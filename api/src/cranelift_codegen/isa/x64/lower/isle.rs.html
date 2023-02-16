@@ -1068,6 +1068,10 @@
 <a href="#1068" id="1068">1068</a>
 <a href="#1069" id="1069">1069</a>
 <a href="#1070" id="1070">1070</a>
+<a href="#1071" id="1071">1071</a>
+<a href="#1072" id="1072">1072</a>
+<a href="#1073" id="1073">1073</a>
+<a href="#1074" id="1074">1074</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for x64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -1328,6 +1332,10 @@
 
         ty.lane_bits() - <span class="number">1
     </span>}
+
+    <span class="kw">fn </span>shift_amount_masked(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type, val: Imm64) -&gt; u32 {
+        (val.bits() <span class="kw">as </span>u32) &amp; <span class="self">self</span>.shift_mask(ty)
+    }
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>simm32_from_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: Value) -&gt; <span class="prelude-ty">Option</span>&lt;GprMemImm&gt; {
