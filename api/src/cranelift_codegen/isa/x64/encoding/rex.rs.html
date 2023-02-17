@@ -512,6 +512,19 @@
 <a href="#512" id="512">512</a>
 <a href="#513" id="513">513</a>
 <a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Encodes instructions in the standard x86 encoding mode. This is called IA-32E mode in the Intel
 //! manuals but corresponds to the addition of the REX-prefix format (hence the name of this module)
 //! that allowed encoding instructions in both compatibility mode (32-bit instructions running on a
@@ -826,18 +839,50 @@
 
     prefixes.emit(sink);
 
+    <span class="comment">// After prefixes, first emit the REX byte depending on the kind of
+    // addressing mode that&#39;s being used.
+    </span><span class="kw">match </span><span class="kw-2">*</span>mem_e {
+        Amode::ImmReg { base, .. } =&gt; {
+            <span class="kw">let </span>enc_e = int_reg_enc(base);
+            rex.emit_two_op(sink, enc_g, enc_e);
+        }
+
+        Amode::ImmRegRegShift {
+            base: reg_base,
+            index: reg_index,
+            ..
+        } =&gt; {
+            <span class="kw">let </span>enc_base = int_reg_enc(<span class="kw-2">*</span>reg_base);
+            <span class="kw">let </span>enc_index = int_reg_enc(<span class="kw-2">*</span>reg_index);
+            rex.emit_three_op(sink, enc_g, enc_index, enc_base);
+        }
+
+        Amode::RipRelative { .. } =&gt; {
+            <span class="comment">// note REX.B = 0.
+            </span>rex.emit_two_op(sink, enc_g, <span class="number">0</span>);
+        }
+    }
+
+    <span class="comment">// Now the opcode(s).  These include any other prefixes the caller
+    // hands to us.
+    </span><span class="kw">while </span>num_opcodes &gt; <span class="number">0 </span>{
+        num_opcodes -= <span class="number">1</span>;
+        sink.put1(((opcodes &gt;&gt; (num_opcodes &lt;&lt; <span class="number">3</span>)) &amp; <span class="number">0xFF</span>) <span class="kw">as </span>u8);
+    }
+
+    <span class="comment">// And finally encode the mod/rm bytes and all further information.
+    </span>emit_modrm_sib_disp(sink, enc_g, mem_e, bytes_at_end)
+}
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>emit_modrm_sib_disp(
+    sink: <span class="kw-2">&amp;mut </span>MachBuffer&lt;Inst&gt;,
+    enc_g: u8,
+    mem_e: <span class="kw-2">&amp;</span>Amode,
+    bytes_at_end: u8,
+) {
     <span class="kw">match </span><span class="kw-2">*</span>mem_e {
         Amode::ImmReg { simm32, base, .. } =&gt; {
-            <span class="comment">// First, the REX byte.
-            </span><span class="kw">let </span>enc_e = int_reg_enc(base);
-            rex.emit_two_op(sink, enc_g, enc_e);
-
-            <span class="comment">// Now the opcode(s).  These include any other prefixes the caller
-            // hands to us.
-            </span><span class="kw">while </span>num_opcodes &gt; <span class="number">0 </span>{
-                num_opcodes -= <span class="number">1</span>;
-                sink.put1(((opcodes &gt;&gt; (num_opcodes &lt;&lt; <span class="number">3</span>)) &amp; <span class="number">0xFF</span>) <span class="kw">as </span>u8);
-            }
+            <span class="kw">let </span>enc_e = int_reg_enc(base);
 
             <span class="comment">// Now the mod/rm and associated immediates.  This is
             // significantly complicated due to the multiple special cases.
@@ -891,15 +936,6 @@
             <span class="kw">let </span>enc_base = int_reg_enc(<span class="kw-2">*</span>reg_base);
             <span class="kw">let </span>enc_index = int_reg_enc(<span class="kw-2">*</span>reg_index);
 
-            <span class="comment">// The rex byte.
-            </span>rex.emit_three_op(sink, enc_g, enc_index, enc_base);
-
-            <span class="comment">// All other prefixes and opcodes.
-            </span><span class="kw">while </span>num_opcodes &gt; <span class="number">0 </span>{
-                num_opcodes -= <span class="number">1</span>;
-                sink.put1(((opcodes &gt;&gt; (num_opcodes &lt;&lt; <span class="number">3</span>)) &amp; <span class="number">0xFF</span>) <span class="kw">as </span>u8);
-            }
-
             <span class="comment">// modrm, SIB, immediates.
             </span><span class="kw">if </span>low8_will_sign_extend_to_32(simm32) &amp;&amp; enc_index != regs::ENC_RSP {
                 sink.put1(encode_modrm(<span class="number">1</span>, enc_g &amp; <span class="number">7</span>, <span class="number">4</span>));
@@ -915,16 +951,6 @@
         }
 
         Amode::RipRelative { <span class="kw-2">ref </span>target } =&gt; {
-            <span class="comment">// First, the REX byte, with REX.B = 0.
-            </span>rex.emit_two_op(sink, enc_g, <span class="number">0</span>);
-
-            <span class="comment">// Now the opcode(s).  These include any other prefixes the caller
-            // hands to us.
-            </span><span class="kw">while </span>num_opcodes &gt; <span class="number">0 </span>{
-                num_opcodes -= <span class="number">1</span>;
-                sink.put1(((opcodes &gt;&gt; (num_opcodes &lt;&lt; <span class="number">3</span>)) &amp; <span class="number">0xFF</span>) <span class="kw">as </span>u8);
-            }
-
             <span class="comment">// RIP-relative is mod=00, rm=101.
             </span>sink.put1(encode_modrm(<span class="number">0</span>, enc_g &amp; <span class="number">7</span>, <span class="number">0b101</span>));
 

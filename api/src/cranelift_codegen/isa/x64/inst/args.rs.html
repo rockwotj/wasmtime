@@ -1962,6 +1962,16 @@
 <a href="#1962" id="1962">1962</a>
 <a href="#1963" id="1963">1963</a>
 <a href="#1964" id="1964">1964</a>
+<a href="#1965" id="1965">1965</a>
+<a href="#1966" id="1966">1966</a>
+<a href="#1967" id="1967">1967</a>
+<a href="#1968" id="1968">1968</a>
+<a href="#1969" id="1969">1969</a>
+<a href="#1970" id="1970">1970</a>
+<a href="#1971" id="1971">1971</a>
+<a href="#1972" id="1972">1972</a>
+<a href="#1973" id="1973">1973</a>
+<a href="#1974" id="1974">1974</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Instruction operand sub-components (aka &quot;parts&quot;): definitions and printing.
 
 </span><span class="kw">use </span><span class="kw">super</span>::regs::{<span class="self">self</span>};
@@ -2126,6 +2136,12 @@
         <span class="kw">impl </span>From&lt;<span class="macro-nonterminal">$newtype_reg</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$newtype_reg_mem_imm </span>{
             <span class="kw">fn </span>from(r: <span class="macro-nonterminal">$newtype_reg</span>) -&gt; <span class="self">Self </span>{
                 <span class="macro-nonterminal">$newtype_reg_mem_imm</span>(RegMemImm::reg(r.into()))
+            }
+        }
+
+        <span class="kw">impl </span>From&lt;<span class="macro-nonterminal">$newtype_reg_mem</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$newtype_reg_mem_imm </span>{
+            <span class="kw">fn </span>from(r: <span class="macro-nonterminal">$newtype_reg_mem</span>) -&gt; <span class="self">Self </span>{
+                <span class="macro-nonterminal">$newtype_reg_mem_imm</span>(r.<span class="number">0</span>.into())
             }
         }
 
@@ -2595,6 +2611,15 @@
     }
 }
 
+<span class="kw">impl </span>From&lt;RegMem&gt; <span class="kw">for </span>RegMemImm {
+    <span class="kw">fn </span>from(rm: RegMem) -&gt; RegMemImm {
+        <span class="kw">match </span>rm {
+            RegMem::Reg { reg } =&gt; RegMemImm::Reg { reg },
+            RegMem::Mem { addr } =&gt; RegMemImm::Mem { addr },
+        }
+    }
+}
+
 <span class="kw">impl </span>PrettyPrint <span class="kw">for </span>RegMemImm {
     <span class="kw">fn </span>pretty_print(<span class="kw-2">&amp;</span><span class="self">self</span>, size: u8, allocs: <span class="kw-2">&amp;mut </span>AllocationConsumer&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; String {
         <span class="kw">match </span><span class="self">self </span>{
@@ -2691,6 +2716,12 @@
                 addr: addr.with_allocs(allocs),
             },
         }
+    }
+}
+
+<span class="kw">impl </span>From&lt;Reg&gt; <span class="kw">for </span>RegMem {
+    <span class="kw">fn </span>from(reg: Reg) -&gt; RegMem {
+        RegMem::Reg { reg }
     }
 }
 
@@ -2848,6 +2879,7 @@
     <span class="attr">#[allow(dead_code)] </span><span class="comment">// never constructed (yet).
     </span>BMI2,
     FMA,
+    AVX,
     AVX512BITALG,
     AVX512DQ,
     AVX512F,
@@ -3441,14 +3473,7 @@
     }
 }
 
-<span class="attr">#[derive(Clone, PartialEq)]
-#[allow(missing_docs)]
-</span><span class="kw">pub enum </span>AvxOpcode {
-    Vfmadd213ss,
-    Vfmadd213sd,
-    Vfmadd213ps,
-    Vfmadd213pd,
-}
+<span class="kw">pub use </span><span class="kw">crate</span>::isa::x64::lower::isle::generated_code::AvxOpcode;
 
 <span class="kw">impl </span>AvxOpcode {
     <span class="doccomment">/// Which `InstructionSet`s support the opcode?
@@ -3458,25 +3483,20 @@
             | AvxOpcode::Vfmadd213sd
             | AvxOpcode::Vfmadd213ps
             | AvxOpcode::Vfmadd213pd =&gt; <span class="macro">smallvec!</span>[InstructionSet::FMA],
+            AvxOpcode::Vminps
+            | AvxOpcode::Vorps
+            | AvxOpcode::Vandnps
+            | AvxOpcode::Vcmpps
+            | AvxOpcode::Vpsrld =&gt; {
+                <span class="macro">smallvec!</span>[InstructionSet::AVX]
+            }
         }
-    }
-}
-
-<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>AvxOpcode {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="kw">let </span>name = <span class="kw">match </span><span class="self">self </span>{
-            AvxOpcode::Vfmadd213ss =&gt; <span class="string">&quot;vfmadd213ss&quot;</span>,
-            AvxOpcode::Vfmadd213sd =&gt; <span class="string">&quot;vfmadd213sd&quot;</span>,
-            AvxOpcode::Vfmadd213ps =&gt; <span class="string">&quot;vfmadd213ps&quot;</span>,
-            AvxOpcode::Vfmadd213pd =&gt; <span class="string">&quot;vfmadd213pd&quot;</span>,
-        };
-        <span class="macro">write!</span>(fmt, <span class="string">&quot;{}&quot;</span>, name)
     }
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>AvxOpcode {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        fmt::Debug::fmt(<span class="self">self</span>, f)
+        <span class="macro">format!</span>(<span class="string">&quot;{self:?}&quot;</span>).to_lowercase().fmt(f)
     }
 }
 
