@@ -803,36 +803,10 @@
 <a href="#803" id="803">803</a>
 <a href="#804" id="804">804</a>
 <a href="#805" id="805">805</a>
-<a href="#806" id="806">806</a>
-<a href="#807" id="807">807</a>
-<a href="#808" id="808">808</a>
-<a href="#809" id="809">809</a>
-<a href="#810" id="810">810</a>
-<a href="#811" id="811">811</a>
-<a href="#812" id="812">812</a>
-<a href="#813" id="813">813</a>
-<a href="#814" id="814">814</a>
-<a href="#815" id="815">815</a>
-<a href="#816" id="816">816</a>
-<a href="#817" id="817">817</a>
-<a href="#818" id="818">818</a>
-<a href="#819" id="819">819</a>
-<a href="#820" id="820">820</a>
-<a href="#821" id="821">821</a>
-<a href="#822" id="822">822</a>
-<a href="#823" id="823">823</a>
-<a href="#824" id="824">824</a>
-<a href="#825" id="825">825</a>
-<a href="#826" id="826">826</a>
-<a href="#827" id="827">827</a>
-<a href="#828" id="828">828</a>
-<a href="#829" id="829">829</a>
-<a href="#830" id="830">830</a>
 </pre><pre class="rust"><code><span class="doccomment">//! A Dominator Tree represented as mappings of Blocks to their immediate dominator.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::entity::SecondaryMap;
 <span class="kw">use </span><span class="kw">crate</span>::flowgraph::{BlockPredecessor, ControlFlowGraph};
-<span class="kw">use </span><span class="kw">crate</span>::inst_predicates;
 <span class="kw">use </span><span class="kw">crate</span>::ir::{Block, ExpandedProgramPoint, Function, Inst, Layout, ProgramOrder, Value};
 <span class="kw">use </span><span class="kw">crate</span>::packed_option::PackedOption;
 <span class="kw">use </span><span class="kw">crate</span>::timing;
@@ -846,8 +820,7 @@
 </span><span class="kw">const </span>STRIDE: u32 = <span class="number">4</span>;
 
 <span class="doccomment">/// Special RPO numbers used during `compute_postorder`.
-</span><span class="kw">const </span>DONE: u32 = <span class="number">1</span>;
-<span class="kw">const </span>SEEN: u32 = <span class="number">2</span>;
+</span><span class="kw">const </span>SEEN: u32 = <span class="number">1</span>;
 
 <span class="doccomment">/// Dominator tree node. We keep one of these per block.
 </span><span class="attr">#[derive(Clone, Default)]
@@ -866,6 +839,12 @@
     </span>idom: PackedOption&lt;Inst&gt;,
 }
 
+<span class="doccomment">/// DFT stack state marker for computing the cfg postorder.
+</span><span class="kw">enum </span>Visit {
+    First,
+    Last,
+}
+
 <span class="doccomment">/// The dominator tree for a single function.
 </span><span class="kw">pub struct </span>DominatorTree {
     nodes: SecondaryMap&lt;Block, DomNode&gt;,
@@ -874,7 +853,7 @@
     </span>postorder: Vec&lt;Block&gt;,
 
     <span class="doccomment">/// Scratch memory used by `compute_postorder()`.
-    </span>stack: Vec&lt;Block&gt;,
+    </span>stack: Vec&lt;(Visit, Block)&gt;,
 
     valid: bool,
 }
@@ -1105,90 +1084,61 @@
 
         <span class="comment">// This algorithm is a depth first traversal (DFT) of the control flow graph, computing a
         // post-order of the blocks that are reachable form the entry block. A DFT post-order is not
-        // unique. The specific order we get is controlled by two factors:
+        // unique. The specific order we get is controlled by the order each node&#39;s children are
+        // visited.
         //
-        // 1. The order each node&#39;s children are visited, and
-        // 2. The method used for pruning graph edges to get a tree.
+        // We view the CFG as a graph where each `BlockCall` value of a terminating branch
+        // instruction is an edge. A consequence of this is that we visit successor nodes in the
+        // reverse order specified by the branch instruction that terminates the basic block.
+        // (Reversed because we are using a stack to control traversal, and push the successors in
+        // the order the branch instruction specifies -- there&#39;s no good reason for this particular
+        // order.)
         //
-        // There are two ways of viewing the CFG as a graph:
-        //
-        // 1. Each block is a node, with outgoing edges for all the branches in the block.
-        // 2. Each basic block is a node, with outgoing edges for the single branch at the end of
-        //    the BB. (A block is a linear sequence of basic blocks).
-        //
-        // The first graph is a contraction of the second one. We want to compute a block post-order
-        // that is compatible both graph interpretations. That is, if you compute a BB post-order
-        // and then remove those BBs that do not correspond to block headers, you get a post-order of
-        // the block graph.
-        //
-        // Node child order:
-        //
-        //     In the BB graph, we always go down the fall-through path first and follow the branch
-        //     destination second.
-        //
-        //     In the block graph, this is equivalent to visiting block successors in a bottom-up
-        //     order, starting from the destination of the block&#39;s terminating jump, ending at the
-        //     destination of the first branch in the block.
-        //
-        // Edge pruning:
-        //
-        //     In the BB graph, we keep an edge to a block the first time we visit the *source* side
-        //     of the edge. Any subsequent edges to the same block are pruned.
-        //
-        //     The equivalent tree is reached in the block graph by keeping the first edge to a block
-        //     in a top-down traversal of the successors. (And then visiting edges in a bottom-up
-        //     order).
-        //
-        // This pruning method makes it possible to compute the DFT without storing lots of
-        // information about the progress through a block.
-
         // During this algorithm only, use `rpo_number` to hold the following state:
         //
-        //   0:    block has not yet been reached in the pre-order.
-        //   SEEN: block has been pushed on the stack but successors not yet pushed.
-        //   DONE: Successors pushed.
+        //   0:    block has not yet had its first visit
+        //   SEEN: block has been visited at least once, implying that all of its successors are on
+        //         the stack
 
         </span><span class="kw">match </span>func.layout.entry_block() {
             <span class="prelude-val">Some</span>(block) =&gt; {
-                <span class="self">self</span>.stack.push(block);
-                <span class="self">self</span>.nodes[block].rpo_number = SEEN;
+                <span class="self">self</span>.stack.push((Visit::First, block));
             }
             <span class="prelude-val">None </span>=&gt; <span class="kw">return</span>,
         }
 
-        <span class="kw">while let </span><span class="prelude-val">Some</span>(block) = <span class="self">self</span>.stack.pop() {
-            <span class="kw">match </span><span class="self">self</span>.nodes[block].rpo_number {
-                SEEN =&gt; {
-                    <span class="comment">// This is the first time we pop the block, so we need to scan its successors and
-                    // then revisit it.
-                    </span><span class="self">self</span>.nodes[block].rpo_number = DONE;
-                    <span class="self">self</span>.stack.push(block);
-                    <span class="self">self</span>.push_successors(func, block);
+        <span class="kw">while let </span><span class="prelude-val">Some</span>((visit, block)) = <span class="self">self</span>.stack.pop() {
+            <span class="kw">match </span>visit {
+                Visit::First =&gt; {
+                    <span class="kw">if </span><span class="self">self</span>.nodes[block].rpo_number == <span class="number">0 </span>{
+                        <span class="comment">// This is the first time we pop the block, so we need to scan its
+                        // successors and then revisit it.
+                        </span><span class="self">self</span>.nodes[block].rpo_number = SEEN;
+                        <span class="self">self</span>.stack.push((Visit::Last, block));
+                        <span class="kw">if let </span><span class="prelude-val">Some</span>(inst) = func.stencil.layout.last_inst(block) {
+                            <span class="kw">for </span>block <span class="kw">in </span>func.stencil.dfg.insts[inst]
+                                .branch_destination(<span class="kw-2">&amp;</span>func.stencil.dfg.jump_tables)
+                                .iter()
+                            {
+                                <span class="kw">let </span>succ = block.block(<span class="kw-2">&amp;</span>func.stencil.dfg.value_lists);
+
+                                <span class="comment">// This is purely an optimization to avoid additional iterations of
+                                // the loop, and is not required; it&#39;s merely inlining the check
+                                // from the outer conditional of this case to avoid the extra loop
+                                // iteration.
+                                </span><span class="kw">if </span><span class="self">self</span>.nodes[succ].rpo_number == <span class="number">0 </span>{
+                                    <span class="self">self</span>.stack.push((Visit::First, succ))
+                                }
+                            }
+                        }
+                    }
                 }
-                DONE =&gt; {
-                    <span class="comment">// This is the second time we pop the block, so all successors have been
-                    // processed.
+
+                Visit::Last =&gt; {
+                    <span class="comment">// We&#39;ve finished all this node&#39;s successors.
                     </span><span class="self">self</span>.postorder.push(block);
                 }
-                <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
             }
-        }
-    }
-
-    <span class="doccomment">/// Push `block` successors onto `self.stack`, filtering out those that have already been seen.
-    ///
-    /// The successors are pushed in program order which is important to get a split-invariant
-    /// post-order. Split-invariant means that if a block is split in two, we get the same
-    /// post-order except for the insertion of the new block header at the split point.
-    </span><span class="kw">fn </span>push_successors(<span class="kw-2">&amp;mut </span><span class="self">self</span>, func: <span class="kw-2">&amp;</span>Function, block: Block) {
-        inst_predicates::visit_block_succs(func, block, |<span class="kw">_</span>, succ, <span class="kw">_</span>| <span class="self">self</span>.push_if_unseen(succ))
-    }
-
-    <span class="doccomment">/// Push `block` onto `self.stack` if it has not already been seen.
-    </span><span class="kw">fn </span>push_if_unseen(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: Block) {
-        <span class="kw">if </span><span class="self">self</span>.nodes[block].rpo_number == <span class="number">0 </span>{
-            <span class="self">self</span>.nodes[block].rpo_number = SEEN;
-            <span class="self">self</span>.stack.push(block);
         }
     }
 
@@ -1558,7 +1508,7 @@
         //   } block3:jump block1
         // } block3
 
-        </span><span class="macro">assert_eq!</span>(dt.cfg_postorder(), <span class="kw-2">&amp;</span>[block2, block0, block1, block3]);
+        </span><span class="macro">assert_eq!</span>(dt.cfg_postorder(), <span class="kw-2">&amp;</span>[block0, block2, block1, block3]);
 
         <span class="macro">assert_eq!</span>(cur.func.layout.entry_block().unwrap(), block3);
         <span class="macro">assert_eq!</span>(dt.idom(block3), <span class="prelude-val">None</span>);
