@@ -184,8 +184,8 @@
         <span class="kw">let </span>frame = Frame::new(<span class="kw-2">&amp;</span>abi_sig, <span class="kw-2">&amp;mut </span>body, <span class="kw-2">&amp;mut </span>validator, <span class="kw-2">&amp;</span>abi)<span class="question-mark">?</span>;
         <span class="comment">// TODO Add in floating point bitmask
         </span><span class="kw">let </span>regalloc = RegAlloc::new(RegSet::new(ALL_GPR, <span class="number">0</span>), regs::scratch());
-        <span class="kw">let </span>codegen_context = CodeGenContext::new(<span class="kw-2">&amp;mut </span>masm, stack, <span class="kw-2">&amp;</span>frame);
-        <span class="kw">let </span><span class="kw-2">mut </span>codegen = CodeGen::new::&lt;abi::X64ABI&gt;(codegen_context, abi_sig, regalloc);
+        <span class="kw">let </span>codegen_context = CodeGenContext::new(regalloc, stack, <span class="kw-2">&amp;</span>frame);
+        <span class="kw">let </span><span class="kw-2">mut </span>codegen = CodeGen::new::&lt;abi::X64ABI&gt;(<span class="kw-2">&amp;mut </span>masm, codegen_context, abi_sig);
 
         codegen.emit(<span class="kw-2">&amp;mut </span>body, validator)<span class="question-mark">?</span>;
 

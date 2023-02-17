@@ -150,11 +150,42 @@
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::abi::{align_to, LocalSlot};
+<span class="kw">use </span><span class="kw">crate</span>::codegen::CodeGenContext;
 <span class="kw">use </span><span class="kw">crate</span>::isa::reg::Reg;
 <span class="kw">use </span><span class="kw">crate</span>::regalloc::RegAlloc;
 <span class="kw">use </span>cranelift_codegen::{Final, MachBufferFinalized};
 <span class="kw">use </span>std::{fmt::Debug, ops::Range};
+
+<span class="attr">#[derive(Eq, PartialEq)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>DivKind {
+    <span class="doccomment">/// Signed division.
+    </span>Signed,
+    <span class="doccomment">/// Unsigned division.
+    </span>Unsigned,
+}
 
 <span class="doccomment">/// Operand size, in bits.
 </span><span class="attr">#[derive(Copy, Clone, Eq, PartialEq)]
@@ -245,6 +276,19 @@
 
     <span class="doccomment">/// Perform multiplication operation.
     </span><span class="kw">fn </span>mul(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dst: RegImm, lhs: RegImm, rhs: RegImm, size: OperandSize);
+
+    <span class="doccomment">/// Perform division operation.
+    /// Division is special in that some architectures have specific
+    /// expectations regarding the location of the instruction
+    /// arguments and regarding the location of the quotient /
+    /// remainder. To free the caller from having to deal with the
+    /// architecure specific contraints we give this function access
+    /// to the code generation context, allowing each implementation
+    /// to decide the lowering path.  For cases in which division is a
+    /// unconstrained binary operation, the caller can decide to use
+    /// the `CodeGenContext::i32_binop` or `CodeGenContext::i64_binop`
+    /// functions.
+    </span><span class="kw">fn </span>div(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>CodeGenContext, kind: DivKind, size: OperandSize);
 
     <span class="doccomment">/// Push the register to the stack, returning the offset.
     </span><span class="kw">fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, src: Reg) -&gt; u32;

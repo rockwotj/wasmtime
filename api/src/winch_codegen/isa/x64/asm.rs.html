@@ -341,14 +341,54 @@
 <a href="#341" id="341">341</a>
 <a href="#342" id="342">342</a>
 <a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Assembler library implementation for x64.
 
-</span><span class="kw">use crate</span>::{isa::reg::Reg, masm::OperandSize};
+</span><span class="kw">use crate</span>::{
+    isa::reg::Reg,
+    masm::{DivKind, OperandSize},
+};
 <span class="kw">use </span>cranelift_codegen::{
     isa::x64::{
         args::{
-            <span class="self">self</span>, AluRmiROpcode, Amode, ExtMode, FromWritableReg, Gpr, GprMem, GprMemImm, RegMem,
-            RegMemImm, SyntheticAmode, WritableGpr,
+            <span class="self">self</span>, AluRmiROpcode, Amode, DivOrRemKind, ExtMode, FromWritableReg, Gpr, GprMem,
+            GprMemImm, RegMem, RegMemImm, SyntheticAmode, WritableGpr,
         },
         settings <span class="kw">as </span>x64_settings, EmitInfo, EmitState, Inst,
     },
@@ -400,6 +440,15 @@
         <span class="kw">match </span>size {
             OperandSize::S32 =&gt; <span class="self">Self</span>::Size32,
             OperandSize::S64 =&gt; <span class="self">Self</span>::Size64,
+        }
+    }
+}
+
+<span class="kw">impl </span>From&lt;DivKind&gt; <span class="kw">for </span>DivOrRemKind {
+    <span class="kw">fn </span>from(kind: DivKind) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span>kind {
+            DivKind::Signed =&gt; DivOrRemKind::SignedDiv,
+            DivKind::Unsigned =&gt; DivOrRemKind::UnsignedDiv,
         }
     }
 }
@@ -603,6 +652,31 @@
                 src, dst
             ),
         }
+    }
+
+    <span class="doccomment">/// Signed/unsigned division.
+    ///
+    /// Emits a sequence of instructions to ensure the correctness of
+    /// the division invariants.  This function assumes that the
+    /// caller has correctly allocated the dividend as `(rdx:rax)` and
+    /// accounted for the quotient to be stored in `rax`.
+    </span><span class="kw">pub fn </span>div(<span class="kw-2">&amp;mut </span><span class="self">self</span>, divisor: Reg, dst: (Reg, Reg), kind: DivKind, size: OperandSize) {
+        <span class="kw">let </span>tmp = <span class="kw">if </span>size == OperandSize::S64 &amp;&amp; kind == DivKind::Signed {
+            <span class="prelude-val">Some</span>(regs::scratch())
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>};
+
+        <span class="self">self</span>.emit(Inst::CheckedDivOrRemSeq {
+            kind: kind.into(),
+            size: size.into(),
+            divisor: divisor.into(),
+            dividend_lo: dst.<span class="number">0</span>.into(),
+            dividend_hi: dst.<span class="number">1</span>.into(),
+            dst_quotient: dst.<span class="number">0</span>.into(),
+            dst_remainder: dst.<span class="number">1</span>.into(),
+            tmp: tmp.map(|reg| reg.into()),
+        });
     }
 
     <span class="doccomment">/// Multiply immediate and register.
