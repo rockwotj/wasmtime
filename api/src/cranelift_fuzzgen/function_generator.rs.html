@@ -1927,68 +1927,16 @@
 <a href="#1927" id="1927">1927</a>
 <a href="#1928" id="1928">1928</a>
 <a href="#1929" id="1929">1929</a>
-<a href="#1930" id="1930">1930</a>
-<a href="#1931" id="1931">1931</a>
-<a href="#1932" id="1932">1932</a>
-<a href="#1933" id="1933">1933</a>
-<a href="#1934" id="1934">1934</a>
-<a href="#1935" id="1935">1935</a>
-<a href="#1936" id="1936">1936</a>
-<a href="#1937" id="1937">1937</a>
-<a href="#1938" id="1938">1938</a>
-<a href="#1939" id="1939">1939</a>
-<a href="#1940" id="1940">1940</a>
-<a href="#1941" id="1941">1941</a>
-<a href="#1942" id="1942">1942</a>
-<a href="#1943" id="1943">1943</a>
-<a href="#1944" id="1944">1944</a>
-<a href="#1945" id="1945">1945</a>
-<a href="#1946" id="1946">1946</a>
-<a href="#1947" id="1947">1947</a>
-<a href="#1948" id="1948">1948</a>
-<a href="#1949" id="1949">1949</a>
-<a href="#1950" id="1950">1950</a>
-<a href="#1951" id="1951">1951</a>
-<a href="#1952" id="1952">1952</a>
-<a href="#1953" id="1953">1953</a>
-<a href="#1954" id="1954">1954</a>
-<a href="#1955" id="1955">1955</a>
-<a href="#1956" id="1956">1956</a>
-<a href="#1957" id="1957">1957</a>
-<a href="#1958" id="1958">1958</a>
-<a href="#1959" id="1959">1959</a>
-<a href="#1960" id="1960">1960</a>
-<a href="#1961" id="1961">1961</a>
-<a href="#1962" id="1962">1962</a>
-<a href="#1963" id="1963">1963</a>
-<a href="#1964" id="1964">1964</a>
-<a href="#1965" id="1965">1965</a>
-<a href="#1966" id="1966">1966</a>
-<a href="#1967" id="1967">1967</a>
-<a href="#1968" id="1968">1968</a>
-<a href="#1969" id="1969">1969</a>
-<a href="#1970" id="1970">1970</a>
-<a href="#1971" id="1971">1971</a>
-<a href="#1972" id="1972">1972</a>
-<a href="#1973" id="1973">1973</a>
-<a href="#1974" id="1974">1974</a>
-<a href="#1975" id="1975">1975</a>
-<a href="#1976" id="1976">1976</a>
-<a href="#1977" id="1977">1977</a>
-<a href="#1978" id="1978">1978</a>
-<a href="#1979" id="1979">1979</a>
-<a href="#1980" id="1980">1980</a>
-<a href="#1981" id="1981">1981</a>
-<a href="#1982" id="1982">1982</a>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::codegen::ir::{ArgumentExtension, ArgumentPurpose};
-<span class="kw">use </span><span class="kw">crate</span>::config::Config;
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::config::Config;
+<span class="kw">use </span><span class="kw">crate</span>::cranelift_arbitrary::CraneliftArbitrary;
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>arbitrary::{Arbitrary, Unstructured};
+<span class="kw">use </span>cranelift::codegen::data_value::DataValue;
 <span class="kw">use </span>cranelift::codegen::ir::instructions::InstructionFormat;
 <span class="kw">use </span>cranelift::codegen::ir::stackslot::StackSize;
 <span class="kw">use </span>cranelift::codegen::ir::{types::<span class="kw-2">*</span>, FuncRef, LibCall, UserExternalName, UserFuncName};
 <span class="kw">use </span>cranelift::codegen::ir::{
-    AbiParam, Block, ExternalName, Function, Opcode, Signature, StackSlot, Type, Value,
+    Block, ExternalName, Function, Opcode, Signature, StackSlot, Type, Value,
 };
 <span class="kw">use </span>cranelift::codegen::isa::CallConv;
 <span class="kw">use </span>cranelift::frontend::{FunctionBuilder, FunctionBuilderContext, Switch, Variable};
@@ -3261,16 +3209,6 @@
     </span>(Opcode::Call, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[], insert_call),
 ];
 
-<span class="doccomment">/// These libcalls need a interpreter implementation in `cranelift-fuzzgen.rs`
-</span><span class="kw">const </span>ALLOWED_LIBCALLS: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[LibCall] = <span class="kw-2">&amp;</span>[
-    LibCall::CeilF32,
-    LibCall::CeilF64,
-    LibCall::FloorF32,
-    LibCall::FloorF64,
-    LibCall::TruncF32,
-    LibCall::TruncF64,
-];
-
 <span class="kw">pub struct </span>FunctionGenerator&lt;<span class="lifetime">&#39;r</span>, <span class="lifetime">&#39;data</span>&gt;
 <span class="kw">where
     </span><span class="lifetime">&#39;data</span>: <span class="lifetime">&#39;r</span>,
@@ -3279,6 +3217,8 @@
     config: <span class="kw-2">&amp;</span><span class="lifetime">&#39;r </span>Config,
     resources: Resources,
     target_triple: Triple,
+    name: UserFuncName,
+    signature: Signature,
 }
 
 <span class="attr">#[derive(Debug, Clone)]
@@ -3307,6 +3247,8 @@
     block_terminators: Vec&lt;BlockTerminator&gt;,
     func_refs: Vec&lt;(Signature, FuncRef)&gt;,
     stack_slots: Vec&lt;(StackSlot, StackSize)&gt;,
+    usercalls: Vec&lt;(UserExternalName, Signature)&gt;,
+    libcalls: Vec&lt;LibCall&gt;,
 }
 
 <span class="kw">impl </span>Resources {
@@ -3341,12 +3283,26 @@
 <span class="kw">where
     </span><span class="lifetime">&#39;data</span>: <span class="lifetime">&#39;r</span>,
 {
-    <span class="kw">pub fn </span>new(u: <span class="kw-2">&amp;</span><span class="lifetime">&#39;r </span><span class="kw-2">mut </span>Unstructured&lt;<span class="lifetime">&#39;data</span>&gt;, config: <span class="kw-2">&amp;</span><span class="lifetime">&#39;r </span>Config, target_triple: Triple) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(
+        u: <span class="kw-2">&amp;</span><span class="lifetime">&#39;r </span><span class="kw-2">mut </span>Unstructured&lt;<span class="lifetime">&#39;data</span>&gt;,
+        config: <span class="kw-2">&amp;</span><span class="lifetime">&#39;r </span>Config,
+        target_triple: Triple,
+        name: UserFuncName,
+        signature: Signature,
+        usercalls: Vec&lt;(UserExternalName, Signature)&gt;,
+        libcalls: Vec&lt;LibCall&gt;,
+    ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             u,
             config,
-            resources: Resources::default(),
+            resources: Resources {
+                usercalls,
+                libcalls,
+                ..Resources::default()
+            },
             target_triple,
+            name,
+            signature,
         }
     }
 
@@ -3355,63 +3311,10 @@
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.u.int_in_range(param.clone())<span class="question-mark">?</span>)
     }
 
-    <span class="kw">fn </span>generate_callconv(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CallConv&gt; {
-        <span class="comment">// TODO: Generate random CallConvs per target
-        </span><span class="prelude-val">Ok</span>(CallConv::SystemV)
-    }
-
     <span class="kw">fn </span>system_callconv(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; CallConv {
         <span class="comment">// TODO: This currently only runs on linux, so this is the only choice
         // We should improve this once we generate flags and targets
         </span>CallConv::SystemV
-    }
-
-    <span class="kw">fn </span>generate_type(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Type&gt; {
-        <span class="comment">// TODO: It would be nice if we could get these directly from cranelift
-        </span><span class="kw">let </span>scalars = [
-            I8, I16, I32, I64, I128, F32, F64,
-            <span class="comment">// R32, R64,
-        </span>];
-        <span class="comment">// TODO: vector types
-
-        </span><span class="kw">let </span>ty = <span class="self">self</span>.u.choose(<span class="kw-2">&amp;</span>scalars[..])<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="kw-2">*</span>ty)
-    }
-
-    <span class="kw">fn </span>generate_abi_param(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;AbiParam&gt; {
-        <span class="kw">let </span>value_type = <span class="self">self</span>.generate_type()<span class="question-mark">?</span>;
-        <span class="comment">// TODO: There are more argument purposes to be explored...
-        </span><span class="kw">let </span>purpose = ArgumentPurpose::Normal;
-        <span class="kw">let </span>extension = <span class="kw">if </span>value_type.is_int() {
-            <span class="kw-2">*</span><span class="self">self</span>.u.choose(<span class="kw-2">&amp;</span>[
-                ArgumentExtension::Sext,
-                ArgumentExtension::Uext,
-                ArgumentExtension::None,
-            ])<span class="question-mark">?
-        </span>} <span class="kw">else </span>{
-            ArgumentExtension::None
-        };
-
-        <span class="prelude-val">Ok</span>(AbiParam {
-            value_type,
-            purpose,
-            extension,
-        })
-    }
-
-    <span class="kw">fn </span>generate_signature(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Signature&gt; {
-        <span class="kw">let </span>callconv = <span class="self">self</span>.generate_callconv()<span class="question-mark">?</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>sig = Signature::new(callconv);
-
-        <span class="kw">for _ in </span><span class="number">0</span>..<span class="self">self</span>.param(<span class="kw-2">&amp;</span><span class="self">self</span>.config.signature_params)<span class="question-mark">? </span>{
-            sig.params.push(<span class="self">self</span>.generate_abi_param()<span class="question-mark">?</span>);
-        }
-
-        <span class="kw">for _ in </span><span class="number">0</span>..<span class="self">self</span>.param(<span class="kw-2">&amp;</span><span class="self">self</span>.config.signature_rets)<span class="question-mark">? </span>{
-            sig.returns.push(<span class="self">self</span>.generate_abi_param()<span class="question-mark">?</span>);
-        }
-
-        <span class="prelude-val">Ok</span>(sig)
     }
 
     <span class="doccomment">/// Finds a stack slot with size of at least n bytes
@@ -3476,31 +3379,18 @@
 
     <span class="doccomment">/// Generates an instruction(`iconst`/`fconst`/etc...) to introduce a constant value
     </span><span class="kw">fn </span>generate_const(<span class="kw-2">&amp;mut </span><span class="self">self</span>, builder: <span class="kw-2">&amp;mut </span>FunctionBuilder, ty: Type) -&gt; <span class="prelude-ty">Result</span>&lt;Value&gt; {
-        <span class="prelude-val">Ok</span>(<span class="kw">match </span>ty {
-            I128 =&gt; {
-                <span class="comment">// See: https://github.com/bytecodealliance/wasmtime/issues/2906
-                </span><span class="kw">let </span>hi = builder.ins().iconst(I64, <span class="self">self</span>.u.arbitrary::&lt;i64&gt;()<span class="question-mark">?</span>);
-                <span class="kw">let </span>lo = builder.ins().iconst(I64, <span class="self">self</span>.u.arbitrary::&lt;i64&gt;()<span class="question-mark">?</span>);
+        <span class="prelude-val">Ok</span>(<span class="kw">match </span><span class="self">self</span>.u.datavalue(ty)<span class="question-mark">? </span>{
+            DataValue::I8(i) =&gt; builder.ins().iconst(ty, i <span class="kw">as </span>i64),
+            DataValue::I16(i) =&gt; builder.ins().iconst(ty, i <span class="kw">as </span>i64),
+            DataValue::I32(i) =&gt; builder.ins().iconst(ty, i <span class="kw">as </span>i64),
+            DataValue::I64(i) =&gt; builder.ins().iconst(ty, i <span class="kw">as </span>i64),
+            DataValue::I128(i) =&gt; {
+                <span class="kw">let </span>hi = builder.ins().iconst(I64, (i &gt;&gt; <span class="number">64</span>) <span class="kw">as </span>i64);
+                <span class="kw">let </span>lo = builder.ins().iconst(I64, i <span class="kw">as </span>i64);
                 builder.ins().iconcat(lo, hi)
             }
-            ty <span class="kw">if </span>ty.is_int() =&gt; {
-                <span class="kw">let </span>imm64 = <span class="kw">match </span>ty {
-                    I8 =&gt; <span class="self">self</span>.u.arbitrary::&lt;i8&gt;()<span class="question-mark">? </span><span class="kw">as </span>i64,
-                    I16 =&gt; <span class="self">self</span>.u.arbitrary::&lt;i16&gt;()<span class="question-mark">? </span><span class="kw">as </span>i64,
-                    I32 =&gt; <span class="self">self</span>.u.arbitrary::&lt;i32&gt;()<span class="question-mark">? </span><span class="kw">as </span>i64,
-                    I64 =&gt; <span class="self">self</span>.u.arbitrary::&lt;i64&gt;()<span class="question-mark">?</span>,
-                    <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
-                };
-                builder.ins().iconst(ty, imm64)
-            }
-            <span class="comment">// f{32,64}::arbitrary does not generate a bunch of important values
-            // such as Signaling NaN&#39;s / NaN&#39;s with payload, so generate floats from integers.
-            </span>F32 =&gt; builder
-                .ins()
-                .f32const(f32::from_bits(u32::arbitrary(<span class="self">self</span>.u)<span class="question-mark">?</span>)),
-            F64 =&gt; builder
-                .ins()
-                .f64const(f64::from_bits(u64::arbitrary(<span class="self">self</span>.u)<span class="question-mark">?</span>)),
+            DataValue::F32(f) =&gt; builder.ins().f32const(f),
+            DataValue::F64(f) =&gt; builder.ins().f64const(f),
             <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(),
         })
     }
@@ -3632,34 +3522,38 @@
     }
 
     <span class="kw">fn </span>generate_funcrefs(<span class="kw-2">&amp;mut </span><span class="self">self</span>, builder: <span class="kw-2">&amp;mut </span>FunctionBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>count = <span class="self">self</span>.param(<span class="kw-2">&amp;</span><span class="self">self</span>.config.funcrefs_per_function)<span class="question-mark">?</span>;
-        <span class="kw">for </span>func_index <span class="kw">in </span><span class="number">0</span>..count.try_into().unwrap() {
-            <span class="kw">let </span>(ext_name, sig) = <span class="kw">if </span><span class="self">self</span>.u.arbitrary::&lt;bool&gt;()<span class="question-mark">? </span>{
-                <span class="kw">let </span>user_func_ref = builder
-                    .func
-                    .declare_imported_user_function(UserExternalName {
-                        namespace: <span class="number">0</span>,
-                        index: func_index,
-                    });
+        <span class="kw">let </span>usercalls: Vec&lt;(ExternalName, Signature)&gt; = <span class="self">self
+            </span>.resources
+            .usercalls
+            .iter()
+            .map(|(name, signature)| {
+                <span class="kw">let </span>user_func_ref = builder.func.declare_imported_user_function(name.clone());
                 <span class="kw">let </span>name = ExternalName::User(user_func_ref);
-                <span class="kw">let </span>signature = <span class="self">self</span>.generate_signature()<span class="question-mark">?</span>;
-                (name, signature)
-            } <span class="kw">else </span>{
-                <span class="kw">let </span>libcall = <span class="kw-2">*</span><span class="self">self</span>.u.choose(ALLOWED_LIBCALLS)<span class="question-mark">?</span>;
-                <span class="comment">// TODO: Use [CallConv::for_libcall] once we generate flags.
-                </span><span class="kw">let </span>callconv = <span class="self">self</span>.system_callconv();
-                <span class="kw">let </span>signature = libcall.signature(callconv);
-                (ExternalName::LibCall(libcall), signature)
-            };
+                (name, signature.clone())
+            })
+            .collect();
 
-            <span class="kw">let </span>sig_ref = builder.import_signature(sig.clone());
+        <span class="kw">let </span>lib_callconv = <span class="self">self</span>.system_callconv();
+        <span class="kw">let </span>libcalls: Vec&lt;(ExternalName, Signature)&gt; = <span class="self">self
+            </span>.resources
+            .libcalls
+            .iter()
+            .map(|libcall| {
+                <span class="kw">let </span>signature = libcall.signature(lib_callconv);
+                <span class="kw">let </span>name = ExternalName::LibCall(<span class="kw-2">*</span>libcall);
+                (name, signature)
+            })
+            .collect();
+
+        <span class="kw">for </span>(name, signature) <span class="kw">in </span>usercalls.into_iter().chain(libcalls) {
+            <span class="kw">let </span>sig_ref = builder.import_signature(signature.clone());
             <span class="kw">let </span>func_ref = builder.import_function(ExtFuncData {
-                name: ext_name,
+                name,
                 signature: sig_ref,
                 colocated: <span class="self">self</span>.u.arbitrary()<span class="question-mark">?</span>,
             });
 
-            <span class="self">self</span>.resources.func_refs.push((sig, func_ref));
+            <span class="self">self</span>.resources.func_refs.push((signature, func_ref));
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -3709,7 +3603,7 @@
     }
 
     <span class="doccomment">/// Creates a random amount of blocks in this function
-    </span><span class="kw">fn </span>generate_blocks(<span class="kw-2">&amp;mut </span><span class="self">self</span>, builder: <span class="kw-2">&amp;mut </span>FunctionBuilder, sig: <span class="kw-2">&amp;</span>Signature) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">fn </span>generate_blocks(<span class="kw-2">&amp;mut </span><span class="self">self</span>, builder: <span class="kw-2">&amp;mut </span>FunctionBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>extra_block_count = <span class="self">self</span>.param(<span class="kw-2">&amp;</span><span class="self">self</span>.config.blocks_per_function)<span class="question-mark">?</span>;
 
         <span class="comment">// We must always have at least one block, so we generate the &quot;extra&quot; blocks and add 1 for
@@ -3733,7 +3627,10 @@
                 // a random signature;
                 </span><span class="kw">if </span>is_entry {
                     builder.append_block_params_for_function_params(block);
-                    <span class="prelude-val">Ok</span>((block, sig.params.iter().map(|a| a.value_type).collect()))
+                    <span class="prelude-val">Ok</span>((
+                        block,
+                        <span class="self">self</span>.signature.params.iter().map(|a| a.value_type).collect(),
+                    ))
                 } <span class="kw">else </span>{
                     <span class="kw">let </span>sig = <span class="self">self</span>.generate_block_signature()<span class="question-mark">?</span>;
                     sig.iter().for_each(|ty| {
@@ -3864,7 +3761,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>params = Vec::with_capacity(param_count);
         <span class="kw">for _ in </span><span class="number">0</span>..param_count {
-            params.push(<span class="self">self</span>.generate_type()<span class="question-mark">?</span>);
+            params.push(<span class="self">self</span>.u._type()<span class="question-mark">?</span>);
         }
         <span class="prelude-val">Ok</span>(params)
     }
@@ -3884,7 +3781,7 @@
 
         <span class="comment">// Create a pool of vars that are going to be used in this function
         </span><span class="kw">for _ in </span><span class="number">0</span>..<span class="self">self</span>.param(<span class="kw-2">&amp;</span><span class="self">self</span>.config.vars_per_function)<span class="question-mark">? </span>{
-            <span class="kw">let </span>ty = <span class="self">self</span>.generate_type()<span class="question-mark">?</span>;
+            <span class="kw">let </span>ty = <span class="self">self</span>.u._type()<span class="question-mark">?</span>;
             <span class="kw">let </span>value = <span class="self">self</span>.generate_const(builder, ty)<span class="question-mark">?</span>;
             vars.push((ty, value));
         }
@@ -3912,15 +3809,12 @@
     /// Because we generate all blocks and variables up front we already know everything that
     /// we need when generating instructions (i.e. jump targets / variables)
     </span><span class="kw">pub fn </span>generate(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Function&gt; {
-        <span class="kw">let </span>sig = <span class="self">self</span>.generate_signature()<span class="question-mark">?</span>;
-
         <span class="kw">let </span><span class="kw-2">mut </span>fn_builder_ctx = FunctionBuilderContext::new();
-        <span class="comment">// function name must be in a different namespace than TESTFILE_NAMESPACE (0)
-        </span><span class="kw">let </span><span class="kw-2">mut </span>func = Function::with_name_signature(UserFuncName::user(<span class="number">1</span>, <span class="number">0</span>), sig.clone());
+        <span class="kw">let </span><span class="kw-2">mut </span>func = Function::with_name_signature(<span class="self">self</span>.name.clone(), <span class="self">self</span>.signature.clone());
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = FunctionBuilder::new(<span class="kw-2">&amp;mut </span>func, <span class="kw-2">&amp;mut </span>fn_builder_ctx);
 
-        <span class="self">self</span>.generate_blocks(<span class="kw-2">&amp;mut </span>builder, <span class="kw-2">&amp;</span>sig)<span class="question-mark">?</span>;
+        <span class="self">self</span>.generate_blocks(<span class="kw-2">&amp;mut </span>builder)<span class="question-mark">?</span>;
 
         <span class="comment">// Function preamble
         </span><span class="self">self</span>.generate_funcrefs(<span class="kw-2">&amp;mut </span>builder)<span class="question-mark">?</span>;

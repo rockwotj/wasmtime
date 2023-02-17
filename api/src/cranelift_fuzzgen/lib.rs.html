@@ -378,39 +378,48 @@
 <a href="#378" id="378">378</a>
 <a href="#379" id="379">379</a>
 <a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::config::Config;
 <span class="kw">use </span><span class="kw">crate</span>::function_generator::FunctionGenerator;
 <span class="kw">use </span><span class="kw">crate</span>::settings::{Flags, OptLevel};
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>arbitrary::{Arbitrary, Unstructured};
 <span class="kw">use </span>cranelift::codegen::data_value::DataValue;
-<span class="kw">use </span>cranelift::codegen::ir::types::<span class="kw-2">*</span>;
-<span class="kw">use </span>cranelift::codegen::ir::Function;
+<span class="kw">use </span>cranelift::codegen::ir::{types::<span class="kw-2">*</span>, UserExternalName, UserFuncName};
+<span class="kw">use </span>cranelift::codegen::ir::{Function, LibCall};
 <span class="kw">use </span>cranelift::codegen::Context;
 <span class="kw">use </span>cranelift::prelude::isa;
 <span class="kw">use </span>cranelift::prelude::<span class="kw-2">*</span>;
+<span class="kw">use </span>cranelift_arbitrary::CraneliftArbitrary;
 <span class="kw">use </span>cranelift_native::builder_with_options;
 <span class="kw">use </span>std::fmt;
 <span class="kw">use </span>target_lexicon::{Architecture, Triple};
 
 <span class="kw">mod </span>config;
+<span class="kw">mod </span>cranelift_arbitrary;
 <span class="kw">mod </span>function_generator;
 <span class="kw">mod </span>passes;
 
+<span class="doccomment">/// These libcalls need a interpreter implementation in `cranelift-fuzzgen.rs`
+</span><span class="kw">const </span>ALLOWED_LIBCALLS: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[LibCall] = <span class="kw-2">&amp;</span>[
+    LibCall::CeilF32,
+    LibCall::CeilF64,
+    LibCall::FloorF32,
+    LibCall::FloorF64,
+    LibCall::TruncF32,
+    LibCall::TruncF64,
+];
+
 <span class="kw">pub type </span>TestCaseInput = Vec&lt;DataValue&gt;;
-
-<span class="doccomment">/// Simple wrapper to generate a single Cranelift `Function`.
-</span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>SingleFunction(<span class="kw">pub </span>Function);
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Arbitrary&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SingleFunction {
-    <span class="kw">fn </span>arbitrary(u: <span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; arbitrary::Result&lt;<span class="self">Self</span>&gt; {
-        FuzzGen::new(u)
-            .generate_func(Triple::host())
-            .map_err(|<span class="kw">_</span>| arbitrary::Error::IncorrectFormat)
-            .map(<span class="self">Self</span>)
-    }
-}
 
 <span class="doccomment">/// Print only non default flags.
 </span><span class="kw">fn </span>write_non_default_flags(f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;, flags: <span class="kw-2">&amp;</span>settings::Flags) -&gt; fmt::Result {
@@ -556,27 +565,6 @@
         }
     }
 
-    <span class="kw">fn </span>generate_datavalue(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type) -&gt; <span class="prelude-ty">Result</span>&lt;DataValue&gt; {
-        <span class="prelude-val">Ok</span>(<span class="kw">match </span>ty {
-            ty <span class="kw">if </span>ty.is_int() =&gt; {
-                <span class="kw">let </span>imm = <span class="kw">match </span>ty {
-                    I8 =&gt; <span class="self">self</span>.u.arbitrary::&lt;i8&gt;()<span class="question-mark">? </span><span class="kw">as </span>i128,
-                    I16 =&gt; <span class="self">self</span>.u.arbitrary::&lt;i16&gt;()<span class="question-mark">? </span><span class="kw">as </span>i128,
-                    I32 =&gt; <span class="self">self</span>.u.arbitrary::&lt;i32&gt;()<span class="question-mark">? </span><span class="kw">as </span>i128,
-                    I64 =&gt; <span class="self">self</span>.u.arbitrary::&lt;i64&gt;()<span class="question-mark">? </span><span class="kw">as </span>i128,
-                    I128 =&gt; <span class="self">self</span>.u.arbitrary::&lt;i128&gt;()<span class="question-mark">?</span>,
-                    <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
-                };
-                DataValue::from_integer(imm, ty)<span class="question-mark">?
-            </span>}
-            <span class="comment">// f{32,64}::arbitrary does not generate a bunch of important values
-            // such as Signaling NaN&#39;s / NaN&#39;s with payload, so generate floats from integers.
-            </span>F32 =&gt; DataValue::F32(Ieee32::with_bits(u32::arbitrary(<span class="self">self</span>.u)<span class="question-mark">?</span>)),
-            F64 =&gt; DataValue::F64(Ieee64::with_bits(u64::arbitrary(<span class="self">self</span>.u)<span class="question-mark">?</span>)),
-            <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(),
-        })
-    }
-
     <span class="kw">fn </span>generate_test_inputs(<span class="kw-2">mut </span><span class="self">self</span>, signature: <span class="kw-2">&amp;</span>Signature) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;TestCaseInput&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>inputs = Vec::new();
 
@@ -589,7 +577,7 @@
             <span class="kw">let </span>test_args = signature
                 .params
                 .iter()
-                .map(|p| <span class="self">self</span>.generate_datavalue(p.value_type))
+                .map(|p| <span class="self">self</span>.u.datavalue(p.value_type))
                 .collect::&lt;<span class="prelude-ty">Result</span>&lt;TestCaseInput&gt;&gt;()<span class="question-mark">?</span>;
 
             inputs.push(test_args);
@@ -656,7 +644,38 @@
     }
 
     <span class="kw">fn </span>generate_func(<span class="kw-2">&amp;mut </span><span class="self">self</span>, target_triple: Triple) -&gt; <span class="prelude-ty">Result</span>&lt;Function&gt; {
-        <span class="kw">let </span>func = FunctionGenerator::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.u, <span class="kw-2">&amp;</span><span class="self">self</span>.config, target_triple).generate()<span class="question-mark">?</span>;
+        <span class="kw">let </span>max_params = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.signature_params.clone())<span class="question-mark">?</span>;
+        <span class="kw">let </span>max_rets = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.signature_rets.clone())<span class="question-mark">?</span>;
+        <span class="kw">let </span>sig = <span class="self">self</span>.u.signature(max_params, max_rets)<span class="question-mark">?</span>;
+
+        <span class="comment">// Function name must be in a different namespace than TESTFILE_NAMESPACE (0)
+        </span><span class="kw">let </span>fname = UserFuncName::user(<span class="number">1</span>, <span class="number">0</span>);
+
+        <span class="comment">// Generate the external functions that we allow calling in this function.
+        </span><span class="kw">let </span>usercalls = (<span class="number">0</span>..<span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.usercalls.clone())<span class="question-mark">?</span>)
+            .map(|i| {
+                <span class="kw">let </span>max_params = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.signature_params.clone())<span class="question-mark">?</span>;
+                <span class="kw">let </span>max_rets = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.signature_rets.clone())<span class="question-mark">?</span>;
+                <span class="kw">let </span>sig = <span class="self">self</span>.u.signature(max_params, max_rets)<span class="question-mark">?</span>;
+                <span class="kw">let </span>name = UserExternalName {
+                    namespace: <span class="number">2</span>,
+                    index: i <span class="kw">as </span>u32,
+                };
+                <span class="prelude-val">Ok</span>((name, sig))
+            })
+            .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;(UserExternalName, Signature)&gt;&gt;&gt;()<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>func = FunctionGenerator::new(
+            <span class="kw-2">&amp;mut </span><span class="self">self</span>.u,
+            <span class="kw-2">&amp;</span><span class="self">self</span>.config,
+            target_triple,
+            fname,
+            sig,
+            usercalls,
+            ALLOWED_LIBCALLS.to_vec(),
+        )
+        .generate()<span class="question-mark">?</span>;
+
         <span class="self">self</span>.run_func_passes(func)
     }
 
@@ -744,8 +763,9 @@
     <span class="kw">pub fn </span>generate_host_test(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;TestCase&gt; {
         <span class="comment">// If we&#39;re generating test inputs as well as a function, then we&#39;re planning to execute
         // this function. That means that any function references in it need to exist. We don&#39;t yet
-        // have infrastructure for generating multiple functions, so just don&#39;t generate funcrefs.
-        </span><span class="self">self</span>.config.funcrefs_per_function = <span class="number">0</span>..=<span class="number">0</span>;
+        // have infrastructure for generating multiple functions, so just don&#39;t generate user call
+        // function references.
+        </span><span class="self">self</span>.config.usercalls = <span class="number">0</span>..=<span class="number">0</span>;
 
         <span class="comment">// TestCase is meant to be consumed by a runner, so we make the assumption here that we&#39;re
         // generating a TargetIsa for the host.

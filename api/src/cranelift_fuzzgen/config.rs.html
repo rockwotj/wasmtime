@@ -104,6 +104,7 @@
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::ops::RangeInclusive;
 
@@ -136,7 +137,8 @@
     </span><span class="kw">pub </span>switch_cases: RangeInclusive&lt;usize&gt;,
     <span class="kw">pub </span>switch_max_range_size: RangeInclusive&lt;usize&gt;,
 
-    <span class="kw">pub </span>funcrefs_per_function: RangeInclusive&lt;usize&gt;,
+    <span class="doccomment">/// Number of distinct functions in the same testsuite that we allow calling per function.
+    </span><span class="kw">pub </span>usercalls: RangeInclusive&lt;usize&gt;,
 
     <span class="doccomment">/// Stack slots.
     /// The combination of these two determines stack usage per function
@@ -185,7 +187,7 @@
             switch_cases: <span class="number">0</span>..=<span class="number">64</span>,
             <span class="comment">// Ranges smaller than 2 don&#39;t make sense.
             </span>switch_max_range_size: <span class="number">2</span>..=<span class="number">32</span>,
-            funcrefs_per_function: <span class="number">0</span>..=<span class="number">8</span>,
+            usercalls: <span class="number">0</span>..=<span class="number">8</span>,
             static_stack_slots_per_function: <span class="number">0</span>..=<span class="number">8</span>,
             static_stack_slot_size: <span class="number">0</span>..=<span class="number">128</span>,
             <span class="comment">// We need the mix of sizes that allows us to:

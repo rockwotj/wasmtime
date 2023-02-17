@@ -13,7 +13,7 @@ var sourcesIndex = JSON.parse('{\
 "cranelift_entity":["",[],["boxed_slice.rs","iter.rs","keys.rs","lib.rs","list.rs","map.rs","packed_option.rs","primary.rs","set.rs","sparse.rs"]],\
 "cranelift_filetests":["",[["test_wasm",[],["config.rs","env.rs"]]],["concurrent.rs","function_runner.rs","lib.rs","match_directive.rs","runner.rs","runone.rs","subtest.rs","test_alias_analysis.rs","test_cat.rs","test_compile.rs","test_dce.rs","test_domtree.rs","test_interpret.rs","test_legalizer.rs","test_licm.rs","test_optimize.rs","test_print_cfg.rs","test_run.rs","test_safepoint.rs","test_simple_gvn.rs","test_simple_preopt.rs","test_unwind.rs","test_verifier.rs","test_wasm.rs"]],\
 "cranelift_frontend":["",[],["frontend.rs","lib.rs","ssa.rs","switch.rs","variable.rs"]],\
-"cranelift_fuzzgen":["",[["passes",[],["fcvt.rs","int_divz.rs","mod.rs"]]],["config.rs","function_generator.rs","lib.rs"]],\
+"cranelift_fuzzgen":["",[["passes",[],["fcvt.rs","int_divz.rs","mod.rs"]]],["config.rs","cranelift_arbitrary.rs","function_generator.rs","lib.rs"]],\
 "cranelift_interpreter":["",[],["address.rs","environment.rs","frame.rs","instruction.rs","interpreter.rs","lib.rs","state.rs","step.rs","value.rs"]],\
 "cranelift_isle":["",[],["ast.rs","codegen.rs","compile.rs","error.rs","lexer.rs","lib.rs","log.rs","overlap.rs","parser.rs","sema.rs","serialize.rs","trie_again.rs"]],\
 "cranelift_jit":["",[],["backend.rs","compiled_blob.rs","lib.rs","memory.rs"]],\
