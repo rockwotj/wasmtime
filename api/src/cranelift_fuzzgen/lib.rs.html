@@ -377,6 +377,7 @@
 <a href="#377" id="377">377</a>
 <a href="#378" id="378">378</a>
 <a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::config::Config;
 <span class="kw">use </span><span class="kw">crate</span>::function_generator::FunctionGenerator;
 <span class="kw">use </span><span class="kw">crate</span>::settings::{Flags, OptLevel};
@@ -700,6 +701,7 @@
         <span class="kw">let </span>supports_inline_probestack = <span class="kw">match </span>target_arch {
             Architecture::X86_64 =&gt; <span class="bool-val">true</span>,
             Architecture::Aarch64(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
+            Architecture::Riscv64(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         };
 
