@@ -1287,7 +1287,7 @@
                 } <span class="kw">else if </span>relocs.is_empty() {
                     SectionKind::ReadOnlyData
                 } <span class="kw">else </span>{
-                    SectionKind::Data
+                    SectionKind::ReadOnlyDataWithRel
                 },
             )
         };
