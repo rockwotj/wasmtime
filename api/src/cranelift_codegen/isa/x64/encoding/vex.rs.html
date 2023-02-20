@@ -489,12 +489,20 @@
 <a href="#489" id="489">489</a>
 <a href="#490" id="490">490</a>
 <a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Encodes VEX instructions. These instructions are those added by the Advanced Vector Extensions
 //! (AVX).
 
 </span><span class="kw">use </span><span class="kw">super</span>::evex::Register;
 <span class="kw">use </span><span class="kw">super</span>::rex::{LegacyPrefixes, OpcodeMap};
 <span class="kw">use </span><span class="kw">super</span>::ByteSink;
+<span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
 <span class="kw">use </span><span class="kw">crate</span>::isa::x64::args::Amode;
 <span class="kw">use </span><span class="kw">crate</span>::isa::x64::encoding::rex;
 <span class="kw">use </span><span class="kw">crate</span>::isa::x64::inst::Inst;
@@ -758,6 +766,12 @@
 
     <span class="doccomment">/// Emit the VEX-encoded instruction to the provided buffer.
     </span><span class="kw">pub fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, sink: <span class="kw-2">&amp;mut </span>MachBuffer&lt;Inst&gt;) {
+        <span class="kw">if let </span>RegisterOrAmode::Amode(amode) = <span class="kw-2">&amp;</span><span class="self">self</span>.rm {
+            <span class="kw">if </span>amode.can_trap() {
+                sink.add_trap(TrapCode::HeapOutOfBounds);
+            }
+        }
+
         <span class="comment">// 2/3 byte prefix
         </span><span class="kw">if </span><span class="self">self</span>.use_2byte_prefix() {
             <span class="self">self</span>.encode_2byte_prefix(sink);

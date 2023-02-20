@@ -1081,7 +1081,6 @@
 <a href="#1081" id="1081">1081</a>
 <a href="#1082" id="1082">1082</a>
 <a href="#1083" id="1083">1083</a>
-<a href="#1084" id="1084">1084</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for x64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -1975,12 +1974,11 @@
                 <span class="prelude-val">None
             </span>};
             <span class="kw">let </span>dividend_hi = <span class="self">self</span>.lower_ctx.alloc_tmp(types::I64).only_reg().unwrap();
-            <span class="self">self</span>.lower_ctx.emit(MInst::alu_rmi_r(
-                OperandSize::Size32,
-                AluRmiROpcode::Xor,
-                RegMemImm::reg(dividend_hi.to_reg()),
-                dividend_hi,
-            ));
+            <span class="self">self</span>.lower_ctx.emit(MInst::AluConstOp {
+                op: AluRmiROpcode::Xor,
+                size: OperandSize::Size32,
+                dst: WritableGpr::from_reg(Gpr::new(dividend_hi.to_reg()).unwrap()),
+            });
             <span class="self">self</span>.lower_ctx.emit(MInst::checked_div_or_rem_seq(
                 kind.clone(),
                 size,

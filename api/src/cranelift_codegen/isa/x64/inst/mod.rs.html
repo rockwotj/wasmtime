@@ -2613,22 +2613,6 @@
 <a href="#2613" id="2613">2613</a>
 <a href="#2614" id="2614">2614</a>
 <a href="#2615" id="2615">2615</a>
-<a href="#2616" id="2616">2616</a>
-<a href="#2617" id="2617">2617</a>
-<a href="#2618" id="2618">2618</a>
-<a href="#2619" id="2619">2619</a>
-<a href="#2620" id="2620">2620</a>
-<a href="#2621" id="2621">2621</a>
-<a href="#2622" id="2622">2622</a>
-<a href="#2623" id="2623">2623</a>
-<a href="#2624" id="2624">2624</a>
-<a href="#2625" id="2625">2625</a>
-<a href="#2626" id="2626">2626</a>
-<a href="#2627" id="2627">2627</a>
-<a href="#2628" id="2628">2628</a>
-<a href="#2629" id="2629">2629</a>
-<a href="#2630" id="2630">2630</a>
-<a href="#2631" id="2631">2631</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines x86_64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc, StackMap};
@@ -2753,7 +2737,8 @@
             | Inst::MachOTlsGetAddr { .. }
             | Inst::CoffTlsGetAddr { .. }
             | Inst::Unwind { .. }
-            | Inst::DummyUse { .. } =&gt; <span class="macro">smallvec!</span>[],
+            | Inst::DummyUse { .. }
+            | Inst::AluConstOp { .. } =&gt; <span class="macro">smallvec!</span>[],
 
             Inst::AluRmRVex { op, .. } =&gt; op.available_from(),
             Inst::UnaryRmR { op, .. } =&gt; op.available_from(),
@@ -2767,7 +2752,8 @@
             | Inst::XmmRmRImm { op, .. }
             | Inst::XmmToGpr { op, .. }
             | Inst::XmmUnaryRmRImm { op, .. }
-            | Inst::XmmUnaryRmR { op, .. } =&gt; <span class="macro">smallvec!</span>[op.available_from()],
+            | Inst::XmmUnaryRmR { op, .. }
+            | Inst::XmmConstOp { op, .. } =&gt; <span class="macro">smallvec!</span>[op.available_from()],
 
             Inst::XmmUnaryRmREvex { op, .. }
             | Inst::XmmRmREvex { op, .. }
@@ -2775,7 +2761,9 @@
 
             Inst::XmmRmiRVex { op, .. }
             | Inst::XmmRmRVex3 { op, .. }
-            | Inst::XmmRmRImmVex { op, .. } =&gt; op.available_from(),
+            | Inst::XmmRmRImmVex { op, .. }
+            | Inst::XmmRmRBlendVex { op, .. }
+            | Inst::XmmVexPinsr { op, .. } =&gt; op.available_from(),
         }
     }
 }
@@ -3253,40 +3241,6 @@
     }
 }
 
-<span class="comment">// Inst helpers.
-
-</span><span class="kw">impl </span>Inst {
-    <span class="doccomment">/// In certain cases, instructions of this format can act as a definition of an XMM register,
-    /// producing a value that is independent of its initial value.
-    ///
-    /// For example, a vector equality comparison (`cmppd` or `cmpps`) that compares a register to
-    /// itself will generate all ones as a result, regardless of its value. From the register
-    /// allocator&#39;s point of view, we should (i) record the first register, which is normally a
-    /// mod, as a def instead; and (ii) not record the second register as a use, because it is the
-    /// same as the first register (already handled).
-    </span><span class="kw">fn </span>produces_const(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::AluRmiR { op, src1, src2, .. } =&gt; {
-                src2.clone().to_reg_mem_imm().to_reg() == <span class="prelude-val">Some</span>(src1.to_reg())
-                    &amp;&amp; (<span class="kw-2">*</span>op == AluRmiROpcode::Xor || <span class="kw-2">*</span>op == AluRmiROpcode::Sub)
-            }
-
-            <span class="self">Self</span>::XmmRmR { op, src1, src2, .. } =&gt; {
-                src2.clone().to_reg_mem().to_reg() == <span class="prelude-val">Some</span>(src1.to_reg())
-                    &amp;&amp; (<span class="kw-2">*</span>op == SseOpcode::Xorps
-                        || <span class="kw-2">*</span>op == SseOpcode::Xorpd
-                        || <span class="kw-2">*</span>op == SseOpcode::Pxor
-                        || <span class="kw-2">*</span>op == SseOpcode::Pcmpeqb
-                        || <span class="kw-2">*</span>op == SseOpcode::Pcmpeqw
-                        || <span class="kw-2">*</span>op == SseOpcode::Pcmpeqd
-                        || <span class="kw-2">*</span>op == SseOpcode::Pcmpeqq)
-            }
-
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-        }
-    }
-}
-
 <span class="comment">//=============================================================================
 // Instructions: printing
 
@@ -3336,16 +3290,6 @@
         <span class="kw">match </span><span class="self">self </span>{
             Inst::Nop { len } =&gt; <span class="macro">format!</span>(<span class="string">&quot;{} len={}&quot;</span>, ljustify(<span class="string">&quot;nop&quot;</span>.to_string()), len),
 
-            Inst::AluRmiR { size, op, dst, .. } <span class="kw">if </span><span class="self">self</span>.produces_const() =&gt; {
-                <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), size.to_bytes(), allocs);
-                <span class="macro">format!</span>(
-                    <span class="string">&quot;{} {}, {}, {}&quot;</span>,
-                    ljustify2(op.to_string(), suffix_lqb(<span class="kw-2">*</span>size)),
-                    dst,
-                    dst,
-                    dst
-                )
-            }
             Inst::AluRmiR {
                 size,
                 op,
@@ -3363,6 +3307,14 @@
                     src1,
                     src2,
                     dst
+                )
+            }
+            Inst::AluConstOp { op, dst, size } =&gt; {
+                <span class="kw">let </span>size_bytes = size.to_bytes();
+                <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), size_bytes, allocs);
+                <span class="macro">format!</span>(
+                    <span class="string">&quot;{} {dst}, {dst}, {dst}&quot;</span>,
+                    ljustify2(op.to_string(), suffix_lqb(<span class="kw-2">*</span>size)),
                 )
             }
             Inst::AluRM {
@@ -3576,11 +3528,6 @@
                 <span class="macro">format!</span>(<span class="string">&quot;{} {}, {}&quot;</span>, ljustify(op.to_string()), src, dst)
             }
 
-            Inst::XmmRmR { op, dst, .. } <span class="kw">if </span><span class="self">self</span>.produces_const() =&gt; {
-                <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), <span class="number">8</span>, allocs);
-                <span class="macro">format!</span>(<span class="string">&quot;{} {}, {}, {}&quot;</span>, ljustify(op.to_string()), dst, dst, dst)
-            }
-
             Inst::XmmRmR {
                 op,
                 src1,
@@ -3592,6 +3539,11 @@
                 <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), <span class="number">8</span>, allocs);
                 <span class="kw">let </span>src2 = src2.pretty_print(<span class="number">8</span>, allocs);
                 <span class="macro">format!</span>(<span class="string">&quot;{} {}, {}, {}&quot;</span>, ljustify(op.to_string()), src1, src2, dst)
+            }
+
+            Inst::XmmConstOp { op, dst } =&gt; {
+                <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), <span class="number">8</span>, allocs);
+                <span class="macro">format!</span>(<span class="string">&quot;{} {dst}, {dst}, {dst}&quot;</span>, ljustify(op.to_string()))
             }
 
             Inst::XmmRmRBlend {
@@ -3647,13 +3599,22 @@
                 <span class="kw">let </span>src1 = pretty_print_reg(src1.to_reg(), <span class="number">8</span>, allocs);
                 <span class="kw">let </span>src2 = src2.pretty_print(<span class="number">8</span>, allocs);
 
-                <span class="macro">format!</span>(
-                    <span class="string">&quot;{} ${imm} {}, {}, {}&quot;</span>,
-                    ljustify(op.to_string()),
-                    src1,
-                    src2,
-                    dst
-                )
+                <span class="macro">format!</span>(<span class="string">&quot;{} ${imm} {src1}, {src2}, {dst}&quot;</span>, ljustify(op.to_string()))
+            }
+
+            Inst::XmmVexPinsr {
+                op,
+                src1,
+                src2,
+                dst,
+                imm,
+                ..
+            } =&gt; {
+                <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), <span class="number">8</span>, allocs);
+                <span class="kw">let </span>src1 = pretty_print_reg(src1.to_reg(), <span class="number">8</span>, allocs);
+                <span class="kw">let </span>src2 = src2.pretty_print(<span class="number">8</span>, allocs);
+
+                <span class="macro">format!</span>(<span class="string">&quot;{} ${imm} {src1}, {src2}, {dst}&quot;</span>, ljustify(op.to_string()))
             }
 
             Inst::XmmRmRVex3 {
@@ -3677,6 +3638,22 @@
                     src3,
                     dst
                 )
+            }
+
+            Inst::XmmRmRBlendVex {
+                op,
+                src1,
+                src2,
+                mask,
+                dst,
+                ..
+            } =&gt; {
+                <span class="kw">let </span>src1 = pretty_print_reg(src1.to_reg(), <span class="number">8</span>, allocs);
+                <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), <span class="number">8</span>, allocs);
+                <span class="kw">let </span>src2 = src2.pretty_print(<span class="number">8</span>, allocs);
+                <span class="kw">let </span>mask = pretty_print_reg(mask.to_reg(), <span class="number">8</span>, allocs);
+
+                <span class="macro">format!</span>(<span class="string">&quot;{} {src1}, {src2}, {mask}, {dst}&quot;</span>, ljustify(op.to_string()))
             }
 
             Inst::XmmRmREvex {
@@ -3737,28 +3714,6 @@
                     lhs,
                     rhs,
                     dst
-                )
-            }
-
-            Inst::XmmRmRImm {
-                op, dst, imm, size, ..
-            } <span class="kw">if </span><span class="self">self</span>.produces_const() =&gt; {
-                <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg(), <span class="number">8</span>, allocs);
-                <span class="macro">format!</span>(
-                    <span class="string">&quot;{} ${}, {}, {}, {}&quot;</span>,
-                    ljustify(<span class="macro">format!</span>(
-                        <span class="string">&quot;{}{}&quot;</span>,
-                        op.to_string(),
-                        <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size64 {
-                            <span class="string">&quot;.w&quot;
-                        </span>} <span class="kw">else </span>{
-                            <span class="string">&quot;&quot;
-                        </span>}
-                    )),
-                    imm,
-                    dst,
-                    dst,
-                    dst,
                 )
             }
 
@@ -4430,14 +4385,11 @@
         Inst::AluRmiR {
             src1, src2, dst, ..
         } =&gt; {
-            <span class="kw">if </span>inst.produces_const() {
-                collector.reg_def(dst.to_writable_reg());
-            } <span class="kw">else </span>{
-                collector.reg_use(src1.to_reg());
-                collector.reg_reuse_def(dst.to_writable_reg(), <span class="number">0</span>);
-                src2.get_operands(collector);
-            }
+            collector.reg_use(src1.to_reg());
+            collector.reg_reuse_def(dst.to_writable_reg(), <span class="number">0</span>);
+            src2.get_operands(collector);
         }
+        Inst::AluConstOp { dst, .. } =&gt; collector.reg_def(dst.to_writable_reg()),
         Inst::AluRM { src1_dst, src2, .. } =&gt; {
             collector.reg_use(src2.to_reg());
             src1_dst.get_operands(collector);
@@ -4535,13 +4487,9 @@
         Inst::XmmRmR {
             src1, src2, dst, ..
         } =&gt; {
-            <span class="kw">if </span>inst.produces_const() {
-                collector.reg_def(dst.to_writable_reg());
-            } <span class="kw">else </span>{
-                collector.reg_use(src1.to_reg());
-                collector.reg_reuse_def(dst.to_writable_reg(), <span class="number">0</span>);
-                src2.get_operands(collector);
-            }
+            collector.reg_use(src1.to_reg());
+            collector.reg_reuse_def(dst.to_writable_reg(), <span class="number">0</span>);
+            src2.get_operands(collector);
         }
         Inst::XmmRmRBlend {
             src1,
@@ -4574,6 +4522,13 @@
             collector.reg_use(src1.to_reg());
             src2.get_operands(collector);
         }
+        Inst::XmmVexPinsr {
+            src1, src2, dst, ..
+        } =&gt; {
+            collector.reg_def(dst.to_writable_reg());
+            collector.reg_use(src1.to_reg());
+            src2.get_operands(collector);
+        }
         Inst::XmmRmRVex3 {
             op,
             src1,
@@ -4596,6 +4551,18 @@
             collector.reg_reuse_def(dst.to_writable_reg(), <span class="number">0</span>);
             collector.reg_use(src2.to_reg());
             src3.get_operands(collector);
+        }
+        Inst::XmmRmRBlendVex {
+            src1,
+            src2,
+            mask,
+            dst,
+            ..
+        } =&gt; {
+            collector.reg_def(dst.to_writable_reg());
+            collector.reg_use(src1.to_reg());
+            src2.get_operands(collector);
+            collector.reg_use(mask.to_reg());
         }
         Inst::XmmRmREvex {
             op,
@@ -4630,9 +4597,7 @@
             dst,
             ..
         } =&gt; {
-            <span class="kw">if </span>inst.produces_const() {
-                collector.reg_def(<span class="kw-2">*</span>dst);
-            } <span class="kw">else if </span>!op.uses_src1() {
+            <span class="kw">if </span>!op.uses_src1() {
                 <span class="comment">// FIXME: split this instruction into two, so we don&#39;t
                 // need this awkward src1-is-only-sometimes-an-arg
                 // behavior.
@@ -4643,6 +4608,9 @@
                 collector.reg_reuse_def(<span class="kw-2">*</span>dst, <span class="number">0</span>);
                 src2.get_operands(collector);
             }
+        }
+        Inst::XmmConstOp { dst, .. } =&gt; {
+            collector.reg_def(dst.to_writable_reg());
         }
         Inst::XmmUninitializedValue { dst } =&gt; collector.reg_def(dst.to_writable_reg()),
         Inst::XmmMinMaxSeq { lhs, rhs, dst, .. } =&gt; {
