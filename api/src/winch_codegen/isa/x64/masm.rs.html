@@ -214,13 +214,35 @@
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
 <a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     address::Address,
     asm::{Assembler, Operand},
     regs::{<span class="self">self</span>, rbp, rsp},
 };
 <span class="kw">use </span><span class="kw">crate</span>::isa::reg::Reg;
-<span class="kw">use </span><span class="kw">crate</span>::masm::{DivKind, MacroAssembler <span class="kw">as </span>Masm, OperandSize, RegImm};
+<span class="kw">use </span><span class="kw">crate</span>::masm::{DivKind, MacroAssembler <span class="kw">as </span>Masm, OperandSize, RegImm, RemKind};
 <span class="kw">use crate</span>::{abi::LocalSlot, codegen::CodeGenContext, stack::Val};
 <span class="kw">use </span>cranelift_codegen::{isa::x64::settings <span class="kw">as </span>x64_settings, settings, Final, MachBufferFinalized};
 
@@ -388,6 +410,28 @@
 
         <span class="comment">// Push the quotient.
         </span>context.stack.push(Val::reg(rax));
+    }
+
+    <span class="kw">fn </span>rem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>CodeGenContext, kind: RemKind, size: OperandSize) {
+        <span class="comment">// Allocate rdx:rax.
+        </span><span class="kw">let </span>rdx = context.gpr(regs::rdx(), <span class="self">self</span>);
+        <span class="kw">let </span>rax = context.gpr(regs::rax(), <span class="self">self</span>);
+
+        <span class="comment">// Allocate the divisor, which can be any gpr.
+        </span><span class="kw">let </span>divisor = context.pop_to_reg(<span class="self">self</span>, size);
+
+        <span class="comment">// Mark rax as allocatable.
+        </span>context.regalloc.free_gpr(rax);
+        <span class="comment">// Move the top value to rax.
+        </span><span class="kw">let </span>rax = context.pop_to_named_reg(<span class="self">self</span>, rax, size);
+        <span class="self">self</span>.asm.rem(divisor, (rax, rdx), kind, size);
+
+        <span class="comment">// Free the divisor and rax.
+        </span>context.free_gpr(divisor);
+        context.free_gpr(rax);
+
+        <span class="comment">// Push the remainder.
+        </span>context.stack.push(Val::reg(rdx));
     }
 
     <span class="kw">fn </span>epilogue(<span class="kw-2">&amp;mut </span><span class="self">self</span>, locals_size: u32) {
