@@ -465,6 +465,16 @@
 <a href="#465" id="465">465</a>
 <a href="#466" id="466">466</a>
 <a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for riscv64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -746,14 +756,24 @@
         ValueRegs::two(shamt, len_sub_shamt)
     }
 
-    <span class="kw">fn </span>has_b(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.backend.isa_flags.has_b()
-    }
     <span class="kw">fn </span>has_zbkb(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.backend.isa_flags.has_zbkb()
     }
+
+    <span class="kw">fn </span>has_zba(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.backend.isa_flags.has_zba()
+    }
+
     <span class="kw">fn </span>has_zbb(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.backend.isa_flags.has_zbb()
+    }
+
+    <span class="kw">fn </span>has_zbc(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.backend.isa_flags.has_zbc()
+    }
+
+    <span class="kw">fn </span>has_zbs(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.backend.isa_flags.has_zbs()
     }
 
     <span class="kw">fn </span>inst_output_get(<span class="kw-2">&amp;mut </span><span class="self">self</span>, x: InstOutput, index: u8) -&gt; ValueRegs {

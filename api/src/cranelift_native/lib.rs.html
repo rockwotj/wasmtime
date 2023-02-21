@@ -259,6 +259,7 @@
 <a href="#259" id="259">259</a>
 <a href="#260" id="260">260</a>
 <a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Performs autodetection of the host for the purposes of running
 //! Cranelift to generate code to run on the same machine.
 
@@ -474,8 +475,9 @@
             isa_builder.enable(<span class="string">&quot;has_v&quot;</span>).unwrap();
         }
 
-        <span class="comment">// TODO: ZiFencei does not have a bit associated with it
-        // TODO: Zbkb does not have a bit associated with it
+        <span class="comment">// In general extensions that are longer than one letter
+        // won&#39;t have a bit associated with them. The Linux kernel
+        // is currently working on a new way to query the extensions.
     </span>}
 
     <span class="comment">// squelch warnings about unused mut/variables on some platforms.
