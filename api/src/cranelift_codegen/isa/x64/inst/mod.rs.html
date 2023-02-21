@@ -2600,6 +2600,36 @@
 <a href="#2600" id="2600">2600</a>
 <a href="#2601" id="2601">2601</a>
 <a href="#2602" id="2602">2602</a>
+<a href="#2603" id="2603">2603</a>
+<a href="#2604" id="2604">2604</a>
+<a href="#2605" id="2605">2605</a>
+<a href="#2606" id="2606">2606</a>
+<a href="#2607" id="2607">2607</a>
+<a href="#2608" id="2608">2608</a>
+<a href="#2609" id="2609">2609</a>
+<a href="#2610" id="2610">2610</a>
+<a href="#2611" id="2611">2611</a>
+<a href="#2612" id="2612">2612</a>
+<a href="#2613" id="2613">2613</a>
+<a href="#2614" id="2614">2614</a>
+<a href="#2615" id="2615">2615</a>
+<a href="#2616" id="2616">2616</a>
+<a href="#2617" id="2617">2617</a>
+<a href="#2618" id="2618">2618</a>
+<a href="#2619" id="2619">2619</a>
+<a href="#2620" id="2620">2620</a>
+<a href="#2621" id="2621">2621</a>
+<a href="#2622" id="2622">2622</a>
+<a href="#2623" id="2623">2623</a>
+<a href="#2624" id="2624">2624</a>
+<a href="#2625" id="2625">2625</a>
+<a href="#2626" id="2626">2626</a>
+<a href="#2627" id="2627">2627</a>
+<a href="#2628" id="2628">2628</a>
+<a href="#2629" id="2629">2629</a>
+<a href="#2630" id="2630">2630</a>
+<a href="#2631" id="2631">2631</a>
+<a href="#2632" id="2632">2632</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines x86_64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc, StackMap};
@@ -2735,11 +2765,13 @@
             | Inst::XmmMovRM { op, .. }
             | Inst::XmmRmiReg { opcode: op, .. }
             | Inst::XmmRmR { op, .. }
+            | Inst::XmmRmRUnaligned { op, .. }
             | Inst::XmmRmRBlend { op, .. }
             | Inst::XmmRmRImm { op, .. }
             | Inst::XmmToGpr { op, .. }
             | Inst::XmmToGprImm { op, .. }
             | Inst::XmmUnaryRmRImm { op, .. }
+            | Inst::XmmUnaryRmRUnaligned { op, .. }
             | Inst::XmmUnaryRmR { op, .. }
             | Inst::XmmConstOp { op, .. } =&gt; <span class="macro">smallvec!</span>[op.available_from()],
 
@@ -2895,7 +2927,7 @@
         <span class="macro">debug_assert!</span>(dst.to_reg().class() == RegClass::Float);
         Inst::XmmUnaryRmR {
             op,
-            src: XmmMem::new(src).unwrap(),
+            src: XmmMemAligned::new(src).unwrap(),
             dst: WritableXmm::from_writable_reg(dst).unwrap(),
         }
     }
@@ -2906,7 +2938,7 @@
         Inst::XmmRmR {
             op,
             src1: Xmm::new(dst.to_reg()).unwrap(),
-            src2: XmmMem::new(src).unwrap(),
+            src2: XmmMemAligned::new(src).unwrap(),
             dst: WritableXmm::from_writable_reg(dst).unwrap(),
         }
     }
@@ -2971,7 +3003,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>xmm_cmp_rm_r(op: SseOpcode, src: RegMem, dst: Reg) -&gt; Inst {
         src.assert_regclass_is(RegClass::Float);
         <span class="macro">debug_assert!</span>(dst.class() == RegClass::Float);
-        <span class="kw">let </span>src = XmmMem::new(src).unwrap();
+        <span class="kw">let </span>src = XmmMemAligned::new(src).unwrap();
         <span class="kw">let </span>dst = Xmm::new(dst).unwrap();
         Inst::XmmCmpRmR { op, src, dst }
     }
@@ -3496,6 +3528,12 @@
                 <span class="macro">format!</span>(<span class="string">&quot;{} {}, {}&quot;</span>, ljustify(op.to_string()), src, dst)
             }
 
+            Inst::XmmUnaryRmRUnaligned { op, src, dst, .. } =&gt; {
+                <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), op.src_size(), allocs);
+                <span class="kw">let </span>src = src.pretty_print(op.src_size(), allocs);
+                <span class="macro">format!</span>(<span class="string">&quot;{} {}, {}&quot;</span>, ljustify(op.to_string()), src, dst)
+            }
+
             Inst::XmmUnaryRmRImm {
                 op, src, dst, imm, ..
             } =&gt; {
@@ -3517,6 +3555,19 @@
             }
 
             Inst::XmmRmR {
+                op,
+                src1,
+                src2,
+                dst,
+                ..
+            } =&gt; {
+                <span class="kw">let </span>src1 = pretty_print_reg(src1.to_reg(), <span class="number">8</span>, allocs);
+                <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), <span class="number">8</span>, allocs);
+                <span class="kw">let </span>src2 = src2.pretty_print(<span class="number">8</span>, allocs);
+                <span class="macro">format!</span>(<span class="string">&quot;{} {}, {}, {}&quot;</span>, ljustify(op.to_string()), src1, src2, dst)
+            }
+
+            Inst::XmmRmRUnaligned {
                 op,
                 src1,
                 src2,
@@ -4464,13 +4515,22 @@
             collector.reg_def(dst.to_writable_reg());
             src.get_operands(collector);
         }
-        Inst::XmmUnaryRmR { src, dst, .. }
-        | Inst::XmmUnaryRmREvex { src, dst, .. }
-        | Inst::XmmUnaryRmRImm { src, dst, .. } =&gt; {
+        Inst::XmmUnaryRmR { src, dst, .. } | Inst::XmmUnaryRmRImm { src, dst, .. } =&gt; {
+            collector.reg_def(dst.to_writable_reg());
+            src.get_operands(collector);
+        }
+        Inst::XmmUnaryRmREvex { src, dst, .. } | Inst::XmmUnaryRmRUnaligned { src, dst, .. } =&gt; {
             collector.reg_def(dst.to_writable_reg());
             src.get_operands(collector);
         }
         Inst::XmmRmR {
+            src1, src2, dst, ..
+        } =&gt; {
+            collector.reg_use(src1.to_reg());
+            collector.reg_reuse_def(dst.to_writable_reg(), <span class="number">0</span>);
+            src2.get_operands(collector);
+        }
+        Inst::XmmRmRUnaligned {
             src1, src2, dst, ..
         } =&gt; {
             collector.reg_use(src1.to_reg());

@@ -3582,6 +3582,38 @@
 <a href="#3582" id="3582">3582</a>
 <a href="#3583" id="3583">3583</a>
 <a href="#3584" id="3584">3584</a>
+<a href="#3585" id="3585">3585</a>
+<a href="#3586" id="3586">3586</a>
+<a href="#3587" id="3587">3587</a>
+<a href="#3588" id="3588">3588</a>
+<a href="#3589" id="3589">3589</a>
+<a href="#3590" id="3590">3590</a>
+<a href="#3591" id="3591">3591</a>
+<a href="#3592" id="3592">3592</a>
+<a href="#3593" id="3593">3593</a>
+<a href="#3594" id="3594">3594</a>
+<a href="#3595" id="3595">3595</a>
+<a href="#3596" id="3596">3596</a>
+<a href="#3597" id="3597">3597</a>
+<a href="#3598" id="3598">3598</a>
+<a href="#3599" id="3599">3599</a>
+<a href="#3600" id="3600">3600</a>
+<a href="#3601" id="3601">3601</a>
+<a href="#3602" id="3602">3602</a>
+<a href="#3603" id="3603">3603</a>
+<a href="#3604" id="3604">3604</a>
+<a href="#3605" id="3605">3605</a>
+<a href="#3606" id="3606">3606</a>
+<a href="#3607" id="3607">3607</a>
+<a href="#3608" id="3608">3608</a>
+<a href="#3609" id="3609">3609</a>
+<a href="#3610" id="3610">3610</a>
+<a href="#3611" id="3611">3611</a>
+<a href="#3612" id="3612">3612</a>
+<a href="#3613" id="3613">3613</a>
+<a href="#3614" id="3614">3614</a>
+<a href="#3615" id="3615">3615</a>
+<a href="#3616" id="3616">3616</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -5315,7 +5347,21 @@
             sink.bind_label(else_label);
         }
 
-        Inst::XmmUnaryRmR {
+        Inst::XmmUnaryRmR { op, src, dst } =&gt; {
+            emit(
+                <span class="kw-2">&amp;</span>Inst::XmmUnaryRmRUnaligned {
+                    op: <span class="kw-2">*</span>op,
+                    src: XmmMem::new(src.clone().into()).unwrap(),
+                    dst: <span class="kw-2">*</span>dst,
+                },
+                allocs,
+                sink,
+                info,
+                state,
+            );
+        }
+
+        Inst::XmmUnaryRmRUnaligned {
             op,
             src: src_e,
             dst: reg_g,
@@ -5426,6 +5472,24 @@
         }
 
         Inst::XmmRmR {
+            op,
+            src1,
+            src2,
+            dst,
+        } =&gt; emit(
+            <span class="kw-2">&amp;</span>Inst::XmmRmRUnaligned {
+                op: <span class="kw-2">*</span>op,
+                dst: <span class="kw-2">*</span>dst,
+                src1: <span class="kw-2">*</span>src1,
+                src2: XmmMem::new(src2.clone().to_reg_mem()).unwrap(),
+            },
+            allocs,
+            sink,
+            info,
+            state,
+        ),
+
+        Inst::XmmRmRUnaligned {
             op,
             src1,
             src2: src_e,

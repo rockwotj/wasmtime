@@ -1081,6 +1081,18 @@
 <a href="#1081" id="1081">1081</a>
 <a href="#1082" id="1082">1082</a>
 <a href="#1083" id="1083">1083</a>
+<a href="#1084" id="1084">1084</a>
+<a href="#1085" id="1085">1085</a>
+<a href="#1086" id="1086">1086</a>
+<a href="#1087" id="1087">1087</a>
+<a href="#1088" id="1088">1088</a>
+<a href="#1089" id="1089">1089</a>
+<a href="#1090" id="1090">1090</a>
+<a href="#1091" id="1091">1091</a>
+<a href="#1092" id="1092">1092</a>
+<a href="#1093" id="1093">1093</a>
+<a href="#1094" id="1094">1094</a>
+<a href="#1095" id="1095">1095</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for x64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -1183,23 +1195,9 @@
             <span class="kw">if let </span><span class="prelude-val">Some</span>(imm) = to_simm32(c <span class="kw">as </span>i64) {
                 <span class="kw">return </span>imm.to_reg_mem_imm();
             }
-
-            <span class="comment">// A load from the constant pool is better than a
-            // rematerialization into a register, because it reduces
-            // register pressure.
-            </span><span class="kw">let </span>vcode_constant = <span class="self">self</span>.emit_u64_le_const(c);
-            <span class="kw">return </span>RegMemImm::mem(SyntheticAmode::ConstantOffset(vcode_constant));
         }
 
-        <span class="kw">if let </span>InputSourceInst::UniqueUse(src_insn, <span class="number">0</span>) = inputs.inst {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>((addr_input, offset)) = is_mergeable_load(<span class="self">self</span>.lower_ctx, src_insn) {
-                <span class="self">self</span>.lower_ctx.sink_inst(src_insn);
-                <span class="kw">let </span>amode = lower_to_amode(<span class="self">self</span>.lower_ctx, addr_input, offset);
-                <span class="kw">return </span>RegMemImm::mem(amode);
-            }
-        }
-
-        RegMemImm::reg(<span class="self">self</span>.put_in_reg(val))
+        <span class="self">self</span>.put_in_reg_mem(val).into()
     }
 
     <span class="kw">fn </span>put_in_xmm_mem_imm(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: Value) -&gt; XmmMemImm {
@@ -1233,7 +1231,7 @@
                 .unwrap();
         }
 
-        XmmMem::new(RegMem::reg(<span class="self">self</span>.put_in_reg(val))).unwrap()
+        XmmMem::new(<span class="self">self</span>.put_in_reg_mem(val)).unwrap()
     }
 
     <span class="kw">fn </span>put_in_reg_mem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: Value) -&gt; RegMem {
@@ -1247,12 +1245,8 @@
             <span class="kw">return </span>RegMem::mem(SyntheticAmode::ConstantOffset(vcode_constant));
         }
 
-        <span class="kw">if let </span>InputSourceInst::UniqueUse(src_insn, <span class="number">0</span>) = inputs.inst {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>((addr_input, offset)) = is_mergeable_load(<span class="self">self</span>.lower_ctx, src_insn) {
-                <span class="self">self</span>.lower_ctx.sink_inst(src_insn);
-                <span class="kw">let </span>amode = lower_to_amode(<span class="self">self</span>.lower_ctx, addr_input, offset);
-                <span class="kw">return </span>RegMem::mem(amode);
-            }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(load) = <span class="self">self</span>.sinkable_load(val) {
+            <span class="kw">return </span><span class="self">self</span>.sink_load(<span class="kw-2">&amp;</span>load);
         }
 
         RegMem::reg(<span class="self">self</span>.put_in_reg(val))
@@ -1529,7 +1523,7 @@
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>xmm_mem_to_xmm_mem_imm(<span class="kw-2">&amp;mut </span><span class="self">self</span>, r: <span class="kw-2">&amp;</span>XmmMem) -&gt; XmmMemImm {
-        r.clone().into()
+        XmmMemImm::new(r.clone().to_reg_mem().into()).unwrap()
     }
 
     <span class="attr">#[inline]
@@ -2080,10 +2074,40 @@
             }
         }
     }
+
+    <span class="kw">fn </span>xmm_mem_to_xmm_mem_aligned(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg: <span class="kw-2">&amp;</span>XmmMem) -&gt; XmmMemAligned {
+        <span class="kw">match </span>XmmMemAligned::new(arg.clone().into()) {
+            <span class="prelude-val">Some</span>(aligned) =&gt; aligned,
+            <span class="prelude-val">None </span>=&gt; <span class="kw">match </span>arg.clone().into() {
+                RegMem::Mem { addr } =&gt; <span class="self">self</span>.load_xmm_unaligned(addr).into(),
+                <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+            },
+        }
+    }
+
+    <span class="kw">fn </span>xmm_mem_imm_to_xmm_mem_aligned_imm(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg: <span class="kw-2">&amp;</span>XmmMemImm) -&gt; XmmMemAlignedImm {
+        <span class="kw">match </span>XmmMemAlignedImm::new(arg.clone().into()) {
+            <span class="prelude-val">Some</span>(aligned) =&gt; aligned,
+            <span class="prelude-val">None </span>=&gt; <span class="kw">match </span>arg.clone().into() {
+                RegMemImm::Mem { addr } =&gt; <span class="self">self</span>.load_xmm_unaligned(addr).into(),
+                <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+            },
+        }
+    }
 }
 
 <span class="kw">impl </span>IsleContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, MInst, X64Backend&gt; {
     <span class="macro">isle_prelude_method_helpers!</span>(X64Caller);
+
+    <span class="kw">fn </span>load_xmm_unaligned(<span class="kw-2">&amp;mut </span><span class="self">self</span>, addr: SyntheticAmode) -&gt; Xmm {
+        <span class="kw">let </span>tmp = <span class="self">self</span>.lower_ctx.alloc_tmp(types::F32X4).only_reg().unwrap();
+        <span class="self">self</span>.lower_ctx.emit(MInst::XmmUnaryRmRUnaligned {
+            op: SseOpcode::Movdqu,
+            src: XmmMem::new(RegMem::mem(addr)).unwrap(),
+            dst: Writable::from_reg(Xmm::new(tmp.to_reg()).unwrap()),
+        });
+        Xmm::new(tmp.to_reg()).unwrap()
+    }
 }
 
 <span class="comment">// Since x64 doesn&#39;t have 8x16 shifts and we must use a 16x8 shift instead, we
