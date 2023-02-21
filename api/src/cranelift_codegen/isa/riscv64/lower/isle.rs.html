@@ -463,6 +463,8 @@
 <a href="#463" id="463">463</a>
 <a href="#464" id="464">464</a>
 <a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for riscv64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -843,6 +845,7 @@
 
     <span class="kw">fn </span>lower_br_table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: Reg, targets: <span class="kw-2">&amp;</span>VecMachLabel) -&gt; Unit {
         <span class="kw">let </span>tmp1 = <span class="self">self</span>.temp_writable_reg(I64);
+        <span class="kw">let </span>tmp2 = <span class="self">self</span>.temp_writable_reg(I64);
         <span class="kw">let </span>targets: Vec&lt;BranchTarget&gt; = targets
             .into_iter()
             .copied()
@@ -851,6 +854,7 @@
         <span class="self">self</span>.emit(<span class="kw-2">&amp;</span>MInst::BrTable {
             index,
             tmp1,
+            tmp2,
             targets,
         });
     }

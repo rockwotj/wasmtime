@@ -2840,6 +2840,24 @@
 <a href="#2840" id="2840">2840</a>
 <a href="#2841" id="2841">2841</a>
 <a href="#2842" id="2842">2842</a>
+<a href="#2843" id="2843">2843</a>
+<a href="#2844" id="2844">2844</a>
+<a href="#2845" id="2845">2845</a>
+<a href="#2846" id="2846">2846</a>
+<a href="#2847" id="2847">2847</a>
+<a href="#2848" id="2848">2848</a>
+<a href="#2849" id="2849">2849</a>
+<a href="#2850" id="2850">2850</a>
+<a href="#2851" id="2851">2851</a>
+<a href="#2852" id="2852">2852</a>
+<a href="#2853" id="2853">2853</a>
+<a href="#2854" id="2854">2854</a>
+<a href="#2855" id="2855">2855</a>
+<a href="#2856" id="2856">2856</a>
+<a href="#2857" id="2857">2857</a>
+<a href="#2858" id="2858">2858</a>
+<a href="#2859" id="2859">2859</a>
+<a href="#2860" id="2860">2860</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::StackMap;
@@ -3826,11 +3844,13 @@
             <span class="kw-2">&amp;</span>Inst::BrTable {
                 index,
                 tmp1,
+                tmp2,
                 <span class="kw-2">ref </span>targets,
             } =&gt; {
                 <span class="kw">let </span>index = allocs.next(index);
                 <span class="kw">let </span>tmp1 = allocs.next_writable(tmp1);
-                <span class="kw">let </span>tmp2 = writable_spilltmp_reg();
+                <span class="kw">let </span>tmp2 = allocs.next_writable(tmp2);
+                <span class="kw">let </span>ext_index = writable_spilltmp_reg();
 
                 <span class="comment">// The default target is passed in as the 0th element of `targets`
                 // separate it here for clarity.
@@ -3843,15 +3863,18 @@
                 // that offset. Each jump table entry is a regular auipc+jalr which we emit sequentially.
                 //
                 // Build the following sequence:
+                //
+                // extend_index:
+                //     zext.w  ext_index, index
                 // bounds_check:
                 //     li      tmp, n_labels
-                //     bltu    index, tmp, compute_target
+                //     bltu    ext_index, tmp, compute_target
                 // jump_to_default_block:
                 //     auipc   pc, 0
                 //     jalr    zero, pc, default_block
                 // compute_target:
                 //     auipc   pc, 0
-                //     slli    tmp, index, 3
+                //     slli    tmp, ext_index, 3
                 //     add     pc, pc, tmp
                 //     jalr    zero, pc, 0x10
                 // jump_table:
@@ -3859,7 +3882,20 @@
                 //     auipc   pc, 0
                 //     jalr    zero, pc, block_target
 
-                // Bounds check.
+                // Extend the index to 64 bits.
+                //
+                // This prevents us branching on the top 32 bits of the index, which
+                // are undefined.
+                </span>Inst::Extend {
+                    rd: ext_index,
+                    rn: index,
+                    signed: <span class="bool-val">false</span>,
+                    from_bits: <span class="number">32</span>,
+                    to_bits: <span class="number">64</span>,
+                }
+                .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
+
+                <span class="comment">// Bounds check.
                 //
                 // Check if the index passed in is larger than the number of jumptable
                 // entries that we have. If it is, we fallthrough to a jump into the
@@ -3872,7 +3908,7 @@
                     not_taken: BranchTarget::zero(),
                     kind: IntegerCompare {
                         kind: IntCC::UnsignedLessThan,
-                        rs1: index,
+                        rs1: ext_index.to_reg(),
                         rs2: tmp2.to_reg(),
                     },
                 }
@@ -3901,7 +3937,7 @@
                 </span>Inst::AluRRImm12 {
                     alu_op: AluOPRRI::Slli,
                     rd: tmp2,
-                    rs: index,
+                    rs: ext_index.to_reg(),
                     imm12: Imm12::from_bits(<span class="number">3</span>),
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);

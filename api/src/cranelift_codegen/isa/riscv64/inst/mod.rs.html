@@ -1724,6 +1724,11 @@
 <a href="#1724" id="1724">1724</a>
 <a href="#1725" id="1725">1725</a>
 <a href="#1726" id="1726">1726</a>
+<a href="#1727" id="1727">1727</a>
+<a href="#1728" id="1728">1728</a>
+<a href="#1729" id="1729">1729</a>
+<a href="#1730" id="1730">1730</a>
+<a href="#1731" id="1731">1731</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines riscv64-specific machine instruction types.
 
 </span><span class="comment">// Some variants are not constructed, but we still want them as options in the future.
@@ -2064,9 +2069,12 @@
     <span class="kw">match </span>inst {
         <span class="kw-2">&amp;</span>Inst::Nop0 =&gt; {}
         <span class="kw-2">&amp;</span>Inst::Nop4 =&gt; {}
-        <span class="kw-2">&amp;</span>Inst::BrTable { index, tmp1, .. } =&gt; {
+        <span class="kw-2">&amp;</span>Inst::BrTable {
+            index, tmp1, tmp2, ..
+        } =&gt; {
             collector.reg_use(index);
             collector.reg_early_def(tmp1);
+            collector.reg_early_def(tmp2);
         }
         <span class="kw-2">&amp;</span>Inst::Auipc { rd, .. } =&gt; collector.reg_def(rd),
         <span class="kw-2">&amp;</span>Inst::Lui { rd, .. } =&gt; collector.reg_def(rd),
@@ -2897,15 +2905,17 @@
             <span class="kw-2">&amp;</span>Inst::BrTable {
                 index,
                 tmp1,
+                tmp2,
                 <span class="kw-2">ref </span>targets,
             } =&gt; {
                 <span class="kw">let </span>targets: Vec&lt;<span class="kw">_</span>&gt; = targets.iter().map(|x| x.as_label().unwrap()).collect();
                 <span class="macro">format!</span>(
-                    <span class="string">&quot;{} {},{}##tmp1={}&quot;</span>,
+                    <span class="string">&quot;{} {},{}##tmp1={},tmp2={}&quot;</span>,
                     <span class="string">&quot;br_table&quot;</span>,
                     format_reg(index, allocs),
                     format_labels(<span class="kw-2">&amp;</span>targets[..]),
                     format_reg(tmp1.to_reg(), allocs),
+                    format_reg(tmp2.to_reg(), allocs),
                 )
             }
             <span class="kw-2">&amp;</span>Inst::Auipc { rd, imm } =&gt; {
