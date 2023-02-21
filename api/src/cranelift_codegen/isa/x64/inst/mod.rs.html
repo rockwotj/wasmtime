@@ -2619,17 +2619,6 @@
 <a href="#2619" id="2619">2619</a>
 <a href="#2620" id="2620">2620</a>
 <a href="#2621" id="2621">2621</a>
-<a href="#2622" id="2622">2622</a>
-<a href="#2623" id="2623">2623</a>
-<a href="#2624" id="2624">2624</a>
-<a href="#2625" id="2625">2625</a>
-<a href="#2626" id="2626">2626</a>
-<a href="#2627" id="2627">2627</a>
-<a href="#2628" id="2628">2628</a>
-<a href="#2629" id="2629">2629</a>
-<a href="#2630" id="2630">2630</a>
-<a href="#2631" id="2631">2631</a>
-<a href="#2632" id="2632">2632</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines x86_64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc, StackMap};
@@ -4576,23 +4565,12 @@
             src2.get_operands(collector);
         }
         Inst::XmmRmRVex3 {
-            op,
             src1,
             src2,
             src3,
             dst,
             ..
         } =&gt; {
-            <span class="comment">// Vfmadd uses and defs the dst reg, that is not the case with all
-            // AVX&#39;s ops, if you&#39;re adding a new op, make sure to correctly define
-            // register uses.
-            </span><span class="macro">assert!</span>(
-                <span class="kw-2">*</span>op == AvxOpcode::Vfmadd213ss
-                    || <span class="kw-2">*</span>op == AvxOpcode::Vfmadd213sd
-                    || <span class="kw-2">*</span>op == AvxOpcode::Vfmadd213ps
-                    || <span class="kw-2">*</span>op == AvxOpcode::Vfmadd213pd
-            );
-
             collector.reg_use(src1.to_reg());
             collector.reg_reuse_def(dst.to_writable_reg(), <span class="number">0</span>);
             collector.reg_use(src2.to_reg());

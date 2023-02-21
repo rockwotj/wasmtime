@@ -3614,6 +3614,20 @@
 <a href="#3614" id="3614">3614</a>
 <a href="#3615" id="3615">3615</a>
 <a href="#3616" id="3616">3616</a>
+<a href="#3617" id="3617">3617</a>
+<a href="#3618" id="3618">3618</a>
+<a href="#3619" id="3619">3619</a>
+<a href="#3620" id="3620">3620</a>
+<a href="#3621" id="3621">3621</a>
+<a href="#3622" id="3622">3622</a>
+<a href="#3623" id="3623">3623</a>
+<a href="#3624" id="3624">3624</a>
+<a href="#3625" id="3625">3625</a>
+<a href="#3626" id="3626">3626</a>
+<a href="#3627" id="3627">3627</a>
+<a href="#3628" id="3628">3628</a>
+<a href="#3629" id="3629">3629</a>
+<a href="#3630" id="3630">3630</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -5897,32 +5911,46 @@
             <span class="kw">let </span>dst = allocs.next(dst.to_reg().to_reg());
             <span class="macro">debug_assert_eq!</span>(src1, dst);
             <span class="kw">let </span>src2 = allocs.next(src2.to_reg());
-            <span class="kw">let </span>src3 = src3.clone().to_reg_mem().with_allocs(allocs);
+            <span class="kw">let </span>src3 = <span class="kw">match </span>src3.clone().to_reg_mem().with_allocs(allocs) {
+                RegMem::Reg { reg } =&gt; {
+                    RegisterOrAmode::Register(reg.to_real_reg().unwrap().hw_enc().into())
+                }
+                RegMem::Mem { addr } =&gt; RegisterOrAmode::Amode(addr.finalize(state, sink)),
+            };
 
             <span class="kw">let </span>(w, map, opcode) = <span class="kw">match </span>op {
+                AvxOpcode::Vfmadd132ss =&gt; (<span class="bool-val">false</span>, OpcodeMap::_0F38, <span class="number">0x99</span>),
                 AvxOpcode::Vfmadd213ss =&gt; (<span class="bool-val">false</span>, OpcodeMap::_0F38, <span class="number">0xA9</span>),
+                AvxOpcode::Vfnmadd132ss =&gt; (<span class="bool-val">false</span>, OpcodeMap::_0F38, <span class="number">0x9D</span>),
+                AvxOpcode::Vfnmadd213ss =&gt; (<span class="bool-val">false</span>, OpcodeMap::_0F38, <span class="number">0xAD</span>),
+                AvxOpcode::Vfmadd132sd =&gt; (<span class="bool-val">true</span>, OpcodeMap::_0F38, <span class="number">0x99</span>),
                 AvxOpcode::Vfmadd213sd =&gt; (<span class="bool-val">true</span>, OpcodeMap::_0F38, <span class="number">0xA9</span>),
+                AvxOpcode::Vfnmadd132sd =&gt; (<span class="bool-val">true</span>, OpcodeMap::_0F38, <span class="number">0x9D</span>),
+                AvxOpcode::Vfnmadd213sd =&gt; (<span class="bool-val">true</span>, OpcodeMap::_0F38, <span class="number">0xAD</span>),
+                AvxOpcode::Vfmadd132ps =&gt; (<span class="bool-val">false</span>, OpcodeMap::_0F38, <span class="number">0x98</span>),
                 AvxOpcode::Vfmadd213ps =&gt; (<span class="bool-val">false</span>, OpcodeMap::_0F38, <span class="number">0xA8</span>),
+                AvxOpcode::Vfnmadd132ps =&gt; (<span class="bool-val">false</span>, OpcodeMap::_0F38, <span class="number">0x9C</span>),
+                AvxOpcode::Vfnmadd213ps =&gt; (<span class="bool-val">false</span>, OpcodeMap::_0F38, <span class="number">0xAC</span>),
+                AvxOpcode::Vfmadd132pd =&gt; (<span class="bool-val">true</span>, OpcodeMap::_0F38, <span class="number">0x98</span>),
                 AvxOpcode::Vfmadd213pd =&gt; (<span class="bool-val">true</span>, OpcodeMap::_0F38, <span class="number">0xA8</span>),
+                AvxOpcode::Vfnmadd132pd =&gt; (<span class="bool-val">true</span>, OpcodeMap::_0F38, <span class="number">0x9C</span>),
+                AvxOpcode::Vfnmadd213pd =&gt; (<span class="bool-val">true</span>, OpcodeMap::_0F38, <span class="number">0xAC</span>),
                 AvxOpcode::Vblendvps =&gt; (<span class="bool-val">false</span>, OpcodeMap::_0F3A, <span class="number">0x4A</span>),
                 AvxOpcode::Vblendvpd =&gt; (<span class="bool-val">false</span>, OpcodeMap::_0F3A, <span class="number">0x4B</span>),
                 AvxOpcode::Vpblendvb =&gt; (<span class="bool-val">false</span>, OpcodeMap::_0F3A, <span class="number">0x4C</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
             };
 
-            <span class="kw">match </span>src3 {
-                RegMem::Reg { reg: src } =&gt; VexInstruction::new()
-                    .length(VexVectorLength::V128)
-                    .prefix(LegacyPrefixes::_66)
-                    .map(map)
-                    .w(w)
-                    .opcode(opcode)
-                    .reg(dst.to_real_reg().unwrap().hw_enc())
-                    .rm(src.to_real_reg().unwrap().hw_enc())
-                    .vvvv(src2.to_real_reg().unwrap().hw_enc())
-                    .encode(sink),
-                <span class="kw">_ </span>=&gt; <span class="macro">todo!</span>(),
-            };
+            VexInstruction::new()
+                .length(VexVectorLength::V128)
+                .prefix(LegacyPrefixes::_66)
+                .map(map)
+                .w(w)
+                .opcode(opcode)
+                .reg(dst.to_real_reg().unwrap().hw_enc())
+                .rm(src3)
+                .vvvv(src2.to_real_reg().unwrap().hw_enc())
+                .encode(sink);
         }
 
         Inst::XmmRmRBlendVex {
