@@ -2600,19 +2600,6 @@
 <a href="#2600" id="2600">2600</a>
 <a href="#2601" id="2601">2601</a>
 <a href="#2602" id="2602">2602</a>
-<a href="#2603" id="2603">2603</a>
-<a href="#2604" id="2604">2604</a>
-<a href="#2605" id="2605">2605</a>
-<a href="#2606" id="2606">2606</a>
-<a href="#2607" id="2607">2607</a>
-<a href="#2608" id="2608">2608</a>
-<a href="#2609" id="2609">2609</a>
-<a href="#2610" id="2610">2610</a>
-<a href="#2611" id="2611">2611</a>
-<a href="#2612" id="2612">2612</a>
-<a href="#2613" id="2613">2613</a>
-<a href="#2614" id="2614">2614</a>
-<a href="#2615" id="2615">2615</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines x86_64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc, StackMap};
@@ -2751,6 +2738,7 @@
             | Inst::XmmRmRBlend { op, .. }
             | Inst::XmmRmRImm { op, .. }
             | Inst::XmmToGpr { op, .. }
+            | Inst::XmmToGprImm { op, .. }
             | Inst::XmmUnaryRmRImm { op, .. }
             | Inst::XmmUnaryRmR { op, .. }
             | Inst::XmmConstOp { op, .. } =&gt; <span class="macro">smallvec!</span>[op.available_from()],
@@ -3726,15 +3714,11 @@
                 size,
                 ..
             } =&gt; {
-                <span class="kw">let </span>src1 = <span class="kw">if </span>op.uses_src1() {
-                    pretty_print_reg(<span class="kw-2">*</span>src1, <span class="number">8</span>, allocs) + <span class="string">&quot;, &quot;
-                </span>} <span class="kw">else </span>{
-                    <span class="string">&quot;&quot;</span>.into()
-                };
+                <span class="kw">let </span>src1 = pretty_print_reg(<span class="kw-2">*</span>src1, <span class="number">8</span>, allocs);
                 <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg(), <span class="number">8</span>, allocs);
                 <span class="kw">let </span>src2 = src2.pretty_print(<span class="number">8</span>, allocs);
                 <span class="macro">format!</span>(
-                    <span class="string">&quot;{} ${}, {}{}, {}&quot;</span>,
+                    <span class="string">&quot;{} ${imm}, {src1}, {src2}, {dst}&quot;</span>,
                     ljustify(<span class="macro">format!</span>(
                         <span class="string">&quot;{}{}&quot;</span>,
                         op.to_string(),
@@ -3744,10 +3728,6 @@
                             <span class="string">&quot;&quot;
                         </span>}
                     )),
-                    imm,
-                    src1,
-                    src2,
-                    dst,
                 )
             }
 
@@ -3766,6 +3746,12 @@
                 <span class="kw">let </span>src = pretty_print_reg(src.to_reg(), <span class="number">8</span>, allocs);
                 <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), dst_size, allocs);
                 <span class="macro">format!</span>(<span class="string">&quot;{} {}, {}&quot;</span>, ljustify(op.to_string()), src, dst)
+            }
+
+            Inst::XmmToGprImm { op, src, dst, imm } =&gt; {
+                <span class="kw">let </span>src = pretty_print_reg(src.to_reg(), <span class="number">8</span>, allocs);
+                <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), <span class="number">8</span>, allocs);
+                <span class="macro">format!</span>(<span class="string">&quot;{} ${imm}, {}, {}&quot;</span>, ljustify(op.to_string()), src, dst)
             }
 
             Inst::GprToXmm {
@@ -4591,23 +4577,11 @@
             src1.get_operands(collector);
         }
         Inst::XmmRmRImm {
-            op,
-            src1,
-            src2,
-            dst,
-            ..
+            src1, src2, dst, ..
         } =&gt; {
-            <span class="kw">if </span>!op.uses_src1() {
-                <span class="comment">// FIXME: split this instruction into two, so we don&#39;t
-                // need this awkward src1-is-only-sometimes-an-arg
-                // behavior.
-                </span>collector.reg_def(<span class="kw-2">*</span>dst);
-                src2.get_operands(collector);
-            } <span class="kw">else </span>{
-                collector.reg_use(<span class="kw-2">*</span>src1);
-                collector.reg_reuse_def(<span class="kw-2">*</span>dst, <span class="number">0</span>);
-                src2.get_operands(collector);
-            }
+            collector.reg_use(<span class="kw-2">*</span>src1);
+            collector.reg_reuse_def(<span class="kw-2">*</span>dst, <span class="number">0</span>);
+            src2.get_operands(collector);
         }
         Inst::XmmConstOp { dst, .. } =&gt; {
             collector.reg_def(dst.to_writable_reg());
@@ -4650,7 +4624,7 @@
             collector.reg_use(src.to_reg());
             collector.reg_fixed_nonallocatable(<span class="kw-2">*</span>dst);
         }
-        Inst::XmmToGpr { src, dst, .. } =&gt; {
+        Inst::XmmToGpr { src, dst, .. } | Inst::XmmToGprImm { src, dst, .. } =&gt; {
             collector.reg_use(src.to_reg());
             collector.reg_def(dst.to_writable_reg());
         }

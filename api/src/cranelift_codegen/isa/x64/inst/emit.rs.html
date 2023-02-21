@@ -3574,6 +3574,14 @@
 <a href="#3574" id="3574">3574</a>
 <a href="#3575" id="3575">3575</a>
 <a href="#3576" id="3576">3576</a>
+<a href="#3577" id="3577">3577</a>
+<a href="#3578" id="3578">3578</a>
+<a href="#3579" id="3579">3579</a>
+<a href="#3580" id="3580">3580</a>
+<a href="#3581" id="3581">3581</a>
+<a href="#3582" id="3582">3582</a>
+<a href="#3583" id="3583">3583</a>
+<a href="#3584" id="3584">3584</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -5368,8 +5376,6 @@
         }
 
         Inst::XmmUnaryRmRImm { op, src, dst, imm } =&gt; {
-            <span class="macro">debug_assert!</span>(!op.uses_src1());
-
             <span class="kw">let </span>dst = allocs.next(dst.to_reg().to_reg());
             <span class="kw">let </span>src = src.clone().to_reg_mem().with_allocs(allocs);
             <span class="kw">let </span>rex = RexFlags::clear_w();
@@ -5379,6 +5385,7 @@
                 SseOpcode::Roundss =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3A0A</span>, <span class="number">3</span>),
                 SseOpcode::Roundpd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3A09</span>, <span class="number">3</span>),
                 SseOpcode::Roundsd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3A0B</span>, <span class="number">3</span>),
+                SseOpcode::Pshufd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F70</span>, <span class="number">2</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Opcode {:?} not implemented&quot;</span>, op),
             };
             <span class="kw">match </span>src {
@@ -6034,17 +6041,10 @@
             imm,
             size,
         } =&gt; {
-            <span class="kw">let </span>(src2, dst) = <span class="kw">if </span>!op.uses_src1() {
-                <span class="kw">let </span>dst = allocs.next(dst.to_reg());
-                <span class="kw">let </span>src2 = src2.with_allocs(allocs);
-                (src2, dst)
-            } <span class="kw">else </span>{
-                <span class="kw">let </span>src1 = allocs.next(<span class="kw-2">*</span>src1);
-                <span class="kw">let </span>dst = allocs.next(dst.to_reg());
-                <span class="kw">let </span>src2 = src2.with_allocs(allocs);
-                <span class="macro">debug_assert_eq!</span>(src1, dst);
-                (src2, dst)
-            };
+            <span class="kw">let </span>src1 = allocs.next(<span class="kw-2">*</span>src1);
+            <span class="kw">let </span>dst = allocs.next(dst.to_reg());
+            <span class="kw">let </span>src2 = src2.with_allocs(allocs);
+            <span class="macro">debug_assert_eq!</span>(src1, dst);
 
             <span class="kw">let </span>(prefix, opcode, len) = <span class="kw">match </span>op {
                 SseOpcode::Cmpps =&gt; (LegacyPrefixes::None, <span class="number">0x0FC2</span>, <span class="number">2</span>),
@@ -6056,10 +6056,6 @@
                 SseOpcode::Pinsrb =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3A20</span>, <span class="number">3</span>),
                 SseOpcode::Pinsrw =&gt; (LegacyPrefixes::_66, <span class="number">0x0FC4</span>, <span class="number">2</span>),
                 SseOpcode::Pinsrd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3A22</span>, <span class="number">3</span>),
-                SseOpcode::Pextrb =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3A14</span>, <span class="number">3</span>),
-                SseOpcode::Pextrw =&gt; (LegacyPrefixes::_66, <span class="number">0x0FC5</span>, <span class="number">2</span>),
-                SseOpcode::Pextrd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3A16</span>, <span class="number">3</span>),
-                SseOpcode::Pshufd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F70</span>, <span class="number">2</span>),
                 SseOpcode::Shufps =&gt; (LegacyPrefixes::None, <span class="number">0x0FC6</span>, <span class="number">2</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Opcode {:?} not implemented&quot;</span>, op),
             };
@@ -6140,6 +6136,26 @@
             <span class="kw">let </span>(src, dst) = <span class="kw">if </span>dst_first { (dst, src) } <span class="kw">else </span>{ (src, dst) };
 
             emit_std_reg_reg(sink, prefix, opcode, <span class="number">2</span>, src, dst, rex);
+        }
+
+        Inst::XmmToGprImm { op, src, dst, imm } =&gt; {
+            <span class="kw">use </span>OperandSize <span class="kw">as </span>OS;
+
+            <span class="kw">let </span>src = allocs.next(src.to_reg());
+            <span class="kw">let </span>dst = allocs.next(dst.to_reg().to_reg());
+
+            <span class="kw">let </span>(prefix, opcode, opcode_bytes, dst_size, dst_first) = <span class="kw">match </span>op {
+                SseOpcode::Pextrb =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3A14</span>, <span class="number">3</span>, OS::Size32, <span class="bool-val">false</span>),
+                SseOpcode::Pextrw =&gt; (LegacyPrefixes::_66, <span class="number">0x0FC5</span>, <span class="number">2</span>, OS::Size32, <span class="bool-val">true</span>),
+                SseOpcode::Pextrd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3A16</span>, <span class="number">3</span>, OS::Size32, <span class="bool-val">false</span>),
+                SseOpcode::Pextrq =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3A16</span>, <span class="number">3</span>, OS::Size64, <span class="bool-val">false</span>),
+                <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected opcode {:?}&quot;</span>, op),
+            };
+            <span class="kw">let </span>rex = RexFlags::from(dst_size);
+            <span class="kw">let </span>(src, dst) = <span class="kw">if </span>dst_first { (dst, src) } <span class="kw">else </span>{ (src, dst) };
+
+            emit_std_reg_reg(sink, prefix, opcode, opcode_bytes, src, dst, rex);
+            sink.put1(<span class="kw-2">*</span>imm);
         }
 
         Inst::GprToXmm {
