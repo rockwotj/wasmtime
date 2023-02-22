@@ -1728,7 +1728,6 @@
 <a href="#1728" id="1728">1728</a>
 <a href="#1729" id="1729">1729</a>
 <a href="#1730" id="1730">1730</a>
-<a href="#1731" id="1731">1731</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines riscv64-specific machine instruction types.
 
 </span><span class="comment">// Some variants are not constructed, but we still want them as options in the future.
@@ -2576,16 +2575,6 @@
             x
         };
 
-        <span class="kw">fn </span>format_extend_op(signed: bool, from_bits: u8, _to_bits: u8) -&gt; String {
-            <span class="kw">let </span>type_name = <span class="kw">match </span>from_bits {
-                <span class="number">1 </span>=&gt; <span class="string">&quot;b1&quot;</span>,
-                <span class="number">8 </span>=&gt; <span class="string">&quot;b&quot;</span>,
-                <span class="number">16 </span>=&gt; <span class="string">&quot;h&quot;</span>,
-                <span class="number">32 </span>=&gt; <span class="string">&quot;w&quot;</span>,
-                <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;from_bits:{:?}&quot;</span>, from_bits),
-            };
-            <span class="macro">format!</span>(<span class="string">&quot;{}ext.{}&quot;</span>, <span class="kw">if </span>signed { <span class="string">&quot;s&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;u&quot; </span>}, type_name)
-        }
         <span class="kw">fn </span>format_frm(rounding_mode: <span class="prelude-ty">Option</span>&lt;FRM&gt;) -&gt; String {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(r) = rounding_mode {
                 <span class="macro">format!</span>(<span class="string">&quot;,{}&quot;</span>, r.to_static_str(),)
@@ -3072,15 +3061,23 @@
             } =&gt; {
                 <span class="kw">let </span>rs_s = format_reg(rs, allocs);
                 <span class="kw">let </span>rd = format_reg(rd.to_reg(), allocs);
-                <span class="comment">// check if it is a load constant.
-                </span><span class="kw">if </span>alu_op == AluOPRRI::Addi &amp;&amp; rs == zero_reg() {
-                    <span class="macro">format!</span>(<span class="string">&quot;li {},{}&quot;</span>, rd, imm12.as_i16())
-                } <span class="kw">else if </span>alu_op == AluOPRRI::Xori &amp;&amp; imm12.as_i16() == -<span class="number">1 </span>{
-                    <span class="macro">format!</span>(<span class="string">&quot;not {},{}&quot;</span>, rd, rs_s)
-                } <span class="kw">else </span>{
-                    <span class="kw">if </span>alu_op.option_funct12().is_some() {
+
+                <span class="comment">// Some of these special cases are better known as
+                // their pseudo-instruction version, so prefer printing those.
+                </span><span class="kw">match </span>(alu_op, rs, imm12) {
+                    (AluOPRRI::Addi, rs, <span class="kw">_</span>) <span class="kw">if </span>rs == zero_reg() =&gt; {
+                        <span class="kw">return </span><span class="macro">format!</span>(<span class="string">&quot;li {},{}&quot;</span>, rd, imm12.as_i16());
+                    }
+                    (AluOPRRI::Addiw, <span class="kw">_</span>, imm12) <span class="kw">if </span>imm12.as_i16() == <span class="number">0 </span>=&gt; {
+                        <span class="kw">return </span><span class="macro">format!</span>(<span class="string">&quot;sext.w {},{}&quot;</span>, rd, rs_s);
+                    }
+                    (AluOPRRI::Xori, <span class="kw">_</span>, imm12) <span class="kw">if </span>imm12.as_i16() == -<span class="number">1 </span>=&gt; {
+                        <span class="kw">return </span><span class="macro">format!</span>(<span class="string">&quot;not {},{}&quot;</span>, rd, rs_s);
+                    }
+                    (alu_op, <span class="kw">_</span>, <span class="kw">_</span>) <span class="kw">if </span>alu_op.option_funct12().is_some() =&gt; {
                         <span class="macro">format!</span>(<span class="string">&quot;{} {},{}&quot;</span>, alu_op.op_name(), rd, rs_s)
-                    } <span class="kw">else </span>{
+                    }
+                    (alu_op, <span class="kw">_</span>, imm12) =&gt; {
                         <span class="macro">format!</span>(<span class="string">&quot;{} {},{},{}&quot;</span>, alu_op.op_name(), rd, rs_s, imm12.as_i16())
                     }
                 }
@@ -3133,16 +3130,17 @@
                 rn,
                 signed,
                 from_bits,
-                to_bits,
+                ..
             } =&gt; {
                 <span class="kw">let </span>rn = format_reg(rn, allocs);
-                <span class="kw">let </span>rm = format_reg(rd.to_reg(), allocs);
-                <span class="macro">format!</span>(
-                    <span class="string">&quot;{} {},{}&quot;</span>,
-                    format_extend_op(signed, from_bits, to_bits),
-                    rm,
-                    rn
-                )
+                <span class="kw">let </span>rd = format_reg(rd.to_reg(), allocs);
+                <span class="kw">return if </span>signed == <span class="bool-val">false </span>&amp;&amp; from_bits == <span class="number">8 </span>{
+                    <span class="macro">format!</span>(<span class="string">&quot;andi {rd},{rn}&quot;</span>)
+                } <span class="kw">else </span>{
+                    <span class="kw">let </span>op = <span class="kw">if </span>signed { <span class="string">&quot;srai&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;srli&quot; </span>};
+                    <span class="kw">let </span>shift_bits = (<span class="number">64 </span>- from_bits) <span class="kw">as </span>i16;
+                    <span class="macro">format!</span>(<span class="string">&quot;slli {rd},{rn},{shift_bits}; {op} {rd},{rd},{shift_bits}&quot;</span>)
+                };
             }
             <span class="kw-2">&amp;</span>MInst::AjustSp { amount } =&gt; {
                 <span class="macro">format!</span>(<span class="string">&quot;{} sp,{:+}&quot;</span>, <span class="string">&quot;add&quot;</span>, amount)

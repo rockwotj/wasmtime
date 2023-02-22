@@ -1967,6 +1967,25 @@
 <a href="#1967" id="1967">1967</a>
 <a href="#1968" id="1968">1968</a>
 <a href="#1969" id="1969">1969</a>
+<a href="#1970" id="1970">1970</a>
+<a href="#1971" id="1971">1971</a>
+<a href="#1972" id="1972">1972</a>
+<a href="#1973" id="1973">1973</a>
+<a href="#1974" id="1974">1974</a>
+<a href="#1975" id="1975">1975</a>
+<a href="#1976" id="1976">1976</a>
+<a href="#1977" id="1977">1977</a>
+<a href="#1978" id="1978">1978</a>
+<a href="#1979" id="1979">1979</a>
+<a href="#1980" id="1980">1980</a>
+<a href="#1981" id="1981">1981</a>
+<a href="#1982" id="1982">1982</a>
+<a href="#1983" id="1983">1983</a>
+<a href="#1984" id="1984">1984</a>
+<a href="#1985" id="1985">1985</a>
+<a href="#1986" id="1986">1986</a>
+<a href="#1987" id="1987">1987</a>
+<a href="#1988" id="1988">1988</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA definitions: instruction arguments.
 
 </span><span class="comment">// Some variants are never constructed, but we still want them as options in the future.
@@ -2715,6 +2734,9 @@
             <span class="self">Self</span>::Sh3add =&gt; <span class="string">&quot;sh3add&quot;</span>,
             <span class="self">Self</span>::Sh3adduw =&gt; <span class="string">&quot;sh3add.uw&quot;</span>,
             <span class="self">Self</span>::Xnor =&gt; <span class="string">&quot;xnor&quot;</span>,
+            <span class="self">Self</span>::Pack =&gt; <span class="string">&quot;pack&quot;</span>,
+            <span class="self">Self</span>::Packw =&gt; <span class="string">&quot;packw&quot;</span>,
+            <span class="self">Self</span>::Packh =&gt; <span class="string">&quot;packh&quot;</span>,
         }
     }
 
@@ -2754,7 +2776,8 @@
             AluOPRRR::Remw =&gt; <span class="number">0b110</span>,
             AluOPRRR::Remuw =&gt; <span class="number">0b111</span>,
 
-            AluOPRRR::Adduw =&gt; <span class="number">0b000</span>,
+            <span class="comment">// Zbb
+            </span>AluOPRRR::Adduw =&gt; <span class="number">0b000</span>,
             AluOPRRR::Andn =&gt; <span class="number">0b111</span>,
             AluOPRRR::Bclr =&gt; <span class="number">0b001</span>,
             AluOPRRR::Bext =&gt; <span class="number">0b101</span>,
@@ -2779,6 +2802,11 @@
             AluOPRRR::Sh3add =&gt; <span class="number">0b110</span>,
             AluOPRRR::Sh3adduw =&gt; <span class="number">0b110</span>,
             AluOPRRR::Xnor =&gt; <span class="number">0b100</span>,
+
+            <span class="comment">// Zbkb
+            </span>AluOPRRR::Pack =&gt; <span class="number">0b100</span>,
+            AluOPRRR::Packw =&gt; <span class="number">0b100</span>,
+            AluOPRRR::Packh =&gt; <span class="number">0b111</span>,
         }
     }
 
@@ -2795,11 +2823,16 @@
             | AluOPRRR::Srl
             | AluOPRRR::Sra
             | AluOPRRR::Or
-            | AluOPRRR::And =&gt; <span class="number">0b0110011</span>,
+            | AluOPRRR::And
+            | AluOPRRR::Pack
+            | AluOPRRR::Packh =&gt; <span class="number">0b0110011</span>,
 
-            AluOPRRR::Addw | AluOPRRR::Subw | AluOPRRR::Sllw | AluOPRRR::Srlw | AluOPRRR::Sraw =&gt; {
-                <span class="number">0b0111011
-            </span>}
+            AluOPRRR::Addw
+            | AluOPRRR::Subw
+            | AluOPRRR::Sllw
+            | AluOPRRR::Srlw
+            | AluOPRRR::Sraw
+            | AluOPRRR::Packw =&gt; <span class="number">0b0111011</span>,
 
             AluOPRRR::Mul
             | AluOPRRR::Mulh
@@ -2906,6 +2939,11 @@
             AluOPRRR::Sh3add =&gt; <span class="number">0b0010000</span>,
             AluOPRRR::Sh3adduw =&gt; <span class="number">0b0010000</span>,
             AluOPRRR::Xnor =&gt; <span class="number">0b0100000</span>,
+
+            <span class="comment">// Zbkb
+            </span>AluOPRRR::Pack =&gt; <span class="number">0b0000100</span>,
+            AluOPRRR::Packw =&gt; <span class="number">0b0000100</span>,
+            AluOPRRR::Packh =&gt; <span class="number">0b0000100</span>,
         }
     }
 
