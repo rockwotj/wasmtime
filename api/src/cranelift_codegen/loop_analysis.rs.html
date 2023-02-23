@@ -443,8 +443,6 @@
 <a href="#443" id="443">443</a>
 <a href="#444" id="444">444</a>
 <a href="#445" id="445">445</a>
-<a href="#446" id="446">446</a>
-<a href="#447" id="447">447</a>
 </pre><pre class="rust"><code><span class="doccomment">//! A loop analysis represented as mappings of loops to their header Block
 //! and parent in the loop tree.
 
@@ -864,25 +862,23 @@
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>loop_analysis = LoopAnalysis::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>cfg = ControlFlowGraph::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>domtree = DominatorTree::new();
-        cfg.compute(<span class="kw-2">&amp;</span>func);
-        domtree.compute(<span class="kw-2">&amp;</span>func, <span class="kw-2">&amp;</span>cfg);
+        <span class="kw">let </span>cfg = ControlFlowGraph::with_function(<span class="kw-2">&amp;</span>func);
+        <span class="kw">let </span>domtree = DominatorTree::with_function(<span class="kw-2">&amp;</span>func, <span class="kw-2">&amp;</span>cfg);
         loop_analysis.compute(<span class="kw-2">&amp;</span>func, <span class="kw-2">&amp;</span>cfg, <span class="kw-2">&amp;</span>domtree);
 
         <span class="kw">let </span>loops = loop_analysis.loops().collect::&lt;Vec&lt;Loop&gt;&gt;();
         <span class="macro">assert_eq!</span>(loops.len(), <span class="number">3</span>);
         <span class="macro">assert_eq!</span>(loop_analysis.loop_header(loops[<span class="number">0</span>]), block0);
-        <span class="macro">assert_eq!</span>(loop_analysis.loop_header(loops[<span class="number">1</span>]), block1);
-        <span class="macro">assert_eq!</span>(loop_analysis.loop_header(loops[<span class="number">2</span>]), block3);
+        <span class="macro">assert_eq!</span>(loop_analysis.loop_header(loops[<span class="number">1</span>]), block3);
+        <span class="macro">assert_eq!</span>(loop_analysis.loop_header(loops[<span class="number">2</span>]), block1);
         <span class="macro">assert_eq!</span>(loop_analysis.loop_parent(loops[<span class="number">1</span>]), <span class="prelude-val">Some</span>(loops[<span class="number">0</span>]));
         <span class="macro">assert_eq!</span>(loop_analysis.loop_parent(loops[<span class="number">2</span>]), <span class="prelude-val">Some</span>(loops[<span class="number">0</span>]));
         <span class="macro">assert_eq!</span>(loop_analysis.loop_parent(loops[<span class="number">0</span>]), <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(loop_analysis.is_in_loop(block0, loops[<span class="number">0</span>]), <span class="bool-val">true</span>);
-        <span class="macro">assert_eq!</span>(loop_analysis.is_in_loop(block1, loops[<span class="number">1</span>]), <span class="bool-val">true</span>);
-        <span class="macro">assert_eq!</span>(loop_analysis.is_in_loop(block2, loops[<span class="number">1</span>]), <span class="bool-val">true</span>);
-        <span class="macro">assert_eq!</span>(loop_analysis.is_in_loop(block3, loops[<span class="number">2</span>]), <span class="bool-val">true</span>);
-        <span class="macro">assert_eq!</span>(loop_analysis.is_in_loop(block4, loops[<span class="number">2</span>]), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(loop_analysis.is_in_loop(block1, loops[<span class="number">2</span>]), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(loop_analysis.is_in_loop(block2, loops[<span class="number">2</span>]), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(loop_analysis.is_in_loop(block3, loops[<span class="number">1</span>]), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(loop_analysis.is_in_loop(block4, loops[<span class="number">1</span>]), <span class="bool-val">true</span>);
         <span class="macro">assert_eq!</span>(loop_analysis.is_in_loop(block5, loops[<span class="number">0</span>]), <span class="bool-val">true</span>);
         <span class="macro">assert_eq!</span>(loop_analysis.loop_level(block0).level(), <span class="number">1</span>);
         <span class="macro">assert_eq!</span>(loop_analysis.loop_level(block1).level(), <span class="number">2</span>);

@@ -396,6 +396,8 @@
 <a href="#396" id="396">396</a>
 <a href="#397" id="397">397</a>
 <a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Instruction Set Architectures.
 //!
 //! The `isa` module provides a `TargetIsa` trait which provides the behavior specialization needed
@@ -441,7 +443,8 @@
 //! The configured target ISA trait object is a `Box&lt;TargetIsa&gt;` which can be used for multiple
 //! concurrent function compilations.
 
-</span><span class="kw">pub use </span><span class="kw">crate</span>::isa::call_conv::CallConv;
+</span><span class="kw">use </span><span class="kw">crate</span>::dominator_tree::DominatorTree;
+<span class="kw">pub use </span><span class="kw">crate</span>::isa::call_conv::CallConv;
 
 <span class="kw">use </span><span class="kw">crate</span>::flowgraph;
 <span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, Function};
@@ -650,6 +653,7 @@
     </span><span class="kw">fn </span>compile_function(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         func: <span class="kw-2">&amp;</span>Function,
+        domtree: <span class="kw-2">&amp;</span>DominatorTree,
         want_disasm: bool,
     ) -&gt; CodegenResult&lt;CompiledCodeStencil&gt;;
 

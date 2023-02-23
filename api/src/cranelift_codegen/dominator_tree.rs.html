@@ -803,6 +803,14 @@
 <a href="#803" id="803">803</a>
 <a href="#804" id="804">804</a>
 <a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
+<a href="#812" id="812">812</a>
+<a href="#813" id="813">813</a>
 </pre><pre class="rust"><code><span class="doccomment">//! A Dominator Tree represented as mappings of Blocks to their immediate dominator.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::entity::SecondaryMap;
@@ -1116,9 +1124,17 @@
                         </span><span class="self">self</span>.nodes[block].rpo_number = SEEN;
                         <span class="self">self</span>.stack.push((Visit::Last, block));
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(inst) = func.stencil.layout.last_inst(block) {
-                            <span class="kw">for </span>block <span class="kw">in </span>func.stencil.dfg.insts[inst]
+                            <span class="comment">// Heuristic: chase the children in reverse. This puts the first
+                            // successor block first in the postorder, all other things being
+                            // equal, which tends to prioritize loop backedges over out-edges,
+                            // putting the edge-block closer to the loop body and minimizing
+                            // live-ranges in linear instruction space. This heuristic doesn&#39;t have
+                            // any effect on the computation of dominators, and is purely for other
+                            // consumers of the postorder we cache here.
+                            </span><span class="kw">for </span>block <span class="kw">in </span>func.stencil.dfg.insts[inst]
                                 .branch_destination(<span class="kw-2">&amp;</span>func.stencil.dfg.jump_tables)
                                 .iter()
+                                .rev()
                             {
                                 <span class="kw">let </span>succ = block.block(<span class="kw-2">&amp;</span>func.stencil.dfg.value_lists);
 
@@ -1446,7 +1462,7 @@
         //       return
         //     } block2
         // } block0
-        </span><span class="macro">assert_eq!</span>(dt.cfg_postorder(), <span class="kw-2">&amp;</span>[trap_block, block2, block0]);
+        </span><span class="macro">assert_eq!</span>(dt.cfg_postorder(), <span class="kw-2">&amp;</span>[block2, trap_block, block0]);
 
         <span class="kw">let </span>v2_def = cur.func.dfg.value_def(v2).unwrap_inst();
         <span class="macro">assert!</span>(!dt.dominates(v2_def, block0, <span class="kw-2">&amp;</span>cur.func.layout));

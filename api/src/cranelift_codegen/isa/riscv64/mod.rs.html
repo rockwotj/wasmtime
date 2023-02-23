@@ -268,9 +268,17 @@
 <a href="#268" id="268">268</a>
 <a href="#269" id="269">269</a>
 <a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
 </pre><pre class="rust"><code><span class="doccomment">//! risc-v 64-bit Instruction Set Architecture.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::ir;
+</span><span class="kw">use </span><span class="kw">crate</span>::dominator_tree::DominatorTree;
+<span class="kw">use </span><span class="kw">crate</span>::ir;
 <span class="kw">use </span><span class="kw">crate</span>::ir::condcodes::IntCC;
 <span class="kw">use </span><span class="kw">crate</span>::ir::Function;
 
@@ -326,11 +334,12 @@
     </span><span class="kw">fn </span>compile_vcode(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         func: <span class="kw-2">&amp;</span>Function,
+        domtree: <span class="kw-2">&amp;</span>DominatorTree,
     ) -&gt; CodegenResult&lt;(VCode&lt;inst::Inst&gt;, regalloc2::Output)&gt; {
         <span class="kw">let </span>emit_info = EmitInfo::new(<span class="self">self</span>.flags.clone(), <span class="self">self</span>.isa_flags.clone());
         <span class="kw">let </span>sigs = SigSet::new::&lt;abi::Riscv64MachineDeps&gt;(func, <span class="kw-2">&amp;</span><span class="self">self</span>.flags)<span class="question-mark">?</span>;
         <span class="kw">let </span>abi = abi::Riscv64Callee::new(func, <span class="self">self</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.isa_flags, <span class="kw-2">&amp;</span>sigs)<span class="question-mark">?</span>;
-        compile::compile::&lt;Riscv64Backend&gt;(func, <span class="self">self</span>, abi, emit_info, sigs)
+        compile::compile::&lt;Riscv64Backend&gt;(func, domtree, <span class="self">self</span>, abi, emit_info, sigs)
     }
 }
 
@@ -338,9 +347,10 @@
     <span class="kw">fn </span>compile_function(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         func: <span class="kw-2">&amp;</span>Function,
+        domtree: <span class="kw-2">&amp;</span>DominatorTree,
         want_disasm: bool,
     ) -&gt; CodegenResult&lt;CompiledCodeStencil&gt; {
-        <span class="kw">let </span>(vcode, regalloc_result) = <span class="self">self</span>.compile_vcode(func)<span class="question-mark">?</span>;
+        <span class="kw">let </span>(vcode, regalloc_result) = <span class="self">self</span>.compile_vcode(func, domtree)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>want_disasm = want_disasm || <span class="macro">log::log_enabled!</span>(log::Level::Debug);
         <span class="kw">let </span>emit_result = vcode.emit(
@@ -486,6 +496,8 @@
 </span><span class="kw">mod </span>test {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::cursor::{Cursor, FuncCursor};
+    <span class="kw">use </span><span class="kw">crate</span>::dominator_tree::DominatorTree;
+    <span class="kw">use </span><span class="kw">crate</span>::flowgraph::ControlFlowGraph;
     <span class="kw">use </span><span class="kw">crate</span>::ir::types::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::ir::{AbiParam, Function, InstBuilder, Signature, UserFuncName};
     <span class="kw">use </span><span class="kw">crate</span>::isa::CallConv;
@@ -520,7 +532,9 @@
             shared_flags,
             isa_flags,
         );
-        <span class="kw">let </span>buffer = backend.compile_function(<span class="kw-2">&amp;mut </span>func, <span class="bool-val">true</span>).unwrap();
+        <span class="kw">let </span>cfg = ControlFlowGraph::with_function(<span class="kw-2">&amp;</span>func);
+        <span class="kw">let </span>domtree = DominatorTree::with_function(<span class="kw-2">&amp;</span>func, <span class="kw-2">&amp;</span>cfg);
+        <span class="kw">let </span>buffer = backend.compile_function(<span class="kw-2">&amp;mut </span>func, <span class="kw-2">&amp;</span>domtree, <span class="bool-val">true</span>).unwrap();
         <span class="kw">let </span>code = buffer.buffer.data();
 
         <span class="comment">// To update this comment, write the golden bytes to a file, and run the following command

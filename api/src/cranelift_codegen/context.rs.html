@@ -539,7 +539,7 @@
 
         <span class="self">self</span>.optimize(isa)<span class="question-mark">?</span>;
 
-        isa.compile_function(<span class="kw-2">&amp;</span><span class="self">self</span>.func, <span class="self">self</span>.want_disasm)
+        isa.compile_function(<span class="kw-2">&amp;</span><span class="self">self</span>.func, <span class="kw-2">&amp;</span><span class="self">self</span>.domtree, <span class="self">self</span>.want_disasm)
     }
 
     <span class="doccomment">/// Optimize the function, performing all compilation steps up to

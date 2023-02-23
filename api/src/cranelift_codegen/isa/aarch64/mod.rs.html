@@ -444,9 +444,25 @@
 <a href="#444" id="444">444</a>
 <a href="#445" id="445">445</a>
 <a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
+<a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
+<a href="#461" id="461">461</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ARM 64-bit Instruction Set Architecture.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::ir::condcodes::IntCC;
+</span><span class="kw">use </span><span class="kw">crate</span>::dominator_tree::DominatorTree;
+<span class="kw">use </span><span class="kw">crate</span>::ir::condcodes::IntCC;
 <span class="kw">use </span><span class="kw">crate</span>::ir::{Function, Type};
 <span class="kw">use </span><span class="kw">crate</span>::isa::aarch64::settings <span class="kw">as </span>aarch64_settings;
 <span class="attr">#[cfg(feature = <span class="string">&quot;unwind&quot;</span>)]
@@ -502,11 +518,12 @@
     </span><span class="kw">fn </span>compile_vcode(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         func: <span class="kw-2">&amp;</span>Function,
+        domtree: <span class="kw-2">&amp;</span>DominatorTree,
     ) -&gt; CodegenResult&lt;(VCode&lt;inst::Inst&gt;, regalloc2::Output)&gt; {
         <span class="kw">let </span>emit_info = EmitInfo::new(<span class="self">self</span>.flags.clone());
         <span class="kw">let </span>sigs = SigSet::new::&lt;abi::AArch64MachineDeps&gt;(func, <span class="kw-2">&amp;</span><span class="self">self</span>.flags)<span class="question-mark">?</span>;
         <span class="kw">let </span>abi = abi::AArch64Callee::new(func, <span class="self">self</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.isa_flags, <span class="kw-2">&amp;</span>sigs)<span class="question-mark">?</span>;
-        compile::compile::&lt;AArch64Backend&gt;(func, <span class="self">self</span>, abi, emit_info, sigs)
+        compile::compile::&lt;AArch64Backend&gt;(func, domtree, <span class="self">self</span>, abi, emit_info, sigs)
     }
 }
 
@@ -514,9 +531,10 @@
     <span class="kw">fn </span>compile_function(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         func: <span class="kw-2">&amp;</span>Function,
+        domtree: <span class="kw-2">&amp;</span>DominatorTree,
         want_disasm: bool,
     ) -&gt; CodegenResult&lt;CompiledCodeStencil&gt; {
-        <span class="kw">let </span>(vcode, regalloc_result) = <span class="self">self</span>.compile_vcode(func)<span class="question-mark">?</span>;
+        <span class="kw">let </span>(vcode, regalloc_result) = <span class="self">self</span>.compile_vcode(func, domtree)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>emit_result = vcode.emit(
             <span class="kw-2">&amp;</span>regalloc_result,
@@ -687,6 +705,8 @@
 </span><span class="kw">mod </span>test {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::cursor::{Cursor, FuncCursor};
+    <span class="kw">use </span><span class="kw">crate</span>::dominator_tree::DominatorTree;
+    <span class="kw">use </span><span class="kw">crate</span>::flowgraph::ControlFlowGraph;
     <span class="kw">use </span><span class="kw">crate</span>::ir::types::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::ir::{AbiParam, Function, InstBuilder, JumpTableData, Signature, UserFuncName};
     <span class="kw">use </span><span class="kw">crate</span>::isa::CallConv;
@@ -721,7 +741,12 @@
             shared_flags,
             isa_flags,
         );
-        <span class="kw">let </span>buffer = backend.compile_function(<span class="kw-2">&amp;mut </span>func, <span class="bool-val">false</span>).unwrap().buffer;
+        <span class="kw">let </span>cfg = ControlFlowGraph::with_function(<span class="kw-2">&amp;</span>func);
+        <span class="kw">let </span>domtree = DominatorTree::with_function(<span class="kw-2">&amp;</span>func, <span class="kw-2">&amp;</span>cfg);
+        <span class="kw">let </span>buffer = backend
+            .compile_function(<span class="kw-2">&amp;mut </span>func, <span class="kw-2">&amp;</span>domtree, <span class="bool-val">false</span>)
+            .unwrap()
+            .buffer;
         <span class="kw">let </span>code = buffer.data();
 
         <span class="comment">// To update this comment, write the golden bytes to a file, and run the following command
@@ -774,8 +799,10 @@
             shared_flags,
             isa_flags,
         );
+        <span class="kw">let </span>cfg = ControlFlowGraph::with_function(<span class="kw-2">&amp;</span>func);
+        <span class="kw">let </span>domtree = DominatorTree::with_function(<span class="kw-2">&amp;</span>func, <span class="kw-2">&amp;</span>cfg);
         <span class="kw">let </span>result = backend
-            .compile_function(<span class="kw-2">&amp;mut </span>func, <span class="comment">/* want_disasm = */ </span><span class="bool-val">false</span>)
+            .compile_function(<span class="kw-2">&amp;mut </span>func, <span class="kw-2">&amp;</span>domtree, <span class="comment">/* want_disasm = */ </span><span class="bool-val">false</span>)
             .unwrap();
         <span class="kw">let </span>code = result.buffer.data();
 
@@ -786,21 +813,22 @@
         //   0:   52824689        mov     w9, #0x1234                     // #4660
         //   4:   0b09000b        add     w11, w0, w9
         //   8:   2a0b03ea        mov     w10, w11
-        //   c:   b50000aa        cbnz    x10, 0x20
-        //  10:   5282468c        mov     w12, #0x1234                    // #4660
-        //  14:   0b0c016e        add     w14, w11, w12
-        //  18:   2a0e03ed        mov     w13, w14
-        //  1c:   b5ffffad        cbnz    x13, 0x10
-        //  20:   2a0b03e0        mov     w0, w11
-        //  24:   b5ffff60        cbnz    x0, 0x10
-        //  28:   52824681        mov     w1, #0x1234                     // #4660
-        //  2c:   4b010160        sub     w0, w11, w1
-        //  30:   d65f03c0        ret
+        //   c:   b40000ca        cbz     x10, 0x24
+        //  10:   2a0b03ed        mov     w13, w11
+        //  14:   b500008d        cbnz    x13, 0x24
+        //  18:   5282468e        mov     w14, #0x1234                    // #4660
+        //  1c:   4b0e0160        sub     w0, w11, w14
+        //  20:   d65f03c0        ret
+        //  24:   5282468f        mov     w15, #0x1234                    // #4660
+        //  28:   0b0f0161        add     w1, w11, w15
+        //  2c:   2a0103e0        mov     w0, w1
+        //  30:   b5ffffa0        cbnz    x0, 0x24
+        //  34:   17fffff7        b       0x10
 
         </span><span class="kw">let </span>golden = <span class="macro">vec!</span>[
-            <span class="number">137</span>, <span class="number">70</span>, <span class="number">130</span>, <span class="number">82</span>, <span class="number">11</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">11</span>, <span class="number">234</span>, <span class="number">3</span>, <span class="number">11</span>, <span class="number">42</span>, <span class="number">170</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">181</span>, <span class="number">140</span>, <span class="number">70</span>, <span class="number">130</span>, <span class="number">82</span>, <span class="number">110</span>,
-            <span class="number">1</span>, <span class="number">12</span>, <span class="number">11</span>, <span class="number">237</span>, <span class="number">3</span>, <span class="number">14</span>, <span class="number">42</span>, <span class="number">173</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">181</span>, <span class="number">224</span>, <span class="number">3</span>, <span class="number">11</span>, <span class="number">42</span>, <span class="number">96</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">181</span>, <span class="number">129</span>,
-            <span class="number">70</span>, <span class="number">130</span>, <span class="number">82</span>, <span class="number">96</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">75</span>, <span class="number">192</span>, <span class="number">3</span>, <span class="number">95</span>, <span class="number">214</span>,
+            <span class="number">137</span>, <span class="number">70</span>, <span class="number">130</span>, <span class="number">82</span>, <span class="number">11</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">11</span>, <span class="number">234</span>, <span class="number">3</span>, <span class="number">11</span>, <span class="number">42</span>, <span class="number">202</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">180</span>, <span class="number">237</span>, <span class="number">3</span>, <span class="number">11</span>, <span class="number">42</span>, <span class="number">141</span>, <span class="number">0</span>,
+            <span class="number">0</span>, <span class="number">181</span>, <span class="number">142</span>, <span class="number">70</span>, <span class="number">130</span>, <span class="number">82</span>, <span class="number">96</span>, <span class="number">1</span>, <span class="number">14</span>, <span class="number">75</span>, <span class="number">192</span>, <span class="number">3</span>, <span class="number">95</span>, <span class="number">214</span>, <span class="number">143</span>, <span class="number">70</span>, <span class="number">130</span>, <span class="number">82</span>, <span class="number">97</span>, <span class="number">1</span>, <span class="number">15</span>,
+            <span class="number">11</span>, <span class="number">224</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">42</span>, <span class="number">160</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">181</span>, <span class="number">247</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">23</span>,
         ];
 
         <span class="macro">assert_eq!</span>(code, <span class="kw-2">&amp;</span>golden[..]);
@@ -855,8 +883,10 @@
             shared_flags,
             isa_flags,
         );
+        <span class="kw">let </span>cfg = ControlFlowGraph::with_function(<span class="kw-2">&amp;</span>func);
+        <span class="kw">let </span>domtree = DominatorTree::with_function(<span class="kw-2">&amp;</span>func, <span class="kw-2">&amp;</span>cfg);
         <span class="kw">let </span>result = backend
-            .compile_function(<span class="kw-2">&amp;mut </span>func, <span class="comment">/* want_disasm = */ </span><span class="bool-val">false</span>)
+            .compile_function(<span class="kw-2">&amp;mut </span>func, <span class="kw-2">&amp;</span>domtree, <span class="comment">/* want_disasm = */ </span><span class="bool-val">false</span>)
             .unwrap();
         <span class="kw">let </span>code = result.buffer.data();
 
@@ -865,7 +895,7 @@
         // &gt; aarch64-linux-gnu-objdump -b binary -D &lt;file&gt; -m aarch64
         //
         //   0:   7100081f        cmp     w0, #0x2
-        //   4:   54000122        b.cs    0x28  // b.hs, b.nlast
+        //   4:   540001a2        b.cs    0x38  // b.hs, b.nlast
         //   8:   9a8023e8        csel    x8, xzr, x0, cs  // cs = hs, nlast
         //   c:   d503229f        csdb
         //  10:   10000087        adr     x7, 0x20
@@ -873,18 +903,18 @@
         //  18:   8b0800e7        add     x7, x7, x8
         //  1c:   d61f00e0        br      x7
         //  20:   00000010        udf     #16
-        //  24:   00000018        udf     #24
-        //  28:   52800060        mov     w0, #0x3                        // #3
+        //  24:   00000008        udf     #8
+        //  28:   52800040        mov     w0, #0x2                        // #2
         //  2c:   d65f03c0        ret
         //  30:   52800020        mov     w0, #0x1                        // #1
         //  34:   d65f03c0        ret
-        //  38:   52800040        mov     w0, #0x2                        // #2
+        //  38:   52800060        mov     w0, #0x3                        // #3
         //  3c:   d65f03c0        ret
 
         </span><span class="kw">let </span>golden = <span class="macro">vec!</span>[
-            <span class="number">31</span>, <span class="number">8</span>, <span class="number">0</span>, <span class="number">113</span>, <span class="number">34</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">84</span>, <span class="number">232</span>, <span class="number">35</span>, <span class="number">128</span>, <span class="number">154</span>, <span class="number">159</span>, <span class="number">34</span>, <span class="number">3</span>, <span class="number">213</span>, <span class="number">135</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">16</span>, <span class="number">232</span>,
-            <span class="number">88</span>, <span class="number">168</span>, <span class="number">184</span>, <span class="number">231</span>, <span class="number">0</span>, <span class="number">8</span>, <span class="number">139</span>, <span class="number">224</span>, <span class="number">0</span>, <span class="number">31</span>, <span class="number">214</span>, <span class="number">16</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">24</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">96</span>, <span class="number">0</span>, <span class="number">128</span>,
-            <span class="number">82</span>, <span class="number">192</span>, <span class="number">3</span>, <span class="number">95</span>, <span class="number">214</span>, <span class="number">32</span>, <span class="number">0</span>, <span class="number">128</span>, <span class="number">82</span>, <span class="number">192</span>, <span class="number">3</span>, <span class="number">95</span>, <span class="number">214</span>, <span class="number">64</span>, <span class="number">0</span>, <span class="number">128</span>, <span class="number">82</span>, <span class="number">192</span>, <span class="number">3</span>, <span class="number">95</span>, <span class="number">214</span>,
+            <span class="number">31</span>, <span class="number">8</span>, <span class="number">0</span>, <span class="number">113</span>, <span class="number">162</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">84</span>, <span class="number">232</span>, <span class="number">35</span>, <span class="number">128</span>, <span class="number">154</span>, <span class="number">159</span>, <span class="number">34</span>, <span class="number">3</span>, <span class="number">213</span>, <span class="number">135</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">16</span>, <span class="number">232</span>,
+            <span class="number">88</span>, <span class="number">168</span>, <span class="number">184</span>, <span class="number">231</span>, <span class="number">0</span>, <span class="number">8</span>, <span class="number">139</span>, <span class="number">224</span>, <span class="number">0</span>, <span class="number">31</span>, <span class="number">214</span>, <span class="number">16</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">8</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">64</span>, <span class="number">0</span>, <span class="number">128</span>, <span class="number">82</span>,
+            <span class="number">192</span>, <span class="number">3</span>, <span class="number">95</span>, <span class="number">214</span>, <span class="number">32</span>, <span class="number">0</span>, <span class="number">128</span>, <span class="number">82</span>, <span class="number">192</span>, <span class="number">3</span>, <span class="number">95</span>, <span class="number">214</span>, <span class="number">96</span>, <span class="number">0</span>, <span class="number">128</span>, <span class="number">82</span>, <span class="number">192</span>, <span class="number">3</span>, <span class="number">95</span>, <span class="number">214</span>,
         ];
 
         <span class="macro">assert_eq!</span>(code, <span class="kw-2">&amp;</span>golden[..]);

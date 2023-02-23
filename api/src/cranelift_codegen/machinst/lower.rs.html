@@ -1367,10 +1367,6 @@
 <a href="#1367" id="1367">1367</a>
 <a href="#1368" id="1368">1368</a>
 <a href="#1369" id="1369">1369</a>
-<a href="#1370" id="1370">1370</a>
-<a href="#1371" id="1371">1371</a>
-<a href="#1372" id="1372">1372</a>
-<a href="#1373" id="1373">1373</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module implements lowering (instruction selection) from Cranelift IR
 //! to machine instructions with virtual registers. This is *almost* the final
 //! machine code, except for register allocation.
@@ -2301,9 +2297,12 @@
     }
 
     <span class="kw">fn </span>lower_branch_blockparam_args(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: BlockIndex) {
-        <span class="kw">for </span>succ_idx <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.vcode.block_order().succ_indices(block).len() {
+        <span class="comment">// TODO: why not make `block_order` public?
+        </span><span class="kw">for </span>succ_idx <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.vcode.block_order().succ_indices(block).<span class="number">1</span>.len() {
             <span class="comment">// Avoid immutable borrow by explicitly indexing.
-            </span><span class="kw">let </span>(inst, succ) = <span class="self">self</span>.vcode.block_order().succ_indices(block)[succ_idx];
+            </span><span class="kw">let </span>(opt_inst, succs) = <span class="self">self</span>.vcode.block_order().succ_indices(block);
+            <span class="kw">let </span>inst = opt_inst.expect(<span class="string">&quot;lower_branch_blockparam_args called on a critical edge!&quot;</span>);
+            <span class="kw">let </span>succ = succs[succ_idx];
 
             <span class="comment">// The use of `succ_idx` to index `branch_destination` is valid on the assumption that
             // the traversal order defined in `visit_block_succs` mirrors the order returned by
@@ -2333,17 +2332,9 @@
         targets: <span class="kw-2">&amp;mut </span>SmallVec&lt;[MachLabel; <span class="number">2</span>]&gt;,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;Inst&gt; {
         targets.clear();
-        <span class="kw">let </span><span class="kw-2">mut </span>last_inst = <span class="prelude-val">None</span>;
-        <span class="kw">for </span><span class="kw-2">&amp;</span>(inst, succ) <span class="kw">in </span><span class="self">self</span>.vcode.block_order().succ_indices(bindex) {
-            <span class="comment">// Basic blocks may end in a single branch instruction, but those instructions may have
-            // multiple destinations. As such, all `inst` values in `succ_indices` must be the
-            // same, or this basic block would have multiple branch instructions present.
-            </span><span class="macro">debug_assert!</span>(last_inst.map_or(<span class="bool-val">true</span>, |prev| prev == inst));
-            last_inst = <span class="prelude-val">Some</span>(inst);
-            targets.push(MachLabel::from_block(succ));
-        }
-
-        last_inst
+        <span class="kw">let </span>(opt_inst, succs) = <span class="self">self</span>.vcode.block_order().succ_indices(bindex);
+        targets.extend(succs.iter().map(|succ| MachLabel::from_block(<span class="kw-2">*</span>succ)));
+        opt_inst
     }
 
     <span class="doccomment">/// Lower the function.
@@ -2398,7 +2389,8 @@
                 // according to the one successor, and pass them
                 // through; note that the successor must have an
                 // original block.
-                </span><span class="kw">let </span>(<span class="kw">_</span>, succ) = <span class="self">self</span>.vcode.block_order().succ_indices(bindex)[<span class="number">0</span>];
+                </span><span class="kw">let </span>(<span class="kw">_</span>, succs) = <span class="self">self</span>.vcode.block_order().succ_indices(bindex);
+                <span class="kw">let </span>succ = succs[<span class="number">0</span>];
 
                 <span class="kw">let </span>orig_succ = lowered_order[succ.index()];
                 <span class="kw">let </span>orig_succ = orig_succ
