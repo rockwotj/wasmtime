@@ -1927,16 +1927,66 @@
 <a href="#1927" id="1927">1927</a>
 <a href="#1928" id="1928">1928</a>
 <a href="#1929" id="1929">1929</a>
+<a href="#1930" id="1930">1930</a>
+<a href="#1931" id="1931">1931</a>
+<a href="#1932" id="1932">1932</a>
+<a href="#1933" id="1933">1933</a>
+<a href="#1934" id="1934">1934</a>
+<a href="#1935" id="1935">1935</a>
+<a href="#1936" id="1936">1936</a>
+<a href="#1937" id="1937">1937</a>
+<a href="#1938" id="1938">1938</a>
+<a href="#1939" id="1939">1939</a>
+<a href="#1940" id="1940">1940</a>
+<a href="#1941" id="1941">1941</a>
+<a href="#1942" id="1942">1942</a>
+<a href="#1943" id="1943">1943</a>
+<a href="#1944" id="1944">1944</a>
+<a href="#1945" id="1945">1945</a>
+<a href="#1946" id="1946">1946</a>
+<a href="#1947" id="1947">1947</a>
+<a href="#1948" id="1948">1948</a>
+<a href="#1949" id="1949">1949</a>
+<a href="#1950" id="1950">1950</a>
+<a href="#1951" id="1951">1951</a>
+<a href="#1952" id="1952">1952</a>
+<a href="#1953" id="1953">1953</a>
+<a href="#1954" id="1954">1954</a>
+<a href="#1955" id="1955">1955</a>
+<a href="#1956" id="1956">1956</a>
+<a href="#1957" id="1957">1957</a>
+<a href="#1958" id="1958">1958</a>
+<a href="#1959" id="1959">1959</a>
+<a href="#1960" id="1960">1960</a>
+<a href="#1961" id="1961">1961</a>
+<a href="#1962" id="1962">1962</a>
+<a href="#1963" id="1963">1963</a>
+<a href="#1964" id="1964">1964</a>
+<a href="#1965" id="1965">1965</a>
+<a href="#1966" id="1966">1966</a>
+<a href="#1967" id="1967">1967</a>
+<a href="#1968" id="1968">1968</a>
+<a href="#1969" id="1969">1969</a>
+<a href="#1970" id="1970">1970</a>
+<a href="#1971" id="1971">1971</a>
+<a href="#1972" id="1972">1972</a>
+<a href="#1973" id="1973">1973</a>
+<a href="#1974" id="1974">1974</a>
+<a href="#1975" id="1975">1975</a>
+<a href="#1976" id="1976">1976</a>
+<a href="#1977" id="1977">1977</a>
+<a href="#1978" id="1978">1978</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::config::Config;
 <span class="kw">use </span><span class="kw">crate</span>::cranelift_arbitrary::CraneliftArbitrary;
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>arbitrary::{Arbitrary, Unstructured};
 <span class="kw">use </span>cranelift::codegen::data_value::DataValue;
+<span class="kw">use </span>cranelift::codegen::ir::immediates::Offset32;
 <span class="kw">use </span>cranelift::codegen::ir::instructions::InstructionFormat;
 <span class="kw">use </span>cranelift::codegen::ir::stackslot::StackSize;
-<span class="kw">use </span>cranelift::codegen::ir::{types::<span class="kw-2">*</span>, FuncRef, LibCall, UserExternalName, UserFuncName};
 <span class="kw">use </span>cranelift::codegen::ir::{
-    Block, ExternalName, Function, Opcode, Signature, StackSlot, Type, Value,
+    types::<span class="kw-2">*</span>, AtomicRmwOp, Block, ExternalName, FuncRef, Function, LibCall, Opcode, Signature,
+    StackSlot, Type, UserExternalName, UserFuncName, Value,
 };
 <span class="kw">use </span>cranelift::codegen::isa::CallConv;
 <span class="kw">use </span>cranelift::frontend::{FunctionBuilder, FunctionBuilderContext, Switch, Variable};
@@ -2144,36 +2194,9 @@
     <span class="kw">let </span>ctrl_type = <span class="kw-2">*</span>rets.first().or(args.first()).unwrap();
     <span class="kw">let </span>type_size = ctrl_type.bytes();
 
-    <span class="comment">// Should we generate an aligned address
-    </span><span class="kw">let </span>is_atomic = [Opcode::AtomicLoad, Opcode::AtomicStore].contains(<span class="kw-2">&amp;</span>opcode);
-    <span class="kw">let </span>is_aarch64 = <span class="macro">matches!</span>(fgen.target_triple.architecture, Architecture::Aarch64(<span class="kw">_</span>));
-    <span class="kw">let </span>aligned = <span class="kw">if </span>is_atomic &amp;&amp; is_aarch64 {
-        <span class="comment">// AArch64 has issues with unaligned atomics.
-        // https://github.com/bytecodealliance/wasmtime/issues/5483
-        </span><span class="bool-val">true
-    </span>} <span class="kw">else </span>{
-        bool::arbitrary(fgen.u)<span class="question-mark">?
-    </span>};
-
-    <span class="kw">let </span><span class="kw-2">mut </span>flags = MemFlags::new();
-    <span class="comment">// Even if we picked an aligned address, we can always generate unaligned memflags
-    </span><span class="kw">if </span>aligned &amp;&amp; bool::arbitrary(fgen.u)<span class="question-mark">? </span>{
-        flags.set_aligned();
-    }
-    <span class="comment">// If the address is aligned, then we know it won&#39;t trap
-    </span><span class="kw">if </span>aligned &amp;&amp; bool::arbitrary(fgen.u)<span class="question-mark">? </span>{
-        flags.set_notrap();
-    }
-
-    <span class="kw">let </span>(address, max_offset) = fgen.generate_load_store_address(builder, type_size, aligned)<span class="question-mark">?</span>;
-
-    <span class="comment">// Pick an offset to pass into the load/store.
-    </span><span class="kw">let </span>offset = <span class="kw">if </span>aligned {
-        <span class="number">0
-    </span>} <span class="kw">else </span>{
-        fgen.u.int_in_range(<span class="number">0</span>..=max_offset)<span class="question-mark">? </span><span class="kw">as </span>i32
-    }
-    .into();
+    <span class="kw">let </span>is_atomic = [Opcode::AtomicLoad, Opcode::AtomicStore].contains(<span class="kw-2">&amp;</span>opcode);
+    <span class="kw">let </span>(address, flags, offset) =
+        fgen.generate_address_and_memflags(builder, type_size, is_atomic)<span class="question-mark">?</span>;
 
     <span class="comment">// The variable being loaded or stored into
     </span><span class="kw">let </span>var = fgen.get_variable_of_type(ctrl_type)<span class="question-mark">?</span>;
@@ -2212,6 +2235,36 @@
         <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(),
     }
 
+    <span class="prelude-val">Ok</span>(())
+}
+
+<span class="kw">fn </span>insert_atomic_rmw(
+    fgen: <span class="kw-2">&amp;mut </span>FunctionGenerator,
+    builder: <span class="kw-2">&amp;mut </span>FunctionBuilder,
+    <span class="kw">_</span>: Opcode,
+    <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[Type],
+    rets: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[Type],
+) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">let </span>ctrl_type = <span class="kw-2">*</span>rets.first().unwrap();
+    <span class="kw">let </span>type_size = ctrl_type.bytes();
+
+    <span class="kw">let </span>rmw_op = <span class="kw-2">*</span>fgen.u.choose(AtomicRmwOp::all())<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>(address, flags, offset) = fgen.generate_address_and_memflags(builder, type_size, <span class="bool-val">true</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// AtomicRMW does not directly support offsets, so add the offset to the address separately.
+    </span><span class="kw">let </span>address = builder.ins().iadd_imm(address, i64::from(offset));
+
+    <span class="comment">// Load and store target variables
+    </span><span class="kw">let </span>source_var = fgen.get_variable_of_type(ctrl_type)<span class="question-mark">?</span>;
+    <span class="kw">let </span>target_var = fgen.get_variable_of_type(ctrl_type)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>source_val = builder.use_var(source_var);
+    <span class="kw">let </span>new_val = builder
+        .ins()
+        .atomic_rmw(ctrl_type, flags, rmw_op, address, source_val);
+
+    builder.def_var(target_var, new_val);
     <span class="prelude-val">Ok</span>(())
 }
 
@@ -3192,6 +3245,11 @@
     (Opcode::AtomicStore, <span class="kw-2">&amp;</span>[I16], <span class="kw-2">&amp;</span>[], insert_load_store),
     (Opcode::AtomicStore, <span class="kw-2">&amp;</span>[I32], <span class="kw-2">&amp;</span>[], insert_load_store),
     (Opcode::AtomicStore, <span class="kw-2">&amp;</span>[I64], <span class="kw-2">&amp;</span>[], insert_load_store),
+    <span class="comment">// AtomicRMW
+    </span>(Opcode::AtomicRmw, <span class="kw-2">&amp;</span>[I8, I8], <span class="kw-2">&amp;</span>[I8], insert_atomic_rmw),
+    (Opcode::AtomicRmw, <span class="kw-2">&amp;</span>[I16, I16], <span class="kw-2">&amp;</span>[I16], insert_atomic_rmw),
+    (Opcode::AtomicRmw, <span class="kw-2">&amp;</span>[I32, I32], <span class="kw-2">&amp;</span>[I32], insert_atomic_rmw),
+    (Opcode::AtomicRmw, <span class="kw-2">&amp;</span>[I64, I64], <span class="kw-2">&amp;</span>[I64], insert_atomic_rmw),
     <span class="comment">// Bitcast
     </span>(Opcode::Bitcast, <span class="kw-2">&amp;</span>[F32], <span class="kw-2">&amp;</span>[I32], insert_bitcast),
     (Opcode::Bitcast, <span class="kw-2">&amp;</span>[I32], <span class="kw-2">&amp;</span>[F32], insert_bitcast),
@@ -3368,6 +3426,46 @@
         // caller. Preserving min_size bytes.
         </span><span class="kw">let </span>max_offset = available_size.saturating_sub(min_size);
         <span class="prelude-val">Ok</span>((addr, max_offset))
+    }
+
+    <span class="comment">// Generates an address and memflags for a load or store.
+    </span><span class="kw">fn </span>generate_address_and_memflags(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        builder: <span class="kw-2">&amp;mut </span>FunctionBuilder,
+        min_size: u32,
+        is_atomic: bool,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(Value, MemFlags, Offset32)&gt; {
+        <span class="comment">// Should we generate an aligned address
+        </span><span class="kw">let </span>is_aarch64 = <span class="macro">matches!</span>(<span class="self">self</span>.target_triple.architecture, Architecture::Aarch64(<span class="kw">_</span>));
+        <span class="kw">let </span>aligned = <span class="kw">if </span>is_atomic &amp;&amp; is_aarch64 {
+            <span class="comment">// AArch64 has issues with unaligned atomics.
+            // https://github.com/bytecodealliance/wasmtime/issues/5483
+            </span><span class="bool-val">true
+        </span>} <span class="kw">else </span>{
+            bool::arbitrary(<span class="self">self</span>.u)<span class="question-mark">?
+        </span>};
+
+        <span class="kw">let </span><span class="kw-2">mut </span>flags = MemFlags::new();
+        <span class="comment">// Even if we picked an aligned address, we can always generate unaligned memflags
+        </span><span class="kw">if </span>aligned &amp;&amp; bool::arbitrary(<span class="self">self</span>.u)<span class="question-mark">? </span>{
+            flags.set_aligned();
+        }
+        <span class="comment">// If the address is aligned, then we know it won&#39;t trap
+        </span><span class="kw">if </span>aligned &amp;&amp; bool::arbitrary(<span class="self">self</span>.u)<span class="question-mark">? </span>{
+            flags.set_notrap();
+        }
+
+        <span class="kw">let </span>(address, max_offset) = <span class="self">self</span>.generate_load_store_address(builder, min_size, aligned)<span class="question-mark">?</span>;
+
+        <span class="comment">// Pick an offset to pass into the load/store.
+        </span><span class="kw">let </span>offset = <span class="kw">if </span>aligned {
+            <span class="number">0
+        </span>} <span class="kw">else </span>{
+            <span class="self">self</span>.u.int_in_range(<span class="number">0</span>..=max_offset)<span class="question-mark">? </span><span class="kw">as </span>i32
+        }
+        .into();
+
+        <span class="prelude-val">Ok</span>((address, flags, offset))
     }
 
     <span class="doccomment">/// Get a variable of type `ty` from the current function

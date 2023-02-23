@@ -70,6 +70,38 @@
 <a href="#70" id="70">70</a>
 <a href="#71" id="71">71</a>
 <a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
 </pre><pre class="rust"><code><span class="doccomment">/// Describes the arithmetic operation in an atomic memory read-modify-write operation.
 </span><span class="kw">use </span>core::fmt::{<span class="self">self</span>, Display, Formatter};
 <span class="kw">use </span>core::str::FromStr;
@@ -102,6 +134,25 @@
     </span>Smin,
     <span class="doccomment">/// Signed max
     </span>Smax,
+}
+
+<span class="kw">impl </span>AtomicRmwOp {
+    <span class="doccomment">/// Returns a slice with all supported [AtomicRmwOp]&#39;s.
+    </span><span class="kw">pub fn </span>all() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[AtomicRmwOp] {
+        <span class="kw-2">&amp;</span>[
+            AtomicRmwOp::Add,
+            AtomicRmwOp::Sub,
+            AtomicRmwOp::And,
+            AtomicRmwOp::Nand,
+            AtomicRmwOp::Or,
+            AtomicRmwOp::Xor,
+            AtomicRmwOp::Xchg,
+            AtomicRmwOp::Umin,
+            AtomicRmwOp::Umax,
+            AtomicRmwOp::Smin,
+            AtomicRmwOp::Smax,
+        ]
+    }
 }
 
 <span class="kw">impl </span>Display <span class="kw">for </span>AtomicRmwOp {
@@ -139,6 +190,19 @@
             <span class="string">&quot;smin&quot; </span>=&gt; <span class="prelude-val">Ok</span>(AtomicRmwOp::Smin),
             <span class="string">&quot;smax&quot; </span>=&gt; <span class="prelude-val">Ok</span>(AtomicRmwOp::Smax),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(()),
+        }
+    }
+}
+
+<span class="attr">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>roundtrip_parse() {
+        <span class="kw">for </span>op <span class="kw">in </span>AtomicRmwOp::all() {
+            <span class="kw">let </span>roundtripped = <span class="macro">format!</span>(<span class="string">&quot;{op}&quot;</span>).parse::&lt;AtomicRmwOp&gt;().unwrap();
+            <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>op, roundtripped);
         }
     }
 }
