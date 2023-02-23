@@ -1655,21 +1655,21 @@
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>i64_from_negated_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: Value) -&gt; <span class="prelude-ty">Option</span>&lt;i64&gt; {
         <span class="kw">let </span>constant = <span class="self">self</span>.u64_from_signed_value(val)<span class="question-mark">? </span><span class="kw">as </span>i64;
-        <span class="kw">let </span>imm = -constant;
+        <span class="kw">let </span>imm = constant.wrapping_neg();
         <span class="prelude-val">Some</span>(imm)
     }
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>i32_from_negated_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: Value) -&gt; <span class="prelude-ty">Option</span>&lt;i32&gt; {
         <span class="kw">let </span>constant = <span class="self">self</span>.u64_from_signed_value(val)<span class="question-mark">? </span><span class="kw">as </span>i64;
-        <span class="kw">let </span>imm = i32::try_from(-constant).ok()<span class="question-mark">?</span>;
+        <span class="kw">let </span>imm = i32::try_from(constant.wrapping_neg()).ok()<span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>(imm)
     }
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>i16_from_negated_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: Value) -&gt; <span class="prelude-ty">Option</span>&lt;i16&gt; {
         <span class="kw">let </span>constant = <span class="self">self</span>.u64_from_signed_value(val)<span class="question-mark">? </span><span class="kw">as </span>i64;
-        <span class="kw">let </span>imm = i16::try_from(-constant).ok()<span class="question-mark">?</span>;
+        <span class="kw">let </span>imm = i16::try_from(constant.wrapping_neg()).ok()<span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>(imm)
     }
 
