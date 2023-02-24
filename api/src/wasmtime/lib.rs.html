@@ -473,6 +473,10 @@
 <a href="#473" id="473">473</a>
 <a href="#474" id="474">474</a>
 <a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Wasmtime&#39;s embedding API
 //!
 //! Wasmtime is a WebAssembly engine for JIT-complied or ahead-of-time compiled
@@ -502,10 +506,9 @@
 //! An example of using Wasmtime looks like:
 //!
 //! ```
-//! use anyhow::Result;
 //! use wasmtime::*;
 //!
-//! fn main() -&gt; Result&lt;()&gt; {
+//! fn main() -&gt; wasmtime::Result&lt;()&gt; {
 //!     // Modules can be compiled through either the text or binary format
 //!     let engine = Engine::default();
 //!     let wat = r#&quot;
@@ -616,10 +619,9 @@
 //! For example we can reimplement the above example with a `Linker`:
 //!
 //! ```
-//! use anyhow::Result;
 //! use wasmtime::*;
 //!
-//! fn main() -&gt; Result&lt;()&gt; {
+//! fn main() -&gt; wasmtime::Result&lt;()&gt; {
 //!     let engine = Engine::default();
 //!     let wat = r#&quot;
 //!         (module
@@ -776,11 +778,10 @@
 //! An example of using WASI looks like:
 //!
 //! ```no_run
-//! # use anyhow::Result;
 //! # use wasmtime::*;
 //! use wasmtime_wasi::sync::WasiCtxBuilder;
 //!
-//! # fn main() -&gt; Result&lt;()&gt; {
+//! # fn main() -&gt; wasmtime::Result&lt;()&gt; {
 //! // Compile our module and create a `Linker` which has WASI functions defined
 //! // within it.
 //! let engine = Engine::default();
@@ -808,7 +809,7 @@
 //! use std::str;
 //!
 //! # use wasmtime::*;
-//! # fn main() -&gt; anyhow::Result&lt;()&gt; {
+//! # fn main() -&gt; wasmtime::Result&lt;()&gt; {
 //! let mut store = Store::default();
 //! let log_str = Func::wrap(&amp;mut store, |mut caller: Caller&lt;&#39;_, ()&gt;, ptr: i32, len: i32| {
 //!     // Use our `caller` context to learn about the memory export of the
@@ -901,6 +902,13 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::trap::<span class="kw-2">*</span>;
 <span class="kw">pub use </span><span class="kw">crate</span>::types::<span class="kw-2">*</span>;
 <span class="kw">pub use </span><span class="kw">crate</span>::values::<span class="kw-2">*</span>;
+
+<span class="doccomment">/// A convenience wrapper for `Result&lt;T, anyhow::Error&gt;`.
+///
+/// This type can be used to interact with `wasmtimes`&#39;s extensive use
+/// of `anyhow::Error` while still not directly depending on `anyhow`.
+/// This type alias is identical to `anyhow::Result`.
+</span><span class="kw">pub use </span>anyhow::{Error, <span class="prelude-ty">Result</span>};
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;component-model&quot;</span>)]
 </span><span class="kw">pub mod </span>component;

@@ -23,19 +23,19 @@ all possible traps that can happen in wasm, in addition to some
 Wasmtime-specific trap codes listed here as well.</p>
 <h2 id="errors-in-wasmtime"><a href="#errors-in-wasmtime">Errors in Wasmtime</a></h2>
 <p>Error-handling in Wasmtime is primarily done through the <a href="https://docs.rs/anyhow/1.0.66/anyhow/index.html" title="anyhow"><code>anyhow</code></a> crate
-where most results are a <a href="https://docs.rs/anyhow/1.0.66/anyhow/type.Result.html"><code>Result&lt;T&gt;</code></a> which is an alias for
+where most results are a <a href="type.Result.html"><code>Result&lt;T&gt;</code></a> which is an alias for
 <a href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html"><code>Result&lt;T, anyhow::Error&gt;</code></a>. Errors in Wasmtime are
-represented with <a href="https://docs.rs/anyhow/1.0.66/anyhow/struct.Error.html" title="anyhow::Error"><code>anyhow::Error</code></a> which acts as a container for any type of
+represented with <a href="struct.Error.html" title="anyhow::Error"><code>anyhow::Error</code></a> which acts as a container for any type of
 error in addition to optional context for this error. The “base” error or
-<a href="https://docs.rs/anyhow/1.0.66/anyhow/struct.Error.html#method.root_cause" title="anyhow::Error::root_cause"><code>anyhow::Error::root_cause</code></a> is a <a href="enum.Trap.html" title="Trap"><code>Trap</code></a> whenever WebAssembly hits a
+<a href="struct.Error.html#method.root_cause" title="anyhow::Error::root_cause"><code>anyhow::Error::root_cause</code></a> is a <a href="enum.Trap.html" title="Trap"><code>Trap</code></a> whenever WebAssembly hits a
 trap, or otherwise it’s whatever the host created the error with when
 returning an error for a host call.</p>
 <p>Any error which happens while WebAssembly is executing will also, by
 default, capture a backtrace of the wasm frames while executing. This
 backtrace is represented with a <a href="struct.WasmBacktrace.html" title="WasmBacktrace"><code>WasmBacktrace</code></a> instance and is attached
-to the <a href="https://docs.rs/anyhow/1.0.66/anyhow/struct.Error.html" title="anyhow::Error"><code>anyhow::Error</code></a> return value as a
-<a href="https://docs.rs/anyhow/1.0.66/anyhow/struct.Error.html#method.context"><code>context</code></a>. Inspecting a <a href="struct.WasmBacktrace.html" title="WasmBacktrace"><code>WasmBacktrace</code></a> can be
-done with the <a href="https://docs.rs/anyhow/1.0.66/anyhow/struct.Error.html#method.downcast_ref"><code>downcast_ref</code></a> function. For
+to the <a href="struct.Error.html" title="anyhow::Error"><code>anyhow::Error</code></a> return value as a
+<a href="struct.Error.html#method.context"><code>context</code></a>. Inspecting a <a href="struct.WasmBacktrace.html" title="WasmBacktrace"><code>WasmBacktrace</code></a> can be
+done with the <a href="struct.Error.html#method.downcast_ref"><code>downcast_ref</code></a> function. For
 information on this see the <a href="struct.WasmBacktrace.html" title="WasmBacktrace"><code>WasmBacktrace</code></a> documentation.</p>
 <h2 id="examples"><a href="#examples">Examples</a></h2>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>engine = Engine::default();

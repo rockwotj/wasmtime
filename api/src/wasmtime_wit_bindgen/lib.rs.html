@@ -1547,7 +1547,7 @@
                     <span class="string">&quot;
                         pub fn new(
                             __exports: &amp;mut wasmtime::component::ExportInstance&lt;&#39;_, &#39;_&gt;,
-                        ) -&gt; anyhow::Result&lt;{camel}&gt; {{
+                        ) -&gt; wasmtime::Result&lt;{camel}&gt; {{
                     &quot;
                 </span>);
                 <span class="kw">let </span><span class="kw-2">mut </span>fields = Vec::new();
@@ -1635,7 +1635,7 @@
                     mut store: impl wasmtime::AsContextMut&lt;Data = T&gt;,
                     component: &amp;wasmtime::component::Component,
                     linker: &amp;wasmtime::component::Linker&lt;T&gt;,
-                ) -&gt; anyhow::Result&lt;(Self, wasmtime::component::Instance)&gt; {{
+                ) -&gt; wasmtime::Result&lt;(Self, wasmtime::component::Instance)&gt; {{
                     let instance = linker.instantiate{async__}(&amp;mut store, component){await_}?;
                     Ok((Self::new(store, &amp;instance)?, instance))
                 }}
@@ -1646,7 +1646,7 @@
                 pub {async_} fn instantiate_pre&lt;T {send}&gt;(
                     mut store: impl wasmtime::AsContextMut&lt;Data = T&gt;,
                     instance_pre: &amp;wasmtime::component::InstancePre&lt;T&gt;,
-                ) -&gt; anyhow::Result&lt;(Self, wasmtime::component::Instance)&gt; {{
+                ) -&gt; wasmtime::Result&lt;(Self, wasmtime::component::Instance)&gt; {{
                     let instance = instance_pre.instantiate{async__}(&amp;mut store){await_}?;
                     Ok((Self::new(store, &amp;instance)?, instance))
                 }}
@@ -1662,7 +1662,7 @@
                 pub fn new(
                     mut store: impl wasmtime::AsContextMut,
                     instance: &amp;wasmtime::component::Instance,
-                ) -&gt; anyhow::Result&lt;Self&gt; {{
+                ) -&gt; wasmtime::Result&lt;Self&gt; {{
                     let mut store = store.as_context_mut();
                     let mut exports = instance.exports(&amp;mut store);
                     let mut __exports = exports.root();
@@ -1765,7 +1765,7 @@
                 pub fn add_to_linker&lt;T, U&gt;(
                     linker: &amp;mut wasmtime::component::Linker&lt;T&gt;,
                     get: impl Fn(&amp;mut T) -&gt; &amp;mut U + Send + Sync + Copy + &#39;static,
-                ) -&gt; anyhow::Result&lt;()&gt;
+                ) -&gt; wasmtime::Result&lt;()&gt;
                     where U: \
             &quot;
         </span>);
@@ -1810,7 +1810,7 @@
                 pub fn add_root_to_linker&lt;T, U&gt;(
                     linker: &amp;mut wasmtime::component::Linker&lt;T&gt;,
                     get: impl Fn(&amp;mut T) -&gt; &amp;mut U + Send + Sync + Copy + &#39;static,
-                ) -&gt; anyhow::Result&lt;()&gt;
+                ) -&gt; wasmtime::Result&lt;()&gt;
                     where U: {world_trait}{maybe_send}
                 {{
                     let mut linker = linker.root();
@@ -2346,7 +2346,7 @@
                 pub fn add_to_linker&lt;T, U&gt;(
                     linker: &amp;mut wasmtime::component::Linker&lt;T&gt;,
                     get: impl Fn(&amp;mut T) -&gt; &amp;mut U + Send + Sync + Copy + &#39;static,
-                ) -&gt; anyhow::Result&lt;()&gt;
+                ) -&gt; wasmtime::Result&lt;()&gt;
                     where {where_clause},
                 {{
             &quot;
@@ -2492,9 +2492,9 @@
             <span class="self">self</span>.push_str(<span class="kw-2">&amp;</span>error_typename);
             <span class="self">self</span>.push_str(<span class="string">&quot;&gt;&quot;</span>);
         } <span class="kw">else </span>{
-            <span class="comment">// All other functions get their return values wrapped in an anyhow::Result.
+            <span class="comment">// All other functions get their return values wrapped in an wasmtime::Result.
             // Returning the anyhow::Error case can be used to trap.
-            </span><span class="self">self</span>.push_str(<span class="string">&quot;anyhow::Result&lt;&quot;</span>);
+            </span><span class="self">self</span>.push_str(<span class="string">&quot;wasmtime::Result&lt;&quot;</span>);
             <span class="self">self</span>.print_result_ty(<span class="kw-2">&amp;</span>func.results, TypeMode::Owned);
             <span class="self">self</span>.push_str(<span class="string">&quot;&gt;&quot;</span>);
         }
@@ -2542,7 +2542,7 @@
             <span class="self">self</span>.print_ty(<span class="kw-2">&amp;</span>param.<span class="number">1</span>, TypeMode::AllBorrowed(<span class="string">&quot;&#39;_&quot;</span>));
             <span class="self">self</span>.push_str(<span class="string">&quot;,&quot;</span>);
         }
-        <span class="self">self</span>.src.push_str(<span class="string">&quot;) -&gt; anyhow::Result&lt;&quot;</span>);
+        <span class="self">self</span>.src.push_str(<span class="string">&quot;) -&gt; wasmtime::Result&lt;&quot;</span>);
         <span class="self">self</span>.print_result_ty(<span class="kw-2">&amp;</span>func.results, TypeMode::Owned);
 
         <span class="kw">if </span><span class="self">self</span>.gen.opts.async_ {

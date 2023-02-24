@@ -850,7 +850,6 @@
 <a href="#850" id="850">850</a>
 <a href="#851" id="851">851</a>
 <a href="#852" id="852">852</a>
-<a href="#853" id="853">853</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Oracles.
 //!
 //! Oracles take a test case and determine whether we have a bug. For example,
@@ -1638,7 +1637,6 @@
 /// arbitrary types and values.
 </span><span class="kw">pub fn </span>dynamic_component_api_target(input: <span class="kw-2">&amp;mut </span>arbitrary::Unstructured) -&gt; arbitrary::Result&lt;()&gt; {
     <span class="kw">use </span><span class="kw">crate</span>::generators::component_types;
-    <span class="kw">use </span>anyhow::Result;
     <span class="kw">use </span>component_fuzz_util::{TestCase, EXPORT_FUNCTION, IMPORT_FUNCTION};
     <span class="kw">use </span>component_test_util::FuncExt;
     <span class="kw">use </span>wasmtime::component::{Component, Linker, Val};

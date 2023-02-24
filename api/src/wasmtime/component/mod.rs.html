@@ -297,8 +297,6 @@
 <a href="#297" id="297">297</a>
 <a href="#298" id="298">298</a>
 <a href="#299" id="299">299</a>
-<a href="#300" id="300">300</a>
-<a href="#301" id="301">301</a>
 </pre><pre class="rust"><code><span class="doccomment">//! In-progress implementation of the WebAssembly component model
 //!
 //! This module is a work-in-progress and currently represents an incomplete and
@@ -383,7 +381,6 @@
 /// Then you can interact with the generated bindings like so:
 ///
 /// ```rust,ignore
-/// use anyhow::Result;
 /// use wasmtime::component::*;
 /// use wasmtime::{Config, Engine, Store};
 ///
@@ -398,12 +395,12 @@
 /// impl HelloWorldImports for MyState {
 ///     // Note the `Result` return value here where `Ok` is returned back to
 ///     // the component and `Err` will raise a trap.
-///     fn name(&amp;mut self) -&gt; Result&lt;String&gt; {
+///     fn name(&amp;mut self) -&gt; wasmtime::Result&lt;String&gt; {
 ///         Ok(self.name.clone())
 ///     }
 /// }
 ///
-/// fn main() -&gt; Result&lt;()&gt; {
+/// fn main() -&gt; wasmtime::Result&lt;()&gt; {
 ///     // Configure an `Engine` and compile the `Component` that is being run for
 ///     // the application.
 ///     let mut config = Config::new();
@@ -469,7 +466,6 @@
 /// Then you can interact with the generated bindings like so:
 ///
 /// ```rust,ignore
-/// use anyhow::Result;
 /// use wasmtime::component::*;
 /// use wasmtime::{Config, Engine, Store};
 ///
@@ -481,16 +477,16 @@
 ///
 /// // Note that the trait here is per-interface and within a submodule now.
 /// impl host::Host for MyState {
-///     fn gen_random_integer(&amp;mut self) -&gt; Result&lt;u32&gt; {
+///     fn gen_random_integer(&amp;mut self) -&gt; wasmtime::Result&lt;u32&gt; {
 ///         Ok(rand::thread_rng().gen())
 ///     }
 ///
-///     fn sha256(&amp;mut self, bytes: Vec&lt;u8&gt;) -&gt; Result&lt;String&gt; {
+///     fn sha256(&amp;mut self, bytes: Vec&lt;u8&gt;) -&gt; wasmtime::Result&lt;String&gt; {
 ///         // ...
 ///     }
 /// }
 ///
-/// fn main() -&gt; Result&lt;()&gt; {
+/// fn main() -&gt; wasmtime::Result&lt;()&gt; {
 ///     let mut config = Config::new();
 ///     config.wasm_component_model(true);
 ///     let engine = Engine::new(&amp;config)?;

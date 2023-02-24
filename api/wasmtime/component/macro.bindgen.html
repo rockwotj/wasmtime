@@ -23,8 +23,7 @@ default world hello-world {
 </code></pre></div>
 <p>Then you can interact with the generated bindings like so:</p>
 
-<div class="example-wrap ignore"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code><span class="kw">use </span>anyhow::Result;
-<span class="kw">use </span>wasmtime::component::<span class="kw-2">*</span>;
+<div class="example-wrap ignore"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code><span class="kw">use </span>wasmtime::component::<span class="kw-2">*</span>;
 <span class="kw">use </span>wasmtime::{Config, Engine, Store};
 
 <span class="macro">bindgen!</span>();
@@ -38,12 +37,12 @@ default world hello-world {
 </span><span class="kw">impl </span>HelloWorldImports <span class="kw">for </span>MyState {
     <span class="comment">// Note the `Result` return value here where `Ok` is returned back to
     // the component and `Err` will raise a trap.
-    </span><span class="kw">fn </span>name(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
+    </span><span class="kw">fn </span>name(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; wasmtime::Result&lt;String&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.name.clone())
     }
 }
 
-<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<span class="kw">fn </span>main() -&gt; wasmtime::Result&lt;()&gt; {
     <span class="comment">// Configure an `Engine` and compile the `Component` that is being run for
     // the application.
     </span><span class="kw">let </span><span class="kw-2">mut </span>config = Config::new();
@@ -102,8 +101,7 @@ default world hello-world {
 </code></pre></div>
 <p>Then you can interact with the generated bindings like so:</p>
 
-<div class="example-wrap ignore"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code><span class="kw">use </span>anyhow::Result;
-<span class="kw">use </span>wasmtime::component::<span class="kw-2">*</span>;
+<div class="example-wrap ignore"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code><span class="kw">use </span>wasmtime::component::<span class="kw-2">*</span>;
 <span class="kw">use </span>wasmtime::{Config, Engine, Store};
 
 <span class="macro">bindgen!</span>();
@@ -114,16 +112,16 @@ default world hello-world {
 
 <span class="comment">// Note that the trait here is per-interface and within a submodule now.
 </span><span class="kw">impl </span>host::Host <span class="kw">for </span>MyState {
-    <span class="kw">fn </span>gen_random_integer(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;u32&gt; {
+    <span class="kw">fn </span>gen_random_integer(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; wasmtime::Result&lt;u32&gt; {
         <span class="prelude-val">Ok</span>(rand::thread_rng().gen())
     }
 
-    <span class="kw">fn </span>sha256(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bytes: Vec&lt;u8&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
+    <span class="kw">fn </span>sha256(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bytes: Vec&lt;u8&gt;) -&gt; wasmtime::Result&lt;String&gt; {
         <span class="comment">// ...
     </span>}
 }
 
-<span class="kw">fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<span class="kw">fn </span>main() -&gt; wasmtime::Result&lt;()&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>config = Config::new();
     config.wasm_component_model(<span class="bool-val">true</span>);
     <span class="kw">let </span>engine = Engine::new(<span class="kw-2">&amp;</span>config)<span class="question-mark">?</span>;
