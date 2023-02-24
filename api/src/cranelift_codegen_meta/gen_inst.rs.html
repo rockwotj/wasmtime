@@ -1765,6 +1765,8 @@
 <a href="#1765" id="1765">1765</a>
 <a href="#1766" id="1766">1766</a>
 <a href="#1767" id="1767">1767</a>
+<a href="#1768" id="1768">1768</a>
+<a href="#1769" id="1769">1769</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Generate instruction data (including opcodes, formats, builders, etc.).
 </span><span class="kw">use </span>std::fmt;
 
@@ -3172,7 +3174,9 @@
         IsleTarget::Opt =&gt; <span class="string">&quot;Value&quot;</span>,
     };
     <span class="kw">for </span>inst <span class="kw">in </span>instructions {
-        <span class="kw">if </span>isle_target == IsleTarget::Opt &amp;&amp; inst.format.has_value_list {
+        <span class="kw">if </span>isle_target == IsleTarget::Opt
+            &amp;&amp; (inst.format.has_value_list || inst.value_results.len() != <span class="number">1</span>)
+        {
             <span class="kw">continue</span>;
         }
 
