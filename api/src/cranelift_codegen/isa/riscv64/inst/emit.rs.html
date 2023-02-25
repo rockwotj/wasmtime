@@ -2807,57 +2807,6 @@
 <a href="#2807" id="2807">2807</a>
 <a href="#2808" id="2808">2808</a>
 <a href="#2809" id="2809">2809</a>
-<a href="#2810" id="2810">2810</a>
-<a href="#2811" id="2811">2811</a>
-<a href="#2812" id="2812">2812</a>
-<a href="#2813" id="2813">2813</a>
-<a href="#2814" id="2814">2814</a>
-<a href="#2815" id="2815">2815</a>
-<a href="#2816" id="2816">2816</a>
-<a href="#2817" id="2817">2817</a>
-<a href="#2818" id="2818">2818</a>
-<a href="#2819" id="2819">2819</a>
-<a href="#2820" id="2820">2820</a>
-<a href="#2821" id="2821">2821</a>
-<a href="#2822" id="2822">2822</a>
-<a href="#2823" id="2823">2823</a>
-<a href="#2824" id="2824">2824</a>
-<a href="#2825" id="2825">2825</a>
-<a href="#2826" id="2826">2826</a>
-<a href="#2827" id="2827">2827</a>
-<a href="#2828" id="2828">2828</a>
-<a href="#2829" id="2829">2829</a>
-<a href="#2830" id="2830">2830</a>
-<a href="#2831" id="2831">2831</a>
-<a href="#2832" id="2832">2832</a>
-<a href="#2833" id="2833">2833</a>
-<a href="#2834" id="2834">2834</a>
-<a href="#2835" id="2835">2835</a>
-<a href="#2836" id="2836">2836</a>
-<a href="#2837" id="2837">2837</a>
-<a href="#2838" id="2838">2838</a>
-<a href="#2839" id="2839">2839</a>
-<a href="#2840" id="2840">2840</a>
-<a href="#2841" id="2841">2841</a>
-<a href="#2842" id="2842">2842</a>
-<a href="#2843" id="2843">2843</a>
-<a href="#2844" id="2844">2844</a>
-<a href="#2845" id="2845">2845</a>
-<a href="#2846" id="2846">2846</a>
-<a href="#2847" id="2847">2847</a>
-<a href="#2848" id="2848">2848</a>
-<a href="#2849" id="2849">2849</a>
-<a href="#2850" id="2850">2850</a>
-<a href="#2851" id="2851">2851</a>
-<a href="#2852" id="2852">2852</a>
-<a href="#2853" id="2853">2853</a>
-<a href="#2854" id="2854">2854</a>
-<a href="#2855" id="2855">2855</a>
-<a href="#2856" id="2856">2856</a>
-<a href="#2857" id="2857">2857</a>
-<a href="#2858" id="2858">2858</a>
-<a href="#2859" id="2859">2859</a>
-<a href="#2860" id="2860">2860</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::StackMap;
@@ -3539,57 +3488,6 @@
                         .into_iter()
                         .for_each(|inst| inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
                 }
-            }
-
-            <span class="kw-2">&amp;</span>Inst::ReferenceCheck { rd, op, x } =&gt; {
-                <span class="kw">let </span>x = allocs.next(x);
-                <span class="kw">let </span>rd = allocs.next_writable(rd);
-                <span class="kw">let </span><span class="kw-2">mut </span>insts = SmallInstVec::new();
-                <span class="kw">match </span>op {
-                    ReferenceCheckOP::IsNull =&gt; {
-                        insts.push(Inst::CondBr {
-                            taken: BranchTarget::ResolvedOffset(Inst::INSTRUCTION_SIZE * <span class="number">3</span>),
-                            not_taken: BranchTarget::zero(),
-                            kind: IntegerCompare {
-                                kind: IntCC::Equal,
-                                rs1: zero_reg(),
-                                rs2: x,
-                            },
-                        });
-                        <span class="comment">// here is false
-                        </span>insts.push(Inst::load_imm12(rd, Imm12::FALSE));
-                        insts.push(Inst::Jal {
-                            dest: BranchTarget::ResolvedOffset(Inst::INSTRUCTION_SIZE * <span class="number">2</span>),
-                        });
-                        <span class="comment">// here is true
-                        </span>insts.push(Inst::load_imm12(rd, Imm12::TRUE));
-                    }
-
-                    ReferenceCheckOP::IsInvalid =&gt; {
-                        <span class="comment">// todo:: right now just check if it is null
-                        // null is a valid reference??????
-                        </span>insts.push(Inst::CondBr {
-                            taken: BranchTarget::ResolvedOffset(Inst::INSTRUCTION_SIZE * <span class="number">3</span>),
-                            not_taken: BranchTarget::zero(),
-                            kind: IntegerCompare {
-                                kind: IntCC::Equal,
-                                rs1: zero_reg(),
-                                rs2: x,
-                            },
-                        });
-                        <span class="comment">// here is false
-                        </span>insts.push(Inst::load_imm12(rd, Imm12::FALSE));
-                        insts.push(Inst::Jal {
-                            dest: BranchTarget::ResolvedOffset(Inst::INSTRUCTION_SIZE * <span class="number">2</span>),
-                        });
-                        <span class="comment">// here is true
-                        </span>insts.push(Inst::load_imm12(rd, Imm12::TRUE));
-                    }
-                }
-
-                insts
-                    .into_iter()
-                    .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
             }
             <span class="kw-2">&amp;</span>Inst::Args { .. } =&gt; {
                 <span class="comment">// Nothing: this is a pseudoinstruction that serves

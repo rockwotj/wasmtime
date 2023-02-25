@@ -918,7 +918,7 @@
     <span class="kw-2">mut </span>alloc: F,
     ty: Type,
 ) -&gt; WritableValueRegs {
-    <span class="kw">if </span>ty.is_int() {
+    <span class="kw">if </span>ty.is_int() || ty.is_ref() {
         <span class="kw">if </span>ty.bits() == <span class="number">128 </span>{
             WritableValueRegs::two(alloc(I64), alloc(I64))
         } <span class="kw">else </span>{

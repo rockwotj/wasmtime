@@ -1720,14 +1720,6 @@
 <a href="#1720" id="1720">1720</a>
 <a href="#1721" id="1721">1721</a>
 <a href="#1722" id="1722">1722</a>
-<a href="#1723" id="1723">1723</a>
-<a href="#1724" id="1724">1724</a>
-<a href="#1725" id="1725">1725</a>
-<a href="#1726" id="1726">1726</a>
-<a href="#1727" id="1727">1727</a>
-<a href="#1728" id="1728">1728</a>
-<a href="#1729" id="1729">1729</a>
-<a href="#1730" id="1730">1730</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines riscv64-specific machine instruction types.
 
 </span><span class="comment">// Some variants are not constructed, but we still want them as options in the future.
@@ -1781,8 +1773,7 @@
 </span><span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::lower::isle::generated_code::MInst;
 <span class="kw">pub use </span><span class="kw">crate</span>::isa::riscv64::lower::isle::generated_code::{
     AluOPRRI, AluOPRRR, AtomicOP, CsrOP, FClassResult, FFlagsException, FenceFm, FloatRoundOP,
-    FloatSelectOP, FpuOPRR, FpuOPRRR, FpuOPRRRR, IntSelectOP, LoadOP, MInst <span class="kw">as </span>Inst,
-    ReferenceCheckOP, StoreOP, FRM,
+    FloatSelectOP, FpuOPRR, FpuOPRRR, FpuOPRRRR, IntSelectOP, LoadOP, MInst <span class="kw">as </span>Inst, StoreOP, FRM,
 };
 
 <span class="kw">type </span>BoxCallInfo = Box&lt;CallInfo&gt;;
@@ -2200,10 +2191,6 @@
             <span class="kw">for </span>d <span class="kw">in </span>dst.iter() {
                 collector.reg_early_def(d.clone());
             }
-        }
-        <span class="kw-2">&amp;</span>Inst::ReferenceCheck { rd, x, .. } =&gt; {
-            collector.reg_use(x);
-            collector.reg_def(rd);
         }
         <span class="kw-2">&amp;</span>Inst::AtomicCas {
             offset,
@@ -2915,12 +2902,6 @@
                     imm.bits
                 )
             }
-
-            <span class="kw-2">&amp;</span>Inst::ReferenceCheck { rd, op, x } =&gt; {
-                <span class="kw">let </span>x = format_reg(x, allocs);
-                <span class="kw">let </span>rd = format_reg(rd.to_reg(), allocs);
-                <span class="macro">format!</span>(<span class="string">&quot;{} {},{}&quot;</span>, op.op_name(), rd, x)
-            }
             <span class="kw-2">&amp;</span>Inst::Jalr { rd, base, offset } =&gt; {
                 <span class="kw">let </span>base = format_reg(base, allocs);
                 <span class="kw">let </span>rd = format_reg(rd.to_reg(), allocs);
@@ -3073,6 +3054,9 @@
                     }
                     (AluOPRRI::Xori, <span class="kw">_</span>, imm12) <span class="kw">if </span>imm12.as_i16() == -<span class="number">1 </span>=&gt; {
                         <span class="kw">return </span><span class="macro">format!</span>(<span class="string">&quot;not {},{}&quot;</span>, rd, rs_s);
+                    }
+                    (AluOPRRI::SltiU, <span class="kw">_</span>, imm12) <span class="kw">if </span>imm12.as_i16() == <span class="number">1 </span>=&gt; {
+                        <span class="kw">return </span><span class="macro">format!</span>(<span class="string">&quot;seqz {},{}&quot;</span>, rd, rs_s);
                     }
                     (alu_op, <span class="kw">_</span>, <span class="kw">_</span>) <span class="kw">if </span>alu_op.option_funct12().is_some() =&gt; {
                         <span class="macro">format!</span>(<span class="string">&quot;{} {},{}&quot;</span>, alu_op.op_name(), rd, rs_s)
