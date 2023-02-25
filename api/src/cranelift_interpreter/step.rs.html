@@ -1641,6 +1641,23 @@
 <a href="#1641" id="1641">1641</a>
 <a href="#1642" id="1642">1642</a>
 <a href="#1643" id="1643">1643</a>
+<a href="#1644" id="1644">1644</a>
+<a href="#1645" id="1645">1645</a>
+<a href="#1646" id="1646">1646</a>
+<a href="#1647" id="1647">1647</a>
+<a href="#1648" id="1648">1648</a>
+<a href="#1649" id="1649">1649</a>
+<a href="#1650" id="1650">1650</a>
+<a href="#1651" id="1651">1651</a>
+<a href="#1652" id="1652">1652</a>
+<a href="#1653" id="1653">1653</a>
+<a href="#1654" id="1654">1654</a>
+<a href="#1655" id="1655">1655</a>
+<a href="#1656" id="1656">1656</a>
+<a href="#1657" id="1657">1657</a>
+<a href="#1658" id="1658">1658</a>
+<a href="#1659" id="1659">1659</a>
+<a href="#1660" id="1660">1660</a>
 </pre><pre class="rust"><code><span class="doccomment">//! The [step] function interprets a single Cranelift instruction given its [State] and
 //! [InstructionContext]; the interpretation is generic over [Value]s.
 </span><span class="kw">use </span><span class="kw">crate</span>::address::{Address, AddressSize};
@@ -2912,7 +2929,24 @@
                 Address::try_from(addr).and_then(|addr| state.checked_store(addr, replace));
             assign_or_memtrap(stored.map(|<span class="kw">_</span>| prev_val_to_assign))
         }
-        Opcode::AtomicCas =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;AtomicCas&quot;</span>),
+        Opcode::AtomicCas =&gt; {
+            <span class="kw">let </span>addr = arg(<span class="number">0</span>)<span class="question-mark">?</span>.into_int()<span class="question-mark">? </span><span class="kw">as </span>u64;
+            <span class="kw">let </span>loaded = Address::try_from(addr).and_then(|addr| state.checked_load(addr, ctrl_ty));
+            <span class="kw">let </span>loaded_val = <span class="kw">match </span>loaded {
+                <span class="prelude-val">Ok</span>(v) =&gt; v,
+                <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(ControlFlow::Trap(CraneliftTrap::User(memerror_to_trap(e)))),
+            };
+            <span class="kw">let </span>expected_val = arg(<span class="number">1</span>)<span class="question-mark">?</span>;
+            <span class="kw">let </span>val_to_assign = <span class="kw">if </span>Value::eq(<span class="kw-2">&amp;</span>loaded_val, <span class="kw-2">&amp;</span>expected_val)<span class="question-mark">? </span>{
+                <span class="kw">let </span>val_to_store = arg(<span class="number">2</span>)<span class="question-mark">?</span>;
+                Address::try_from(addr)
+                    .and_then(|addr| state.checked_store(addr, val_to_store))
+                    .map(|<span class="kw">_</span>| loaded_val)
+            } <span class="kw">else </span>{
+                <span class="prelude-val">Ok</span>(loaded_val)
+            };
+            assign_or_memtrap(val_to_assign)
+        }
         Opcode::AtomicLoad =&gt; {
             <span class="kw">let </span>load_ty = inst_context.controlling_type().unwrap();
             <span class="kw">let </span>addr = arg(<span class="number">0</span>)<span class="question-mark">?</span>.into_int()<span class="question-mark">? </span><span class="kw">as </span>u64;
