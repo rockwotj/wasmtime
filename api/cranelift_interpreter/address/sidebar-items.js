@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["AddressRegion","Virtual Address region"],["AddressSize",""]],"struct":[["Address",""]]};
+window.SIDEBAR_ITEMS = {"enum":[["AddressFunctionEntry",""],["AddressRegion","Virtual Address region"],["AddressSize",""]],"struct":[["Address",""]]};

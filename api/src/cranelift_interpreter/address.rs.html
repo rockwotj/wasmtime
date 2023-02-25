@@ -295,6 +295,24 @@
 <a href="#295" id="295">295</a>
 <a href="#296" id="296">296</a>
 <a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Virtual Addressing Scheme for the Interpreter
 //!
 //! The interpreter uses virtual memory addresses for its memory operations. These addresses
@@ -312,8 +330,8 @@
 //! are the &quot;entry&quot; field, the amount of &quot;entry&quot; bits depends on the size of the address and
 //! the &quot;region&quot; of the address. The remaining bits belong to the &quot;offset&quot; field
 //!
-//! An example address could be a 32 bit address, in the `heap` region, which has 2 &quot;entry&quot; bits
-//! this address would have 32 - 2 - 2 = 28 offset bits.
+//! An example address could be a 32 bit address, in the `function` region, which has 1 &quot;entry&quot; bit
+//! this address would have 32 - 1 - 2 = 29 offset bits.
 //!
 //! The only exception to this is the &quot;stack&quot; region, where, because we only have a single &quot;stack&quot;
 //! we have 0 &quot;entry&quot; bits, and thus is all offset.
@@ -321,11 +339,11 @@
 //! | address size | address kind | region value (2 bits) | entry bits (#) | offset bits (#) |
 //! |--------------|--------------|-----------------------|----------------|-----------------|
 //! | 32           | Stack        | 0b00                  | 0              | 30              |
-//! | 32           | Heap         | 0b01                  | 2              | 28              |
+//! | 32           | Function     | 0b01                  | 1              | 29              |
 //! | 32           | Table        | 0b10                  | 5              | 25              |
 //! | 32           | GlobalValue  | 0b11                  | 6              | 24              |
 //! | 64           | Stack        | 0b00                  | 0              | 62              |
-//! | 64           | Heap         | 0b01                  | 6              | 56              |
+//! | 64           | Function     | 0b01                  | 1              | 61              |
 //! | 64           | Table        | 0b10                  | 10             | 52              |
 //! | 64           | GlobalValue  | 0b11                  | 12             | 50              |
 
@@ -365,7 +383,7 @@
 </span><span class="attr">#[derive(Debug, Copy, Clone, PartialEq)]
 </span><span class="kw">pub enum </span>AddressRegion {
     Stack,
-    Heap,
+    Function,
     Table,
     GlobalValue,
 }
@@ -375,7 +393,7 @@
         <span class="macro">assert!</span>(bits &lt; <span class="number">4</span>);
         <span class="kw">match </span>bits {
             <span class="number">0 </span>=&gt; AddressRegion::Stack,
-            <span class="number">1 </span>=&gt; AddressRegion::Heap,
+            <span class="number">1 </span>=&gt; AddressRegion::Function,
             <span class="number">2 </span>=&gt; AddressRegion::Table,
             <span class="number">3 </span>=&gt; AddressRegion::GlobalValue,
             <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
@@ -385,7 +403,7 @@
     <span class="kw">pub fn </span>encode(<span class="self">self</span>) -&gt; u64 {
         <span class="kw">match </span><span class="self">self </span>{
             AddressRegion::Stack =&gt; <span class="number">0</span>,
-            AddressRegion::Heap =&gt; <span class="number">1</span>,
+            AddressRegion::Function =&gt; <span class="number">1</span>,
             AddressRegion::Table =&gt; <span class="number">2</span>,
             AddressRegion::GlobalValue =&gt; <span class="number">3</span>,
         }
@@ -440,11 +458,13 @@
             <span class="comment">// We only have one stack, so the whole address is offset
             </span>(<span class="kw">_</span>, AddressRegion::Stack) =&gt; <span class="number">0</span>,
 
-            (AddressSize::_32, AddressRegion::Heap) =&gt; <span class="number">2</span>,
+            <span class="comment">// We have two function &quot;entries&quot;, one for libcalls, and
+            // another for user functions.
+            </span>(<span class="kw">_</span>, AddressRegion::Function) =&gt; <span class="number">1</span>,
+
             (AddressSize::_32, AddressRegion::Table) =&gt; <span class="number">5</span>,
             (AddressSize::_32, AddressRegion::GlobalValue) =&gt; <span class="number">6</span>,
 
-            (AddressSize::_64, AddressRegion::Heap) =&gt; <span class="number">6</span>,
             (AddressSize::_64, AddressRegion::Table) =&gt; <span class="number">10</span>,
             (AddressSize::_64, AddressRegion::GlobalValue) =&gt; <span class="number">12</span>,
         }
@@ -521,6 +541,22 @@
     }
 }
 
+<span class="attr">#[derive(Debug, Clone, PartialEq)]
+</span><span class="kw">pub enum </span>AddressFunctionEntry {
+    UserFunction = <span class="number">0</span>,
+    LibCall,
+}
+
+<span class="kw">impl </span>From&lt;u64&gt; <span class="kw">for </span>AddressFunctionEntry {
+    <span class="kw">fn </span>from(bits: u64) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span>bits {
+            <span class="number">0 </span>=&gt; AddressFunctionEntry::UserFunction,
+            <span class="number">1 </span>=&gt; AddressFunctionEntry::LibCall,
+            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+        }
+    }
+}
+
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
@@ -530,7 +566,7 @@
     </span><span class="kw">fn </span>address_region_roundtrip_encode_decode() {
         <span class="kw">let </span>all_regions = [
             AddressRegion::Stack,
-            AddressRegion::Heap,
+            AddressRegion::Function,
             AddressRegion::Table,
             AddressRegion::GlobalValue,
         ];
@@ -547,10 +583,10 @@
             (AddressSize::_32, AddressRegion::Stack, <span class="number">0</span>, <span class="number">1</span>),
             (AddressSize::_32, AddressRegion::Stack, <span class="number">0</span>, <span class="number">1024</span>),
             (AddressSize::_32, AddressRegion::Stack, <span class="number">0</span>, <span class="number">0x3FFF_FFFF</span>),
-            (AddressSize::_32, AddressRegion::Heap, <span class="number">0</span>, <span class="number">0</span>),
-            (AddressSize::_32, AddressRegion::Heap, <span class="number">1</span>, <span class="number">1</span>),
-            (AddressSize::_32, AddressRegion::Heap, <span class="number">3</span>, <span class="number">1024</span>),
-            (AddressSize::_32, AddressRegion::Heap, <span class="number">3</span>, <span class="number">0x0FFF_FFFF</span>),
+            (AddressSize::_32, AddressRegion::Function, <span class="number">0</span>, <span class="number">0</span>),
+            (AddressSize::_32, AddressRegion::Function, <span class="number">1</span>, <span class="number">1</span>),
+            (AddressSize::_32, AddressRegion::Function, <span class="number">0</span>, <span class="number">1024</span>),
+            (AddressSize::_32, AddressRegion::Function, <span class="number">1</span>, <span class="number">0x0FFF_FFFF</span>),
             (AddressSize::_32, AddressRegion::Table, <span class="number">0</span>, <span class="number">0</span>),
             (AddressSize::_32, AddressRegion::Table, <span class="number">1</span>, <span class="number">1</span>),
             (AddressSize::_32, AddressRegion::Table, <span class="number">31</span>, <span class="number">0x1FF_FFFF</span>),
@@ -565,10 +601,10 @@
                 <span class="number">0</span>,
                 <span class="number">0x3FFFFFFF_FFFFFFFF</span>,
             ),
-            (AddressSize::_64, AddressRegion::Heap, <span class="number">0</span>, <span class="number">0</span>),
-            (AddressSize::_64, AddressRegion::Heap, <span class="number">1</span>, <span class="number">1</span>),
-            (AddressSize::_64, AddressRegion::Heap, <span class="number">3</span>, <span class="number">1024</span>),
-            (AddressSize::_64, AddressRegion::Heap, <span class="number">3</span>, <span class="number">0x0FFF_FFFF</span>),
+            (AddressSize::_64, AddressRegion::Function, <span class="number">0</span>, <span class="number">0</span>),
+            (AddressSize::_64, AddressRegion::Function, <span class="number">1</span>, <span class="number">1</span>),
+            (AddressSize::_64, AddressRegion::Function, <span class="number">0</span>, <span class="number">1024</span>),
+            (AddressSize::_64, AddressRegion::Function, <span class="number">1</span>, <span class="number">0x0FFF_FFFF</span>),
             (AddressSize::_64, AddressRegion::Table, <span class="number">0</span>, <span class="number">0</span>),
             (AddressSize::_64, AddressRegion::Table, <span class="number">1</span>, <span class="number">1</span>),
             (AddressSize::_64, AddressRegion::Table, <span class="number">31</span>, <span class="number">0x1FF_FFFF</span>),
