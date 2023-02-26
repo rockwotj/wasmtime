@@ -2246,7 +2246,7 @@
         <span class="kw-2">&amp;</span>Inst::FcvtToInt { rd, rs, tmp, .. } =&gt; {
             collector.reg_use(rs);
             collector.reg_early_def(tmp);
-            collector.reg_def(rd);
+            collector.reg_early_def(rd);
         }
         <span class="kw-2">&amp;</span>Inst::SelectIf {
             <span class="kw-2">ref </span>rd,

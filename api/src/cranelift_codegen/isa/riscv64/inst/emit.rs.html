@@ -4560,23 +4560,23 @@
                 <span class="kw">if </span>out_type.bits() &lt; <span class="number">32 </span>&amp;&amp; is_signed {
                     <span class="comment">// load value part mask.
                     </span>Inst::load_constant_u32(
-                        tmp,
+                        writable_spilltmp_reg(),
                         <span class="kw">if </span><span class="number">16 </span>== out_type.bits() {
                             (u16::MAX &gt;&gt; <span class="number">1</span>) <span class="kw">as </span>u64
                         } <span class="kw">else </span>{
                             <span class="comment">// I8
                             </span>(u8::MAX &gt;&gt; <span class="number">1</span>) <span class="kw">as </span>u64
                         },
-                        <span class="kw-2">&amp;mut </span>|<span class="kw">_</span>| writable_spilltmp_reg(),
+                        <span class="kw-2">&amp;mut </span>|<span class="kw">_</span>| writable_spilltmp_reg2(),
                     )
                     .into_iter()
                     .for_each(|x| x.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
                     <span class="comment">// keep value part.
                     </span>Inst::AluRRR {
                         alu_op: AluOPRRR::And,
-                        rd: tmp,
+                        rd: writable_spilltmp_reg(),
                         rs1: rd.to_reg(),
-                        rs2: tmp.to_reg(),
+                        rs2: spilltmp_reg(),
                     }
                     .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                     <span class="comment">// extact sign bit.
@@ -4604,7 +4604,7 @@
                         alu_op: AluOPRRR::Or,
                         rd: rd,
                         rs1: rd.to_reg(),
-                        rs2: tmp.to_reg(),
+                        rs2: spilltmp_reg(),
                     }
                     .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 }
