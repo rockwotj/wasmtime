@@ -425,6 +425,17 @@
 <a href="#425" id="425">425</a>
 <a href="#426" id="426">426</a>
 <a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::types::TypeInfo;
 <span class="kw">use </span>heck::<span class="kw-2">*</span>;
 <span class="kw">use </span>std::collections::HashMap;
@@ -795,7 +806,8 @@
     }
 }
 
-<span class="kw">pub fn </span>to_rust_ident(name: <span class="kw-2">&amp;</span>str) -&gt; String {
+<span class="doccomment">/// Translate `name` to a Rust `snake_case` identifier.
+</span><span class="kw">pub fn </span>to_rust_ident(name: <span class="kw-2">&amp;</span>str) -&gt; String {
     <span class="kw">match </span>name {
         <span class="comment">// Escape Rust keywords.
         // Source: https://doc.rust-lang.org/reference/keywords.html
@@ -850,6 +862,16 @@
         <span class="string">&quot;yield&quot; </span>=&gt; <span class="string">&quot;yield_&quot;</span>.into(),
         <span class="string">&quot;try&quot; </span>=&gt; <span class="string">&quot;try_&quot;</span>.into(),
         s =&gt; s.to_snake_case(),
+    }
+}
+
+<span class="doccomment">/// Translate `name` to a Rust `UpperCamelCase` identifier.
+</span><span class="kw">pub fn </span>to_rust_upper_camel_case(name: <span class="kw-2">&amp;</span>str) -&gt; String {
+    <span class="kw">match </span>name {
+        <span class="comment">// We use `Host` as the name of the trait for host implementations
+        // to fill in, so rename it if &quot;Host&quot; is used as a regular identifier.
+        </span><span class="string">&quot;host&quot; </span>=&gt; <span class="string">&quot;Host_&quot;</span>.into(),
+        s =&gt; s.to_upper_camel_case(),
     }
 }
 </code></pre></div>

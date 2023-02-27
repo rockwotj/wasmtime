@@ -1365,8 +1365,7 @@
 <a href="#1365" id="1365">1365</a>
 <a href="#1366" id="1366">1366</a>
 <a href="#1367" id="1367">1367</a>
-<a href="#1368" id="1368">1368</a>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::rust::{to_rust_ident, RustGenerator, TypeMode};
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::rust::{to_rust_ident, to_rust_upper_camel_case, RustGenerator, TypeMode};
 <span class="kw">use </span><span class="kw">crate</span>::types::{TypeInfo, Types};
 <span class="kw">use </span>heck::<span class="kw-2">*</span>;
 <span class="kw">use </span>std::collections::BTreeMap;
@@ -1530,7 +1529,7 @@
                 gen.generate_trappable_error_types(TypeOwner::Interface(<span class="kw-2">*</span>id));
                 <span class="kw">let </span>iface = <span class="kw-2">&amp;</span>resolve.interfaces[<span class="kw-2">*</span>id];
 
-                <span class="kw">let </span>camel = name.to_upper_camel_case();
+                <span class="kw">let </span>camel = to_rust_upper_camel_case(name);
                 <span class="macro">uwriteln!</span>(gen.src, <span class="string">&quot;pub struct {camel} {{&quot;</span>);
                 <span class="kw">for </span>(<span class="kw">_</span>, func) <span class="kw">in </span>iface.functions.iter() {
                     <span class="macro">uwriteln!</span>(
@@ -1605,7 +1604,7 @@
     }
 
     <span class="kw">fn </span>finish(<span class="kw-2">&amp;mut </span><span class="self">self</span>, resolve: <span class="kw-2">&amp;</span>Resolve, world: WorldId) -&gt; String {
-        <span class="kw">let </span>camel = resolve.worlds[world].name.to_upper_camel_case();
+        <span class="kw">let </span>camel = to_rust_upper_camel_case(<span class="kw-2">&amp;</span>resolve.worlds[world].name);
         <span class="macro">uwriteln!</span>(<span class="self">self</span>.src, <span class="string">&quot;pub struct {camel} {{&quot;</span>);
         <span class="kw">for </span>(name, (ty, <span class="kw">_</span>)) <span class="kw">in </span><span class="self">self</span>.exports.fields.iter() {
             <span class="macro">uwriteln!</span>(<span class="self">self</span>.src, <span class="string">&quot;{name}: {ty},&quot;</span>);
@@ -1731,7 +1730,7 @@
             <span class="kw">return</span>;
         }
 
-        <span class="kw">let </span>world_camel = resolve.worlds[world].name.to_upper_camel_case();
+        <span class="kw">let </span>world_camel = to_rust_upper_camel_case(<span class="kw-2">&amp;</span>resolve.worlds[world].name);
         <span class="kw">if </span><span class="self">self</span>.opts.async_ {
             <span class="macro">uwriteln!</span>(<span class="self">self</span>.src, <span class="string">&quot;#[wasmtime::component::__internal::async_trait]&quot;</span>)
         }
@@ -1769,11 +1768,11 @@
                     where U: \
             &quot;
         </span>);
-        <span class="kw">let </span>world_camel = resolve.worlds[world].name.to_upper_camel_case();
+        <span class="kw">let </span>world_camel = to_rust_upper_camel_case(<span class="kw-2">&amp;</span>resolve.worlds[world].name);
         <span class="kw">let </span>world_trait = <span class="macro">format!</span>(<span class="string">&quot;{world_camel}Imports&quot;</span>);
         <span class="kw">for </span>(i, name) <span class="kw">in </span>interfaces
             .iter()
-            .map(|n| <span class="macro">format!</span>(<span class="string">&quot;{n}::{}&quot;</span>, n.to_upper_camel_case()))
+            .map(|n| <span class="macro">format!</span>(<span class="string">&quot;{n}::Host&quot;</span>))
             .chain(<span class="kw">if </span>functions.is_empty() {
                 <span class="prelude-val">None
             </span>} <span class="kw">else </span>{
@@ -1959,7 +1958,7 @@
         <span class="self">self</span>.rustdoc(docs);
         <span class="self">self</span>.src.push_str(<span class="string">&quot;wasmtime::component::flags!(\n&quot;</span>);
         <span class="self">self</span>.src
-            .push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{} {{\n&quot;</span>, name.to_upper_camel_case()));
+            .push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{} {{\n&quot;</span>, to_rust_upper_camel_case(name)));
         <span class="kw">for </span>flag <span class="kw">in </span>flags.flags.iter() {
             <span class="comment">// TODO wasmtime-component-macro doesnt support docs for flags rn
             </span><span class="macro">uwrite!</span>(
@@ -2025,7 +2024,7 @@
         <span class="kw">let </span>info = <span class="self">self</span>.info(id);
 
         <span class="kw">for </span>(name, mode) <span class="kw">in </span><span class="self">self</span>.modes_of(id) {
-            <span class="kw">let </span>name = name.to_upper_camel_case();
+            <span class="kw">let </span>name = to_rust_upper_camel_case(<span class="kw-2">&amp;</span>name);
 
             <span class="self">self</span>.rustdoc(docs);
             <span class="kw">let </span>lt = <span class="self">self</span>.lifetime_for(<span class="kw-2">&amp;</span>info, mode);
@@ -2151,14 +2150,14 @@
     <span class="kw">fn </span>type_enum(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: TypeId, name: <span class="kw-2">&amp;</span>str, enum_: <span class="kw-2">&amp;</span>Enum, docs: <span class="kw-2">&amp;</span>Docs) {
         <span class="kw">let </span>info = <span class="self">self</span>.info(id);
 
-        <span class="kw">let </span>name = name.to_upper_camel_case();
+        <span class="kw">let </span>name = to_rust_upper_camel_case(name);
         <span class="self">self</span>.rustdoc(docs);
         <span class="self">self</span>.push_str(<span class="string">&quot;#[derive(wasmtime::component::ComponentType)]\n&quot;</span>);
         <span class="self">self</span>.push_str(<span class="string">&quot;#[derive(wasmtime::component::Lift)]\n&quot;</span>);
         <span class="self">self</span>.push_str(<span class="string">&quot;#[derive(wasmtime::component::Lower)]\n&quot;</span>);
         <span class="self">self</span>.push_str(<span class="string">&quot;#[component(enum)]\n&quot;</span>);
         <span class="self">self</span>.push_str(<span class="string">&quot;#[derive(Clone, Copy, PartialEq, Eq)]\n&quot;</span>);
-        <span class="self">self</span>.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;pub enum {} {{\n&quot;</span>, name.to_upper_camel_case()));
+        <span class="self">self</span>.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;pub enum {} {{\n&quot;</span>, name));
         <span class="kw">for </span>case <span class="kw">in </span>enum_.cases.iter() {
             <span class="self">self</span>.rustdoc(<span class="kw-2">&amp;</span>case.docs);
             <span class="self">self</span>.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;#[component(name = \&quot;{}\&quot;)]&quot;</span>, case.name));
@@ -2321,7 +2320,6 @@
 
     <span class="kw">fn </span>generate_add_to_linker(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: InterfaceId, name: <span class="kw-2">&amp;</span>str) {
         <span class="kw">let </span>iface = <span class="kw-2">&amp;</span><span class="self">self</span>.resolve.interfaces[id];
-        <span class="kw">let </span>camel = name.to_upper_camel_case();
         <span class="kw">let </span>owner = TypeOwner::Interface(id);
 
         <span class="kw">if </span><span class="self">self</span>.gen.opts.async_ {
@@ -2329,16 +2327,16 @@
         }
         <span class="comment">// Generate the `pub trait` which represents the host functionality for
         // this import.
-        </span><span class="macro">uwriteln!</span>(<span class="self">self</span>.src, <span class="string">&quot;pub trait {camel}: Sized {{&quot;</span>);
+        </span><span class="macro">uwriteln!</span>(<span class="self">self</span>.src, <span class="string">&quot;pub trait Host: Sized {{&quot;</span>);
         <span class="kw">for </span>(<span class="kw">_</span>, func) <span class="kw">in </span>iface.functions.iter() {
             <span class="self">self</span>.generate_function_trait_sig(owner, func);
         }
         <span class="macro">uwriteln!</span>(<span class="self">self</span>.src, <span class="string">&quot;}}&quot;</span>);
 
         <span class="kw">let </span>where_clause = <span class="kw">if </span><span class="self">self</span>.gen.opts.async_ {
-            <span class="macro">format!</span>(<span class="string">&quot;T: Send, U: {camel} + Send&quot;</span>)
+            <span class="macro">format!</span>(<span class="string">&quot;T: Send, U: Host + Send&quot;</span>)
         } <span class="kw">else </span>{
-            <span class="macro">format!</span>(<span class="string">&quot;U: {camel}&quot;</span>)
+            <span class="macro">format!</span>(<span class="string">&quot;U: Host&quot;</span>)
         };
         <span class="macro">uwriteln!</span>(
             <span class="self">self</span>.src,
