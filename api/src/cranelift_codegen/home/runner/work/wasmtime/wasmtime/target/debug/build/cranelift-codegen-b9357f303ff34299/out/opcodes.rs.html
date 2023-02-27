@@ -4831,23 +4831,6 @@
 <a href="#4831" id="4831">4831</a>
 <a href="#4832" id="4832">4832</a>
 <a href="#4833" id="4833">4833</a>
-<a href="#4834" id="4834">4834</a>
-<a href="#4835" id="4835">4835</a>
-<a href="#4836" id="4836">4836</a>
-<a href="#4837" id="4837">4837</a>
-<a href="#4838" id="4838">4838</a>
-<a href="#4839" id="4839">4839</a>
-<a href="#4840" id="4840">4840</a>
-<a href="#4841" id="4841">4841</a>
-<a href="#4842" id="4842">4842</a>
-<a href="#4843" id="4843">4843</a>
-<a href="#4844" id="4844">4844</a>
-<a href="#4845" id="4845">4845</a>
-<a href="#4846" id="4846">4846</a>
-<a href="#4847" id="4847">4847</a>
-<a href="#4848" id="4848">4848</a>
-<a href="#4849" id="4849">4849</a>
-<a href="#4850" id="4850">4850</a>
 </pre><pre class="rust"><code><span class="doccomment">/// An instruction format
 ///
 /// Every opcode has a corresponding instruction format
@@ -6741,8 +6724,6 @@
     <span class="doccomment">/// `a = iadd_pairwise x, y`. (Binary)
     /// Type inferred from `x`.
     </span>IaddPairwise,
-    <span class="doccomment">/// `a = widening_pairwise_dot_product_s x, y`. (Binary)
-    </span>WideningPairwiseDotProductS,
     <span class="doccomment">/// `a = uextend x`. (Unary)
     </span>Uextend,
     <span class="doccomment">/// `a = sextend x`. (Unary)
@@ -6969,7 +6950,7 @@
 
 }
 
-<span class="kw">const </span>OPCODE_FORMAT: [InstructionFormat; <span class="number">182</span>] = [
+<span class="kw">const </span>OPCODE_FORMAT: [InstructionFormat; <span class="number">181</span>] = [
     InstructionFormat::Jump, <span class="comment">// jump
     </span>InstructionFormat::Brif, <span class="comment">// brif
     </span>InstructionFormat::BranchTable, <span class="comment">// br_table
@@ -7130,7 +7111,6 @@
     </span>InstructionFormat::Unary, <span class="comment">// uwiden_low
     </span>InstructionFormat::Unary, <span class="comment">// uwiden_high
     </span>InstructionFormat::Binary, <span class="comment">// iadd_pairwise
-    </span>InstructionFormat::Binary, <span class="comment">// widening_pairwise_dot_product_s
     </span>InstructionFormat::Unary, <span class="comment">// uextend
     </span>InstructionFormat::Unary, <span class="comment">// sextend
     </span>InstructionFormat::Unary, <span class="comment">// fpromote
@@ -7699,9 +7679,6 @@
         Opcode::Vselect =&gt; {
             <span class="string">&quot;vselect&quot;
         </span>}
-        Opcode::WideningPairwiseDotProductS =&gt; {
-            <span class="string">&quot;widening_pairwise_dot_product_s&quot;
-        </span>}
     }
 }
 
@@ -7940,7 +7917,7 @@
     <span class="prelude-val">None</span>,
     <span class="prelude-val">Some</span>(Opcode::F32const),
     <span class="prelude-val">Some</span>(Opcode::UdivImm),
-    <span class="prelude-val">Some</span>(Opcode::WideningPairwiseDotProductS),
+    <span class="prelude-val">None</span>,
     <span class="prelude-val">Some</span>(Opcode::Splat),
     <span class="prelude-val">Some</span>(Opcode::IaddCout),
     <span class="prelude-val">Some</span>(Opcode::Snarrow),
@@ -7966,7 +7943,7 @@
 
 
 <span class="comment">// Table of opcode constraints.
-</span><span class="kw">const </span>OPCODE_CONSTRAINTS: [OpcodeConstraints; <span class="number">182</span>] = [
+</span><span class="kw">const </span>OPCODE_CONSTRAINTS: [OpcodeConstraints; <span class="number">181</span>] = [
     <span class="comment">// Jump: fixed_results=0, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=0
     // Constraints=[]
     </span>OpcodeConstraints {
@@ -9235,13 +9212,6 @@
         typeset_offset: <span class="number">19</span>,
         constraint_offset: <span class="number">0</span>,
     },
-    <span class="comment">// WideningPairwiseDotProductS: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=2
-    // Constraints=[&#39;Concrete(ir::types::I32X4)&#39;, &#39;Concrete(ir::types::I16X8)&#39;, &#39;Concrete(ir::types::I16X8)&#39;]
-    </span>OpcodeConstraints {
-        flags: <span class="number">0x41</span>,
-        typeset_offset: <span class="number">255</span>,
-        constraint_offset: <span class="number">61</span>,
-    },
     <span class="comment">// Uextend: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(0)&#39;]
     // Polymorphic over TypeSet(lanes={1, 2, 4, 8, 16, 32, 64, 128, 256}, ints={8, 16, 32, 64, 128})
@@ -9264,7 +9234,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">20</span>,
-        constraint_offset: <span class="number">64</span>,
+        constraint_offset: <span class="number">60</span>,
     },
     <span class="comment">// Fdemote: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(17)&#39;]
@@ -9272,21 +9242,21 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">20</span>,
-        constraint_offset: <span class="number">64</span>,
+        constraint_offset: <span class="number">60</span>,
     },
     <span class="comment">// Fvdemote: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Concrete(ir::types::F32X4)&#39;, &#39;Concrete(ir::types::F64X2)&#39;]
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">255</span>,
-        constraint_offset: <span class="number">66</span>,
+        constraint_offset: <span class="number">62</span>,
     },
     <span class="comment">// FvpromoteLow: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Concrete(ir::types::F64X2)&#39;, &#39;Concrete(ir::types::F32X4)&#39;]
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">255</span>,
-        constraint_offset: <span class="number">67</span>,
+        constraint_offset: <span class="number">63</span>,
     },
     <span class="comment">// FcvtToUint: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(21)&#39;]
@@ -9294,7 +9264,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">3</span>,
-        constraint_offset: <span class="number">69</span>,
+        constraint_offset: <span class="number">65</span>,
     },
     <span class="comment">// FcvtToSint: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(21)&#39;]
@@ -9302,7 +9272,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">3</span>,
-        constraint_offset: <span class="number">69</span>,
+        constraint_offset: <span class="number">65</span>,
     },
     <span class="comment">// FcvtToUintSat: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(17)&#39;]
@@ -9310,7 +9280,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">3</span>,
-        constraint_offset: <span class="number">64</span>,
+        constraint_offset: <span class="number">60</span>,
     },
     <span class="comment">// FcvtToSintSat: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(17)&#39;]
@@ -9318,7 +9288,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">3</span>,
-        constraint_offset: <span class="number">64</span>,
+        constraint_offset: <span class="number">60</span>,
     },
     <span class="comment">// FcvtFromUint: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(3)&#39;]
@@ -9350,7 +9320,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x3a</span>,
         typeset_offset: <span class="number">22</span>,
-        constraint_offset: <span class="number">71</span>,
+        constraint_offset: <span class="number">67</span>,
     },
     <span class="comment">// Iconcat: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=true, fixed_values=2
     // Constraints=[&#39;DoubleWidth&#39;, &#39;Same&#39;, &#39;Same&#39;]
@@ -9358,7 +9328,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x59</span>,
         typeset_offset: <span class="number">9</span>,
-        constraint_offset: <span class="number">74</span>,
+        constraint_offset: <span class="number">70</span>,
     },
     <span class="comment">// AtomicRmw: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=2
     // Constraints=[&#39;Same&#39;, &#39;Free(1)&#39;, &#39;Same&#39;]
@@ -9366,7 +9336,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x41</span>,
         typeset_offset: <span class="number">23</span>,
-        constraint_offset: <span class="number">76</span>,
+        constraint_offset: <span class="number">72</span>,
     },
     <span class="comment">// AtomicCas: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=3
     // Constraints=[&#39;Same&#39;, &#39;Free(1)&#39;, &#39;Same&#39;, &#39;Same&#39;]
@@ -9374,7 +9344,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x69</span>,
         typeset_offset: <span class="number">23</span>,
-        constraint_offset: <span class="number">76</span>,
+        constraint_offset: <span class="number">72</span>,
     },
     <span class="comment">// AtomicLoad: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(1)&#39;]
@@ -9405,7 +9375,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x39</span>,
         typeset_offset: <span class="number">24</span>,
-        constraint_offset: <span class="number">80</span>,
+        constraint_offset: <span class="number">76</span>,
     },
 ];
 
@@ -9614,7 +9584,7 @@
 ];
 
 <span class="comment">// Table of operand constraint sequences.
-</span><span class="kw">const </span>OPERAND_CONSTRAINTS: [OperandConstraint; <span class="number">82</span>] = [
+</span><span class="kw">const </span>OPERAND_CONSTRAINTS: [OperandConstraint; <span class="number">78</span>] = [
     OperandConstraint::Same,
     OperandConstraint::Same,
     OperandConstraint::Same,
@@ -9675,10 +9645,6 @@
     OperandConstraint::Same,
     OperandConstraint::Same,
     OperandConstraint::MergeLanes,
-    OperandConstraint::Same,
-    OperandConstraint::Concrete(ir::types::I32X4),
-    OperandConstraint::Concrete(ir::types::I16X8),
-    OperandConstraint::Concrete(ir::types::I16X8),
     OperandConstraint::Same,
     OperandConstraint::Free(<span class="number">17</span>),
     OperandConstraint::Concrete(ir::types::F32X4),

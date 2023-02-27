@@ -3622,41 +3622,6 @@
 <a href="#3622" id="3622">3622</a>
 <a href="#3623" id="3623">3623</a>
 <a href="#3624" id="3624">3624</a>
-<a href="#3625" id="3625">3625</a>
-<a href="#3626" id="3626">3626</a>
-<a href="#3627" id="3627">3627</a>
-<a href="#3628" id="3628">3628</a>
-<a href="#3629" id="3629">3629</a>
-<a href="#3630" id="3630">3630</a>
-<a href="#3631" id="3631">3631</a>
-<a href="#3632" id="3632">3632</a>
-<a href="#3633" id="3633">3633</a>
-<a href="#3634" id="3634">3634</a>
-<a href="#3635" id="3635">3635</a>
-<a href="#3636" id="3636">3636</a>
-<a href="#3637" id="3637">3637</a>
-<a href="#3638" id="3638">3638</a>
-<a href="#3639" id="3639">3639</a>
-<a href="#3640" id="3640">3640</a>
-<a href="#3641" id="3641">3641</a>
-<a href="#3642" id="3642">3642</a>
-<a href="#3643" id="3643">3643</a>
-<a href="#3644" id="3644">3644</a>
-<a href="#3645" id="3645">3645</a>
-<a href="#3646" id="3646">3646</a>
-<a href="#3647" id="3647">3647</a>
-<a href="#3648" id="3648">3648</a>
-<a href="#3649" id="3649">3649</a>
-<a href="#3650" id="3650">3650</a>
-<a href="#3651" id="3651">3651</a>
-<a href="#3652" id="3652">3652</a>
-<a href="#3653" id="3653">3653</a>
-<a href="#3654" id="3654">3654</a>
-<a href="#3655" id="3655">3655</a>
-<a href="#3656" id="3656">3656</a>
-<a href="#3657" id="3657">3657</a>
-<a href="#3658" id="3658">3658</a>
-<a href="#3659" id="3659">3659</a>
 </pre><pre class="rust"><code><span class="attr">#![allow(non_snake_case)]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::cdsl::instructions::{
@@ -6786,41 +6751,6 @@
         pairwise add results will make up the low half of the resulting vector while
         the second operand pairwise add results will make up the upper half of the
         resulting vector.
-            &quot;#</span>,
-            <span class="kw-2">&amp;</span>formats.binary,
-        )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
-    );
-
-    <span class="kw">let </span>I16x8 = <span class="kw-2">&amp;</span>TypeVar::new(
-        <span class="string">&quot;I16x8&quot;</span>,
-        <span class="string">&quot;A SIMD vector type containing 8 integer lanes each 16 bits wide.&quot;</span>,
-        TypeSetBuilder::new()
-            .ints(<span class="number">16</span>..<span class="number">16</span>)
-            .simd_lanes(<span class="number">8</span>..<span class="number">8</span>)
-            .includes_scalars(<span class="bool-val">false</span>)
-            .build(),
-    );
-
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, I16x8);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, I16x8);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>I16x8.merge_lanes());
-
-    ig.push(
-        Inst::new(
-            <span class="string">&quot;widening_pairwise_dot_product_s&quot;</span>,
-            <span class="string">r#&quot;
-        Takes corresponding elements in `x` and `y`, performs a sign-extending length-doubling
-        multiplication on them, then adds adjacent pairs of elements to form the result.  For
-        example, if the input vectors are `[x3, x2, x1, x0]` and `[y3, y2, y1, y0]`, it produces
-        the vector `[r1, r0]`, where `r1 = sx(x3) * sx(y3) + sx(x2) * sx(y2)` and
-        `r0 = sx(x1) * sx(y1) + sx(x0) * sx(y0)`, and `sx(n)` sign-extends `n` to twice its width.
-
-        This will double the lane width and halve the number of lanes.  So the resulting
-        vector has the same number of bits as `x` and `y` do (individually).
-
-        See &lt;https://github.com/WebAssembly/simd/pull/127&gt; for background info.
             &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )

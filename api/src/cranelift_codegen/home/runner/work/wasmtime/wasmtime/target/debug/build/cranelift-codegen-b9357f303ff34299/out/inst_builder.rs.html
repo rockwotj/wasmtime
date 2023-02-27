@@ -4205,31 +4205,6 @@
 <a href="#4205" id="4205">4205</a>
 <a href="#4206" id="4206">4206</a>
 <a href="#4207" id="4207">4207</a>
-<a href="#4208" id="4208">4208</a>
-<a href="#4209" id="4209">4209</a>
-<a href="#4210" id="4210">4210</a>
-<a href="#4211" id="4211">4211</a>
-<a href="#4212" id="4212">4212</a>
-<a href="#4213" id="4213">4213</a>
-<a href="#4214" id="4214">4214</a>
-<a href="#4215" id="4215">4215</a>
-<a href="#4216" id="4216">4216</a>
-<a href="#4217" id="4217">4217</a>
-<a href="#4218" id="4218">4218</a>
-<a href="#4219" id="4219">4219</a>
-<a href="#4220" id="4220">4220</a>
-<a href="#4221" id="4221">4221</a>
-<a href="#4222" id="4222">4222</a>
-<a href="#4223" id="4223">4223</a>
-<a href="#4224" id="4224">4224</a>
-<a href="#4225" id="4225">4225</a>
-<a href="#4226" id="4226">4226</a>
-<a href="#4227" id="4227">4227</a>
-<a href="#4228" id="4228">4228</a>
-<a href="#4229" id="4229">4229</a>
-<a href="#4230" id="4230">4230</a>
-<a href="#4231" id="4231">4231</a>
-<a href="#4232" id="4232">4232</a>
 </pre><pre class="rust"><code><span class="doccomment">/// Convenience methods for building instructions.
 ///
 /// The `InstBuilder` trait has one method per instruction opcode for
@@ -7545,31 +7520,6 @@
     </span><span class="kw">fn </span>iadd_pairwise(<span class="self">self</span>, x: ir::Value, y: ir::Value) -&gt; Value {
         <span class="kw">let </span>ctrl_typevar = <span class="self">self</span>.data_flow_graph().value_type(x);
         <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Binary(Opcode::IaddPairwise, ctrl_typevar, x, y);
-        dfg.first_result(inst)
-    }
-
-    <span class="doccomment">/// Takes corresponding elements in `x` and `y`, performs a sign-extending length-doubling
-    /// multiplication on them, then adds adjacent pairs of elements to form the result.  For
-    /// example, if the input vectors are `[x3, x2, x1, x0]` and `[y3, y2, y1, y0]`, it produces
-    /// the vector `[r1, r0]`, where `r1 = sx(x3) * sx(y3) + sx(x2) * sx(y2)` and
-    /// `r0 = sx(x1) * sx(y1) + sx(x0) * sx(y0)`, and `sx(n)` sign-extends `n` to twice its width.
-    ///
-    /// This will double the lane width and halve the number of lanes.  So the resulting
-    /// vector has the same number of bits as `x` and `y` do (individually).
-    ///
-    /// See &lt;https://github.com/WebAssembly/simd/pull/127&gt; for background info.
-    ///
-    /// Inputs:
-    ///
-    /// - x: A SIMD vector type containing 8 integer lanes each 16 bits wide.
-    /// - y: A SIMD vector type containing 8 integer lanes each 16 bits wide.
-    ///
-    /// Outputs:
-    ///
-    /// - a:
-    </span><span class="attr">#[allow(non_snake_case)]
-    </span><span class="kw">fn </span>widening_pairwise_dot_product_s(<span class="self">self</span>, x: ir::Value, y: ir::Value) -&gt; Value {
-        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Binary(Opcode::WideningPairwiseDotProductS, types::INVALID, x, y);
         dfg.first_result(inst)
     }
 

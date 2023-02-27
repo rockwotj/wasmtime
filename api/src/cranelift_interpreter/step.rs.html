@@ -1638,26 +1638,6 @@
 <a href="#1638" id="1638">1638</a>
 <a href="#1639" id="1639">1639</a>
 <a href="#1640" id="1640">1640</a>
-<a href="#1641" id="1641">1641</a>
-<a href="#1642" id="1642">1642</a>
-<a href="#1643" id="1643">1643</a>
-<a href="#1644" id="1644">1644</a>
-<a href="#1645" id="1645">1645</a>
-<a href="#1646" id="1646">1646</a>
-<a href="#1647" id="1647">1647</a>
-<a href="#1648" id="1648">1648</a>
-<a href="#1649" id="1649">1649</a>
-<a href="#1650" id="1650">1650</a>
-<a href="#1651" id="1651">1651</a>
-<a href="#1652" id="1652">1652</a>
-<a href="#1653" id="1653">1653</a>
-<a href="#1654" id="1654">1654</a>
-<a href="#1655" id="1655">1655</a>
-<a href="#1656" id="1656">1656</a>
-<a href="#1657" id="1657">1657</a>
-<a href="#1658" id="1658">1658</a>
-<a href="#1659" id="1659">1659</a>
-<a href="#1660" id="1660">1660</a>
 </pre><pre class="rust"><code><span class="doccomment">//! The [step] function interprets a single Cranelift instruction given its [State] and
 //! [InstructionContext]; the interpretation is generic over [Value]s.
 </span><span class="kw">use </span><span class="kw">crate</span>::address::{Address, AddressSize};
@@ -2967,26 +2947,6 @@
             <span class="comment">// The interpreter always runs in a single threaded context, so we don&#39;t
             // actually need to emit a fence here.
             </span>ControlFlow::Continue
-        }
-        Opcode::WideningPairwiseDotProductS =&gt; {
-            <span class="kw">let </span>ctrl_ty = types::I16X8;
-            <span class="kw">let </span>new_type = ctrl_ty.merge_lanes().unwrap();
-            <span class="kw">let </span>arg0 = extractlanes(<span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>, ctrl_ty)<span class="question-mark">?</span>;
-            <span class="kw">let </span>arg1 = extractlanes(<span class="kw-2">&amp;</span>arg(<span class="number">1</span>)<span class="question-mark">?</span>, ctrl_ty)<span class="question-mark">?</span>;
-            <span class="kw">let </span>new_vec = arg0
-                .chunks(<span class="number">2</span>)
-                .into_iter()
-                .zip(arg1.chunks(<span class="number">2</span>))
-                .into_iter()
-                .map(|(x, y)| {
-                    <span class="kw">let </span><span class="kw-2">mut </span>z = <span class="number">0i128</span>;
-                    <span class="kw">for </span>(lhs, rhs) <span class="kw">in </span>x.into_iter().zip(y.into_iter()) {
-                        z += lhs.clone().into_int()<span class="question-mark">? </span>* rhs.clone().into_int()<span class="question-mark">?</span>;
-                    }
-                    Value::int(z, new_type.lane_type())
-                })
-                .collect::&lt;ValueResult&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;&gt;()<span class="question-mark">?</span>;
-            assign(vectorizelanes(<span class="kw-2">&amp;</span>new_vec, new_type)<span class="question-mark">?</span>)
         }
         Opcode::SqmulRoundSat =&gt; {
             <span class="kw">let </span>lane_type = ctrl_ty.lane_type();

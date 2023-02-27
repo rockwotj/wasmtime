@@ -3279,6 +3279,12 @@
 <a href="#3279" id="3279">3279</a>
 <a href="#3280" id="3280">3280</a>
 <a href="#3281" id="3281">3281</a>
+<a href="#3282" id="3282">3282</a>
+<a href="#3283" id="3283">3283</a>
+<a href="#3284" id="3284">3284</a>
+<a href="#3285" id="3285">3285</a>
+<a href="#3286" id="3286">3286</a>
+<a href="#3287" id="3287">3287</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module contains the bulk of the interesting code performing the translation between
 //! WebAssembly and Cranelift IR.
 //!
@@ -5340,7 +5346,13 @@
         }
         Operator::I32x4DotI16x8S =&gt; {
             <span class="kw">let </span>(a, b) = pop2_with_bitcast(state, I16X8, builder);
-            state.push1(builder.ins().widening_pairwise_dot_product_s(a, b));
+            <span class="kw">let </span>alow = builder.ins().swiden_low(a);
+            <span class="kw">let </span>blow = builder.ins().swiden_low(b);
+            <span class="kw">let </span>low = builder.ins().imul(alow, blow);
+            <span class="kw">let </span>ahigh = builder.ins().swiden_high(a);
+            <span class="kw">let </span>bhigh = builder.ins().swiden_high(b);
+            <span class="kw">let </span>high = builder.ins().imul(ahigh, bhigh);
+            state.push1(builder.ins().iadd_pairwise(low, high));
         }
         Operator::I8x16Popcnt =&gt; {
             <span class="kw">let </span>arg = pop1_with_bitcast(state, type_of(op), builder);
