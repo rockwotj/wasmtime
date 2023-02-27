@@ -76,7 +76,7 @@ default world hello-world {
 
     <span class="comment">// Here our `greet` function doesn&#39;t take any parameters for the component,
     // but in the Wasmtime embedding API the first argument is always a `Store`.
-    </span>bindings.greet(<span class="kw-2">&amp;mut </span>store)<span class="question-mark">?</span>;
+    </span>bindings.call_greet(<span class="kw-2">&amp;mut </span>store)<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
 <p>The function signatures within generated traits and on generated exports
