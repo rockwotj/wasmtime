@@ -107,10 +107,51 @@
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
 <a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
 </pre><pre class="rust"><code><span class="kw">use </span>cranelift_codegen::binemit::Reloc;
 <span class="kw">use </span>cranelift_module::ModuleExtName;
 <span class="kw">use </span>cranelift_module::ModuleReloc;
 <span class="kw">use </span>std::convert::TryFrom;
+
+<span class="doccomment">/// Reads a 32bit instruction at `iptr`, and writes it again after
+/// being altered by `modifier`
+</span><span class="kw">unsafe fn </span>modify_inst32(iptr: <span class="kw-2">*mut </span>u32, modifier: <span class="kw">impl </span>FnOnce(u32) -&gt; u32) {
+    <span class="kw">let </span>inst = iptr.read_unaligned();
+    <span class="kw">let </span>new_inst = modifier(inst);
+    iptr.write_unaligned(new_inst);
+}
 
 <span class="attr">#[derive(Clone)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>CompiledBlob {
@@ -206,9 +247,34 @@
                     // immediate offset argument.
                     </span><span class="kw">let </span>chop = <span class="number">32 </span>- <span class="number">26</span>;
                     <span class="kw">let </span>imm26 = (diff <span class="kw">as </span>u32) &lt;&lt; chop &gt;&gt; chop;
-                    <span class="kw">let </span>ins = <span class="kw">unsafe </span>{ iptr.read_unaligned() } | imm26;
+                    <span class="kw">unsafe </span>{ modify_inst32(iptr, |inst| inst | imm26) };
+                }
+                Reloc::RiscvCall =&gt; {
+                    <span class="comment">// A R_RISCV_CALL relocation expects auipc+jalr instruction pair.
+                    // It is the equivalent of two relocations:
+                    // 1. R_RISCV_PCREL_HI20 on the `auipc`
+                    // 2. R_RISCV_PCREL_LO12_I on the `jalr`
+
+                    </span><span class="kw">let </span>base = get_address(name);
+                    <span class="kw">let </span>what = <span class="kw">unsafe </span>{ base.offset(isize::try_from(addend).unwrap()) };
+                    <span class="kw">let </span>pcrel = i32::try_from((what <span class="kw">as </span>isize) - (at <span class="kw">as </span>isize)).unwrap() <span class="kw">as </span>u32;
+
+                    <span class="comment">// See https://github.com/riscv-non-isa/riscv-elf-psabi-doc/blob/master/riscv-elf.adoc#pc-relative-symbol-addresses
+                    // for a better explanation of the following code.
+                    //
+                    // Unlike the regular symbol relocations, here both &quot;sub-relocations&quot; point
+                    // to the same address.
+                    </span><span class="kw">let </span>hi20 = pcrel.wrapping_add(<span class="number">0x800</span>) &amp; <span class="number">0xFFFFF000</span>;
+                    <span class="kw">let </span>lo12 = (pcrel - hi20) &amp; <span class="number">0xFFF</span>;
+
                     <span class="kw">unsafe </span>{
-                        iptr.write_unaligned(ins);
+                        <span class="comment">// Do a R_RISCV_PCREL_HI20 on the `auipc`
+                        </span><span class="kw">let </span>auipc_addr = at <span class="kw">as </span><span class="kw-2">*mut </span>u32;
+                        modify_inst32(auipc_addr, |auipc| (auipc &amp; <span class="number">0xFFF</span>) | hi20);
+
+                        <span class="comment">// Do a R_RISCV_PCREL_LO12_I on the `jalr`
+                        </span><span class="kw">let </span>jalr_addr = at.offset(<span class="number">4</span>) <span class="kw">as </span><span class="kw-2">*mut </span>u32;
+                        modify_inst32(jalr_addr, |jalr| (jalr &amp; <span class="number">0xFFFFF</span>) | (lo12 &lt;&lt; <span class="number">20</span>));
                     }
                 }
                 <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(),
