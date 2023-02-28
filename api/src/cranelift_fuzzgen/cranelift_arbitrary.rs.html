@@ -92,6 +92,26 @@
 <a href="#92" id="92">92</a>
 <a href="#93" id="93">93</a>
 <a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::codegen::ir::{ArgumentExtension, ArgumentPurpose};
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>cranelift::codegen::data_value::DataValue;
@@ -101,27 +121,39 @@
 
 <span class="kw">use </span>arbitrary::Unstructured;
 <span class="kw">use </span>cranelift::prelude::{Ieee32, Ieee64};
+<span class="kw">use </span>target_lexicon::Architecture;
 
 <span class="doccomment">/// A trait for generating random Cranelift datastructures.
 </span><span class="kw">pub trait </span>CraneliftArbitrary {
-    <span class="kw">fn </span>_type(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Type&gt;;
+    <span class="kw">fn </span>_type(<span class="kw-2">&amp;mut </span><span class="self">self</span>, architecture: Architecture) -&gt; <span class="prelude-ty">Result</span>&lt;Type&gt;;
     <span class="kw">fn </span>callconv(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CallConv&gt;;
-    <span class="kw">fn </span>abi_param(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;AbiParam&gt;;
-    <span class="kw">fn </span>signature(<span class="kw-2">&amp;mut </span><span class="self">self</span>, max_params: usize, max_rets: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Signature&gt;;
+    <span class="kw">fn </span>abi_param(<span class="kw-2">&amp;mut </span><span class="self">self</span>, architecture: Architecture) -&gt; <span class="prelude-ty">Result</span>&lt;AbiParam&gt;;
+    <span class="kw">fn </span>signature(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        architecture: Architecture,
+        max_params: usize,
+        max_rets: usize,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Signature&gt;;
     <span class="kw">fn </span>datavalue(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type) -&gt; <span class="prelude-ty">Result</span>&lt;DataValue&gt;;
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CraneliftArbitrary <span class="kw">for </span><span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>_type(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Type&gt; {
+    <span class="kw">fn </span>_type(<span class="kw-2">&amp;mut </span><span class="self">self</span>, architecture: Architecture) -&gt; <span class="prelude-ty">Result</span>&lt;Type&gt; {
         <span class="comment">// TODO: It would be nice if we could get these directly from cranelift
-        </span><span class="kw">let </span>scalars = [
-            I8, I16, I32, I64, I128, F32, F64,
-            <span class="comment">// R32, R64,
-        </span>];
-        <span class="comment">// TODO: vector types
+        // TODO: RISCV does not support SIMD yet
+        </span><span class="kw">let </span>supports_simd = !<span class="macro">matches!</span>(architecture, Architecture::Riscv64(<span class="kw">_</span>));
+        <span class="kw">let </span>choices = <span class="kw">if </span>supports_simd {
+            <span class="kw-2">&amp;</span>[
+                I8, I16, I32, I64, I128, <span class="comment">// Scalar Integers
+                </span>F32, F64, <span class="comment">// Scalar Floats
+                </span>I8X16, I16X8, I32X4, I64X2, <span class="comment">// SIMD Integers
+                </span>F32X4, F64X2, <span class="comment">// SIMD Floats
+            </span>][..]
+        } <span class="kw">else </span>{
+            <span class="kw-2">&amp;</span>[I8, I16, I32, I64, I128, F32, F64][..]
+        };
 
-        </span><span class="kw">let </span>ty = <span class="self">self</span>.choose(<span class="kw-2">&amp;</span>scalars[..])<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="kw-2">*</span>ty)
+        <span class="prelude-val">Ok</span>(<span class="kw-2">*</span><span class="self">self</span>.choose(choices)<span class="question-mark">?</span>)
     }
 
     <span class="kw">fn </span>callconv(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CallConv&gt; {
@@ -129,8 +161,8 @@
         </span><span class="prelude-val">Ok</span>(CallConv::SystemV)
     }
 
-    <span class="kw">fn </span>abi_param(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;AbiParam&gt; {
-        <span class="kw">let </span>value_type = <span class="self">self</span>._type()<span class="question-mark">?</span>;
+    <span class="kw">fn </span>abi_param(<span class="kw-2">&amp;mut </span><span class="self">self</span>, architecture: Architecture) -&gt; <span class="prelude-ty">Result</span>&lt;AbiParam&gt; {
+        <span class="kw">let </span>value_type = <span class="self">self</span>._type(architecture)<span class="question-mark">?</span>;
         <span class="comment">// TODO: There are more argument purposes to be explored...
         </span><span class="kw">let </span>purpose = ArgumentPurpose::Normal;
         <span class="kw">let </span>extension = <span class="kw">if </span>value_type.is_int() {
@@ -150,16 +182,21 @@
         })
     }
 
-    <span class="kw">fn </span>signature(<span class="kw-2">&amp;mut </span><span class="self">self</span>, max_params: usize, max_rets: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Signature&gt; {
+    <span class="kw">fn </span>signature(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        architecture: Architecture,
+        max_params: usize,
+        max_rets: usize,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Signature&gt; {
         <span class="kw">let </span>callconv = <span class="self">self</span>.callconv()<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>sig = Signature::new(callconv);
 
         <span class="kw">for _ in </span><span class="number">0</span>..max_params {
-            sig.params.push(<span class="self">self</span>.abi_param()<span class="question-mark">?</span>);
+            sig.params.push(<span class="self">self</span>.abi_param(architecture)<span class="question-mark">?</span>);
         }
 
         <span class="kw">for _ in </span><span class="number">0</span>..max_rets {
-            sig.returns.push(<span class="self">self</span>.abi_param()<span class="question-mark">?</span>);
+            sig.returns.push(<span class="self">self</span>.abi_param(architecture)<span class="question-mark">?</span>);
         }
 
         <span class="prelude-val">Ok</span>(sig)
@@ -182,6 +219,9 @@
             // such as Signaling NaN&#39;s / NaN&#39;s with payload, so generate floats from integers.
             </span>F32 =&gt; DataValue::F32(Ieee32::with_bits(<span class="self">self</span>.arbitrary::&lt;u32&gt;()<span class="question-mark">?</span>)),
             F64 =&gt; DataValue::F64(Ieee64::with_bits(<span class="self">self</span>.arbitrary::&lt;u64&gt;()<span class="question-mark">?</span>)),
+            ty <span class="kw">if </span>ty.is_vector() &amp;&amp; ty.bits() == <span class="number">128 </span>=&gt; {
+                DataValue::V128(<span class="self">self</span>.arbitrary::&lt;[u8; <span class="number">16</span>]&gt;()<span class="question-mark">?</span>)
+            }
             <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(),
         })
     }

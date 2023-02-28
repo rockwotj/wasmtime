@@ -388,6 +388,10 @@
 <a href="#388" id="388">388</a>
 <a href="#389" id="389">389</a>
 <a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::config::Config;
 <span class="kw">use </span><span class="kw">crate</span>::function_generator::FunctionGenerator;
 <span class="kw">use </span><span class="kw">crate</span>::settings::{Flags, OptLevel};
@@ -646,7 +650,9 @@
     <span class="kw">fn </span>generate_func(<span class="kw-2">&amp;mut </span><span class="self">self</span>, target_triple: Triple) -&gt; <span class="prelude-ty">Result</span>&lt;Function&gt; {
         <span class="kw">let </span>max_params = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.signature_params.clone())<span class="question-mark">?</span>;
         <span class="kw">let </span>max_rets = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.signature_rets.clone())<span class="question-mark">?</span>;
-        <span class="kw">let </span>sig = <span class="self">self</span>.u.signature(max_params, max_rets)<span class="question-mark">?</span>;
+        <span class="kw">let </span>sig = <span class="self">self
+            </span>.u
+            .signature(target_triple.architecture, max_params, max_rets)<span class="question-mark">?</span>;
 
         <span class="comment">// Function name must be in a different namespace than TESTFILE_NAMESPACE (0)
         </span><span class="kw">let </span>fname = UserFuncName::user(<span class="number">1</span>, <span class="number">0</span>);
@@ -656,7 +662,9 @@
             .map(|i| {
                 <span class="kw">let </span>max_params = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.signature_params.clone())<span class="question-mark">?</span>;
                 <span class="kw">let </span>max_rets = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.signature_rets.clone())<span class="question-mark">?</span>;
-                <span class="kw">let </span>sig = <span class="self">self</span>.u.signature(max_params, max_rets)<span class="question-mark">?</span>;
+                <span class="kw">let </span>sig = <span class="self">self
+                    </span>.u
+                    .signature(target_triple.architecture, max_params, max_rets)<span class="question-mark">?</span>;
                 <span class="kw">let </span>name = UserExternalName {
                     namespace: <span class="number">2</span>,
                     index: i <span class="kw">as </span>u32,

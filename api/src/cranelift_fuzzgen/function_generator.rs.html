@@ -2017,6 +2017,21 @@
 <a href="#2017" id="2017">2017</a>
 <a href="#2018" id="2018">2018</a>
 <a href="#2019" id="2019">2019</a>
+<a href="#2020" id="2020">2020</a>
+<a href="#2021" id="2021">2021</a>
+<a href="#2022" id="2022">2022</a>
+<a href="#2023" id="2023">2023</a>
+<a href="#2024" id="2024">2024</a>
+<a href="#2025" id="2025">2025</a>
+<a href="#2026" id="2026">2026</a>
+<a href="#2027" id="2027">2027</a>
+<a href="#2028" id="2028">2028</a>
+<a href="#2029" id="2029">2029</a>
+<a href="#2030" id="2030">2030</a>
+<a href="#2031" id="2031">2031</a>
+<a href="#2032" id="2032">2032</a>
+<a href="#2033" id="2033">2033</a>
+<a href="#2034" id="2034">2034</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::config::Config;
 <span class="kw">use </span><span class="kw">crate</span>::cranelift_arbitrary::CraneliftArbitrary;
 <span class="kw">use </span>anyhow::Result;
@@ -2584,6 +2599,12 @@
         }
 
         Architecture::Riscv64(<span class="kw">_</span>) =&gt; {
+            <span class="comment">// RISC-V Does not support SIMD at all
+            </span><span class="kw">let </span>is_simd = args.iter().chain(rets).any(|t| t.is_vector());
+            <span class="kw">if </span>is_simd {
+                <span class="kw">return </span><span class="bool-val">false</span>;
+            }
+
             <span class="macro">exceptions!</span>(
                 <span class="comment">// TODO
                 </span>(Opcode::IaddCout),
@@ -2756,6 +2777,10 @@
     (Opcode::Iabs, <span class="kw-2">&amp;</span>[I32], <span class="kw-2">&amp;</span>[I32], insert_opcode),
     (Opcode::Iabs, <span class="kw-2">&amp;</span>[I64], <span class="kw-2">&amp;</span>[I64], insert_opcode),
     (Opcode::Iabs, <span class="kw-2">&amp;</span>[I128], <span class="kw-2">&amp;</span>[I128], insert_opcode),
+    (Opcode::Iabs, <span class="kw-2">&amp;</span>[I8X16, I8X16], <span class="kw-2">&amp;</span>[I8X16], insert_opcode),
+    (Opcode::Iabs, <span class="kw-2">&amp;</span>[I16X8, I16X8], <span class="kw-2">&amp;</span>[I16X8], insert_opcode),
+    (Opcode::Iabs, <span class="kw-2">&amp;</span>[I32X4, I32X4], <span class="kw-2">&amp;</span>[I32X4], insert_opcode),
+    (Opcode::Iabs, <span class="kw-2">&amp;</span>[I64X2, I64X2], <span class="kw-2">&amp;</span>[I64X2], insert_opcode),
     <span class="comment">// Smin
     </span>(Opcode::Smin, <span class="kw-2">&amp;</span>[I8, I8], <span class="kw-2">&amp;</span>[I8], insert_opcode),
     (Opcode::Smin, <span class="kw-2">&amp;</span>[I16, I16], <span class="kw-2">&amp;</span>[I16], insert_opcode),
@@ -3571,6 +3596,11 @@
             }
             DataValue::F32(f) =&gt; builder.ins().f32const(f),
             DataValue::F64(f) =&gt; builder.ins().f64const(f),
+            DataValue::V128(bytes) =&gt; {
+                <span class="kw">let </span>data = bytes.to_vec().into();
+                <span class="kw">let </span>handle = builder.func.dfg.constants.insert(data);
+                builder.ins().vconst(ty, handle)
+            }
             <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(),
         })
     }
@@ -3941,7 +3971,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>params = Vec::with_capacity(param_count);
         <span class="kw">for _ in </span><span class="number">0</span>..param_count {
-            params.push(<span class="self">self</span>.u._type()<span class="question-mark">?</span>);
+            params.push(<span class="self">self</span>.u._type(<span class="self">self</span>.target_triple.architecture)<span class="question-mark">?</span>);
         }
         <span class="prelude-val">Ok</span>(params)
     }
@@ -3961,7 +3991,7 @@
 
         <span class="comment">// Create a pool of vars that are going to be used in this function
         </span><span class="kw">for _ in </span><span class="number">0</span>..<span class="self">self</span>.param(<span class="kw-2">&amp;</span><span class="self">self</span>.config.vars_per_function)<span class="question-mark">? </span>{
-            <span class="kw">let </span>ty = <span class="self">self</span>.u._type()<span class="question-mark">?</span>;
+            <span class="kw">let </span>ty = <span class="self">self</span>.u._type(<span class="self">self</span>.target_triple.architecture)<span class="question-mark">?</span>;
             <span class="kw">let </span>value = <span class="self">self</span>.generate_const(builder, ty)<span class="question-mark">?</span>;
             vars.push((ty, value));
         }
