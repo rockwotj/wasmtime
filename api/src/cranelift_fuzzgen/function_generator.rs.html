@@ -1976,6 +1976,41 @@
 <a href="#1976" id="1976">1976</a>
 <a href="#1977" id="1977">1977</a>
 <a href="#1978" id="1978">1978</a>
+<a href="#1979" id="1979">1979</a>
+<a href="#1980" id="1980">1980</a>
+<a href="#1981" id="1981">1981</a>
+<a href="#1982" id="1982">1982</a>
+<a href="#1983" id="1983">1983</a>
+<a href="#1984" id="1984">1984</a>
+<a href="#1985" id="1985">1985</a>
+<a href="#1986" id="1986">1986</a>
+<a href="#1987" id="1987">1987</a>
+<a href="#1988" id="1988">1988</a>
+<a href="#1989" id="1989">1989</a>
+<a href="#1990" id="1990">1990</a>
+<a href="#1991" id="1991">1991</a>
+<a href="#1992" id="1992">1992</a>
+<a href="#1993" id="1993">1993</a>
+<a href="#1994" id="1994">1994</a>
+<a href="#1995" id="1995">1995</a>
+<a href="#1996" id="1996">1996</a>
+<a href="#1997" id="1997">1997</a>
+<a href="#1998" id="1998">1998</a>
+<a href="#1999" id="1999">1999</a>
+<a href="#2000" id="2000">2000</a>
+<a href="#2001" id="2001">2001</a>
+<a href="#2002" id="2002">2002</a>
+<a href="#2003" id="2003">2003</a>
+<a href="#2004" id="2004">2004</a>
+<a href="#2005" id="2005">2005</a>
+<a href="#2006" id="2006">2006</a>
+<a href="#2007" id="2007">2007</a>
+<a href="#2008" id="2008">2008</a>
+<a href="#2009" id="2009">2009</a>
+<a href="#2010" id="2010">2010</a>
+<a href="#2011" id="2011">2011</a>
+<a href="#2012" id="2012">2012</a>
+<a href="#2013" id="2013">2013</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::config::Config;
 <span class="kw">use </span><span class="kw">crate</span>::cranelift_arbitrary::CraneliftArbitrary;
 <span class="kw">use </span>anyhow::Result;
@@ -2265,6 +2300,36 @@
         .atomic_rmw(ctrl_type, flags, rmw_op, address, source_val);
 
     builder.def_var(target_var, new_val);
+    <span class="prelude-val">Ok</span>(())
+}
+
+<span class="kw">fn </span>insert_atomic_cas(
+    fgen: <span class="kw-2">&amp;mut </span>FunctionGenerator,
+    builder: <span class="kw-2">&amp;mut </span>FunctionBuilder,
+    <span class="kw">_</span>: Opcode,
+    <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[Type],
+    rets: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[Type],
+) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">let </span>ctrl_type = <span class="kw-2">*</span>rets.first().unwrap();
+    <span class="kw">let </span>type_size = ctrl_type.bytes();
+
+    <span class="kw">let </span>(address, flags, offset) = fgen.generate_address_and_memflags(builder, type_size, <span class="bool-val">true</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// AtomicCas does not directly support offsets, so add the offset to the address separately.
+    </span><span class="kw">let </span>address = builder.ins().iadd_imm(address, i64::from(offset));
+
+    <span class="comment">// Source and Target variables
+    </span><span class="kw">let </span>expected_var = fgen.get_variable_of_type(ctrl_type)<span class="question-mark">?</span>;
+    <span class="kw">let </span>store_var = fgen.get_variable_of_type(ctrl_type)<span class="question-mark">?</span>;
+    <span class="kw">let </span>loaded_var = fgen.get_variable_of_type(ctrl_type)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>expected_val = builder.use_var(expected_var);
+    <span class="kw">let </span>store_val = builder.use_var(store_var);
+    <span class="kw">let </span>new_val = builder
+        .ins()
+        .atomic_cas(flags, address, expected_val, store_val);
+
+    builder.def_var(loaded_var, new_val);
     <span class="prelude-val">Ok</span>(())
 }
 
@@ -3250,6 +3315,11 @@
     (Opcode::AtomicRmw, <span class="kw-2">&amp;</span>[I16, I16], <span class="kw-2">&amp;</span>[I16], insert_atomic_rmw),
     (Opcode::AtomicRmw, <span class="kw-2">&amp;</span>[I32, I32], <span class="kw-2">&amp;</span>[I32], insert_atomic_rmw),
     (Opcode::AtomicRmw, <span class="kw-2">&amp;</span>[I64, I64], <span class="kw-2">&amp;</span>[I64], insert_atomic_rmw),
+    <span class="comment">// AtomicCas
+    </span>(Opcode::AtomicCas, <span class="kw-2">&amp;</span>[I8, I8], <span class="kw-2">&amp;</span>[I8], insert_atomic_cas),
+    (Opcode::AtomicCas, <span class="kw-2">&amp;</span>[I16, I16], <span class="kw-2">&amp;</span>[I16], insert_atomic_cas),
+    (Opcode::AtomicCas, <span class="kw-2">&amp;</span>[I32, I32], <span class="kw-2">&amp;</span>[I32], insert_atomic_cas),
+    (Opcode::AtomicCas, <span class="kw-2">&amp;</span>[I64, I64], <span class="kw-2">&amp;</span>[I64], insert_atomic_cas),
     <span class="comment">// Bitcast
     </span>(Opcode::Bitcast, <span class="kw-2">&amp;</span>[F32], <span class="kw-2">&amp;</span>[I32], insert_bitcast),
     (Opcode::Bitcast, <span class="kw-2">&amp;</span>[I32], <span class="kw-2">&amp;</span>[F32], insert_bitcast),
