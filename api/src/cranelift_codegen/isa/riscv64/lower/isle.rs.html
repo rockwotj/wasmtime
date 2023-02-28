@@ -464,12 +464,27 @@
 <a href="#464" id="464">464</a>
 <a href="#465" id="465">465</a>
 <a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for riscv64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
 </span><span class="attr">#[allow(unused)]
 </span><span class="kw">pub mod </span>generated_code;
-<span class="kw">use </span>generated_code::{Context, MInst};
+<span class="kw">use </span>generated_code::{Context, ExtendOp, MInst};
 
 <span class="comment">// Types that the generated ISLE code uses via `use super::*`.
 </span><span class="kw">use super</span>::{writable_zero_reg, zero_reg};
@@ -526,7 +541,22 @@
             <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
         }
     }
+    <span class="kw">fn </span>intcc_to_extend_op(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cc: <span class="kw-2">&amp;</span>IntCC) -&gt; ExtendOp {
+        <span class="kw">use </span>IntCC::<span class="kw-2">*</span>;
+        <span class="kw">match </span><span class="kw-2">*</span>cc {
+            Equal
+            | NotEqual
+            | UnsignedLessThan
+            | UnsignedGreaterThanOrEqual
+            | UnsignedGreaterThan
+            | UnsignedLessThanOrEqual =&gt; ExtendOp::Zero,
 
+            SignedLessThan
+            | SignedGreaterThanOrEqual
+            | SignedGreaterThan
+            | SignedLessThanOrEqual =&gt; ExtendOp::Signed,
+        }
+    }
     <span class="kw">fn </span>lower_cond_br(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         cc: <span class="kw-2">&amp;</span>IntCC,
