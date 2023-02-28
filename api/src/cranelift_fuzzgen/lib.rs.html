@@ -392,6 +392,49 @@
 <a href="#392" id="392">392</a>
 <a href="#393" id="393">393</a>
 <a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::config::Config;
 <span class="kw">use </span><span class="kw">crate</span>::function_generator::FunctionGenerator;
 <span class="kw">use </span><span class="kw">crate</span>::settings::{Flags, OptLevel};
@@ -470,17 +513,32 @@
         // configurations.
         </span><span class="kw">let </span>target = u.choose(isa::ALL_ARCHITECTURES)<span class="question-mark">?</span>;
         <span class="kw">let </span>builder = isa::lookup_by_name(target).map_err(|<span class="kw">_</span>| arbitrary::Error::IncorrectFormat)<span class="question-mark">?</span>;
+        <span class="kw">let </span>architecture = builder.triple().architecture;
 
         <span class="kw">let </span><span class="kw-2">mut </span>gen = FuzzGen::new(u);
         <span class="kw">let </span>flags = gen
-            .generate_flags(builder.triple().architecture)
+            .generate_flags(architecture)
             .map_err(|<span class="kw">_</span>| arbitrary::Error::IncorrectFormat)<span class="question-mark">?</span>;
         <span class="kw">let </span>isa = builder
             .finish(flags)
             .map_err(|<span class="kw">_</span>| arbitrary::Error::IncorrectFormat)<span class="question-mark">?</span>;
 
+        <span class="comment">// Function name must be in a different namespace than TESTFILE_NAMESPACE (0)
+        </span><span class="kw">let </span>fname = UserFuncName::user(<span class="number">1</span>, <span class="number">0</span>);
+
+        <span class="comment">// We don&#39;t actually generate these functions, we just simulate their signatures and names
+        </span><span class="kw">let </span>func_count = gen.u.int_in_range(gen.config.testcase_funcs.clone())<span class="question-mark">?</span>;
+        <span class="kw">let </span>usercalls = (<span class="number">0</span>..func_count)
+            .map(|i| {
+                <span class="kw">let </span>name = UserExternalName::new(<span class="number">2</span>, i <span class="kw">as </span>u32);
+                <span class="kw">let </span>sig = gen.generate_signature(architecture)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>((name, sig))
+            })
+            .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;(UserExternalName, Signature)&gt;&gt;&gt;()
+            .map_err(|<span class="kw">_</span>| arbitrary::Error::IncorrectFormat)<span class="question-mark">?</span>;
+
         <span class="kw">let </span>func = gen
-            .generate_func(isa.triple().clone())
+            .generate_func(fname, isa.triple().clone(), usercalls)
             .map_err(|<span class="kw">_</span>| arbitrary::Error::IncorrectFormat)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(FunctionWithIsa { isa, func })
@@ -490,8 +548,9 @@
 <span class="kw">pub struct </span>TestCase {
     <span class="doccomment">/// TargetIsa to use when compiling this test case
     </span><span class="kw">pub </span>isa: isa::OwnedTargetIsa,
-    <span class="doccomment">/// Function under test
-    </span><span class="kw">pub </span>func: Function,
+    <span class="doccomment">/// Functions under test
+    /// By convention the first function is the main function.
+    </span><span class="kw">pub </span>functions: Vec&lt;Function&gt;,
     <span class="doccomment">/// Generate multiple test inputs for each test case.
     /// This allows us to get more coverage per compilation, which may be somewhat expensive.
     </span><span class="kw">pub </span>inputs: Vec&lt;TestCaseInput&gt;,
@@ -505,8 +564,14 @@
 
         write_non_default_flags(f, <span class="self">self</span>.isa.flags())<span class="question-mark">?</span>;
 
-        <span class="macro">writeln!</span>(f, <span class="string">&quot;target {}&quot;</span>, <span class="self">self</span>.isa.triple().architecture)<span class="question-mark">?</span>;
-        <span class="macro">writeln!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.func)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(f, <span class="string">&quot;target {}\n&quot;</span>, <span class="self">self</span>.isa.triple().architecture)<span class="question-mark">?</span>;
+
+        <span class="comment">// Print the functions backwards, so that the main function is printed last
+        // and near the test inputs.
+        </span><span class="kw">for </span>func <span class="kw">in </span><span class="self">self</span>.functions.iter().rev() {
+            <span class="macro">writeln!</span>(f, <span class="string">&quot;{}\n&quot;</span>, func)<span class="question-mark">?</span>;
+        }
+
         <span class="macro">writeln!</span>(f, <span class="string">&quot;; Note: the results in the below test cases are simply a placeholder and probably will be wrong\n&quot;</span>)<span class="question-mark">?</span>;
 
         <span class="kw">for </span>input <span class="kw">in </span><span class="self">self</span>.inputs.iter() {
@@ -514,7 +579,7 @@
             // here to figure them out? Should work, however we need to be careful to catch
             // panics in case its the interpreter that is failing.
             // For now create a placeholder output consisting of the zero value for the type
-            </span><span class="kw">let </span>returns = <span class="kw-2">&amp;</span><span class="self">self</span>.func.signature.returns;
+            </span><span class="kw">let </span>returns = <span class="kw-2">&amp;</span><span class="self">self</span>.main().signature.returns;
             <span class="kw">let </span>placeholder_output = returns
                 .iter()
                 .map(|param| DataValue::read_from_slice(<span class="kw-2">&amp;</span>[<span class="number">0</span>; <span class="number">16</span>][..], param.value_type))
@@ -535,7 +600,7 @@
                 .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
                 .join(<span class="string">&quot;, &quot;</span>);
 
-            <span class="macro">writeln!</span>(f, <span class="string">&quot;; run: {}({}){}&quot;</span>, <span class="self">self</span>.func.name, args, test_condition)<span class="question-mark">?</span>;
+            <span class="macro">writeln!</span>(f, <span class="string">&quot;; run: {}({}){}&quot;</span>, <span class="self">self</span>.main().name, args, test_condition)<span class="question-mark">?</span>;
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -547,6 +612,13 @@
         FuzzGen::new(u)
             .generate_host_test()
             .map_err(|<span class="kw">_</span>| arbitrary::Error::IncorrectFormat)
+    }
+}
+
+<span class="kw">impl </span>TestCase {
+    <span class="doccomment">/// Returns the main function of this test case.
+    </span><span class="kw">pub fn </span>main(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Function {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.functions[<span class="number">0</span>]
     }
 }
 
@@ -567,6 +639,12 @@
             u,
             config: Config::default(),
         }
+    }
+
+    <span class="kw">fn </span>generate_signature(<span class="kw-2">&amp;mut </span><span class="self">self</span>, architecture: Architecture) -&gt; <span class="prelude-ty">Result</span>&lt;Signature&gt; {
+        <span class="kw">let </span>max_params = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.signature_params.clone())<span class="question-mark">?</span>;
+        <span class="kw">let </span>max_rets = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.signature_rets.clone())<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.u.signature(architecture, max_params, max_rets)<span class="question-mark">?</span>)
     }
 
     <span class="kw">fn </span>generate_test_inputs(<span class="kw-2">mut </span><span class="self">self</span>, signature: <span class="kw-2">&amp;</span>Signature) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;TestCaseInput&gt;&gt; {
@@ -647,37 +725,19 @@
         <span class="prelude-val">Ok</span>(ctx.func)
     }
 
-    <span class="kw">fn </span>generate_func(<span class="kw-2">&amp;mut </span><span class="self">self</span>, target_triple: Triple) -&gt; <span class="prelude-ty">Result</span>&lt;Function&gt; {
-        <span class="kw">let </span>max_params = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.signature_params.clone())<span class="question-mark">?</span>;
-        <span class="kw">let </span>max_rets = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.signature_rets.clone())<span class="question-mark">?</span>;
-        <span class="kw">let </span>sig = <span class="self">self
-            </span>.u
-            .signature(target_triple.architecture, max_params, max_rets)<span class="question-mark">?</span>;
-
-        <span class="comment">// Function name must be in a different namespace than TESTFILE_NAMESPACE (0)
-        </span><span class="kw">let </span>fname = UserFuncName::user(<span class="number">1</span>, <span class="number">0</span>);
-
-        <span class="comment">// Generate the external functions that we allow calling in this function.
-        </span><span class="kw">let </span>usercalls = (<span class="number">0</span>..<span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.usercalls.clone())<span class="question-mark">?</span>)
-            .map(|i| {
-                <span class="kw">let </span>max_params = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.signature_params.clone())<span class="question-mark">?</span>;
-                <span class="kw">let </span>max_rets = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.signature_rets.clone())<span class="question-mark">?</span>;
-                <span class="kw">let </span>sig = <span class="self">self
-                    </span>.u
-                    .signature(target_triple.architecture, max_params, max_rets)<span class="question-mark">?</span>;
-                <span class="kw">let </span>name = UserExternalName {
-                    namespace: <span class="number">2</span>,
-                    index: i <span class="kw">as </span>u32,
-                };
-                <span class="prelude-val">Ok</span>((name, sig))
-            })
-            .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;(UserExternalName, Signature)&gt;&gt;&gt;()<span class="question-mark">?</span>;
+    <span class="kw">fn </span>generate_func(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        name: UserFuncName,
+        target_triple: Triple,
+        usercalls: Vec&lt;(UserExternalName, Signature)&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Function&gt; {
+        <span class="kw">let </span>sig = <span class="self">self</span>.generate_signature(target_triple.architecture)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>func = FunctionGenerator::new(
             <span class="kw-2">&amp;mut </span><span class="self">self</span>.u,
             <span class="kw-2">&amp;</span><span class="self">self</span>.config,
             target_triple,
-            fname,
+            name,
             sig,
             usercalls,
             ALLOWED_LIBCALLS.to_vec(),
@@ -769,21 +829,47 @@
     }
 
     <span class="kw">pub fn </span>generate_host_test(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;TestCase&gt; {
-        <span class="comment">// If we&#39;re generating test inputs as well as a function, then we&#39;re planning to execute
-        // this function. That means that any function references in it need to exist. We don&#39;t yet
-        // have infrastructure for generating multiple functions, so just don&#39;t generate user call
-        // function references.
-        </span><span class="self">self</span>.config.usercalls = <span class="number">0</span>..=<span class="number">0</span>;
-
         <span class="comment">// TestCase is meant to be consumed by a runner, so we make the assumption here that we&#39;re
         // generating a TargetIsa for the host.
         </span><span class="kw">let </span>builder =
             builder_with_options(<span class="bool-val">true</span>).expect(<span class="string">&quot;Unable to build a TargetIsa for the current host&quot;</span>);
         <span class="kw">let </span>flags = <span class="self">self</span>.generate_flags(builder.triple().architecture)<span class="question-mark">?</span>;
         <span class="kw">let </span>isa = builder.finish(flags)<span class="question-mark">?</span>;
-        <span class="kw">let </span>func = <span class="self">self</span>.generate_func(isa.triple().clone())<span class="question-mark">?</span>;
-        <span class="kw">let </span>inputs = <span class="self">self</span>.generate_test_inputs(<span class="kw-2">&amp;</span>func.signature)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(TestCase { isa, func, inputs })
+
+        <span class="comment">// When generating functions, we allow each function to call any function that has
+        // already been generated. This guarantees that we never have loops in the call graph.
+        // We generate these backwards, and then reverse them so that the main function is at
+        // the start.
+        </span><span class="kw">let </span>func_count = <span class="self">self</span>.u.int_in_range(<span class="self">self</span>.config.testcase_funcs.clone())<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>functions: Vec&lt;Function&gt; = Vec::with_capacity(func_count);
+        <span class="kw">for </span>i <span class="kw">in </span>(<span class="number">0</span>..func_count).rev() {
+            <span class="comment">// Function name must be in a different namespace than TESTFILE_NAMESPACE (0)
+            </span><span class="kw">let </span>fname = UserFuncName::user(<span class="number">1</span>, i <span class="kw">as </span>u32);
+
+            <span class="kw">let </span>usercalls: Vec&lt;(UserExternalName, Signature)&gt; = functions
+                .iter()
+                .map(|f| {
+                    (
+                        f.name.get_user().unwrap().clone(),
+                        f.stencil.signature.clone(),
+                    )
+                })
+                .collect();
+
+            <span class="kw">let </span>func = <span class="self">self</span>.generate_func(fname, isa.triple().clone(), usercalls)<span class="question-mark">?</span>;
+            functions.push(func);
+        }
+        <span class="comment">// Now reverse the functions so that the main function is at the start.
+        </span>functions.reverse();
+
+        <span class="kw">let </span>main = <span class="kw-2">&amp;</span>functions[<span class="number">0</span>];
+        <span class="kw">let </span>inputs = <span class="self">self</span>.generate_test_inputs(<span class="kw-2">&amp;</span>main.signature)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(TestCase {
+            isa,
+            functions,
+            inputs,
+        })
     }
 }
 </code></pre></div>

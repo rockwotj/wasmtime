@@ -104,7 +104,6 @@
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::ops::RangeInclusive;
 
@@ -115,6 +114,8 @@
     /// so we allow the fuzzer to control this by feeding us more or less bytes.
     /// The upper bound here is to prevent too many inputs that cause long test times
     </span><span class="kw">pub </span>max_test_case_inputs: usize,
+    <span class="comment">// Number of functions that we generate per testcase
+    </span><span class="kw">pub </span>testcase_funcs: RangeInclusive&lt;usize&gt;,
     <span class="kw">pub </span>signature_params: RangeInclusive&lt;usize&gt;,
     <span class="kw">pub </span>signature_rets: RangeInclusive&lt;usize&gt;,
     <span class="kw">pub </span>instructions_per_block: RangeInclusive&lt;usize&gt;,
@@ -136,9 +137,6 @@
     /// The size of the range is controlled by `switch_max_range_size`.
     </span><span class="kw">pub </span>switch_cases: RangeInclusive&lt;usize&gt;,
     <span class="kw">pub </span>switch_max_range_size: RangeInclusive&lt;usize&gt;,
-
-    <span class="doccomment">/// Number of distinct functions in the same testsuite that we allow calling per function.
-    </span><span class="kw">pub </span>usercalls: RangeInclusive&lt;usize&gt;,
 
     <span class="doccomment">/// Stack slots.
     /// The combination of these two determines stack usage per function
@@ -177,6 +175,7 @@
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         Config {
             max_test_case_inputs: <span class="number">100</span>,
+            testcase_funcs: <span class="number">1</span>..=<span class="number">8</span>,
             signature_params: <span class="number">0</span>..=<span class="number">16</span>,
             signature_rets: <span class="number">0</span>..=<span class="number">16</span>,
             instructions_per_block: <span class="number">0</span>..=<span class="number">64</span>,
@@ -187,7 +186,6 @@
             switch_cases: <span class="number">0</span>..=<span class="number">64</span>,
             <span class="comment">// Ranges smaller than 2 don&#39;t make sense.
             </span>switch_max_range_size: <span class="number">2</span>..=<span class="number">32</span>,
-            usercalls: <span class="number">0</span>..=<span class="number">8</span>,
             static_stack_slots_per_function: <span class="number">0</span>..=<span class="number">8</span>,
             static_stack_slot_size: <span class="number">0</span>..=<span class="number">128</span>,
             <span class="comment">// We need the mix of sizes that allows us to:
