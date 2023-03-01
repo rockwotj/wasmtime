@@ -2120,6 +2120,14 @@
 <a href="#2120" id="2120">2120</a>
 <a href="#2121" id="2121">2121</a>
 <a href="#2122" id="2122">2122</a>
+<a href="#2123" id="2123">2123</a>
+<a href="#2124" id="2124">2124</a>
+<a href="#2125" id="2125">2125</a>
+<a href="#2126" id="2126">2126</a>
+<a href="#2127" id="2127">2127</a>
+<a href="#2128" id="2128">2128</a>
+<a href="#2129" id="2129">2129</a>
+<a href="#2130" id="2130">2130</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Instruction operand sub-components (aka &quot;parts&quot;): definitions and printing.
 
 </span><span class="kw">use </span><span class="kw">super</span>::regs::{<span class="self">self</span>};
@@ -3237,6 +3245,8 @@
     Unpcklps,
     Xorps,
     Xorpd,
+    Phaddw,
+    Phaddd,
 }
 
 <span class="kw">impl </span>SseOpcode {
@@ -3383,7 +3393,9 @@
             | SseOpcode::Pabsd
             | SseOpcode::Palignr
             | SseOpcode::Pmulhrsw
-            | SseOpcode::Pshufb =&gt; SSSE3,
+            | SseOpcode::Pshufb
+            | SseOpcode::Phaddw
+            | SseOpcode::Phaddd =&gt; SSSE3,
 
             SseOpcode::Blendvpd
             | SseOpcode::Blendvps
@@ -3617,6 +3629,8 @@
             SseOpcode::Unpcklps =&gt; <span class="string">&quot;unpcklps&quot;</span>,
             SseOpcode::Xorps =&gt; <span class="string">&quot;xorps&quot;</span>,
             SseOpcode::Xorpd =&gt; <span class="string">&quot;xorpd&quot;</span>,
+            SseOpcode::Phaddw =&gt; <span class="string">&quot;phaddw&quot;</span>,
+            SseOpcode::Phaddd =&gt; <span class="string">&quot;phaddd&quot;</span>,
         };
         <span class="macro">write!</span>(fmt, <span class="string">&quot;{}&quot;</span>, name)
     }
@@ -3783,7 +3797,9 @@
             | AvxOpcode::Vcvtpd2ps
             | AvxOpcode::Vcvtps2pd
             | AvxOpcode::Vcvttpd2dq
-            | AvxOpcode::Vcvttps2dq =&gt; {
+            | AvxOpcode::Vcvttps2dq
+            | AvxOpcode::Vphaddw
+            | AvxOpcode::Vphaddd =&gt; {
                 <span class="macro">smallvec!</span>[InstructionSet::AVX]
             }
         }
