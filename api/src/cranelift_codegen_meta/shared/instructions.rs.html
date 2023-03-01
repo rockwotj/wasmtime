@@ -3622,6 +3622,8 @@
 <a href="#3622" id="3622">3622</a>
 <a href="#3623" id="3623">3623</a>
 <a href="#3624" id="3624">3624</a>
+<a href="#3625" id="3625">3625</a>
+<a href="#3626" id="3626">3626</a>
 </pre><pre class="rust"><code><span class="attr">#![allow(non_snake_case)]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::cdsl::instructions::{
@@ -3991,6 +3993,7 @@
     );
     <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, I8x16).with_doc(<span class="string">&quot;Vector to modify by re-arranging lanes&quot;</span>);
     <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, I8x16).with_doc(<span class="string">&quot;Mask for re-arranging lanes&quot;</span>);
+    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, I8x16);
 
     ig.push(
         Inst::new(
@@ -4012,6 +4015,7 @@
     <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, TxN).with_doc(<span class="string">&quot;The vector to modify&quot;</span>);
     <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, <span class="kw-2">&amp;</span>TxN.lane_of()).with_doc(<span class="string">&quot;New lane value&quot;</span>);
     <span class="kw">let </span>Idx = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;Idx&quot;</span>, <span class="kw-2">&amp;</span>imm.uimm8).with_doc(<span class="string">&quot;Lane index&quot;</span>);
+    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, TxN);
 
     ig.push(
         Inst::new(

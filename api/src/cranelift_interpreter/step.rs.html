@@ -2667,7 +2667,7 @@
                     new[i] = x[s[i] <span class="kw">as </span>usize];
                 } <span class="comment">// else leave as 0
             </span>}
-            assign(Value::vector(new, ctrl_ty)<span class="question-mark">?</span>)
+            assign(Value::vector(new, types::I8X16)<span class="question-mark">?</span>)
         }
         Opcode::Splat =&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>new_vector = SimdVec::new();

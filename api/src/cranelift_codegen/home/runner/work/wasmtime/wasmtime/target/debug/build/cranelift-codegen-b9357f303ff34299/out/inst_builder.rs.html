@@ -4204,7 +4204,6 @@
 <a href="#4204" id="4204">4204</a>
 <a href="#4205" id="4205">4205</a>
 <a href="#4206" id="4206">4206</a>
-<a href="#4207" id="4207">4207</a>
 </pre><pre class="rust"><code><span class="doccomment">/// Convenience methods for building instructions.
 ///
 /// The `InstBuilder` trait has one method per instruction opcode for
@@ -4530,16 +4529,15 @@
     ///
     /// Inputs:
     ///
-    /// - TxN (controlling type variable): A SIMD vector type
     /// - x: Vector to modify by re-arranging lanes
     /// - y: Mask for re-arranging lanes
     ///
     /// Outputs:
     ///
-    /// - a: A SIMD vector type
+    /// - a: A SIMD vector type consisting of 16 lanes of 8-bit integers
     </span><span class="attr">#[allow(non_snake_case)]
-    </span><span class="kw">fn </span>swizzle(<span class="self">self</span>, TxN: <span class="kw">crate</span>::ir::Type, x: ir::Value, y: ir::Value) -&gt; Value {
-        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Binary(Opcode::Swizzle, TxN, x, y);
+    </span><span class="kw">fn </span>swizzle(<span class="self">self</span>, x: ir::Value, y: ir::Value) -&gt; Value {
+        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Binary(Opcode::Swizzle, types::INVALID, x, y);
         dfg.first_result(inst)
     }
 
