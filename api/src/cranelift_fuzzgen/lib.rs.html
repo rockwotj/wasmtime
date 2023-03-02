@@ -582,7 +582,7 @@
             </span><span class="kw">let </span>returns = <span class="kw-2">&amp;</span><span class="self">self</span>.main().signature.returns;
             <span class="kw">let </span>placeholder_output = returns
                 .iter()
-                .map(|param| DataValue::read_from_slice(<span class="kw-2">&amp;</span>[<span class="number">0</span>; <span class="number">16</span>][..], param.value_type))
+                .map(|param| DataValue::read_from_slice_ne(<span class="kw-2">&amp;</span>[<span class="number">0</span>; <span class="number">16</span>][..], param.value_type))
                 .map(|val| <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, val))
                 .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
                 .join(<span class="string">&quot;, &quot;</span>);

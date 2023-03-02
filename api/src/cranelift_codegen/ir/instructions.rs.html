@@ -941,6 +941,8 @@
 <a href="#941" id="941">941</a>
 <a href="#942" id="942">942</a>
 <a href="#943" id="943">943</a>
+<a href="#944" id="944">944</a>
+<a href="#945" id="945">945</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Instruction formats and opcodes.
 //!
 //! The `instructions` module contains definitions for instruction formats, opcodes, and the
@@ -1346,7 +1348,9 @@
             <span class="kw-2">&amp;</span>InstructionData::Load { flags, .. }
             | <span class="kw-2">&amp;</span>InstructionData::LoadNoOffset { flags, .. }
             | <span class="kw-2">&amp;</span>InstructionData::Store { flags, .. }
-            | <span class="kw-2">&amp;</span>InstructionData::StoreNoOffset { flags, .. } =&gt; <span class="prelude-val">Some</span>(flags),
+            | <span class="kw-2">&amp;</span>InstructionData::StoreNoOffset { flags, .. }
+            | <span class="kw-2">&amp;</span>InstructionData::AtomicCas { flags, .. }
+            | <span class="kw-2">&amp;</span>InstructionData::AtomicRmw { flags, .. } =&gt; <span class="prelude-val">Some</span>(flags),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }

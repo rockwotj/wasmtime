@@ -942,6 +942,30 @@
 <a href="#942" id="942">942</a>
 <a href="#943" id="943">943</a>
 <a href="#944" id="944">944</a>
+<a href="#945" id="945">945</a>
+<a href="#946" id="946">946</a>
+<a href="#947" id="947">947</a>
+<a href="#948" id="948">948</a>
+<a href="#949" id="949">949</a>
+<a href="#950" id="950">950</a>
+<a href="#951" id="951">951</a>
+<a href="#952" id="952">952</a>
+<a href="#953" id="953">953</a>
+<a href="#954" id="954">954</a>
+<a href="#955" id="955">955</a>
+<a href="#956" id="956">956</a>
+<a href="#957" id="957">957</a>
+<a href="#958" id="958">958</a>
+<a href="#959" id="959">959</a>
+<a href="#960" id="960">960</a>
+<a href="#961" id="961">961</a>
+<a href="#962" id="962">962</a>
+<a href="#963" id="963">963</a>
+<a href="#964" id="964">964</a>
+<a href="#965" id="965">965</a>
+<a href="#966" id="966">966</a>
+<a href="#967" id="967">967</a>
+<a href="#968" id="968">968</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Cranelift IR interpreter.
 //!
 //! This module partially contains the logic for interpreting Cranelift IR.
@@ -955,8 +979,8 @@
 <span class="kw">use </span><span class="kw">crate</span>::value::{Value, ValueError};
 <span class="kw">use </span>cranelift_codegen::data_value::DataValue;
 <span class="kw">use </span>cranelift_codegen::ir::{
-    ArgumentPurpose, Block, ExternalName, FuncRef, Function, GlobalValue, GlobalValueData, LibCall,
-    StackSlot, TrapCode, Type, Value <span class="kw">as </span>ValueRef,
+    ArgumentPurpose, Block, Endianness, ExternalName, FuncRef, Function, GlobalValue,
+    GlobalValueData, LibCall, MemFlags, StackSlot, TrapCode, Type, Value <span class="kw">as </span>ValueRef,
 };
 <span class="kw">use </span>log::trace;
 <span class="kw">use </span>smallvec::SmallVec;
@@ -1136,10 +1160,16 @@
     </span><span class="kw">pub </span>frame_offset: usize,
     <span class="kw">pub </span>stack: Vec&lt;u8&gt;,
     <span class="kw">pub </span>pinned_reg: DataValue,
+    <span class="kw">pub </span>native_endianness: Endianness,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>InterpreterState&lt;<span class="lifetime">&#39;_</span>&gt; {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>native_endianness = <span class="kw">if </span><span class="macro">cfg!</span>(target_endian = <span class="string">&quot;little&quot;</span>) {
+            Endianness::Little
+        } <span class="kw">else </span>{
+            Endianness::Big
+        };
         <span class="self">Self </span>{
             functions: FunctionStore::default(),
             libcall_handler: |<span class="kw">_</span>, <span class="kw">_</span>| <span class="prelude-val">Err</span>(TrapCode::UnreachableCodeReached),
@@ -1147,6 +1177,7 @@
             frame_offset: <span class="number">0</span>,
             stack: Vec::with_capacity(<span class="number">1024</span>),
             pinned_reg: DataValue::U64(<span class="number">0</span>),
+            native_endianness,
         }
     }
 }
@@ -1252,7 +1283,12 @@
         Address::from_parts(size, AddressRegion::Stack, <span class="number">0</span>, final_offset)
     }
 
-    <span class="kw">fn </span>checked_load(<span class="kw-2">&amp;</span><span class="self">self</span>, addr: Address, ty: Type) -&gt; <span class="prelude-ty">Result</span>&lt;DataValue, MemoryError&gt; {
+    <span class="kw">fn </span>checked_load(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        addr: Address,
+        ty: Type,
+        mem_flags: MemFlags,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;DataValue, MemoryError&gt; {
         <span class="kw">let </span>load_size = ty.bytes() <span class="kw">as </span>usize;
         <span class="kw">let </span>addr_start = addr.offset <span class="kw">as </span>usize;
         <span class="kw">let </span>addr_end = addr_start + load_size;
@@ -1268,10 +1304,18 @@
             <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(),
         };
 
-        <span class="prelude-val">Ok</span>(DataValue::read_from_slice(src, ty))
+        <span class="prelude-val">Ok</span>(<span class="kw">match </span>mem_flags.endianness(<span class="self">self</span>.native_endianness) {
+            Endianness::Big =&gt; DataValue::read_from_slice_be(src, ty),
+            Endianness::Little =&gt; DataValue::read_from_slice_le(src, ty),
+        })
     }
 
-    <span class="kw">fn </span>checked_store(<span class="kw-2">&amp;mut </span><span class="self">self</span>, addr: Address, v: DataValue) -&gt; <span class="prelude-ty">Result</span>&lt;(), MemoryError&gt; {
+    <span class="kw">fn </span>checked_store(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        addr: Address,
+        v: DataValue,
+        mem_flags: MemFlags,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), MemoryError&gt; {
         <span class="kw">let </span>store_size = v.ty().bytes() <span class="kw">as </span>usize;
         <span class="kw">let </span>addr_start = addr.offset <span class="kw">as </span>usize;
         <span class="kw">let </span>addr_end = addr_start + store_size;
@@ -1287,7 +1331,10 @@
             <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(),
         };
 
-        <span class="prelude-val">Ok</span>(v.write_to_slice(dst))
+        <span class="prelude-val">Ok</span>(<span class="kw">match </span>mem_flags.endianness(<span class="self">self</span>.native_endianness) {
+            Endianness::Big =&gt; v.write_to_slice_be(dst),
+            Endianness::Little =&gt; v.write_to_slice_le(dst),
+        })
     }
 
     <span class="kw">fn </span>function_address(
@@ -1437,9 +1484,10 @@
                     global_type,
                 }) =&gt; {
                     <span class="kw">let </span><span class="kw-2">mut </span>addr = Address::try_from(current_val)<span class="question-mark">?</span>;
+                    <span class="kw">let </span>mem_flags = MemFlags::trusted();
                     <span class="comment">// We can forego bounds checking here since its performed in `checked_load`
                     </span>addr.offset += offset <span class="kw">as </span>u64;
-                    current_val = <span class="self">self</span>.checked_load(addr, global_type)<span class="question-mark">?</span>;
+                    current_val = <span class="self">self</span>.checked_load(addr, global_type, mem_flags)<span class="question-mark">?</span>;
                 }
 
                 <span class="comment">// We are done resolving this, return the current value

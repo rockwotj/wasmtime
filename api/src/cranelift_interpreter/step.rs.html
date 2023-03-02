@@ -1638,6 +1638,19 @@
 <a href="#1638" id="1638">1638</a>
 <a href="#1639" id="1639">1639</a>
 <a href="#1640" id="1640">1640</a>
+<a href="#1641" id="1641">1641</a>
+<a href="#1642" id="1642">1642</a>
+<a href="#1643" id="1643">1643</a>
+<a href="#1644" id="1644">1644</a>
+<a href="#1645" id="1645">1645</a>
+<a href="#1646" id="1646">1646</a>
+<a href="#1647" id="1647">1647</a>
+<a href="#1648" id="1648">1648</a>
+<a href="#1649" id="1649">1649</a>
+<a href="#1650" id="1650">1650</a>
+<a href="#1651" id="1651">1651</a>
+<a href="#1652" id="1652">1652</a>
+<a href="#1653" id="1653">1653</a>
 </pre><pre class="rust"><code><span class="doccomment">//! The [step] function interprets a single Cranelift instruction given its [State] and
 //! [InstructionContext]; the interpretation is generic over [Value]s.
 </span><span class="kw">use </span><span class="kw">crate</span>::address::{Address, AddressSize};
@@ -1648,7 +1661,7 @@
 <span class="kw">use </span>cranelift_codegen::ir::condcodes::{FloatCC, IntCC};
 <span class="kw">use </span>cranelift_codegen::ir::{
     types, AbiParam, AtomicRmwOp, Block, BlockCall, ExternalName, FuncRef, Function,
-    InstructionData, Opcode, TrapCode, Type, Value <span class="kw">as </span>ValueRef,
+    InstructionData, MemFlags, Opcode, TrapCode, Type, Value <span class="kw">as </span>ValueRef,
 };
 <span class="kw">use </span>log::trace;
 <span class="kw">use </span>smallvec::{smallvec, SmallVec};
@@ -2122,8 +2135,10 @@
             };
 
             <span class="kw">let </span>addr_value = calculate_addr(types::I64, imm(), args()<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+            <span class="kw">let </span>mem_flags = inst.memflags().expect(<span class="string">&quot;instruction to have memory flags&quot;</span>);
             <span class="kw">let </span>loaded = assign_or_memtrap(
-                Address::try_from(addr_value).and_then(|addr| state.checked_load(addr, load_ty)),
+                Address::try_from(addr_value)
+                    .and_then(|addr| state.checked_load(addr, load_ty, mem_flags)),
             );
 
             <span class="kw">match </span>(loaded, kind) {
@@ -2145,33 +2160,37 @@
             };
 
             <span class="kw">let </span>addr_value = calculate_addr(types::I64, imm(), args_range(<span class="number">1</span>..)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+            <span class="kw">let </span>mem_flags = inst.memflags().expect(<span class="string">&quot;instruction to have memory flags&quot;</span>);
             <span class="kw">let </span>reduced = <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = kind {
                 arg(<span class="number">0</span>)<span class="question-mark">?</span>.convert(c)<span class="question-mark">?
             </span>} <span class="kw">else </span>{
                 arg(<span class="number">0</span>)<span class="question-mark">?
             </span>};
             continue_or_memtrap(
-                Address::try_from(addr_value).and_then(|addr| state.checked_store(addr, reduced)),
+                Address::try_from(addr_value)
+                    .and_then(|addr| state.checked_store(addr, reduced, mem_flags)),
             )
         }
         Opcode::StackLoad =&gt; {
             <span class="kw">let </span>load_ty = inst_context.controlling_type().unwrap();
             <span class="kw">let </span>slot = inst.stack_slot().unwrap();
             <span class="kw">let </span>offset = sum(imm(), args()<span class="question-mark">?</span>)<span class="question-mark">? </span><span class="kw">as </span>u64;
+            <span class="kw">let </span>mem_flags = MemFlags::trusted();
             assign_or_memtrap({
                 state
                     .stack_address(AddressSize::_64, slot, offset)
-                    .and_then(|addr| state.checked_load(addr, load_ty))
+                    .and_then(|addr| state.checked_load(addr, load_ty, mem_flags))
             })
         }
         Opcode::StackStore =&gt; {
             <span class="kw">let </span>arg = arg(<span class="number">0</span>)<span class="question-mark">?</span>;
             <span class="kw">let </span>slot = inst.stack_slot().unwrap();
             <span class="kw">let </span>offset = sum(imm(), args_range(<span class="number">1</span>..)<span class="question-mark">?</span>)<span class="question-mark">? </span><span class="kw">as </span>u64;
+            <span class="kw">let </span>mem_flags = MemFlags::trusted();
             continue_or_memtrap({
                 state
                     .stack_address(AddressSize::_64, slot, offset)
-                    .and_then(|addr| state.checked_store(addr, arg))
+                    .and_then(|addr| state.checked_store(addr, arg, mem_flags))
             })
         }
         Opcode::StackAddr =&gt; {
@@ -2878,7 +2897,9 @@
             <span class="kw">let </span>op = inst.atomic_rmw_op().unwrap();
             <span class="kw">let </span>val = arg(<span class="number">1</span>)<span class="question-mark">?</span>;
             <span class="kw">let </span>addr = arg(<span class="number">0</span>)<span class="question-mark">?</span>.into_int()<span class="question-mark">? </span><span class="kw">as </span>u64;
-            <span class="kw">let </span>loaded = Address::try_from(addr).and_then(|addr| state.checked_load(addr, ctrl_ty));
+            <span class="kw">let </span>mem_flags = inst.memflags().expect(<span class="string">&quot;instruction to have memory flags&quot;</span>);
+            <span class="kw">let </span>loaded = Address::try_from(addr)
+                .and_then(|addr| state.checked_load(addr, ctrl_ty, mem_flags));
             <span class="kw">let </span>prev_val = <span class="kw">match </span>loaded {
                 <span class="prelude-val">Ok</span>(v) =&gt; v,
                 <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(ControlFlow::Trap(CraneliftTrap::User(memerror_to_trap(e)))),
@@ -2905,13 +2926,15 @@
                 )
                 .and_then(|v| Value::convert(v, ValueConversionKind::ToSigned)),
             }<span class="question-mark">?</span>;
-            <span class="kw">let </span>stored =
-                Address::try_from(addr).and_then(|addr| state.checked_store(addr, replace));
+            <span class="kw">let </span>stored = Address::try_from(addr)
+                .and_then(|addr| state.checked_store(addr, replace, mem_flags));
             assign_or_memtrap(stored.map(|<span class="kw">_</span>| prev_val_to_assign))
         }
         Opcode::AtomicCas =&gt; {
             <span class="kw">let </span>addr = arg(<span class="number">0</span>)<span class="question-mark">?</span>.into_int()<span class="question-mark">? </span><span class="kw">as </span>u64;
-            <span class="kw">let </span>loaded = Address::try_from(addr).and_then(|addr| state.checked_load(addr, ctrl_ty));
+            <span class="kw">let </span>mem_flags = inst.memflags().expect(<span class="string">&quot;instruction to have memory flags&quot;</span>);
+            <span class="kw">let </span>loaded = Address::try_from(addr)
+                .and_then(|addr| state.checked_load(addr, ctrl_ty, mem_flags));
             <span class="kw">let </span>loaded_val = <span class="kw">match </span>loaded {
                 <span class="prelude-val">Ok</span>(v) =&gt; v,
                 <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(ControlFlow::Trap(CraneliftTrap::User(memerror_to_trap(e)))),
@@ -2920,7 +2943,7 @@
             <span class="kw">let </span>val_to_assign = <span class="kw">if </span>Value::eq(<span class="kw-2">&amp;</span>loaded_val, <span class="kw-2">&amp;</span>expected_val)<span class="question-mark">? </span>{
                 <span class="kw">let </span>val_to_store = arg(<span class="number">2</span>)<span class="question-mark">?</span>;
                 Address::try_from(addr)
-                    .and_then(|addr| state.checked_store(addr, val_to_store))
+                    .and_then(|addr| state.checked_store(addr, val_to_store, mem_flags))
                     .map(|<span class="kw">_</span>| loaded_val)
             } <span class="kw">else </span>{
                 <span class="prelude-val">Ok</span>(loaded_val)
@@ -2930,17 +2953,20 @@
         Opcode::AtomicLoad =&gt; {
             <span class="kw">let </span>load_ty = inst_context.controlling_type().unwrap();
             <span class="kw">let </span>addr = arg(<span class="number">0</span>)<span class="question-mark">?</span>.into_int()<span class="question-mark">? </span><span class="kw">as </span>u64;
+            <span class="kw">let </span>mem_flags = inst.memflags().expect(<span class="string">&quot;instruction to have memory flags&quot;</span>);
             <span class="comment">// We are doing a regular load here, this isn&#39;t actually thread safe.
             </span>assign_or_memtrap(
-                Address::try_from(addr).and_then(|addr| state.checked_load(addr, load_ty)),
+                Address::try_from(addr)
+                    .and_then(|addr| state.checked_load(addr, load_ty, mem_flags)),
             )
         }
         Opcode::AtomicStore =&gt; {
             <span class="kw">let </span>val = arg(<span class="number">0</span>)<span class="question-mark">?</span>;
             <span class="kw">let </span>addr = arg(<span class="number">1</span>)<span class="question-mark">?</span>.into_int()<span class="question-mark">? </span><span class="kw">as </span>u64;
+            <span class="kw">let </span>mem_flags = inst.memflags().expect(<span class="string">&quot;instruction to have memory flags&quot;</span>);
             <span class="comment">// We are doing a regular store here, this isn&#39;t actually thread safe.
             </span>continue_or_memtrap(
-                Address::try_from(addr).and_then(|addr| state.checked_store(addr, val)),
+                Address::try_from(addr).and_then(|addr| state.checked_store(addr, val, mem_flags)),
             )
         }
         Opcode::Fence =&gt; {
