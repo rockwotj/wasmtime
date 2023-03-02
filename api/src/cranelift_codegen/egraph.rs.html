@@ -579,6 +579,91 @@
 <a href="#579" id="579">579</a>
 <a href="#580" id="580">580</a>
 <a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
+<a href="#626" id="626">626</a>
+<a href="#627" id="627">627</a>
+<a href="#628" id="628">628</a>
+<a href="#629" id="629">629</a>
+<a href="#630" id="630">630</a>
+<a href="#631" id="631">631</a>
+<a href="#632" id="632">632</a>
+<a href="#633" id="633">633</a>
+<a href="#634" id="634">634</a>
+<a href="#635" id="635">635</a>
+<a href="#636" id="636">636</a>
+<a href="#637" id="637">637</a>
+<a href="#638" id="638">638</a>
+<a href="#639" id="639">639</a>
+<a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Support for egraphs represented in the DataFlowGraph.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::alias_analysis::{AliasAnalysis, LastStores};
@@ -588,13 +673,14 @@
 <span class="kw">use </span><span class="kw">crate</span>::egraph::domtree::DomTreeWithChildren;
 <span class="kw">use </span><span class="kw">crate</span>::egraph::elaborate::Elaborator;
 <span class="kw">use </span><span class="kw">crate</span>::fx::FxHashSet;
-<span class="kw">use </span><span class="kw">crate</span>::inst_predicates::is_pure_for_egraph;
+<span class="kw">use </span><span class="kw">crate</span>::inst_predicates::{is_mergeable_for_egraph, is_pure_for_egraph};
 <span class="kw">use </span><span class="kw">crate</span>::ir::{
-    DataFlowGraph, Function, Inst, InstructionData, Type, Value, ValueDef, ValueListPool,
+    Block, DataFlowGraph, Function, Inst, InstructionData, Type, Value, ValueDef, ValueListPool,
 };
 <span class="kw">use </span><span class="kw">crate</span>::loop_analysis::LoopAnalysis;
 <span class="kw">use </span><span class="kw">crate</span>::opts::generated_code::ContextIter;
 <span class="kw">use </span><span class="kw">crate</span>::opts::IsleContext;
+<span class="kw">use </span><span class="kw">crate</span>::scoped_hash_map::{Entry <span class="kw">as </span>ScopedEntry, ScopedHashMap};
 <span class="kw">use </span><span class="kw">crate</span>::trace;
 <span class="kw">use </span><span class="kw">crate</span>::unionfind::UnionFind;
 <span class="kw">use </span>cranelift_entity::packed_option::ReservedValue;
@@ -658,6 +744,7 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) func: <span class="kw-2">&amp;</span><span class="lifetime">&#39;opt </span><span class="kw-2">mut </span>Function,
     <span class="kw">pub</span>(<span class="kw">crate</span>) value_to_opt_value: <span class="kw-2">&amp;</span><span class="lifetime">&#39;opt </span><span class="kw-2">mut </span>SecondaryMap&lt;Value, Value&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) gvn_map: <span class="kw-2">&amp;</span><span class="lifetime">&#39;opt </span><span class="kw-2">mut </span>CtxHashMap&lt;(Type, InstructionData), Value&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) effectful_gvn_map: <span class="kw-2">&amp;</span><span class="lifetime">&#39;opt </span><span class="kw-2">mut </span>ScopedHashMap&lt;(Type, InstructionData), Value&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) eclasses: <span class="kw-2">&amp;</span><span class="lifetime">&#39;opt </span><span class="kw-2">mut </span>UnionFind&lt;Value&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) remat_values: <span class="kw-2">&amp;</span><span class="lifetime">&#39;opt </span><span class="kw-2">mut </span>FxHashSet&lt;Value&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) stats: <span class="kw-2">&amp;</span><span class="lifetime">&#39;opt </span><span class="kw-2">mut </span>Stats,
@@ -866,10 +953,49 @@
     </span><span class="kw">fn </span>optimize_skeleton_inst(<span class="kw-2">&amp;mut </span><span class="self">self</span>, inst: Inst) -&gt; bool {
         <span class="self">self</span>.stats.skeleton_inst += <span class="number">1</span>;
 
-        <span class="comment">// If a load or store, process it with the alias analysis to see
-        // if we can optimize it (rewrite in terms of an earlier load or
-        // stored value).
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(new_result) =
+        <span class="comment">// First, can we try to deduplicate? We need to keep some copy
+        // of the instruction around because it&#39;s side-effecting, but
+        // we may be able to reuse an earlier instance of it.
+        </span><span class="kw">if </span>is_mergeable_for_egraph(<span class="self">self</span>.func, inst) {
+            <span class="kw">let </span>result = <span class="self">self</span>.func.dfg.inst_results(inst)[<span class="number">0</span>];
+            <span class="macro">trace!</span>(<span class="string">&quot; -&gt; mergeable side-effecting op {}&quot;</span>, inst);
+
+            <span class="comment">// Does this instruction already exist? If so, add entries to
+            // the value-map to rewrite uses of its results to the results
+            // of the original (existing) instruction. If not, optimize
+            // the new instruction.
+            //
+            // Note that we use the &quot;effectful GVN map&quot;, which is
+            // scoped: because effectful ops are not removed from the
+            // skeleton (`Layout`), we need to be mindful of whether
+            // our current position is dominated by an instance of the
+            // instruction. (See #5796 for details.)
+            </span><span class="kw">let </span>ty = <span class="self">self</span>.func.dfg.ctrl_typevar(inst);
+            <span class="kw">match </span><span class="self">self
+                </span>.effectful_gvn_map
+                .entry((ty, <span class="self">self</span>.func.dfg.insts[inst].clone()))
+            {
+                ScopedEntry::Occupied(o) =&gt; {
+                    <span class="kw">let </span>orig_result = <span class="kw-2">*</span>o.get();
+                    <span class="comment">// Hit in GVN map -- reuse value.
+                    </span><span class="self">self</span>.value_to_opt_value[result] = orig_result;
+                    <span class="self">self</span>.eclasses.union(orig_result, result);
+                    <span class="macro">trace!</span>(<span class="string">&quot; -&gt; merges result {} to {}&quot;</span>, result, orig_result);
+                    <span class="bool-val">true
+                </span>}
+                ScopedEntry::Vacant(v) =&gt; {
+                    <span class="comment">// Otherwise, insert it into the value-map.
+                    </span><span class="self">self</span>.value_to_opt_value[result] = result;
+                    v.insert(result);
+                    <span class="macro">trace!</span>(<span class="string">&quot; -&gt; inserts as new (no GVN)&quot;</span>);
+                    <span class="bool-val">false
+                </span>}
+            }
+        }
+        <span class="comment">// Otherwise, if a load or store, process it with the alias
+        // analysis to see if we can optimize it (rewrite in terms of
+        // an earlier load or stored value).
+        </span><span class="kw">else if let </span><span class="prelude-val">Some</span>(new_result) =
             <span class="self">self</span>.alias_analysis
                 .process_inst(<span class="self">self</span>.func, <span class="self">self</span>.alias_analysis_state, inst)
         {
@@ -963,82 +1089,126 @@
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = FuncCursor::new(<span class="self">self</span>.func);
         <span class="kw">let </span><span class="kw-2">mut </span>value_to_opt_value: SecondaryMap&lt;Value, Value&gt; =
             SecondaryMap::with_default(Value::reserved_value());
-        <span class="kw">let </span><span class="kw-2">mut </span>gvn_map: CtxHashMap&lt;(Type, InstructionData), Value&gt; =
+        <span class="comment">// Map from instruction to value for hash-consing of pure ops
+        // into the egraph. This can be a standard (non-scoped)
+        // hashmap because pure ops have no location: they are
+        // &quot;outside of&quot; control flow.
+        //
+        // Note also that we keep the controlling typevar (the `Type`
+        // in the tuple below) because it may disambiguate
+        // instructions that are identical except for type.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>gvn_map: CtxHashMap&lt;(Type, InstructionData), Value&gt; =
             CtxHashMap::with_capacity(cursor.func.dfg.num_values());
+        <span class="comment">// Map from instruction to value for GVN&#39;ing of effectful but
+        // idempotent ops, which remain in the side-effecting
+        // skeleton. This needs to be scoped because we cannot
+        // deduplicate one instruction to another that is in a
+        // non-dominating block.
+        //
+        // Note that we can use a ScopedHashMap here without the
+        // &quot;context&quot; (as needed by CtxHashMap) because in practice the
+        // ops we want to GVN have all their args inline. Equality on
+        // the InstructionData itself is conservative: two insts whose
+        // struct contents compare shallowly equal are definitely
+        // identical, but identical insts in a deep-equality sense may
+        // not compare shallowly equal, due to list indirection. This
+        // is fine for GVN, because it is still sound to skip any
+        // given GVN opportunity (and keep the original instructions).
+        //
+        // As above, we keep the controlling typevar here as part of
+        // the key: effectful instructions may (as for pure
+        // instructions) be differentiated only on the type.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>effectful_gvn_map: ScopedHashMap&lt;(Type, InstructionData), Value&gt; =
+            ScopedHashMap::new();
 
         <span class="comment">// In domtree preorder, visit blocks. (TODO: factor out an
         // iterator from this and elaborator.)
         </span><span class="kw">let </span>root = <span class="self">self</span>.domtree_children.root();
-        <span class="kw">let </span><span class="kw-2">mut </span>block_stack = <span class="macro">vec!</span>[root];
-        <span class="kw">while let </span><span class="prelude-val">Some</span>(block) = block_stack.pop() {
-            <span class="comment">// We popped this block; push children
-            // immediately, then process this block.
-            </span>block_stack.extend(<span class="self">self</span>.domtree_children.children(block));
+        <span class="kw">enum </span>StackEntry {
+            Visit(Block),
+            Pop,
+        }
+        <span class="kw">let </span><span class="kw-2">mut </span>block_stack = <span class="macro">vec!</span>[StackEntry::Visit(root)];
+        <span class="kw">while let </span><span class="prelude-val">Some</span>(entry) = block_stack.pop() {
+            <span class="kw">match </span>entry {
+                StackEntry::Visit(block) =&gt; {
+                    <span class="comment">// We popped this block; push children
+                    // immediately, then process this block.
+                    </span>block_stack.push(StackEntry::Pop);
+                    block_stack
+                        .extend(<span class="self">self</span>.domtree_children.children(block).map(StackEntry::Visit));
+                    effectful_gvn_map.increment_depth();
 
-            <span class="macro">trace!</span>(<span class="string">&quot;Processing block {}&quot;</span>, block);
-            cursor.set_position(CursorPosition::Before(block));
+                    <span class="macro">trace!</span>(<span class="string">&quot;Processing block {}&quot;</span>, block);
+                    cursor.set_position(CursorPosition::Before(block));
 
-            <span class="kw">let </span><span class="kw-2">mut </span>alias_analysis_state = <span class="self">self</span>.alias_analysis.block_starting_state(block);
+                    <span class="kw">let </span><span class="kw-2">mut </span>alias_analysis_state = <span class="self">self</span>.alias_analysis.block_starting_state(block);
 
-            <span class="kw">for </span><span class="kw-2">&amp;</span>param <span class="kw">in </span>cursor.func.dfg.block_params(block) {
-                <span class="macro">trace!</span>(<span class="string">&quot;creating initial singleton eclass for blockparam {}&quot;</span>, param);
-                <span class="self">self</span>.eclasses.add(param);
-                value_to_opt_value[param] = param;
-            }
-            <span class="kw">while let </span><span class="prelude-val">Some</span>(inst) = cursor.next_inst() {
-                <span class="macro">trace!</span>(<span class="string">&quot;Processing inst {}&quot;</span>, inst);
-
-                <span class="comment">// While we&#39;re passing over all insts, create initial
-                // singleton eclasses for all result and blockparam
-                // values.  Also do initial analysis of all inst
-                // results.
-                </span><span class="kw">for </span><span class="kw-2">&amp;</span>result <span class="kw">in </span>cursor.func.dfg.inst_results(inst) {
-                    <span class="macro">trace!</span>(<span class="string">&quot;creating initial singleton eclass for {}&quot;</span>, result);
-                    <span class="self">self</span>.eclasses.add(result);
-                }
-
-                <span class="comment">// Rewrite args of *all* instructions using the
-                // value-to-opt-value map.
-                </span>cursor.func.dfg.resolve_aliases_in_arguments(inst);
-                cursor.func.dfg.map_inst_values(inst, |<span class="kw">_</span>, arg| {
-                    <span class="kw">let </span>new_value = value_to_opt_value[arg];
-                    <span class="macro">trace!</span>(<span class="string">&quot;rewriting arg {} of inst {} to {}&quot;</span>, arg, inst, new_value);
-                    <span class="macro">debug_assert_ne!</span>(new_value, Value::reserved_value());
-                    new_value
-                });
-
-                <span class="comment">// Build a context for optimization, with borrows of
-                // state. We can&#39;t invoke a method on `self` because
-                // we&#39;ve borrowed `self.func` mutably (as
-                // `cursor.func`) so we pull apart the pieces instead
-                // here.
-                </span><span class="kw">let </span><span class="kw-2">mut </span>ctx = OptimizeCtx {
-                    func: cursor.func,
-                    value_to_opt_value: <span class="kw-2">&amp;mut </span>value_to_opt_value,
-                    gvn_map: <span class="kw-2">&amp;mut </span>gvn_map,
-                    eclasses: <span class="kw-2">&amp;mut </span><span class="self">self</span>.eclasses,
-                    rewrite_depth: <span class="number">0</span>,
-                    subsume_values: FxHashSet::default(),
-                    remat_values: <span class="kw-2">&amp;mut </span><span class="self">self</span>.remat_values,
-                    stats: <span class="kw-2">&amp;mut </span><span class="self">self</span>.stats,
-                    alias_analysis: <span class="self">self</span>.alias_analysis,
-                    alias_analysis_state: <span class="kw-2">&amp;mut </span>alias_analysis_state,
-                };
-
-                <span class="kw">if </span>is_pure_for_egraph(ctx.func, inst) {
-                    <span class="comment">// Insert into GVN map and optimize any new nodes
-                    // inserted (recursively performing this work for
-                    // any nodes the optimization rules produce).
-                    </span><span class="kw">let </span>inst = NewOrExistingInst::Existing(inst);
-                    ctx.insert_pure_enode(inst);
-                    <span class="comment">// We&#39;ve now rewritten all uses, or will when we
-                    // see them, and the instruction exists as a pure
-                    // enode in the eclass, so we can remove it.
-                    </span>cursor.remove_inst_and_step_back();
-                } <span class="kw">else </span>{
-                    <span class="kw">if </span>ctx.optimize_skeleton_inst(inst) {
-                        cursor.remove_inst_and_step_back();
+                    <span class="kw">for </span><span class="kw-2">&amp;</span>param <span class="kw">in </span>cursor.func.dfg.block_params(block) {
+                        <span class="macro">trace!</span>(<span class="string">&quot;creating initial singleton eclass for blockparam {}&quot;</span>, param);
+                        <span class="self">self</span>.eclasses.add(param);
+                        value_to_opt_value[param] = param;
                     }
+                    <span class="kw">while let </span><span class="prelude-val">Some</span>(inst) = cursor.next_inst() {
+                        <span class="macro">trace!</span>(<span class="string">&quot;Processing inst {}&quot;</span>, inst);
+
+                        <span class="comment">// While we&#39;re passing over all insts, create initial
+                        // singleton eclasses for all result and blockparam
+                        // values.  Also do initial analysis of all inst
+                        // results.
+                        </span><span class="kw">for </span><span class="kw-2">&amp;</span>result <span class="kw">in </span>cursor.func.dfg.inst_results(inst) {
+                            <span class="macro">trace!</span>(<span class="string">&quot;creating initial singleton eclass for {}&quot;</span>, result);
+                            <span class="self">self</span>.eclasses.add(result);
+                        }
+
+                        <span class="comment">// Rewrite args of *all* instructions using the
+                        // value-to-opt-value map.
+                        </span>cursor.func.dfg.resolve_aliases_in_arguments(inst);
+                        cursor.func.dfg.map_inst_values(inst, |<span class="kw">_</span>, arg| {
+                            <span class="kw">let </span>new_value = value_to_opt_value[arg];
+                            <span class="macro">trace!</span>(<span class="string">&quot;rewriting arg {} of inst {} to {}&quot;</span>, arg, inst, new_value);
+                            <span class="macro">debug_assert_ne!</span>(new_value, Value::reserved_value());
+                            new_value
+                        });
+
+                        <span class="comment">// Build a context for optimization, with borrows of
+                        // state. We can&#39;t invoke a method on `self` because
+                        // we&#39;ve borrowed `self.func` mutably (as
+                        // `cursor.func`) so we pull apart the pieces instead
+                        // here.
+                        </span><span class="kw">let </span><span class="kw-2">mut </span>ctx = OptimizeCtx {
+                            func: cursor.func,
+                            value_to_opt_value: <span class="kw-2">&amp;mut </span>value_to_opt_value,
+                            gvn_map: <span class="kw-2">&amp;mut </span>gvn_map,
+                            effectful_gvn_map: <span class="kw-2">&amp;mut </span>effectful_gvn_map,
+                            eclasses: <span class="kw-2">&amp;mut </span><span class="self">self</span>.eclasses,
+                            rewrite_depth: <span class="number">0</span>,
+                            subsume_values: FxHashSet::default(),
+                            remat_values: <span class="kw-2">&amp;mut </span><span class="self">self</span>.remat_values,
+                            stats: <span class="kw-2">&amp;mut </span><span class="self">self</span>.stats,
+                            alias_analysis: <span class="self">self</span>.alias_analysis,
+                            alias_analysis_state: <span class="kw-2">&amp;mut </span>alias_analysis_state,
+                        };
+
+                        <span class="kw">if </span>is_pure_for_egraph(ctx.func, inst) {
+                            <span class="comment">// Insert into GVN map and optimize any new nodes
+                            // inserted (recursively performing this work for
+                            // any nodes the optimization rules produce).
+                            </span><span class="kw">let </span>inst = NewOrExistingInst::Existing(inst);
+                            ctx.insert_pure_enode(inst);
+                            <span class="comment">// We&#39;ve now rewritten all uses, or will when we
+                            // see them, and the instruction exists as a pure
+                            // enode in the eclass, so we can remove it.
+                            </span>cursor.remove_inst_and_step_back();
+                        } <span class="kw">else </span>{
+                            <span class="kw">if </span>ctx.optimize_skeleton_inst(inst) {
+                                cursor.remove_inst_and_step_back();
+                            }
+                        }
+                    }
+                }
+                StackEntry::Pop =&gt; {
+                    effectful_gvn_map.decrement_depth();
                 }
             }
         }

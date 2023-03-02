@@ -988,7 +988,7 @@
 /// The BlockCall::new function guarantees this layout by requiring a block argument that&#39;s written
 /// in as the first element of the EntityList. Any subsequent entries are always assumed to be real
 /// Values.
-</span><span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Hash)]
+</span><span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = <span class="string">&quot;enable-serde&quot;</span>, derive(Serialize, Deserialize))]
 </span><span class="kw">pub struct </span>BlockCall {
     <span class="doccomment">/// The underlying storage for the BlockCall. The first element of the values EntityList is

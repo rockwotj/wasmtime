@@ -930,7 +930,7 @@
 ///
 /// The index stored in an `EntityList` points to part 2, the list elements. The value 0 is
 /// reserved for the empty list which isn&#39;t allocated in the vector.
-</span><span class="attr">#[derive(Clone, Copy, Debug, PartialEq, Hash)]
+</span><span class="attr">#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = <span class="string">&quot;enable-serde&quot;</span>, derive(Serialize, Deserialize))]
 </span><span class="kw">pub struct </span>EntityList&lt;T: EntityRef + ReservedValue&gt; {
     index: u32,

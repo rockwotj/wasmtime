@@ -1835,7 +1835,7 @@
 /// 16 bytes on 64-bit architectures. If more space is needed to represent an instruction, use a
 /// `ValueList` to store the additional information out of line.
 </span><span class="kw">fn </span>gen_instruction_data(formats: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>InstructionFormat], fmt: <span class="kw-2">&amp;mut </span>Formatter) {
-    fmt.line(<span class="string">&quot;#[derive(Copy, Clone, Debug, PartialEq, Hash)]&quot;</span>);
+    fmt.line(<span class="string">&quot;#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]&quot;</span>);
     fmt.line(<span class="string">r#&quot;#[cfg_attr(feature = &quot;enable-serde&quot;, derive(Serialize, Deserialize))]&quot;#</span>);
     fmt.line(<span class="string">&quot;#[allow(missing_docs)]&quot;</span>);
     <span class="macro">fmtln!</span>(fmt, <span class="string">&quot;pub enum InstructionData {&quot;</span>);

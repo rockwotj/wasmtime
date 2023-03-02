@@ -196,6 +196,25 @@
 <a href="#196" id="196">196</a>
 <a href="#197" id="197">197</a>
 <a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Instruction predicates/properties, shared by various analyses.
 </span><span class="kw">use </span><span class="kw">crate</span>::ir::immediates::Offset32;
 <span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, Block, DataFlowGraph, Function, Inst, InstructionData, Opcode, Type, Value};
@@ -269,6 +288,25 @@
     <span class="kw">let </span>op = func.dfg.insts[inst].opcode();
 
     has_one_result &amp;&amp; (is_readonly_load || (!op.can_load() &amp;&amp; !trivially_has_side_effects(op)))
+}
+
+<span class="doccomment">/// Can the given instruction be merged into another copy of itself?
+/// These instructions may have side-effects, but as long as we retain
+/// the first instance of the instruction, the second and further
+/// instances are redundant if they would produce the same trap or
+/// result.
+</span><span class="kw">pub fn </span>is_mergeable_for_egraph(func: <span class="kw-2">&amp;</span>Function, inst: Inst) -&gt; bool {
+    <span class="kw">let </span>op = func.dfg.insts[inst].opcode();
+    <span class="comment">// We can only merge one-result operators due to the way that GVN
+    // is structured in the egraph implementation.
+    </span><span class="kw">let </span>has_one_result = func.dfg.inst_results(inst).len() == <span class="number">1</span>;
+    has_one_result
+        <span class="comment">// Loads/stores are handled by alias analysis and not
+        // otherwise mergeable.
+        </span>&amp;&amp; !op.can_load()
+        &amp;&amp; !op.can_store()
+        <span class="comment">// Can only have idempotent side-effects.
+        </span>&amp;&amp; (!has_side_effect(func, inst) || op.side_effects_idempotent())
 }
 
 <span class="doccomment">/// Does the given instruction have any side-effect as per [has_side_effect], or else is a load,
