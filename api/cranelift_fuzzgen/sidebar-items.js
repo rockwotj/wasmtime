@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["FunctionWithIsa","A generated function with an ISA that targets one of cranelift’s backends."],["FuzzGen",""],["TestCase",""]],"type":[["TestCaseInput",""]]};
+window.SIDEBAR_ITEMS = {"struct":[["FuzzGen",""],["PrintableTestCase","Provides a way to format a `TestCase` in the .clif format."]],"type":[["TestCaseInput",""]]};
