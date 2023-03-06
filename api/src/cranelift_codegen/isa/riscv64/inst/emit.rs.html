@@ -2807,6 +2807,13 @@
 <a href="#2807" id="2807">2807</a>
 <a href="#2808" id="2808">2808</a>
 <a href="#2809" id="2809">2809</a>
+<a href="#2810" id="2810">2810</a>
+<a href="#2811" id="2811">2811</a>
+<a href="#2812" id="2812">2812</a>
+<a href="#2813" id="2813">2813</a>
+<a href="#2814" id="2814">2814</a>
+<a href="#2815" id="2815">2815</a>
+<a href="#2816" id="2816">2816</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::StackMap;
@@ -4184,7 +4191,7 @@
                     | <span class="kw">crate</span>::ir::AtomicRmwOp::And
                     | <span class="kw">crate</span>::ir::AtomicRmwOp::Or
                     | <span class="kw">crate</span>::ir::AtomicRmwOp::Xor =&gt; {
-                        AtomicOP::extract(t0, offset, dst.to_reg(), ty)
+                        AtomicOP::extract(dst, offset, dst.to_reg(), ty)
                             .iter()
                             .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
                         Inst::AluRRR {
@@ -4197,7 +4204,7 @@
                                 <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
                             },
                             rd: t0,
-                            rs1: t0.to_reg(),
+                            rs1: dst.to_reg(),
                             rs2: x,
                         }
                         .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
@@ -4221,19 +4228,16 @@
                         spilltmp_reg2()
                     }
                     <span class="kw">crate</span>::ir::AtomicRmwOp::Nand =&gt; {
-                        <span class="kw">let </span>x2 = <span class="kw">if </span>ty.bits() &lt; <span class="number">32 </span>{
-                            AtomicOP::extract(t0, offset, dst.to_reg(), ty)
+                        <span class="kw">if </span>ty.bits() &lt; <span class="number">32 </span>{
+                            AtomicOP::extract(dst, offset, dst.to_reg(), ty)
                                 .iter()
                                 .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
-                            t0.to_reg()
-                        } <span class="kw">else </span>{
-                            dst.to_reg()
-                        };
+                        }
                         Inst::AluRRR {
                             alu_op: AluOPRRR::And,
                             rd: t0,
                             rs1: x,
-                            rs2: x2,
+                            rs2: dst.to_reg(),
                         }
                         .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                         Inst::construct_bit_not(t0, t0.to_reg()).emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
@@ -4265,12 +4269,13 @@
                     | <span class="kw">crate</span>::ir::AtomicRmwOp::Umax
                     | <span class="kw">crate</span>::ir::AtomicRmwOp::Smin
                     | <span class="kw">crate</span>::ir::AtomicRmwOp::Smax =&gt; {
+                        <span class="kw">let </span>label_select_dst = sink.get_label();
                         <span class="kw">let </span>label_select_done = sink.get_label();
                         <span class="kw">if </span>op == <span class="kw">crate</span>::ir::AtomicRmwOp::Umin || op == <span class="kw">crate</span>::ir::AtomicRmwOp::Umax
                         {
-                            AtomicOP::extract(t0, offset, dst.to_reg(), ty)
+                            AtomicOP::extract(dst, offset, dst.to_reg(), ty)
                         } <span class="kw">else </span>{
-                            AtomicOP::extract_sext(t0, offset, dst.to_reg(), ty)
+                            AtomicOP::extract_sext(dst, offset, dst.to_reg(), ty)
                         }
                         .iter()
                         .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
@@ -4282,9 +4287,9 @@
                                 <span class="kw">crate</span>::ir::AtomicRmwOp::Smax =&gt; IntCC::SignedGreaterThan,
                                 <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
                             },
-                            ValueRegs::one(t0.to_reg()),
+                            ValueRegs::one(dst.to_reg()),
                             ValueRegs::one(x),
-                            BranchTarget::Label(label_select_done),
+                            BranchTarget::Label(label_select_dst),
                             BranchTarget::zero(),
                             ty,
                         )
@@ -4292,6 +4297,12 @@
                         .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
                         <span class="comment">// here we select x.
                         </span>Inst::gen_move(t0, x, I64).emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
+                        Inst::Jal {
+                            dest: BranchTarget::Label(label_select_done),
+                        }
+                        .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
+                        sink.bind_label(label_select_dst);
+                        Inst::gen_move(t0, dst.to_reg(), I64).emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                         sink.bind_label(label_select_done);
                         Inst::Atomic {
                             op: AtomicOP::load_op(ty),
@@ -4313,6 +4324,9 @@
                         spilltmp_reg2()
                     }
                     <span class="kw">crate</span>::ir::AtomicRmwOp::Xchg =&gt; {
+                        AtomicOP::extract(dst, offset, dst.to_reg(), ty)
+                            .iter()
+                            .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
                         Inst::Atomic {
                             op: AtomicOP::load_op(ty),
                             rd: writable_spilltmp_reg2(),
