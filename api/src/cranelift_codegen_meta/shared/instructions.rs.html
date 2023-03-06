@@ -3623,7 +3623,6 @@
 <a href="#3623" id="3623">3623</a>
 <a href="#3624" id="3624">3624</a>
 <a href="#3625" id="3625">3625</a>
-<a href="#3626" id="3626">3626</a>
 </pre><pre class="rust"><code><span class="attr">#![allow(non_snake_case)]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::cdsl::instructions::{
@@ -5300,7 +5299,7 @@
 
     <span class="kw">let </span>I16or32 = <span class="kw-2">&amp;</span>TypeVar::new(
         <span class="string">&quot;I16or32&quot;</span>,
-        <span class="string">&quot;A scalar or vector integer type with 16- or 32-bit numbers&quot;</span>,
+        <span class="string">&quot;A vector integer type with 16- or 32-bit numbers&quot;</span>,
         TypeSetBuilder::new().ints(<span class="number">16</span>..<span class="number">32</span>).simd_lanes(<span class="number">4</span>..<span class="number">8</span>).build(),
     );
 
@@ -5316,8 +5315,7 @@
         is the number bitwidth:
         `a := signed_saturate((x * y + 1 &lt;&lt; (Q - 1)) &gt;&gt; Q)`
 
-        Polymorphic over all integer types (scalar and vector) with 16- or
-        32-bit numbers.
+        Polymorphic over all integer vector types with 16- or 32-bit numbers.
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )

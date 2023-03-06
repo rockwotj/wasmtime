@@ -4203,7 +4203,6 @@
 <a href="#4203" id="4203">4203</a>
 <a href="#4204" id="4204">4204</a>
 <a href="#4205" id="4205">4205</a>
-<a href="#4206" id="4206">4206</a>
 </pre><pre class="rust"><code><span class="doccomment">/// Convenience methods for building instructions.
 ///
 /// The `InstBuilder` trait has one method per instruction opcode for
@@ -5861,17 +5860,16 @@
     /// is the number bitwidth:
     /// `a := signed_saturate((x * y + 1 &lt;&lt; (Q - 1)) &gt;&gt; Q)`
     ///
-    /// Polymorphic over all integer types (scalar and vector) with 16- or
-    /// 32-bit numbers.
+    /// Polymorphic over all integer vector types with 16- or 32-bit numbers.
     ///
     /// Inputs:
     ///
-    /// - x: A scalar or vector integer type with 16- or 32-bit numbers
-    /// - y: A scalar or vector integer type with 16- or 32-bit numbers
+    /// - x: A vector integer type with 16- or 32-bit numbers
+    /// - y: A vector integer type with 16- or 32-bit numbers
     ///
     /// Outputs:
     ///
-    /// - a: A scalar or vector integer type with 16- or 32-bit numbers
+    /// - a: A vector integer type with 16- or 32-bit numbers
     </span><span class="attr">#[allow(non_snake_case)]
     </span><span class="kw">fn </span>sqmul_round_sat(<span class="self">self</span>, x: ir::Value, y: ir::Value) -&gt; Value {
         <span class="kw">let </span>ctrl_typevar = <span class="self">self</span>.data_flow_graph().value_type(x);
