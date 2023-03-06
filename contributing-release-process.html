@@ -290,10 +290,12 @@ Advisory</strong>
 <ul>
 <li>This will not have any CI run, it's recommended to run <code>./ci/run-tests.sh</code>
 locally at least.</li>
-<li>This will also only be the patch for the <code>main</code> branch. You'll need to
-locally maintain and develop patches for any older releases being backported
-to. Note that from the major release process there should already be a
-branch for all older releases.</li>
+<li>Develop fixes for all branches that will get a patch release in the
+advisory, one PR per branch. When the advisory is published all branches
+will be merged simultaneously. Be sure to run <code>./ci/run-tests.sh</code> in each
+branch.</li>
+<li>Don't forget to update <code>RELEASES.md</code> with notes about the release on
+each branch.</li>
 </ul>
 </li>
 <li><strong>Send a PR for the version bump when an email goes out announcing there will
@@ -302,7 +304,7 @@ be a security release</strong>
 <li>An email is sent to the bytecodealliance security mailing list ahead of a
 patch release to announce that a patch release will happen. At this time you
 should <a href="https://github.com/bytecodealliance/wasmtime/actions/workflows/release-process.yml">trigger the version bump</a> against the appropriate
-<code>release-x.y.z</code> branch with the <code>release-patch</code> argument.</li>
+<code>release-x.y.z</code> branches with the <code>release-patch</code> argument.</li>
 <li>This will send a PR, but you should not merge it. Instead use this PR and
 the time ahead of the security release to fix any issues with CI. Older
 <code>release-x.y.z</code> branches haven't run CI in awhile so they may need to
@@ -310,13 +312,14 @@ backport fixes of one variety or another. DO NOT include the actual fix for
 the security issue into the PR, that comes in the next step.</li>
 </ul>
 </li>
-<li><strong>Make the patches public</strong>
+<li><strong>Make the advisories/patches public</strong>
 <ul>
-<li>For the <code>main</code> branch this will involve simply publishing the GitHub
-Security Advisory. Note that CI will run after the advisory's changes are
-merged in on <code>main</code>.</li>
-<li>For the backported release branches you should either create a PR targeting
-these branches or push the changes to the previous version-bump PRs.</li>
+<li>Publishing the GitHub Security Advisory will merge all the PRs into each
+branch from the advisory. Note that CI will run for release branches but
+<code>main</code> will probably fail CI since it expected to be merged through the
+merge queue, but that's ok.</li>
+<li>Double-check that CI for release branches finishes and completes
+successfully.</li>
 </ul>
 </li>
 <li><strong>Merge the version-bump PR</strong>
