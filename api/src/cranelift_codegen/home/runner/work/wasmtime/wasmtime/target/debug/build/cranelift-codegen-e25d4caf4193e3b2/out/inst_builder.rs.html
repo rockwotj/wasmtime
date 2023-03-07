@@ -4310,7 +4310,6 @@
 <a href="#4310" id="4310">4310</a>
 <a href="#4311" id="4311">4311</a>
 <a href="#4312" id="4312">4312</a>
-<a href="#4313" id="4313">4313</a>
 </pre><pre class="rust"><code><span class="doccomment">/// Convenience methods for building instructions.
 ///
 /// The `InstBuilder` trait has one method per instruction opcode for
@@ -7495,17 +7494,16 @@
 
     <span class="doccomment">/// Convert `x` to an integer mask.
     ///
-    /// True maps to all 1s and false maps to all 0s. The result type must have
-    /// the same number of vector lanes as the input.
+    /// Non-zero maps to all 1s and zero maps to all 0s.
     ///
     /// Inputs:
     ///
-    /// - IntTo (controlling type variable): An integer type with the same number of lanes
-    /// - x: A scalar or vector whose values are truthy
+    /// - IntTo (controlling type variable): An integer type
+    /// - x: A scalar whose values are truthy
     ///
     /// Outputs:
     ///
-    /// - a: An integer type with the same number of lanes
+    /// - a: An integer type
     </span><span class="attr">#[allow(non_snake_case)]
     </span><span class="kw">fn </span>bmask(<span class="self">self</span>, IntTo: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
         <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Bmask, IntTo, x);

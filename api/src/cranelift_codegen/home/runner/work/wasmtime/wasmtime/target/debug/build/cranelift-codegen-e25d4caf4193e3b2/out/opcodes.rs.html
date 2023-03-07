@@ -9257,12 +9257,12 @@
         constraint_offset: <span class="number">4</span>,
     },
     <span class="comment">// Bmask: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
-    // Constraints=[&#39;Same&#39;, &#39;Free(3)&#39;]
-    // Polymorphic over TypeSet(lanes={1, 2, 4, 8, 16, 32, 64, 128, 256}, ints={8, 16, 32, 64, 128})
+    // Constraints=[&#39;Same&#39;, &#39;Free(0)&#39;]
+    // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64, 128})
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
-        typeset_offset: <span class="number">3</span>,
-        constraint_offset: <span class="number">51</span>,
+        typeset_offset: <span class="number">0</span>,
+        constraint_offset: <span class="number">27</span>,
     },
     <span class="comment">// Ireduce: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(0)&#39;]
@@ -9278,7 +9278,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x59</span>,
         typeset_offset: <span class="number">18</span>,
-        constraint_offset: <span class="number">53</span>,
+        constraint_offset: <span class="number">51</span>,
     },
     <span class="comment">// Unarrow: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=true, fixed_values=2
     // Constraints=[&#39;SplitLanes&#39;, &#39;Same&#39;, &#39;Same&#39;]
@@ -9286,7 +9286,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x59</span>,
         typeset_offset: <span class="number">18</span>,
-        constraint_offset: <span class="number">53</span>,
+        constraint_offset: <span class="number">51</span>,
     },
     <span class="comment">// Uunarrow: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=true, fixed_values=2
     // Constraints=[&#39;SplitLanes&#39;, &#39;Same&#39;, &#39;Same&#39;]
@@ -9294,7 +9294,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x59</span>,
         typeset_offset: <span class="number">18</span>,
-        constraint_offset: <span class="number">53</span>,
+        constraint_offset: <span class="number">51</span>,
     },
     <span class="comment">// SwidenLow: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=true, fixed_values=1
     // Constraints=[&#39;MergeLanes&#39;, &#39;Same&#39;]
@@ -9302,7 +9302,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x39</span>,
         typeset_offset: <span class="number">19</span>,
-        constraint_offset: <span class="number">56</span>,
+        constraint_offset: <span class="number">54</span>,
     },
     <span class="comment">// SwidenHigh: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=true, fixed_values=1
     // Constraints=[&#39;MergeLanes&#39;, &#39;Same&#39;]
@@ -9310,7 +9310,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x39</span>,
         typeset_offset: <span class="number">19</span>,
-        constraint_offset: <span class="number">56</span>,
+        constraint_offset: <span class="number">54</span>,
     },
     <span class="comment">// UwidenLow: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=true, fixed_values=1
     // Constraints=[&#39;MergeLanes&#39;, &#39;Same&#39;]
@@ -9318,7 +9318,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x39</span>,
         typeset_offset: <span class="number">19</span>,
-        constraint_offset: <span class="number">56</span>,
+        constraint_offset: <span class="number">54</span>,
     },
     <span class="comment">// UwidenHigh: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=true, fixed_values=1
     // Constraints=[&#39;MergeLanes&#39;, &#39;Same&#39;]
@@ -9326,7 +9326,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x39</span>,
         typeset_offset: <span class="number">19</span>,
-        constraint_offset: <span class="number">56</span>,
+        constraint_offset: <span class="number">54</span>,
     },
     <span class="comment">// IaddPairwise: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=2
     // Constraints=[&#39;Same&#39;, &#39;Same&#39;, &#39;Same&#39;]
@@ -9341,22 +9341,22 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x41</span>,
         typeset_offset: <span class="number">255</span>,
-        constraint_offset: <span class="number">58</span>,
+        constraint_offset: <span class="number">56</span>,
     },
     <span class="comment">// Uextend: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(0)&#39;]
-    // Polymorphic over TypeSet(lanes={1, 2, 4, 8, 16, 32, 64, 128, 256}, ints={8, 16, 32, 64, 128})
+    // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64, 128})
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
-        typeset_offset: <span class="number">3</span>,
+        typeset_offset: <span class="number">0</span>,
         constraint_offset: <span class="number">27</span>,
     },
     <span class="comment">// Sextend: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(0)&#39;]
-    // Polymorphic over TypeSet(lanes={1, 2, 4, 8, 16, 32, 64, 128, 256}, ints={8, 16, 32, 64, 128})
+    // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64, 128})
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
-        typeset_offset: <span class="number">3</span>,
+        typeset_offset: <span class="number">0</span>,
         constraint_offset: <span class="number">27</span>,
     },
     <span class="comment">// Fpromote: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
@@ -9365,7 +9365,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">20</span>,
-        constraint_offset: <span class="number">61</span>,
+        constraint_offset: <span class="number">59</span>,
     },
     <span class="comment">// Fdemote: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(17)&#39;]
@@ -9373,21 +9373,21 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">20</span>,
-        constraint_offset: <span class="number">61</span>,
+        constraint_offset: <span class="number">59</span>,
     },
     <span class="comment">// Fvdemote: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Concrete(ir::types::F32X4)&#39;, &#39;Concrete(ir::types::F64X2)&#39;]
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">255</span>,
-        constraint_offset: <span class="number">63</span>,
+        constraint_offset: <span class="number">61</span>,
     },
     <span class="comment">// FvpromoteLow: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Concrete(ir::types::F64X2)&#39;, &#39;Concrete(ir::types::F32X4)&#39;]
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">255</span>,
-        constraint_offset: <span class="number">64</span>,
+        constraint_offset: <span class="number">62</span>,
     },
     <span class="comment">// FcvtToUint: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(21)&#39;]
@@ -9395,7 +9395,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">3</span>,
-        constraint_offset: <span class="number">66</span>,
+        constraint_offset: <span class="number">64</span>,
     },
     <span class="comment">// FcvtToSint: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(21)&#39;]
@@ -9403,7 +9403,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">3</span>,
-        constraint_offset: <span class="number">66</span>,
+        constraint_offset: <span class="number">64</span>,
     },
     <span class="comment">// FcvtToUintSat: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(17)&#39;]
@@ -9411,7 +9411,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">3</span>,
-        constraint_offset: <span class="number">61</span>,
+        constraint_offset: <span class="number">59</span>,
     },
     <span class="comment">// FcvtToSintSat: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(17)&#39;]
@@ -9419,7 +9419,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">3</span>,
-        constraint_offset: <span class="number">61</span>,
+        constraint_offset: <span class="number">59</span>,
     },
     <span class="comment">// X86Cvtt2dq: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(17)&#39;]
@@ -9427,7 +9427,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">3</span>,
-        constraint_offset: <span class="number">61</span>,
+        constraint_offset: <span class="number">59</span>,
     },
     <span class="comment">// FcvtFromUint: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(3)&#39;]
@@ -9435,7 +9435,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">20</span>,
-        constraint_offset: <span class="number">51</span>,
+        constraint_offset: <span class="number">66</span>,
     },
     <span class="comment">// FcvtFromSint: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(3)&#39;]
@@ -9443,7 +9443,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">20</span>,
-        constraint_offset: <span class="number">51</span>,
+        constraint_offset: <span class="number">66</span>,
     },
     <span class="comment">// FcvtLowFromSint: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(3)&#39;]
@@ -9451,7 +9451,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">20</span>,
-        constraint_offset: <span class="number">51</span>,
+        constraint_offset: <span class="number">66</span>,
     },
     <span class="comment">// Isplit: fixed_results=2, use_typevar_operand=true, requires_typevar_operand=true, fixed_values=1
     // Constraints=[&#39;HalfWidth&#39;, &#39;HalfWidth&#39;, &#39;Same&#39;]
@@ -9775,8 +9775,6 @@
     OperandConstraint::Free(<span class="number">0</span>),
     OperandConstraint::Same,
     OperandConstraint::Free(<span class="number">5</span>),
-    OperandConstraint::Same,
-    OperandConstraint::Free(<span class="number">3</span>),
     OperandConstraint::SplitLanes,
     OperandConstraint::Same,
     OperandConstraint::Same,
@@ -9792,6 +9790,8 @@
     OperandConstraint::Concrete(ir::types::F32X4),
     OperandConstraint::Same,
     OperandConstraint::Free(<span class="number">21</span>),
+    OperandConstraint::Same,
+    OperandConstraint::Free(<span class="number">3</span>),
     OperandConstraint::HalfWidth,
     OperandConstraint::HalfWidth,
     OperandConstraint::Same,

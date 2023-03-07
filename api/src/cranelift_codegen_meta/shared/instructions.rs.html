@@ -3722,6 +3722,9 @@
 <a href="#3722" id="3722">3722</a>
 <a href="#3723" id="3723">3723</a>
 <a href="#3724" id="3724">3724</a>
+<a href="#3725" id="3725">3725</a>
+<a href="#3726" id="3726">3726</a>
+<a href="#3727" id="3727">3727</a>
 </pre><pre class="rust"><code><span class="attr">#![allow(non_snake_case)]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::cdsl::instructions::{
@@ -6691,19 +6694,13 @@
 
     <span class="kw">let </span>Truthy = <span class="kw-2">&amp;</span>TypeVar::new(
         <span class="string">&quot;Truthy&quot;</span>,
-        <span class="string">&quot;A scalar or vector whose values are truthy&quot;</span>,
-        TypeSetBuilder::new()
-            .ints(Interval::All)
-            .simd_lanes(Interval::All)
-            .build(),
+        <span class="string">&quot;A scalar whose values are truthy&quot;</span>,
+        TypeSetBuilder::new().ints(Interval::All).build(),
     );
     <span class="kw">let </span>IntTo = <span class="kw-2">&amp;</span>TypeVar::new(
         <span class="string">&quot;IntTo&quot;</span>,
-        <span class="string">&quot;An integer type with the same number of lanes&quot;</span>,
-        TypeSetBuilder::new()
-            .ints(Interval::All)
-            .simd_lanes(Interval::All)
-            .build(),
+        <span class="string">&quot;An integer type&quot;</span>,
+        TypeSetBuilder::new().ints(Interval::All).build(),
     );
     <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Truthy);
     <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, IntTo);
@@ -6714,8 +6711,7 @@
             <span class="string">r#&quot;
         Convert `x` to an integer mask.
 
-        True maps to all 1s and false maps to all 0s. The result type must have
-        the same number of vector lanes as the input.
+        Non-zero maps to all 1s and zero maps to all 0s.
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
@@ -6944,21 +6940,20 @@
         .operands_out(<span class="macro">vec!</span>[a]),
     );
 
-    <span class="kw">let </span>IntTo = <span class="kw-2">&amp;</span>TypeVar::new(
-        <span class="string">&quot;IntTo&quot;</span>,
-        <span class="string">&quot;A larger integer type with the same number of lanes&quot;</span>,
-        TypeSetBuilder::new()
-            .ints(Interval::All)
-            .simd_lanes(Interval::All)
-            .build(),
-    );
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Int);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, IntTo);
+    {
+        <span class="kw">let </span>IntTo = <span class="kw-2">&amp;</span>TypeVar::new(
+            <span class="string">&quot;IntTo&quot;</span>,
+            <span class="string">&quot;A larger integer type with the same number of lanes&quot;</span>,
+            TypeSetBuilder::new().ints(Interval::All).build(),
+        );
 
-    ig.push(
-        Inst::new(
-            <span class="string">&quot;uextend&quot;</span>,
-            <span class="string">r#&quot;
+        <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Int);
+        <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, IntTo);
+
+        ig.push(
+            Inst::new(
+                <span class="string">&quot;uextend&quot;</span>,
+                <span class="string">r#&quot;
         Convert `x` to a larger integer type by zero-extending.
 
         Each lane in `x` is converted to a larger integer type by adding
@@ -6969,16 +6964,16 @@
         and each lane must not have fewer bits that the input lanes. If the
         input and output types are the same, this is a no-op.
         &quot;#</span>,
-            <span class="kw-2">&amp;</span>formats.unary,
-        )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
-    );
+                <span class="kw-2">&amp;</span>formats.unary,
+            )
+            .operands_in(<span class="macro">vec!</span>[x])
+            .operands_out(<span class="macro">vec!</span>[a]),
+        );
 
-    ig.push(
-        Inst::new(
-            <span class="string">&quot;sextend&quot;</span>,
-            <span class="string">r#&quot;
+        ig.push(
+            Inst::new(
+                <span class="string">&quot;sextend&quot;</span>,
+                <span class="string">r#&quot;
         Convert `x` to a larger integer type by sign-extending.
 
         Each lane in `x` is converted to a larger integer type by replicating
@@ -6989,10 +6984,20 @@
         and each lane must not have fewer bits that the input lanes. If the
         input and output types are the same, this is a no-op.
         &quot;#</span>,
-            <span class="kw-2">&amp;</span>formats.unary,
-        )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+                <span class="kw-2">&amp;</span>formats.unary,
+            )
+            .operands_in(<span class="macro">vec!</span>[x])
+            .operands_out(<span class="macro">vec!</span>[a]),
+        );
+    }
+
+    <span class="kw">let </span>IntTo = <span class="kw-2">&amp;</span>TypeVar::new(
+        <span class="string">&quot;IntTo&quot;</span>,
+        <span class="string">&quot;A larger integer type with the same number of lanes&quot;</span>,
+        TypeSetBuilder::new()
+            .ints(Interval::All)
+            .simd_lanes(Interval::All)
+            .build(),
     );
 
     <span class="kw">let </span>FloatTo = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -7003,6 +7008,7 @@
             .simd_lanes(Interval::All)
             .build(),
     );
+
     <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Float);
     <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, FloatTo);
 
