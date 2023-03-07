@@ -94,6 +94,11 @@
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
 </pre><pre class="rust"><code><span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="doccomment">/// Tunable parameters for WebAssembly compilation.
@@ -141,6 +146,10 @@
     <span class="doccomment">/// Flag for the component module whether adapter modules have debug
     /// assertions baked into them.
     </span><span class="kw">pub </span>debug_adapter_modules: bool,
+
+    <span class="doccomment">/// Whether or not lowerings for relaxed simd instructions are forced to
+    /// be deterministic.
+    </span><span class="kw">pub </span>relaxed_simd_deterministic: bool,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>Tunables {
@@ -187,6 +196,7 @@
             guard_before_linear_memory: <span class="bool-val">true</span>,
             generate_address_map: <span class="bool-val">true</span>,
             debug_adapter_modules: <span class="bool-val">false</span>,
+            relaxed_simd_deterministic: <span class="bool-val">false</span>,
         }
     }
 }

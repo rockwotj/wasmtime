@@ -603,6 +603,12 @@
 <a href="#603" id="603">603</a>
 <a href="#604" id="604">604</a>
 <a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module implements serialization and deserialization of `Engine`
 //! configuration data which is embedded into compiled artifacts of Wasmtime.
 //!
@@ -914,6 +920,7 @@
             epoch_interruption,
             static_memory_bound_is_maximum,
             guard_before_linear_memory,
+            relaxed_simd_deterministic,
 
             <span class="comment">// This doesn&#39;t affect compilation, it&#39;s just a runtime setting.
             </span>dynamic_memory_growth_reserve: <span class="kw">_</span>,
@@ -968,6 +975,11 @@
             guard_before_linear_memory,
             other.guard_before_linear_memory,
             <span class="string">&quot;guard before linear memory&quot;</span>,
+        )<span class="question-mark">?</span>;
+        <span class="self">Self</span>::check_bool(
+            relaxed_simd_deterministic,
+            other.relaxed_simd_deterministic,
+            <span class="string">&quot;relaxed simd deterministic semantics&quot;</span>,
         )<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(())

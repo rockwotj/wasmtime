@@ -315,6 +315,8 @@
 <a href="#315" id="315">315</a>
 <a href="#316" id="316">316</a>
 <a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Memory management for executable code.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::subslice_range;
@@ -613,6 +615,8 @@
                 obj::LibCall::CeilF64 =&gt; libcalls::relocs::ceilf64 <span class="kw">as </span>usize,
                 obj::LibCall::TruncF32 =&gt; libcalls::relocs::truncf32 <span class="kw">as </span>usize,
                 obj::LibCall::TruncF64 =&gt; libcalls::relocs::truncf64 <span class="kw">as </span>usize,
+                obj::LibCall::FmaF32 =&gt; libcalls::relocs::fmaf32 <span class="kw">as </span>usize,
+                obj::LibCall::FmaF64 =&gt; libcalls::relocs::fmaf64 <span class="kw">as </span>usize,
             };
             <span class="kw-2">*</span><span class="self">self</span>.mmap.as_mut_ptr().add(offset).cast::&lt;usize&gt;() = libcall;
         }

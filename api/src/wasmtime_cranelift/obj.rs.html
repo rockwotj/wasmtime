@@ -549,6 +549,8 @@
 <a href="#549" id="549">549</a>
 <a href="#550" id="550">550</a>
 <a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Object file builder.
 //!
 //! Creates ELF image based on `Compilation` information. The ELF contains
@@ -1096,6 +1098,8 @@
         LibCall::CeilF64 =&gt; LC::CeilF64,
         LibCall::TruncF32 =&gt; LC::TruncF32,
         LibCall::TruncF64 =&gt; LC::TruncF64,
+        LibCall::FmaF32 =&gt; LC::FmaF32,
+        LibCall::FmaF64 =&gt; LC::FmaF64,
         <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unknown libcall to give a name to: {call:?}&quot;</span>),
     };
     other.symbol()

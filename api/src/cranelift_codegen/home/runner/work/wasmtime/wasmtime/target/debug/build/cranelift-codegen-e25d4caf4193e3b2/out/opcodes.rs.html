@@ -4827,6 +4827,80 @@
 <a href="#4827" id="4827">4827</a>
 <a href="#4828" id="4828">4828</a>
 <a href="#4829" id="4829">4829</a>
+<a href="#4830" id="4830">4830</a>
+<a href="#4831" id="4831">4831</a>
+<a href="#4832" id="4832">4832</a>
+<a href="#4833" id="4833">4833</a>
+<a href="#4834" id="4834">4834</a>
+<a href="#4835" id="4835">4835</a>
+<a href="#4836" id="4836">4836</a>
+<a href="#4837" id="4837">4837</a>
+<a href="#4838" id="4838">4838</a>
+<a href="#4839" id="4839">4839</a>
+<a href="#4840" id="4840">4840</a>
+<a href="#4841" id="4841">4841</a>
+<a href="#4842" id="4842">4842</a>
+<a href="#4843" id="4843">4843</a>
+<a href="#4844" id="4844">4844</a>
+<a href="#4845" id="4845">4845</a>
+<a href="#4846" id="4846">4846</a>
+<a href="#4847" id="4847">4847</a>
+<a href="#4848" id="4848">4848</a>
+<a href="#4849" id="4849">4849</a>
+<a href="#4850" id="4850">4850</a>
+<a href="#4851" id="4851">4851</a>
+<a href="#4852" id="4852">4852</a>
+<a href="#4853" id="4853">4853</a>
+<a href="#4854" id="4854">4854</a>
+<a href="#4855" id="4855">4855</a>
+<a href="#4856" id="4856">4856</a>
+<a href="#4857" id="4857">4857</a>
+<a href="#4858" id="4858">4858</a>
+<a href="#4859" id="4859">4859</a>
+<a href="#4860" id="4860">4860</a>
+<a href="#4861" id="4861">4861</a>
+<a href="#4862" id="4862">4862</a>
+<a href="#4863" id="4863">4863</a>
+<a href="#4864" id="4864">4864</a>
+<a href="#4865" id="4865">4865</a>
+<a href="#4866" id="4866">4866</a>
+<a href="#4867" id="4867">4867</a>
+<a href="#4868" id="4868">4868</a>
+<a href="#4869" id="4869">4869</a>
+<a href="#4870" id="4870">4870</a>
+<a href="#4871" id="4871">4871</a>
+<a href="#4872" id="4872">4872</a>
+<a href="#4873" id="4873">4873</a>
+<a href="#4874" id="4874">4874</a>
+<a href="#4875" id="4875">4875</a>
+<a href="#4876" id="4876">4876</a>
+<a href="#4877" id="4877">4877</a>
+<a href="#4878" id="4878">4878</a>
+<a href="#4879" id="4879">4879</a>
+<a href="#4880" id="4880">4880</a>
+<a href="#4881" id="4881">4881</a>
+<a href="#4882" id="4882">4882</a>
+<a href="#4883" id="4883">4883</a>
+<a href="#4884" id="4884">4884</a>
+<a href="#4885" id="4885">4885</a>
+<a href="#4886" id="4886">4886</a>
+<a href="#4887" id="4887">4887</a>
+<a href="#4888" id="4888">4888</a>
+<a href="#4889" id="4889">4889</a>
+<a href="#4890" id="4890">4890</a>
+<a href="#4891" id="4891">4891</a>
+<a href="#4892" id="4892">4892</a>
+<a href="#4893" id="4893">4893</a>
+<a href="#4894" id="4894">4894</a>
+<a href="#4895" id="4895">4895</a>
+<a href="#4896" id="4896">4896</a>
+<a href="#4897" id="4897">4897</a>
+<a href="#4898" id="4898">4898</a>
+<a href="#4899" id="4899">4899</a>
+<a href="#4900" id="4900">4900</a>
+<a href="#4901" id="4901">4901</a>
+<a href="#4902" id="4902">4902</a>
+<a href="#4903" id="4903">4903</a>
 </pre><pre class="rust"><code><span class="doccomment">/// An instruction format
 ///
 /// Every opcode has a corresponding instruction format
@@ -6320,6 +6394,8 @@
     </span>Splat,
     <span class="doccomment">/// `a = swizzle x, y`. (Binary)
     </span>Swizzle,
+    <span class="doccomment">/// `a = x86_pshufb x, y`. (Binary)
+    </span>X86Pshufb,
     <span class="doccomment">/// `a = insertlane x, y, Idx`. (TernaryImm8)
     /// Type inferred from `x`.
     </span>Insertlane,
@@ -6455,6 +6531,9 @@
     <span class="doccomment">/// `a = bitselect c, x, y`. (Ternary)
     /// Type inferred from `x`.
     </span>Bitselect,
+    <span class="doccomment">/// `a = x86_blendv c, x, y`. (Ternary)
+    /// Type inferred from `x`.
+    </span>X86Blendv,
     <span class="doccomment">/// `a = vselect c, x, y`. (Ternary)
     /// Type inferred from `x`.
     </span>Vselect,
@@ -6496,6 +6575,9 @@
     <span class="doccomment">/// `a = sqmul_round_sat x, y`. (Binary)
     /// Type inferred from `x`.
     </span>SqmulRoundSat,
+    <span class="doccomment">/// `a = x86_pmulhrsw x, y`. (Binary)
+    /// Type inferred from `x`.
+    </span>X86Pmulhrsw,
     <span class="doccomment">/// `a = udiv x, y`. (Binary)
     /// Type inferred from `x`.
     </span>Udiv,
@@ -6720,6 +6802,8 @@
     <span class="doccomment">/// `a = iadd_pairwise x, y`. (Binary)
     /// Type inferred from `x`.
     </span>IaddPairwise,
+    <span class="doccomment">/// `a = x86_pmaddubsw x, y`. (Binary)
+    </span>X86Pmaddubsw,
     <span class="doccomment">/// `a = uextend x`. (Unary)
     </span>Uextend,
     <span class="doccomment">/// `a = sextend x`. (Unary)
@@ -6740,6 +6824,8 @@
     </span>FcvtToUintSat,
     <span class="doccomment">/// `a = fcvt_to_sint_sat x`. (Unary)
     </span>FcvtToSintSat,
+    <span class="doccomment">/// `a = x86_cvtt2dq x`. (Unary)
+    </span>X86Cvtt2dq,
     <span class="doccomment">/// `a = fcvt_from_uint x`. (Unary)
     </span>FcvtFromUint,
     <span class="doccomment">/// `a = fcvt_from_sint x`. (Unary)
@@ -6946,7 +7032,7 @@
 
 }
 
-<span class="kw">const </span>OPCODE_FORMAT: [InstructionFormat; <span class="number">181</span>] = [
+<span class="kw">const </span>OPCODE_FORMAT: [InstructionFormat; <span class="number">186</span>] = [
     InstructionFormat::Jump, <span class="comment">// jump
     </span>InstructionFormat::Brif, <span class="comment">// brif
     </span>InstructionFormat::BranchTable, <span class="comment">// br_table
@@ -6964,6 +7050,7 @@
     </span>InstructionFormat::FuncAddr, <span class="comment">// func_addr
     </span>InstructionFormat::Unary, <span class="comment">// splat
     </span>InstructionFormat::Binary, <span class="comment">// swizzle
+    </span>InstructionFormat::Binary, <span class="comment">// x86_pshufb
     </span>InstructionFormat::TernaryImm8, <span class="comment">// insertlane
     </span>InstructionFormat::BinaryImm8, <span class="comment">// extractlane
     </span>InstructionFormat::Binary, <span class="comment">// smin
@@ -7017,6 +7104,7 @@
     </span>InstructionFormat::Ternary, <span class="comment">// select
     </span>InstructionFormat::Ternary, <span class="comment">// select_spectre_guard
     </span>InstructionFormat::Ternary, <span class="comment">// bitselect
+    </span>InstructionFormat::Ternary, <span class="comment">// x86_blendv
     </span>InstructionFormat::Ternary, <span class="comment">// vselect
     </span>InstructionFormat::Unary, <span class="comment">// vany_true
     </span>InstructionFormat::Unary, <span class="comment">// vall_true
@@ -7031,6 +7119,7 @@
     </span>InstructionFormat::Binary, <span class="comment">// umulhi
     </span>InstructionFormat::Binary, <span class="comment">// smulhi
     </span>InstructionFormat::Binary, <span class="comment">// sqmul_round_sat
+    </span>InstructionFormat::Binary, <span class="comment">// x86_pmulhrsw
     </span>InstructionFormat::Binary, <span class="comment">// udiv
     </span>InstructionFormat::Binary, <span class="comment">// sdiv
     </span>InstructionFormat::Binary, <span class="comment">// urem
@@ -7107,6 +7196,7 @@
     </span>InstructionFormat::Unary, <span class="comment">// uwiden_low
     </span>InstructionFormat::Unary, <span class="comment">// uwiden_high
     </span>InstructionFormat::Binary, <span class="comment">// iadd_pairwise
+    </span>InstructionFormat::Binary, <span class="comment">// x86_pmaddubsw
     </span>InstructionFormat::Unary, <span class="comment">// uextend
     </span>InstructionFormat::Unary, <span class="comment">// sextend
     </span>InstructionFormat::Unary, <span class="comment">// fpromote
@@ -7117,6 +7207,7 @@
     </span>InstructionFormat::Unary, <span class="comment">// fcvt_to_sint
     </span>InstructionFormat::Unary, <span class="comment">// fcvt_to_uint_sat
     </span>InstructionFormat::Unary, <span class="comment">// fcvt_to_sint_sat
+    </span>InstructionFormat::Unary, <span class="comment">// x86_cvtt2dq
     </span>InstructionFormat::Unary, <span class="comment">// fcvt_from_uint
     </span>InstructionFormat::Unary, <span class="comment">// fcvt_from_sint
     </span>InstructionFormat::Unary, <span class="comment">// fcvt_low_from_sint
@@ -7675,6 +7766,21 @@
         Opcode::Vselect =&gt; {
             <span class="string">&quot;vselect&quot;
         </span>}
+        Opcode::X86Blendv =&gt; {
+            <span class="string">&quot;x86_blendv&quot;
+        </span>}
+        Opcode::X86Cvtt2dq =&gt; {
+            <span class="string">&quot;x86_cvtt2dq&quot;
+        </span>}
+        Opcode::X86Pmaddubsw =&gt; {
+            <span class="string">&quot;x86_pmaddubsw&quot;
+        </span>}
+        Opcode::X86Pmulhrsw =&gt; {
+            <span class="string">&quot;x86_pmulhrsw&quot;
+        </span>}
+        Opcode::X86Pshufb =&gt; {
+            <span class="string">&quot;x86_pshufb&quot;
+        </span>}
     }
 }
 
@@ -7705,7 +7811,7 @@
     <span class="prelude-val">Some</span>(Opcode::Urem),
     <span class="prelude-val">Some</span>(Opcode::Bxor),
     <span class="prelude-val">None</span>,
-    <span class="prelude-val">Some</span>(Opcode::ExtractVector),
+    <span class="prelude-val">Some</span>(Opcode::X86Pmaddubsw),
     <span class="prelude-val">Some</span>(Opcode::Umax),
     <span class="prelude-val">Some</span>(Opcode::SremImm),
     <span class="prelude-val">Some</span>(Opcode::Insertlane),
@@ -7731,7 +7837,7 @@
     <span class="prelude-val">None</span>,
     <span class="prelude-val">Some</span>(Opcode::Vconst),
     <span class="prelude-val">Some</span>(Opcode::Call),
-    <span class="prelude-val">None</span>,
+    <span class="prelude-val">Some</span>(Opcode::ExtractVector),
     <span class="prelude-val">Some</span>(Opcode::Sqrt),
     <span class="prelude-val">None</span>,
     <span class="prelude-val">None</span>,
@@ -7789,7 +7895,7 @@
     <span class="prelude-val">None</span>,
     <span class="prelude-val">None</span>,
     <span class="prelude-val">None</span>,
-    <span class="prelude-val">None</span>,
+    <span class="prelude-val">Some</span>(Opcode::X86Blendv),
     <span class="prelude-val">Some</span>(Opcode::SetPinnedReg),
     <span class="prelude-val">None</span>,
     <span class="prelude-val">None</span>,
@@ -7823,7 +7929,7 @@
     <span class="prelude-val">Some</span>(Opcode::AvgRound),
     <span class="prelude-val">Some</span>(Opcode::Sload32),
     <span class="prelude-val">Some</span>(Opcode::Unarrow),
-    <span class="prelude-val">None</span>,
+    <span class="prelude-val">Some</span>(Opcode::X86Pshufb),
     <span class="prelude-val">Some</span>(Opcode::Extractlane),
     <span class="prelude-val">Some</span>(Opcode::StackAddr),
     <span class="prelude-val">None</span>,
@@ -7858,13 +7964,13 @@
     <span class="prelude-val">Some</span>(Opcode::IrsubImm),
     <span class="prelude-val">Some</span>(Opcode::Bor),
     <span class="prelude-val">Some</span>(Opcode::SqmulRoundSat),
-    <span class="prelude-val">Some</span>(Opcode::IsubBout),
+    <span class="prelude-val">Some</span>(Opcode::X86Pmulhrsw),
     <span class="prelude-val">Some</span>(Opcode::Debugtrap),
     <span class="prelude-val">Some</span>(Opcode::Sload16x4),
-    <span class="prelude-val">Some</span>(Opcode::Ctz),
+    <span class="prelude-val">Some</span>(Opcode::IsubBout),
     <span class="prelude-val">Some</span>(Opcode::IshlImm),
     <span class="prelude-val">Some</span>(Opcode::BandNot),
-    <span class="prelude-val">Some</span>(Opcode::Bitcast),
+    <span class="prelude-val">Some</span>(Opcode::Ctz),
     <span class="prelude-val">Some</span>(Opcode::Cls),
     <span class="prelude-val">Some</span>(Opcode::Floor),
     <span class="prelude-val">Some</span>(Opcode::UwidenHigh),
@@ -7879,7 +7985,7 @@
     <span class="prelude-val">Some</span>(Opcode::SelectSpectreGuard),
     <span class="prelude-val">Some</span>(Opcode::Fpromote),
     <span class="prelude-val">None</span>,
-    <span class="prelude-val">None</span>,
+    <span class="prelude-val">Some</span>(Opcode::Bitcast),
     <span class="prelude-val">None</span>,
     <span class="prelude-val">Some</span>(Opcode::SymbolValue),
     <span class="prelude-val">Some</span>(Opcode::DynamicStackAddr),
@@ -7919,7 +8025,7 @@
     <span class="prelude-val">Some</span>(Opcode::Snarrow),
     <span class="prelude-val">Some</span>(Opcode::CallIndirect),
     <span class="prelude-val">Some</span>(Opcode::Sload8),
-    <span class="prelude-val">None</span>,
+    <span class="prelude-val">Some</span>(Opcode::X86Cvtt2dq),
     <span class="prelude-val">Some</span>(Opcode::VhighBits),
     <span class="prelude-val">Some</span>(Opcode::IsInvalid),
     <span class="prelude-val">None</span>,
@@ -7939,7 +8045,7 @@
 
 
 <span class="comment">// Table of opcode constraints.
-</span><span class="kw">const </span>OPCODE_CONSTRAINTS: [OpcodeConstraints; <span class="number">181</span>] = [
+</span><span class="kw">const </span>OPCODE_CONSTRAINTS: [OpcodeConstraints; <span class="number">186</span>] = [
     <span class="comment">// Jump: fixed_results=0, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=0
     // Constraints=[]
     </span>OpcodeConstraints {
@@ -8061,6 +8167,13 @@
         constraint_offset: <span class="number">4</span>,
     },
     <span class="comment">// Swizzle: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=2
+    // Constraints=[&#39;Concrete(ir::types::I8X16)&#39;, &#39;Concrete(ir::types::I8X16)&#39;, &#39;Concrete(ir::types::I8X16)&#39;]
+    </span>OpcodeConstraints {
+        flags: <span class="number">0x41</span>,
+        typeset_offset: <span class="number">255</span>,
+        constraint_offset: <span class="number">6</span>,
+    },
+    <span class="comment">// X86Pshufb: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=2
     // Constraints=[&#39;Concrete(ir::types::I8X16)&#39;, &#39;Concrete(ir::types::I8X16)&#39;, &#39;Concrete(ir::types::I8X16)&#39;]
     </span>OpcodeConstraints {
         flags: <span class="number">0x41</span>,
@@ -8487,6 +8600,14 @@
         typeset_offset: <span class="number">12</span>,
         constraint_offset: <span class="number">29</span>,
     },
+    <span class="comment">// X86Blendv: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=3
+    // Constraints=[&#39;Same&#39;, &#39;Same&#39;, &#39;Same&#39;, &#39;Same&#39;]
+    // Polymorphic over TypeSet(lanes={1, 2, 4, 8, 16, 32, 64, 128, 256}, ints={8, 16, 32, 64, 128}, floats={32, 64}, refs={32, 64})
+    </span>OpcodeConstraints {
+        flags: <span class="number">0x69</span>,
+        typeset_offset: <span class="number">12</span>,
+        constraint_offset: <span class="number">29</span>,
+    },
     <span class="comment">// Vselect: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=3
     // Constraints=[&#39;Same&#39;, &#39;AsBool&#39;, &#39;Same&#39;, &#39;Same&#39;]
     // Polymorphic over TypeSet(lanes={2, 4, 8, 16, 32, 64, 128, 256}, ints={8, 16, 32, 64, 128}, floats={32, 64})
@@ -8592,6 +8713,14 @@
         constraint_offset: <span class="number">0</span>,
     },
     <span class="comment">// SqmulRoundSat: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=2
+    // Constraints=[&#39;Same&#39;, &#39;Same&#39;, &#39;Same&#39;]
+    // Polymorphic over TypeSet(lanes={4, 8}, ints={16, 32})
+    </span>OpcodeConstraints {
+        flags: <span class="number">0x49</span>,
+        typeset_offset: <span class="number">14</span>,
+        constraint_offset: <span class="number">0</span>,
+    },
+    <span class="comment">// X86Pmulhrsw: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=2
     // Constraints=[&#39;Same&#39;, &#39;Same&#39;, &#39;Same&#39;]
     // Polymorphic over TypeSet(lanes={4, 8}, ints={16, 32})
     </span>OpcodeConstraints {
@@ -9207,6 +9336,13 @@
         typeset_offset: <span class="number">19</span>,
         constraint_offset: <span class="number">0</span>,
     },
+    <span class="comment">// X86Pmaddubsw: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=2
+    // Constraints=[&#39;Concrete(ir::types::I16X8)&#39;, &#39;Concrete(ir::types::I8X16)&#39;, &#39;Concrete(ir::types::I8X16)&#39;]
+    </span>OpcodeConstraints {
+        flags: <span class="number">0x41</span>,
+        typeset_offset: <span class="number">255</span>,
+        constraint_offset: <span class="number">58</span>,
+    },
     <span class="comment">// Uextend: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(0)&#39;]
     // Polymorphic over TypeSet(lanes={1, 2, 4, 8, 16, 32, 64, 128, 256}, ints={8, 16, 32, 64, 128})
@@ -9229,7 +9365,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">20</span>,
-        constraint_offset: <span class="number">57</span>,
+        constraint_offset: <span class="number">61</span>,
     },
     <span class="comment">// Fdemote: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(17)&#39;]
@@ -9237,21 +9373,21 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">20</span>,
-        constraint_offset: <span class="number">57</span>,
+        constraint_offset: <span class="number">61</span>,
     },
     <span class="comment">// Fvdemote: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Concrete(ir::types::F32X4)&#39;, &#39;Concrete(ir::types::F64X2)&#39;]
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">255</span>,
-        constraint_offset: <span class="number">59</span>,
+        constraint_offset: <span class="number">63</span>,
     },
     <span class="comment">// FvpromoteLow: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Concrete(ir::types::F64X2)&#39;, &#39;Concrete(ir::types::F32X4)&#39;]
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">255</span>,
-        constraint_offset: <span class="number">60</span>,
+        constraint_offset: <span class="number">64</span>,
     },
     <span class="comment">// FcvtToUint: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(21)&#39;]
@@ -9259,7 +9395,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">3</span>,
-        constraint_offset: <span class="number">62</span>,
+        constraint_offset: <span class="number">66</span>,
     },
     <span class="comment">// FcvtToSint: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(21)&#39;]
@@ -9267,7 +9403,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">3</span>,
-        constraint_offset: <span class="number">62</span>,
+        constraint_offset: <span class="number">66</span>,
     },
     <span class="comment">// FcvtToUintSat: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(17)&#39;]
@@ -9275,7 +9411,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">3</span>,
-        constraint_offset: <span class="number">57</span>,
+        constraint_offset: <span class="number">61</span>,
     },
     <span class="comment">// FcvtToSintSat: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(17)&#39;]
@@ -9283,7 +9419,15 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
         typeset_offset: <span class="number">3</span>,
-        constraint_offset: <span class="number">57</span>,
+        constraint_offset: <span class="number">61</span>,
+    },
+    <span class="comment">// X86Cvtt2dq: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
+    // Constraints=[&#39;Same&#39;, &#39;Free(17)&#39;]
+    // Polymorphic over TypeSet(lanes={1, 2, 4, 8, 16, 32, 64, 128, 256}, ints={8, 16, 32, 64, 128})
+    </span>OpcodeConstraints {
+        flags: <span class="number">0x21</span>,
+        typeset_offset: <span class="number">3</span>,
+        constraint_offset: <span class="number">61</span>,
     },
     <span class="comment">// FcvtFromUint: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(3)&#39;]
@@ -9315,7 +9459,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x3a</span>,
         typeset_offset: <span class="number">22</span>,
-        constraint_offset: <span class="number">64</span>,
+        constraint_offset: <span class="number">68</span>,
     },
     <span class="comment">// Iconcat: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=true, fixed_values=2
     // Constraints=[&#39;DoubleWidth&#39;, &#39;Same&#39;, &#39;Same&#39;]
@@ -9323,7 +9467,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x59</span>,
         typeset_offset: <span class="number">9</span>,
-        constraint_offset: <span class="number">67</span>,
+        constraint_offset: <span class="number">71</span>,
     },
     <span class="comment">// AtomicRmw: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=2
     // Constraints=[&#39;Same&#39;, &#39;Free(1)&#39;, &#39;Same&#39;]
@@ -9331,7 +9475,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x41</span>,
         typeset_offset: <span class="number">23</span>,
-        constraint_offset: <span class="number">69</span>,
+        constraint_offset: <span class="number">73</span>,
     },
     <span class="comment">// AtomicCas: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=3
     // Constraints=[&#39;Same&#39;, &#39;Free(1)&#39;, &#39;Same&#39;, &#39;Same&#39;]
@@ -9339,7 +9483,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x69</span>,
         typeset_offset: <span class="number">23</span>,
-        constraint_offset: <span class="number">69</span>,
+        constraint_offset: <span class="number">73</span>,
     },
     <span class="comment">// AtomicLoad: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
     // Constraints=[&#39;Same&#39;, &#39;Free(1)&#39;]
@@ -9370,7 +9514,7 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x39</span>,
         typeset_offset: <span class="number">24</span>,
-        constraint_offset: <span class="number">73</span>,
+        constraint_offset: <span class="number">77</span>,
     },
 ];
 
@@ -9579,7 +9723,7 @@
 ];
 
 <span class="comment">// Table of operand constraint sequences.
-</span><span class="kw">const </span>OPERAND_CONSTRAINTS: [OperandConstraint; <span class="number">75</span>] = [
+</span><span class="kw">const </span>OPERAND_CONSTRAINTS: [OperandConstraint; <span class="number">79</span>] = [
     OperandConstraint::Same,
     OperandConstraint::Same,
     OperandConstraint::Same,
@@ -9637,6 +9781,10 @@
     OperandConstraint::Same,
     OperandConstraint::Same,
     OperandConstraint::MergeLanes,
+    OperandConstraint::Same,
+    OperandConstraint::Concrete(ir::types::I16X8),
+    OperandConstraint::Concrete(ir::types::I8X16),
+    OperandConstraint::Concrete(ir::types::I8X16),
     OperandConstraint::Same,
     OperandConstraint::Free(<span class="number">17</span>),
     OperandConstraint::Concrete(ir::types::F32X4),
