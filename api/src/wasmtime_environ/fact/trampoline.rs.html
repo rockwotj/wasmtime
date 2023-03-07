@@ -3155,10 +3155,6 @@
 <a href="#3155" id="3155">3155</a>
 <a href="#3156" id="3156">3156</a>
 <a href="#3157" id="3157">3157</a>
-<a href="#3158" id="3158">3158</a>
-<a href="#3159" id="3159">3159</a>
-<a href="#3160" id="3160">3160</a>
-<a href="#3161" id="3161">3161</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Low-level compilation of an fused adapter function.
 //!
 //! This module is tasked with the top-level `compile` function which creates a
@@ -5809,10 +5805,8 @@
             | (ValType::F64, ValType::F32)
 
             <span class="comment">// not used in the component model
-            </span>| (ValType::ExternRef, <span class="kw">_</span>)
-            | (<span class="kw">_</span>, ValType::ExternRef)
-            | (ValType::FuncRef, <span class="kw">_</span>)
-            | (<span class="kw">_</span>, ValType::FuncRef)
+            </span>| (ValType::Ref(<span class="kw">_</span>), <span class="kw">_</span>)
+            | (<span class="kw">_</span>, ValType::Ref(<span class="kw">_</span>))
             | (ValType::V128, <span class="kw">_</span>)
             | (<span class="kw">_</span>, ValType::V128) =&gt; {
                 <span class="macro">panic!</span>(<span class="string">&quot;cannot get {dst_ty:?} from {src_ty:?} local&quot;</span>);
@@ -5866,10 +5860,8 @@
             | (ValType::F32, ValType::F64)
 
             <span class="comment">// not used in the component model
-            </span>| (ValType::ExternRef, <span class="kw">_</span>)
-            | (<span class="kw">_</span>, ValType::ExternRef)
-            | (ValType::FuncRef, <span class="kw">_</span>)
-            | (<span class="kw">_</span>, ValType::FuncRef)
+            </span>| (ValType::Ref(<span class="kw">_</span>), <span class="kw">_</span>)
+            | (<span class="kw">_</span>, ValType::Ref(<span class="kw">_</span>))
             | (ValType::V128, <span class="kw">_</span>)
             | (<span class="kw">_</span>, ValType::V128) =&gt; {
                 <span class="macro">panic!</span>(<span class="string">&quot;cannot get {dst_ty:?} from {src_ty:?} local&quot;</span>);

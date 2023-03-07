@@ -601,6 +601,8 @@
 <a href="#601" id="601">601</a>
 <a href="#602" id="602">602</a>
 <a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module implements serialization and deserialization of `Engine`
 //! configuration data which is embedded into compiled artifacts of Wasmtime.
 //!
@@ -790,6 +792,7 @@
             relaxed_simd,
             extended_const,
             memory_control,
+            function_references,
 
             <span class="comment">// Always on; we don&#39;t currently have knobs for these.
             </span>mutable_global: <span class="kw">_</span>,
@@ -800,6 +803,7 @@
 
         <span class="macro">assert!</span>(!memory_control);
         <span class="macro">assert!</span>(!tail_call);
+        <span class="macro">assert!</span>(!function_references);
 
         Metadata {
             target: engine.compiler().triple().to_string(),

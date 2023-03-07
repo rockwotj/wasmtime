@@ -105,6 +105,7 @@
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Helper functions and structures for the translation.
 </span><span class="kw">use </span><span class="kw">crate</span>::environ::TargetEnvironment;
 <span class="kw">use </span><span class="kw">crate</span>::WasmResult;
@@ -144,8 +145,9 @@
                 wasmparser::ValType::F32 =&gt; <span class="kw-2">&amp;</span>[wasmparser::ValType::F32],
                 wasmparser::ValType::F64 =&gt; <span class="kw-2">&amp;</span>[wasmparser::ValType::F64],
                 wasmparser::ValType::V128 =&gt; <span class="kw-2">&amp;</span>[wasmparser::ValType::V128],
-                wasmparser::ValType::ExternRef =&gt; <span class="kw-2">&amp;</span>[wasmparser::ValType::ExternRef],
-                wasmparser::ValType::FuncRef =&gt; <span class="kw-2">&amp;</span>[wasmparser::ValType::FuncRef],
+                wasmparser::ValType::EXTERNREF =&gt; <span class="kw-2">&amp;</span>[wasmparser::ValType::EXTERNREF],
+                wasmparser::ValType::FUNCREF =&gt; <span class="kw-2">&amp;</span>[wasmparser::ValType::FUNCREF],
+                wasmparser::ValType::Ref(<span class="kw">_</span>) =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;function references proposal&quot;</span>),
             };
             (
                 itertools::Either::Left(params.iter().copied()),
@@ -186,7 +188,7 @@
             wasmparser::ValType::F64 =&gt; {
                 builder.append_block_param(block, ir::types::F64);
             }
-            wasmparser::ValType::ExternRef | wasmparser::ValType::FuncRef =&gt; {
+            wasmparser::ValType::Ref(ty) =&gt; {
                 builder.append_block_param(block, environ.reference_type(ty.try_into()<span class="question-mark">?</span>));
             }
             wasmparser::ValType::V128 =&gt; {

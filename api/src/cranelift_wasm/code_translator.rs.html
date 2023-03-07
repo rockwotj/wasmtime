@@ -3285,6 +3285,16 @@
 <a href="#3285" id="3285">3285</a>
 <a href="#3286" id="3286">3286</a>
 <a href="#3287" id="3287">3287</a>
+<a href="#3288" id="3288">3288</a>
+<a href="#3289" id="3289">3289</a>
+<a href="#3290" id="3290">3290</a>
+<a href="#3291" id="3291">3291</a>
+<a href="#3292" id="3292">3292</a>
+<a href="#3293" id="3293">3293</a>
+<a href="#3294" id="3294">3294</a>
+<a href="#3295" id="3295">3295</a>
+<a href="#3296" id="3296">3296</a>
+<a href="#3297" id="3297">3297</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module contains the bulk of the interesting code performing the translation between
 //! WebAssembly and Cranelift IR.
 //!
@@ -4438,8 +4448,8 @@
         Operator::F32Le | Operator::F64Le =&gt; {
             translate_fcmp(FloatCC::LessThanOrEqual, builder, state)
         }
-        Operator::RefNull { ty } =&gt; {
-            state.push1(environ.translate_ref_null(builder.cursor(), (<span class="kw-2">*</span>ty).try_into()<span class="question-mark">?</span>)<span class="question-mark">?</span>)
+        Operator::RefNull { hty } =&gt; {
+            state.push1(environ.translate_ref_null(builder.cursor(), (<span class="kw-2">*</span>hty).try_into()<span class="question-mark">?</span>)<span class="question-mark">?</span>)
         }
         Operator::RefIsNull =&gt; {
             <span class="kw">let </span>value = state.pop1();
@@ -5444,14 +5454,14 @@
             ));
         }
         Operator::I8x16RelaxedSwizzle
-        | Operator::I32x4RelaxedTruncSatF32x4S
-        | Operator::I32x4RelaxedTruncSatF32x4U
-        | Operator::I32x4RelaxedTruncSatF64x2SZero
-        | Operator::I32x4RelaxedTruncSatF64x2UZero
-        | Operator::F32x4RelaxedFma
-        | Operator::F32x4RelaxedFnma
-        | Operator::F64x2RelaxedFma
-        | Operator::F64x2RelaxedFnma
+        | Operator::I32x4RelaxedTruncF32x4S
+        | Operator::I32x4RelaxedTruncF32x4U
+        | Operator::I32x4RelaxedTruncF64x2SZero
+        | Operator::I32x4RelaxedTruncF64x2UZero
+        | Operator::F32x4RelaxedMadd
+        | Operator::F32x4RelaxedNmadd
+        | Operator::F64x2RelaxedMadd
+        | Operator::F64x2RelaxedNmadd
         | Operator::I8x16RelaxedLaneselect
         | Operator::I16x8RelaxedLaneselect
         | Operator::I32x4RelaxedLaneselect
@@ -5461,10 +5471,20 @@
         | Operator::F64x2RelaxedMin
         | Operator::F64x2RelaxedMax
         | Operator::I16x8RelaxedQ15mulrS
-        | Operator::I16x8DotI8x16I7x16S
-        | Operator::I32x4DotI8x16I7x16AddS
-        | Operator::F32x4RelaxedDotBf16x8AddF32x4 =&gt; {
+        | Operator::I16x8RelaxedDotI8x16I7x16S
+        | Operator::I32x4RelaxedDotI8x16I7x16AddS =&gt; {
             <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">wasm_unsupported!</span>(<span class="string">&quot;proposed relaxed-simd operator {:?}&quot;</span>, op));
+        }
+
+        Operator::CallRef { .. }
+        | Operator::ReturnCallRef { .. }
+        | Operator::BrOnNull { .. }
+        | Operator::BrOnNonNull { .. }
+        | Operator::RefAsNonNull =&gt; {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro">wasm_unsupported!</span>(
+                <span class="string">&quot;proposed function-references operator {:?}&quot;</span>,
+                op
+            ));
         }
     };
     <span class="prelude-val">Ok</span>(())

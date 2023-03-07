@@ -377,8 +377,8 @@
 <span class="kw">use </span>std::ops::RangeInclusive;
 <span class="kw">use </span>wasm_encoder::{
     CodeSection, ConstExpr, EntityType, ExportKind, ExportSection, Function, FunctionSection,
-    GlobalSection, ImportSection, Instruction, Module, TableSection, TableType, TypeSection,
-    ValType,
+    GlobalSection, ImportSection, Instruction, Module, RefType, TableSection, TableType,
+    TypeSection, ValType,
 };
 
 <span class="doccomment">/// A description of a Wasm module that makes a series of `externref` table
@@ -423,27 +423,27 @@
             // dynamically adjusts the stack pointer for each call that uses
             // return pointers rather than statically allocating space in the
             // stack frame.
-            </span><span class="macro">vec!</span>[ValType::ExternRef, ValType::ExternRef, ValType::ExternRef],
+            </span><span class="macro">vec!</span>[ValType::EXTERNREF, ValType::EXTERNREF, ValType::EXTERNREF],
         );
 
         <span class="comment">// 1: &quot;run&quot;
         </span><span class="kw">let </span><span class="kw-2">mut </span>params: Vec&lt;ValType&gt; = Vec::with_capacity(<span class="self">self</span>.num_params <span class="kw">as </span>usize);
         <span class="kw">for </span>_i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.num_params {
-            params.push(ValType::ExternRef);
+            params.push(ValType::EXTERNREF);
         }
         <span class="kw">let </span>results = <span class="macro">vec!</span>[];
         types.function(params, results);
 
         <span class="comment">// 2: `take_refs`
         </span>types.function(
-            <span class="macro">vec!</span>[ValType::ExternRef, ValType::ExternRef, ValType::ExternRef],
+            <span class="macro">vec!</span>[ValType::EXTERNREF, ValType::EXTERNREF, ValType::EXTERNREF],
             <span class="macro">vec!</span>[],
         );
 
         <span class="comment">// 3: `make_refs`
         </span>types.function(
             <span class="macro">vec!</span>[],
-            <span class="macro">vec!</span>[ValType::ExternRef, ValType::ExternRef, ValType::ExternRef],
+            <span class="macro">vec!</span>[ValType::EXTERNREF, ValType::EXTERNREF, ValType::EXTERNREF],
         );
 
         <span class="comment">// Import the GC function.
@@ -455,7 +455,7 @@
         <span class="comment">// Define our table.
         </span><span class="kw">let </span><span class="kw-2">mut </span>tables = TableSection::new();
         tables.table(TableType {
-            element_type: ValType::ExternRef,
+            element_type: RefType::EXTERNREF,
             minimum: <span class="self">self</span>.table_size <span class="kw">as </span>u32,
             maximum: <span class="prelude-val">None</span>,
         });
@@ -465,10 +465,10 @@
         <span class="kw">for _ in </span><span class="number">0</span>..<span class="self">self</span>.num_globals {
             globals.global(
                 wasm_encoder::GlobalType {
-                    val_type: wasm_encoder::ValType::ExternRef,
+                    val_type: wasm_encoder::ValType::EXTERNREF,
                     mutable: <span class="bool-val">true</span>,
                 },
-                <span class="kw-2">&amp;</span>ConstExpr::ref_null(wasm_encoder::ValType::ExternRef),
+                <span class="kw-2">&amp;</span>ConstExpr::ref_null(wasm_encoder::HeapType::Extern),
             );
         }
 
@@ -481,7 +481,7 @@
 
         <span class="comment">// Give ourselves one scratch local that we can use in various `TableOp`
         // implementations.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>func = Function::new(<span class="macro">vec!</span>[(<span class="number">1</span>, ValType::ExternRef)]);
+        </span><span class="kw">let </span><span class="kw-2">mut </span>func = Function::new(<span class="macro">vec!</span>[(<span class="number">1</span>, ValType::EXTERNREF)]);
 
         func.instruction(<span class="kw-2">&amp;</span>Instruction::Loop(wasm_encoder::BlockType::Empty));
         <span class="kw">for </span>op <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.ops {
@@ -634,7 +634,7 @@
                 func.instruction(<span class="kw-2">&amp;</span>Instruction::Drop);
             }
             <span class="self">Self</span>::Null =&gt; {
-                func.instruction(<span class="kw-2">&amp;</span>Instruction::RefNull(wasm_encoder::ValType::ExternRef));
+                func.instruction(<span class="kw-2">&amp;</span>Instruction::RefNull(wasm_encoder::HeapType::Extern));
             }
         }
     }

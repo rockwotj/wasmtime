@@ -1142,7 +1142,7 @@
                 <span class="self">self</span>.result.module.table_plans.reserve_exact(cnt);
 
                 <span class="kw">for </span>entry <span class="kw">in </span>tables {
-                    <span class="kw">let </span>table = entry<span class="question-mark">?</span>.try_into()<span class="question-mark">?</span>;
+                    <span class="kw">let </span>table = entry<span class="question-mark">?</span>.ty.try_into()<span class="question-mark">?</span>;
                     <span class="kw">let </span>plan = TablePlan::for_table(table, <span class="kw-2">&amp;</span><span class="self">self</span>.tunables);
                     <span class="self">self</span>.result.module.table_plans.push(plan);
                 }
@@ -1186,7 +1186,7 @@
                         Operator::V128Const { value } =&gt; {
                             GlobalInit::V128Const(u128::from_le_bytes(<span class="kw-2">*</span>value.bytes()))
                         }
-                        Operator::RefNull { ty: <span class="kw">_ </span>} =&gt; GlobalInit::RefNullConst,
+                        Operator::RefNull { hty: <span class="kw">_ </span>} =&gt; GlobalInit::RefNullConst,
                         Operator::RefFunc { function_index } =&gt; {
                             <span class="kw">let </span>index = FuncIndex::from_u32(function_index);
                             <span class="self">self</span>.flag_func_escaped(index);

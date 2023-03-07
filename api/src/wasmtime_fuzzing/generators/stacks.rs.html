@@ -493,7 +493,7 @@
         types.function(<span class="macro">vec!</span>[], <span class="macro">vec!</span>[]);
 
         <span class="kw">let </span>call_func_type = types.len();
-        types.function(<span class="macro">vec!</span>[wasm_encoder::ValType::FuncRef], <span class="macro">vec!</span>[]);
+        types.function(<span class="macro">vec!</span>[wasm_encoder::ValType::FUNCREF], <span class="macro">vec!</span>[]);
 
         section(<span class="kw-2">&amp;mut </span>module, types);
 
@@ -561,7 +561,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>elems = wasm_encoder::ElementSection::new();
         elems.declared(
-            wasm_encoder::ValType::FuncRef,
+            wasm_encoder::RefType::FUNCREF,
             wasm_encoder::Elements::Functions(
                 <span class="kw-2">&amp;</span>(<span class="number">0</span>..num_imported_funcs + u32::try_from(<span class="self">self</span>.funcs.len()).unwrap())
                     .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(),
