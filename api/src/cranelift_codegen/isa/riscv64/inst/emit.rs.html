@@ -2810,10 +2810,6 @@
 <a href="#2810" id="2810">2810</a>
 <a href="#2811" id="2811">2811</a>
 <a href="#2812" id="2812">2812</a>
-<a href="#2813" id="2813">2813</a>
-<a href="#2814" id="2814">2814</a>
-<a href="#2815" id="2815">2815</a>
-<a href="#2816" id="2816">2816</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::StackMap;
@@ -4091,31 +4087,27 @@
                     amo: AMO::SeqCst,
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                <span class="kw">let </span>origin_value = <span class="kw">if </span>ty.bits() &lt; <span class="number">32 </span>{
-                    AtomicOP::extract(t0, offset, dst.to_reg(), ty)
+                <span class="kw">if </span>ty.bits() &lt; <span class="number">32 </span>{
+                    AtomicOP::extract(dst, offset, dst.to_reg(), ty)
                         .iter()
                         .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
-                    t0.to_reg()
                 } <span class="kw">else if </span>ty.bits() == <span class="number">32 </span>{
                     Inst::Extend {
-                        rd: t0,
+                        rd: dst,
                         rn: dst.to_reg(),
                         signed: <span class="bool-val">false</span>,
                         from_bits: <span class="number">32</span>,
                         to_bits: <span class="number">64</span>,
                     }
                     .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                    t0.to_reg()
-                } <span class="kw">else </span>{
-                    dst.to_reg()
-                };
+                }
                 Inst::CondBr {
                     taken: BranchTarget::Label(fail_label),
                     not_taken: BranchTarget::zero(),
                     kind: IntegerCompare {
                         kind: IntCC::NotEqual,
                         rs1: e,
-                        rs2: origin_value,
+                        rs2: dst.to_reg(),
                     },
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
