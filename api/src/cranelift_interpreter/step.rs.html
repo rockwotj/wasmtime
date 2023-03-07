@@ -1651,6 +1651,8 @@
 <a href="#1651" id="1651">1651</a>
 <a href="#1652" id="1652">1652</a>
 <a href="#1653" id="1653">1653</a>
+<a href="#1654" id="1654">1654</a>
+<a href="#1655" id="1655">1655</a>
 </pre><pre class="rust"><code><span class="doccomment">//! The [step] function interprets a single Cranelift instruction given its [State] and
 //! [InstructionContext]; the interpretation is generic over [Value]s.
 </span><span class="kw">use </span><span class="kw">crate</span>::address::{Address, AddressSize};
@@ -1826,6 +1828,8 @@
         MemoryError::InvalidEntry { .. } =&gt; TrapCode::HeapOutOfBounds,
         MemoryError::OutOfBoundsStore { .. } =&gt; TrapCode::HeapOutOfBounds,
         MemoryError::OutOfBoundsLoad { .. } =&gt; TrapCode::HeapOutOfBounds,
+        MemoryError::MisalignedLoad { .. } =&gt; TrapCode::HeapMisaligned,
+        MemoryError::MisalignedStore { .. } =&gt; TrapCode::HeapMisaligned,
     };
 
     <span class="comment">// Assigns or traps depending on the value of the result
@@ -2175,7 +2179,7 @@
             <span class="kw">let </span>load_ty = inst_context.controlling_type().unwrap();
             <span class="kw">let </span>slot = inst.stack_slot().unwrap();
             <span class="kw">let </span>offset = sum(imm(), args()<span class="question-mark">?</span>)<span class="question-mark">? </span><span class="kw">as </span>u64;
-            <span class="kw">let </span>mem_flags = MemFlags::trusted();
+            <span class="kw">let </span>mem_flags = MemFlags::new();
             assign_or_memtrap({
                 state
                     .stack_address(AddressSize::_64, slot, offset)
@@ -2186,7 +2190,7 @@
             <span class="kw">let </span>arg = arg(<span class="number">0</span>)<span class="question-mark">?</span>;
             <span class="kw">let </span>slot = inst.stack_slot().unwrap();
             <span class="kw">let </span>offset = sum(imm(), args_range(<span class="number">1</span>..)<span class="question-mark">?</span>)<span class="question-mark">? </span><span class="kw">as </span>u64;
-            <span class="kw">let </span>mem_flags = MemFlags::trusted();
+            <span class="kw">let </span>mem_flags = MemFlags::new();
             continue_or_memtrap({
                 state
                     .stack_address(AddressSize::_64, slot, offset)
