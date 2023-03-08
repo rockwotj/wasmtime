@@ -3706,6 +3706,11 @@
 <a href="#3706" id="3706">3706</a>
 <a href="#3707" id="3707">3707</a>
 <a href="#3708" id="3708">3708</a>
+<a href="#3709" id="3709">3709</a>
+<a href="#3710" id="3710">3710</a>
+<a href="#3711" id="3711">3711</a>
+<a href="#3712" id="3712">3712</a>
+<a href="#3713" id="3713">3713</a>
 </pre><pre class="rust"><code><span class="attr">#![allow(non_snake_case)]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::cdsl::instructions::{
@@ -6953,15 +6958,6 @@
         );
     }
 
-    <span class="kw">let </span>IntTo = <span class="kw-2">&amp;</span>TypeVar::new(
-        <span class="string">&quot;IntTo&quot;</span>,
-        <span class="string">&quot;A larger integer type with the same number of lanes&quot;</span>,
-        TypeSetBuilder::new()
-            .ints(Interval::All)
-            .simd_lanes(Interval::All)
-            .build(),
-    );
-
     <span class="kw">let </span>FloatTo = <span class="kw-2">&amp;</span>TypeVar::new(
         <span class="string">&quot;FloatTo&quot;</span>,
         <span class="string">&quot;A scalar or vector floating point number&quot;</span>,
@@ -7084,6 +7080,11 @@
         <span class="string">&quot;A scalar only floating point number&quot;</span>,
         TypeSetBuilder::new().floats(Interval::All).build(),
     );
+    <span class="kw">let </span>IntTo = <span class="kw-2">&amp;</span>TypeVar::new(
+        <span class="string">&quot;IntTo&quot;</span>,
+        <span class="string">&quot;An scalar only integer type&quot;</span>,
+        TypeSetBuilder::new().ints(Interval::All).build(),
+    );
     <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, FloatScalar);
     <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, IntTo);
 
@@ -7123,6 +7124,15 @@
         .operands_out(<span class="macro">vec!</span>[a])
         .can_trap()
         .side_effects_idempotent(),
+    );
+
+    <span class="kw">let </span>IntTo = <span class="kw-2">&amp;</span>TypeVar::new(
+        <span class="string">&quot;IntTo&quot;</span>,
+        <span class="string">&quot;A larger integer type with the same number of lanes&quot;</span>,
+        TypeSetBuilder::new()
+            .ints(Interval::All)
+            .simd_lanes(Interval::All)
+            .build(),
     );
 
     <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Float);

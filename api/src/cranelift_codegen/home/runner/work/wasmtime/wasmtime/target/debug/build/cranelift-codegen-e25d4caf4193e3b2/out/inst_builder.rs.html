@@ -7826,12 +7826,12 @@
     ///
     /// Inputs:
     ///
-    /// - IntTo (controlling type variable): A larger integer type with the same number of lanes
+    /// - IntTo (controlling type variable): An scalar only integer type
     /// - x: A scalar only floating point number
     ///
     /// Outputs:
     ///
-    /// - a: A larger integer type with the same number of lanes
+    /// - a: An scalar only integer type
     </span><span class="attr">#[allow(non_snake_case)]
     </span><span class="kw">fn </span>fcvt_to_uint(<span class="self">self</span>, IntTo: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
         <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::FcvtToUint, IntTo, x);
@@ -7846,12 +7846,12 @@
     ///
     /// Inputs:
     ///
-    /// - IntTo (controlling type variable): A larger integer type with the same number of lanes
+    /// - IntTo (controlling type variable): An scalar only integer type
     /// - x: A scalar only floating point number
     ///
     /// Outputs:
     ///
-    /// - a: A larger integer type with the same number of lanes
+    /// - a: An scalar only integer type
     </span><span class="attr">#[allow(non_snake_case)]
     </span><span class="kw">fn </span>fcvt_to_sint(<span class="self">self</span>, IntTo: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
         <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::FcvtToSint, IntTo, x);
