@@ -1644,20 +1644,6 @@
 <a href="#1644" id="1644">1644</a>
 <a href="#1645" id="1645">1645</a>
 <a href="#1646" id="1646">1646</a>
-<a href="#1647" id="1647">1647</a>
-<a href="#1648" id="1648">1648</a>
-<a href="#1649" id="1649">1649</a>
-<a href="#1650" id="1650">1650</a>
-<a href="#1651" id="1651">1651</a>
-<a href="#1652" id="1652">1652</a>
-<a href="#1653" id="1653">1653</a>
-<a href="#1654" id="1654">1654</a>
-<a href="#1655" id="1655">1655</a>
-<a href="#1656" id="1656">1656</a>
-<a href="#1657" id="1657">1657</a>
-<a href="#1658" id="1658">1658</a>
-<a href="#1659" id="1659">1659</a>
-<a href="#1660" id="1660">1660</a>
 </pre><pre class="rust"><code><span class="doccomment">//! The [step] function interprets a single Cranelift instruction given its [State] and
 //! [InstructionContext]; the interpretation is generic over [Value]s.
 </span><span class="kw">use </span><span class="kw">crate</span>::address::{Address, AddressSize};
@@ -2263,11 +2249,7 @@
         Opcode::Select | Opcode::SelectSpectreGuard =&gt; {
             choose(arg(<span class="number">0</span>)<span class="question-mark">?</span>.into_bool()<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>, arg(<span class="number">2</span>)<span class="question-mark">?</span>)
         }
-        Opcode::Bitselect =&gt; {
-            <span class="kw">let </span>mask_a = Value::and(arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
-            <span class="kw">let </span>mask_b = Value::and(Value::not(arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>, arg(<span class="number">2</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
-            assign(Value::or(mask_a, mask_b)<span class="question-mark">?</span>)
-        }
+        Opcode::Bitselect =&gt; assign(bitselect(arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>, arg(<span class="number">2</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>),
         Opcode::Icmp =&gt; assign(icmp(
             ctrl_ty,
             inst.cond_code().unwrap(),
@@ -2283,7 +2265,7 @@
         Opcode::Smin =&gt; {
             <span class="kw">if </span>ctrl_ty.is_vector() {
                 <span class="kw">let </span>icmp = icmp(ctrl_ty, IntCC::SignedGreaterThan, <span class="kw-2">&amp;</span>arg(<span class="number">1</span>)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
-                assign(vselect(<span class="kw-2">&amp;</span>icmp, <span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span>arg(<span class="number">1</span>)<span class="question-mark">?</span>, ctrl_ty)<span class="question-mark">?</span>)
+                assign(bitselect(icmp, arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>)
             } <span class="kw">else </span>{
                 choose(Value::gt(<span class="kw-2">&amp;</span>arg(<span class="number">1</span>)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>, arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>)
             }
@@ -2291,7 +2273,7 @@
         Opcode::Umin =&gt; {
             <span class="kw">if </span>ctrl_ty.is_vector() {
                 <span class="kw">let </span>icmp = icmp(ctrl_ty, IntCC::UnsignedGreaterThan, <span class="kw-2">&amp;</span>arg(<span class="number">1</span>)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
-                assign(vselect(<span class="kw-2">&amp;</span>icmp, <span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span>arg(<span class="number">1</span>)<span class="question-mark">?</span>, ctrl_ty)<span class="question-mark">?</span>)
+                assign(bitselect(icmp, arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>)
             } <span class="kw">else </span>{
                 choose(
                     Value::gt(
@@ -2306,7 +2288,7 @@
         Opcode::Smax =&gt; {
             <span class="kw">if </span>ctrl_ty.is_vector() {
                 <span class="kw">let </span>icmp = icmp(ctrl_ty, IntCC::SignedGreaterThan, <span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span>arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
-                assign(vselect(<span class="kw-2">&amp;</span>icmp, <span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span>arg(<span class="number">1</span>)<span class="question-mark">?</span>, ctrl_ty)<span class="question-mark">?</span>)
+                assign(bitselect(icmp, arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>)
             } <span class="kw">else </span>{
                 choose(Value::gt(<span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span>arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>, arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>)
             }
@@ -2314,7 +2296,7 @@
         Opcode::Umax =&gt; {
             <span class="kw">if </span>ctrl_ty.is_vector() {
                 <span class="kw">let </span>icmp = icmp(ctrl_ty, IntCC::UnsignedGreaterThan, <span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span>arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
-                assign(vselect(<span class="kw-2">&amp;</span>icmp, <span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span>arg(<span class="number">1</span>)<span class="question-mark">?</span>, ctrl_ty)<span class="question-mark">?</span>)
+                assign(bitselect(icmp, arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>)
             } <span class="kw">else </span>{
                 choose(
                     Value::gt(
@@ -2727,7 +2709,6 @@
             }
             assign(Value::int(result, ctrl_ty)<span class="question-mark">?</span>)
         }
-        Opcode::Vselect =&gt; assign(vselect(<span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span>arg(<span class="number">1</span>)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span>arg(<span class="number">2</span>)<span class="question-mark">?</span>, ctrl_ty)<span class="question-mark">?</span>),
         Opcode::VanyTrue =&gt; {
             <span class="kw">let </span>lane_ty = ctrl_ty.lane_type();
             <span class="kw">let </span>init = V::bool(<span class="bool-val">false</span>, <span class="bool-val">true</span>, lane_ty)<span class="question-mark">?</span>;
@@ -3301,22 +3282,13 @@
     vectorizelanes(<span class="kw-2">&amp;</span>result, vector_type)
 }
 
-<span class="kw">fn </span>vselect&lt;V&gt;(c: <span class="kw-2">&amp;</span>V, x: <span class="kw-2">&amp;</span>V, y: <span class="kw-2">&amp;</span>V, vector_type: types::Type) -&gt; ValueResult&lt;V&gt;
+<span class="kw">fn </span>bitselect&lt;V&gt;(c: V, x: V, y: V) -&gt; ValueResult&lt;V&gt;
 <span class="kw">where
     </span>V: Value,
 {
-    <span class="kw">let </span>c = extractlanes(c, vector_type)<span class="question-mark">?</span>;
-    <span class="kw">let </span>x = extractlanes(x, vector_type)<span class="question-mark">?</span>;
-    <span class="kw">let </span>y = extractlanes(y, vector_type)<span class="question-mark">?</span>;
-    <span class="kw">let </span><span class="kw-2">mut </span>new_vec = SimdVec::new();
-    <span class="kw">for </span>(c, (x, y)) <span class="kw">in </span>c.into_iter().zip(x.into_iter().zip(y.into_iter())) {
-        <span class="kw">if </span>Value::eq(<span class="kw-2">&amp;</span>c, <span class="kw-2">&amp;</span>Value::int(<span class="number">0</span>, vector_type.lane_type())<span class="question-mark">?</span>)<span class="question-mark">? </span>{
-            new_vec.push(y);
-        } <span class="kw">else </span>{
-            new_vec.push(x);
-        }
-    }
-    vectorizelanes(<span class="kw-2">&amp;</span>new_vec, vector_type)
+    <span class="kw">let </span>mask_x = Value::and(c.clone(), x)<span class="question-mark">?</span>;
+    <span class="kw">let </span>mask_y = Value::and(Value::not(c)<span class="question-mark">?</span>, y)<span class="question-mark">?</span>;
+    Value::or(mask_x, mask_y)
 }
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cranelift_interpreter" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0-nightly (b70baa4f9 2022-12-14)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>

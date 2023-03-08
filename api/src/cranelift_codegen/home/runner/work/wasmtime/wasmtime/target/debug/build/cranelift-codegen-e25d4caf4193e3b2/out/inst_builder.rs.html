@@ -4289,27 +4289,6 @@
 <a href="#4289" id="4289">4289</a>
 <a href="#4290" id="4290">4290</a>
 <a href="#4291" id="4291">4291</a>
-<a href="#4292" id="4292">4292</a>
-<a href="#4293" id="4293">4293</a>
-<a href="#4294" id="4294">4294</a>
-<a href="#4295" id="4295">4295</a>
-<a href="#4296" id="4296">4296</a>
-<a href="#4297" id="4297">4297</a>
-<a href="#4298" id="4298">4298</a>
-<a href="#4299" id="4299">4299</a>
-<a href="#4300" id="4300">4300</a>
-<a href="#4301" id="4301">4301</a>
-<a href="#4302" id="4302">4302</a>
-<a href="#4303" id="4303">4303</a>
-<a href="#4304" id="4304">4304</a>
-<a href="#4305" id="4305">4305</a>
-<a href="#4306" id="4306">4306</a>
-<a href="#4307" id="4307">4307</a>
-<a href="#4308" id="4308">4308</a>
-<a href="#4309" id="4309">4309</a>
-<a href="#4310" id="4310">4310</a>
-<a href="#4311" id="4311">4311</a>
-<a href="#4312" id="4312">4312</a>
 </pre><pre class="rust"><code><span class="doccomment">/// Convenience methods for building instructions.
 ///
 /// The `InstBuilder` trait has one method per instruction opcode for
@@ -5641,8 +5620,8 @@
 
     <span class="doccomment">/// Conditional select.
     ///
-    /// This instruction selects whole values. Use `vselect` for
-    /// lane-wise selection.
+    /// This instruction selects whole values. Use `bitselect` to choose each
+    /// bit according to a mask.
     ///
     /// Inputs:
     ///
@@ -5697,7 +5676,7 @@
     ///
     /// For each bit in `c`, this instruction selects the corresponding bit from `x` if the bit
     /// in `x` is 1 and the corresponding bit from `y` if the bit in `c` is 0. See also:
-    /// `select`, `vselect`.
+    /// `select`.
     ///
     /// Inputs:
     ///
@@ -5735,27 +5714,6 @@
     </span><span class="kw">fn </span>x86_blendv(<span class="self">self</span>, c: ir::Value, x: ir::Value, y: ir::Value) -&gt; Value {
         <span class="kw">let </span>ctrl_typevar = <span class="self">self</span>.data_flow_graph().value_type(x);
         <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Ternary(Opcode::X86Blendv, ctrl_typevar, c, x, y);
-        dfg.first_result(inst)
-    }
-
-    <span class="doccomment">/// Vector lane select.
-    ///
-    /// Select lanes from ``x`` or ``y`` controlled by the lanes of the truthy
-    /// vector ``c``.
-    ///
-    /// Inputs:
-    ///
-    /// - c: Controlling vector
-    /// - x: Value to use where `c` is true
-    /// - y: Value to use where `c` is false
-    ///
-    /// Outputs:
-    ///
-    /// - a: A SIMD vector type
-    </span><span class="attr">#[allow(non_snake_case)]
-    </span><span class="kw">fn </span>vselect(<span class="self">self</span>, c: ir::Value, x: ir::Value, y: ir::Value) -&gt; Value {
-        <span class="kw">let </span>ctrl_typevar = <span class="self">self</span>.data_flow_graph().value_type(x);
-        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Ternary(Opcode::Vselect, ctrl_typevar, c, x, y);
         dfg.first_result(inst)
     }
 
