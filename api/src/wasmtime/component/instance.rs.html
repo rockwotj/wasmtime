@@ -689,6 +689,18 @@
 <a href="#689" id="689">689</a>
 <a href="#690" id="690">690</a>
 <a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::component::func::HostFunc;
 <span class="kw">use </span><span class="kw">crate</span>::component::{Component, ComponentNamedList, Func, Lift, Lower, TypedFunc};
 <span class="kw">use </span><span class="kw">crate</span>::instance::OwnedImports;
@@ -885,7 +897,8 @@
     imports: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>PrimaryMap&lt;RuntimeImportIndex, RuntimeImport&gt;,
 }
 
-<span class="kw">pub enum </span>RuntimeImport {
+<span class="attr">#[derive(Clone)]
+</span><span class="kw">pub enum </span>RuntimeImport {
     Func(Arc&lt;HostFunc&gt;),
     Module(Module),
 }
@@ -1153,6 +1166,17 @@
     component: Component,
     imports: PrimaryMap&lt;RuntimeImportIndex, RuntimeImport&gt;,
     _marker: marker::PhantomData&lt;<span class="kw">fn</span>() -&gt; T&gt;,
+}
+
+<span class="comment">// `InstancePre`&#39;s clone does not require `T: Clone`
+</span><span class="kw">impl</span>&lt;T&gt; Clone <span class="kw">for </span>InstancePre&lt;T&gt; {
+    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            component: <span class="self">self</span>.component.clone(),
+            imports: <span class="self">self</span>.imports.clone(),
+            _marker: <span class="self">self</span>._marker,
+        }
+    }
 }
 
 <span class="kw">impl</span>&lt;T&gt; InstancePre&lt;T&gt; {
