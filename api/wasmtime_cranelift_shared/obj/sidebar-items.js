@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["ModuleTextBuilder","A helper structure used to assemble the final text section of an exectuable, plus unwinding information and other related details."]]};

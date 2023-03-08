@@ -1050,13 +1050,20 @@
 <a href="#1050" id="1050">1050</a>
 <a href="#1051" id="1051">1051</a>
 <a href="#1052" id="1052">1052</a>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::builder::LinkOptions;
-<span class="kw">use </span><span class="kw">crate</span>::debug::{DwarfSectionRelocTarget, ModuleMemoryOffset};
+<a href="#1053" id="1053">1053</a>
+<a href="#1054" id="1054">1054</a>
+<a href="#1055" id="1055">1055</a>
+<a href="#1056" id="1056">1056</a>
+<a href="#1057" id="1057">1057</a>
+<a href="#1058" id="1058">1058</a>
+<a href="#1059" id="1059">1059</a>
+<a href="#1060" id="1060">1060</a>
+<a href="#1061" id="1061">1061</a>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::debug::{DwarfSectionRelocTarget, ModuleMemoryOffset};
 <span class="kw">use </span><span class="kw">crate</span>::func_environ::FuncEnvironment;
-<span class="kw">use </span><span class="kw">crate</span>::obj::ModuleTextBuilder;
 <span class="kw">use crate</span>::{
-    blank_sig, func_signature, indirect_signature, value_type, wasmtime_call_conv,
-    CompiledFunction, FunctionAddressMap, Relocation, RelocationTarget,
+    blank_sig, builder::LinkOptions, func_signature, indirect_signature, value_type,
+    wasmtime_call_conv, CompiledFunction, FunctionAddressMap,
 };
 <span class="kw">use </span>anyhow::{Context <span class="kw">as _</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>cranelift_codegen::ir::{
@@ -1065,8 +1072,8 @@
 <span class="kw">use </span>cranelift_codegen::isa::{OwnedTargetIsa, TargetIsa};
 <span class="kw">use </span>cranelift_codegen::print_errors::pretty_error;
 <span class="kw">use </span>cranelift_codegen::Context;
-<span class="kw">use </span>cranelift_codegen::{settings, MachReloc, MachTrap};
 <span class="kw">use </span>cranelift_codegen::{CompiledCode, MachSrcLoc, MachStackMap};
+<span class="kw">use </span>cranelift_codegen::{MachReloc, MachTrap};
 <span class="kw">use </span>cranelift_entity::{EntityRef, PrimaryMap};
 <span class="kw">use </span>cranelift_frontend::FunctionBuilder;
 <span class="kw">use </span>cranelift_wasm::{
@@ -1082,6 +1089,8 @@
 <span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::sync::{Arc, Mutex};
 <span class="kw">use </span>wasmparser::{FuncValidatorAllocations, FunctionBody};
+<span class="kw">use </span>wasmtime_cranelift_shared::obj::ModuleTextBuilder;
+<span class="kw">use </span>wasmtime_cranelift_shared::{Relocation, RelocationTarget};
 <span class="kw">use </span>wasmtime_environ::{
     AddressMapSection, CacheStore, CompileError, FilePos, FlagValue, FunctionBodyData, FunctionLoc,
     InstructionAddressMap, ModuleTranslation, ModuleTypes, PtrSize, StackMapInformation, Trap,
@@ -1412,7 +1421,8 @@
         tunables: <span class="kw-2">&amp;</span>Tunables,
         resolve_reloc: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Fn(usize, FuncIndex) -&gt; usize,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(SymbolId, FunctionLoc)&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = ModuleTextBuilder::new(obj, <span class="kw-2">&amp;*</span><span class="self">self</span>.isa, funcs.len());
+        <span class="kw">let </span><span class="kw-2">mut </span>builder =
+            ModuleTextBuilder::new(obj, <span class="self">self</span>, <span class="self">self</span>.isa.text_section_builder(funcs.len()));
         <span class="kw">if </span><span class="self">self</span>.linkopts.force_jump_veneers {
             builder.force_veneers();
         }
@@ -1421,8 +1431,15 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>ret = Vec::with_capacity(funcs.len());
         <span class="kw">for </span>(i, (sym, func)) <span class="kw">in </span>funcs.iter().enumerate() {
-            <span class="kw">let </span>func = func.downcast_ref().unwrap();
-            <span class="kw">let </span>(sym, range) = builder.append_func(<span class="kw-2">&amp;</span>sym, func, |idx| resolve_reloc(i, idx));
+            <span class="kw">let </span>func = func.downcast_ref::&lt;CompiledFunction&gt;().unwrap();
+            <span class="kw">let </span>(sym, range) = builder.append_func(
+                <span class="kw-2">&amp;</span>sym,
+                <span class="kw-2">&amp;</span>func.body,
+                func.alignment,
+                func.unwind_info.as_ref(),
+                <span class="kw-2">&amp;</span>func.relocations,
+                |idx| resolve_reloc(i, idx),
+            );
             <span class="kw">if </span>tunables.generate_address_map {
                 addrs.push(range.clone(), <span class="kw-2">&amp;</span>func.address_map.instructions);
             }
@@ -1453,9 +1470,23 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(FunctionLoc, FunctionLoc)&gt; {
         <span class="kw">let </span>host_to_wasm = <span class="self">self</span>.host_to_wasm_trampoline(ty)<span class="question-mark">?</span>;
         <span class="kw">let </span>wasm_to_host = <span class="self">self</span>.wasm_to_host_trampoline(ty, host_fn)<span class="question-mark">?</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = ModuleTextBuilder::new(obj, <span class="kw-2">&amp;*</span><span class="self">self</span>.isa, <span class="number">2</span>);
-        <span class="kw">let </span>(<span class="kw">_</span>, a) = builder.append_func(<span class="string">&quot;host_to_wasm&quot;</span>, <span class="kw-2">&amp;</span>host_to_wasm, |<span class="kw">_</span>| <span class="macro">unreachable!</span>());
-        <span class="kw">let </span>(<span class="kw">_</span>, b) = builder.append_func(<span class="string">&quot;wasm_to_host&quot;</span>, <span class="kw-2">&amp;</span>wasm_to_host, |<span class="kw">_</span>| <span class="macro">unreachable!</span>());
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = ModuleTextBuilder::new(obj, <span class="self">self</span>, <span class="self">self</span>.isa.text_section_builder(<span class="number">2</span>));
+        <span class="kw">let </span>(<span class="kw">_</span>, a) = builder.append_func(
+            <span class="string">&quot;host_to_wasm&quot;</span>,
+            <span class="kw-2">&amp;</span>host_to_wasm.body,
+            host_to_wasm.alignment,
+            host_to_wasm.unwind_info.as_ref(),
+            <span class="kw-2">&amp;</span>host_to_wasm.relocations,
+            |<span class="kw">_</span>| <span class="macro">unreachable!</span>(),
+        );
+        <span class="kw">let </span>(<span class="kw">_</span>, b) = builder.append_func(
+            <span class="string">&quot;wasm_to_host&quot;</span>,
+            <span class="kw-2">&amp;</span>wasm_to_host.body,
+            wasm_to_host.alignment,
+            wasm_to_host.unwind_info.as_ref(),
+            <span class="kw-2">&amp;</span>wasm_to_host.relocations,
+            |<span class="kw">_</span>| <span class="macro">unreachable!</span>(),
+        );
         <span class="kw">let </span>a = FunctionLoc {
             start: u32::try_from(a.start).unwrap(),
             length: u32::try_from(a.end - a.start).unwrap(),
@@ -1472,24 +1503,12 @@
         <span class="self">self</span>.isa.triple()
     }
 
-    <span class="kw">fn </span>page_size_align(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
-        <span class="self">self</span>.isa.code_section_alignment()
-    }
-
     <span class="kw">fn </span>flags(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BTreeMap&lt;String, FlagValue&gt; {
-        <span class="self">self</span>.isa
-            .flags()
-            .iter()
-            .map(|val| (val.name.to_string(), to_flag_value(<span class="kw-2">&amp;</span>val)))
-            .collect()
+        wasmtime_cranelift_shared::clif_flags_to_wasmtime(<span class="self">self</span>.isa.flags().iter())
     }
 
     <span class="kw">fn </span>isa_flags(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BTreeMap&lt;String, FlagValue&gt; {
-        <span class="self">self</span>.isa
-            .isa_flags()
-            .iter()
-            .map(|val| (val.name.to_string(), to_flag_value(val)))
-            .collect()
+        wasmtime_cranelift_shared::clif_flags_to_wasmtime(<span class="self">self</span>.isa.isa_flags())
     }
 
     <span class="kw">fn </span>is_branch_protection_enabled(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
@@ -1586,6 +1605,14 @@
 
         <span class="prelude-val">Ok</span>(())
     }
+
+    <span class="kw">fn </span>function_alignment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
+        <span class="self">self</span>.isa.function_alignment()
+    }
+
+    <span class="kw">fn </span>create_systemv_cie(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;gimli::write::CommonInformationEntry&gt; {
+        <span class="self">self</span>.isa.create_systemv_cie()
+    }
 }
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;incremental-cache&quot;</span>)]
@@ -1649,15 +1676,6 @@
         .compile_and_emit(isa, <span class="kw-2">&amp;mut </span>code_buf)
         .map_err(|error| CompileError::Codegen(pretty_error(<span class="kw-2">&amp;</span>error.func, error.inner)))<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>((compiled_code, code_buf))
-}
-
-<span class="kw">fn </span>to_flag_value(v: <span class="kw-2">&amp;</span>settings::Value) -&gt; FlagValue {
-    <span class="kw">match </span>v.kind() {
-        settings::SettingKind::Enum =&gt; FlagValue::Enum(v.as_enum().unwrap().into()),
-        settings::SettingKind::Num =&gt; FlagValue::Num(v.as_num().unwrap()),
-        settings::SettingKind::Bool =&gt; FlagValue::Bool(v.as_bool().unwrap()),
-        settings::SettingKind::Preset =&gt; <span class="macro">unreachable!</span>(),
-    }
 }
 
 <span class="kw">impl </span>Compiler {

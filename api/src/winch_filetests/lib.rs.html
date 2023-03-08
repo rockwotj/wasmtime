@@ -259,7 +259,7 @@
 
         <span class="kw">let </span>shared_flags = settings::Flags::new(settings::builder());
         <span class="kw">let </span>isa_builder = lookup(triple).unwrap();
-        <span class="kw">let </span>isa = isa_builder.build(shared_flags).unwrap();
+        <span class="kw">let </span>isa = isa_builder.finish(shared_flags).unwrap();
 
         <span class="kw">let </span><span class="kw-2">mut </span>validator = Validator::new();
         <span class="kw">let </span>parser = WasmParser::new(<span class="number">0</span>);

@@ -120,9 +120,19 @@
 <a href="#120" id="120">120</a>
 <a href="#121" id="121">121</a>
 <a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
 </pre><pre class="rust"><code><span class="kw">use </span>anyhow::{anyhow, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>core::fmt::Formatter;
-<span class="kw">use </span>cranelift_codegen::{isa::CallConv, settings, Final, MachBufferFinalized};
+<span class="kw">use </span>cranelift_codegen::isa::{CallConv, IsaBuilder};
+<span class="kw">use </span>cranelift_codegen::settings;
+<span class="kw">use </span>cranelift_codegen::{Final, MachBufferFinalized, TextSectionBuilder};
 <span class="kw">use </span>std::{
     error,
     fmt::{<span class="self">self</span>, Debug, Display},
@@ -151,24 +161,7 @@
     }};
 }
 
-<span class="doccomment">/// The target ISA builder.
-</span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Builder {
-    <span class="doccomment">/// The target triple.
-    </span>triple: Triple,
-    <span class="doccomment">/// The ISA settings builder.
-    </span>settings: settings::Builder,
-    <span class="doccomment">/// The Target ISA constructor.
-    </span>constructor: <span class="kw">fn</span>(Triple, settings::Flags, settings::Builder) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>TargetIsa&gt;&gt;,
-}
-
-<span class="kw">impl </span>Builder {
-    <span class="doccomment">/// Create a TargetIsa by combining ISA-specific settings with the provided
-    /// shared flags.
-    </span><span class="kw">pub fn </span>build(<span class="self">self</span>, shared_flags: settings::Flags) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>TargetIsa&gt;&gt; {
-        (<span class="self">self</span>.constructor)(<span class="self">self</span>.triple, shared_flags, <span class="self">self</span>.settings)
-    }
-}
+<span class="kw">pub type </span>Builder = IsaBuilder&lt;<span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>TargetIsa&gt;&gt;&gt;;
 
 <span class="doccomment">/// Look for an ISA builder for the given target triple.
 </span><span class="kw">pub fn </span>lookup(triple: Triple) -&gt; <span class="prelude-ty">Result</span>&lt;Builder&gt; {
@@ -214,6 +207,17 @@
     <span class="doccomment">/// Get the target triple of the ISA.
     </span><span class="kw">fn </span>triple(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Triple;
 
+    <span class="doccomment">/// Get the ISA-independent flags that were used to make this trait object.
+    </span><span class="kw">fn </span>flags(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>settings::Flags;
+
+    <span class="doccomment">/// Get the ISA-dependent flag values that were used to make this trait object.
+    </span><span class="kw">fn </span>isa_flags(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;settings::Value&gt;;
+
+    <span class="doccomment">/// Get a flag indicating whether branch protection is enabled.
+    </span><span class="kw">fn </span>is_branch_protection_enabled(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="bool-val">false
+    </span>}
+
     <span class="kw">fn </span>compile_function(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         sig: <span class="kw-2">&amp;</span>FuncType,
@@ -230,6 +234,18 @@
     </span><span class="kw">fn </span>endianness(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; target_lexicon::Endianness {
         <span class="self">self</span>.triple().endianness().unwrap()
     }
+
+    <span class="doccomment">/// See `cranelift_codegen::isa::TargetIsa::create_systemv_cie`.
+    </span><span class="kw">fn </span>create_systemv_cie(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;gimli::write::CommonInformationEntry&gt; {
+        <span class="comment">// By default, an ISA cannot create a System V CIE.
+        </span><span class="prelude-val">None
+    </span>}
+
+    <span class="doccomment">/// See `cranelift_codegen::isa::TargetIsa::text_section_builder`.
+    </span><span class="kw">fn </span>text_section_builder(<span class="kw-2">&amp;</span><span class="self">self</span>, num_labeled_funcs: usize) -&gt; Box&lt;<span class="kw">dyn </span>TextSectionBuilder&gt;;
+
+    <span class="doccomment">/// See `cranelift_codegen::isa::TargetIsa::function_alignment`.
+    </span><span class="kw">fn </span>function_alignment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32;
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa {

@@ -2102,6 +2102,8 @@
 <a href="#2102" id="2102">2102</a>
 <a href="#2103" id="2103">2103</a>
 <a href="#2104" id="2104">2104</a>
+<a href="#2105" id="2105">2105</a>
+<a href="#2106" id="2106">2106</a>
 </pre><pre class="rust"><code><span class="doccomment">//! In-memory representation of compiled machine code, with labels and fixups to
 //! refer to those labels. Handles constant-pool island insertion and also
 //! veneer insertion for out-of-range jumps.
@@ -3714,7 +3716,9 @@
 }
 
 <span class="kw">impl</span>&lt;I: VCodeInst&gt; MachTextSectionBuilder&lt;I&gt; {
-    <span class="kw">pub fn </span>new(num_funcs: usize) -&gt; MachTextSectionBuilder&lt;I&gt; {
+    <span class="doccomment">/// Creates a new text section builder which will have `num_funcs` functions
+    /// pushed into it.
+    </span><span class="kw">pub fn </span>new(num_funcs: usize) -&gt; MachTextSectionBuilder&lt;I&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
         buf.reserve_labels_for_blocks(num_funcs);
         MachTextSectionBuilder {

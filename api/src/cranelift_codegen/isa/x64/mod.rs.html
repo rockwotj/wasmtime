@@ -471,7 +471,7 @@
 <span class="kw">fn </span>isa_constructor(
     triple: Triple,
     shared_flags: Flags,
-    builder: shared_settings::Builder,
+    builder: <span class="kw-2">&amp;</span>shared_settings::Builder,
 ) -&gt; CodegenResult&lt;OwnedTargetIsa&gt; {
     <span class="kw">let </span>isa_flags = x64_settings::Flags::new(<span class="kw-2">&amp;</span>shared_flags, builder);
 

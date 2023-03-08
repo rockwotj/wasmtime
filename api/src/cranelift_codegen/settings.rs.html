@@ -762,9 +762,9 @@
     }
 
     <span class="doccomment">/// Extract contents of builder once everything is configured.
-    </span><span class="kw">pub fn </span>state_for(<span class="self">self</span>, name: <span class="kw-2">&amp;</span>str) -&gt; Box&lt;[u8]&gt; {
+    </span><span class="kw">pub fn </span>state_for(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;</span>[u8] {
         <span class="macro">assert_eq!</span>(name, <span class="self">self</span>.template.name);
-        <span class="self">self</span>.bytes
+        <span class="kw-2">&amp;</span><span class="self">self</span>.bytes
     }
 
     <span class="doccomment">/// Iterates the available settings in the builder.

@@ -57,83 +57,57 @@
 <a href="#57" id="57">57</a>
 <a href="#58" id="58">58</a>
 <a href="#59" id="59">59</a>
-<a href="#60" id="60">60</a>
-<a href="#61" id="61">61</a>
-<a href="#62" id="62">62</a>
-<a href="#63" id="63">63</a>
-<a href="#64" id="64">64</a>
-<a href="#65" id="65">65</a>
-<a href="#66" id="66">66</a>
-<a href="#67" id="67">67</a>
-<a href="#68" id="68">68</a>
-<a href="#69" id="69">69</a>
-<a href="#70" id="70">70</a>
-<a href="#71" id="71">71</a>
-<a href="#72" id="72">72</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::compiler::Compiler;
-<span class="kw">use </span>anyhow::Result;
-<span class="kw">use </span>cranelift_codegen::settings;
+<span class="kw">use </span>anyhow::{bail, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>target_lexicon::Triple;
+<span class="kw">use </span>wasmtime_cranelift_shared::isa_builder::IsaBuilder;
 <span class="kw">use </span>wasmtime_environ::{CompilerBuilder, Setting};
-<span class="kw">use </span>winch_codegen::isa;
+<span class="kw">use </span>winch_codegen::{isa, TargetIsa};
 
 <span class="doccomment">/// Compiler builder.
 </span><span class="kw">struct </span>Builder {
-    <span class="doccomment">/// Target triple.
-    </span>triple: Triple,
-    <span class="doccomment">/// Shared flags builder.
-    </span>shared_flags: settings::Builder,
-    <span class="doccomment">/// ISA builder.
-    </span>isa_builder: isa::Builder,
+    inner: IsaBuilder&lt;<span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>TargetIsa&gt;&gt;&gt;,
 }
 
 <span class="kw">pub fn </span>builder() -&gt; Box&lt;<span class="kw">dyn </span>CompilerBuilder&gt; {
-    <span class="kw">let </span>triple = Triple::host();
     Box::new(Builder {
-        triple: triple.clone(),
-        shared_flags: settings::builder(),
-        <span class="comment">// TODO:
-        // Either refactor and re-use `cranelift-native::builder()` or come up with a similar
-        // mechanism to lookup the host&#39;s architecture ISA and infer native flags.
-        </span>isa_builder: isa::lookup(triple).expect(<span class="string">&quot;host architecture is not supported&quot;</span>),
+        inner: IsaBuilder::new(|triple| isa::lookup(triple).map_err(|e| e.into())),
     })
 }
 
 <span class="kw">impl </span>CompilerBuilder <span class="kw">for </span>Builder {
     <span class="kw">fn </span>triple(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>target_lexicon::Triple {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.triple
+        <span class="self">self</span>.inner.triple()
     }
 
     <span class="kw">fn </span>target(<span class="kw-2">&amp;mut </span><span class="self">self</span>, target: target_lexicon::Triple) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.triple = target;
+        <span class="self">self</span>.inner.target(target)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn </span>set(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _name: <span class="kw-2">&amp;</span>str, _val: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="prelude-val">Ok</span>(())
+    <span class="kw">fn </span>set(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.set(name, value)
     }
 
-    <span class="kw">fn </span>enable(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="prelude-val">Ok</span>(())
+    <span class="kw">fn </span>enable(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.enable(name)
     }
 
     <span class="kw">fn </span>settings(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;Setting&gt; {
-        <span class="macro">vec!</span>[]
+        <span class="self">self</span>.inner.settings()
     }
 
     <span class="kw">fn </span>build(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>wasmtime_environ::Compiler&gt;&gt; {
-        <span class="kw">let </span>flags = settings::Flags::new(<span class="self">self</span>.shared_flags.clone());
-        <span class="prelude-val">Ok</span>(Box::new(Compiler::new(
-            <span class="self">self</span>.isa_builder.clone().build(flags)<span class="question-mark">?</span>,
-        )))
+        <span class="kw">let </span>isa = <span class="self">self</span>.inner.build()<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(Box::new(Compiler::new(isa)))
     }
 
     <span class="kw">fn </span>enable_incremental_compilation(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         _cache_store: Arc&lt;<span class="kw">dyn </span>wasmtime_environ::CacheStore&gt;,
-    ) {
-        <span class="macro">todo!</span>()
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="macro">bail!</span>(<span class="string">&quot;incremental compilation is not supported on this platform&quot;</span>);
     }
 }
 

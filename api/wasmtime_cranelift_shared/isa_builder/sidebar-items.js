@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["IsaBuilder","A helper to build an Isa for a compiler implementation. Compiler builders can wrap this to provide better flexibility when setting flags."]]};

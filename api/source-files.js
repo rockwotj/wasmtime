@@ -39,7 +39,8 @@ var sourcesIndex = JSON.parse('{\
 "wasmtime_cli_flags":["",[],["lib.rs"]],\
 "wasmtime_component_macro":["",[],["bindgen.rs","component.rs","lib.rs"]],\
 "wasmtime_component_util":["",[],["lib.rs"]],\
-"wasmtime_cranelift":["",[["compiler",[],["component.rs"]],["debug",[["transform",[],["address_transform.rs","attr.rs","expression.rs","line_program.rs","mod.rs","range_info_builder.rs","refs.rs","simulate.rs","unit.rs","utils.rs"]]],["gc.rs","write_debuginfo.rs"]]],["builder.rs","compiler.rs","debug.rs","func_environ.rs","lib.rs","obj.rs"]],\
+"wasmtime_cranelift":["",[["compiler",[],["component.rs"]],["debug",[["transform",[],["address_transform.rs","attr.rs","expression.rs","line_program.rs","mod.rs","range_info_builder.rs","refs.rs","simulate.rs","unit.rs","utils.rs"]]],["gc.rs","write_debuginfo.rs"]]],["builder.rs","compiler.rs","debug.rs","func_environ.rs","lib.rs"]],\
+"wasmtime_cranelift_shared":["",[],["isa_builder.rs","lib.rs","obj.rs"]],\
 "wasmtime_environ":["",[["component",[["translate",[],["adapt.rs","inline.rs"]]],["compiler.rs","dfg.rs","info.rs","translate.rs","types.rs","vmcomponent_offsets.rs"]],["fact",[],["core_types.rs","signature.rs","trampoline.rs","transcode.rs","traps.rs"]]],["address_map.rs","builtin.rs","compilation.rs","component.rs","fact.rs","lib.rs","module.rs","module_environ.rs","module_types.rs","obj.rs","ref_bits.rs","scopevec.rs","stack_map.rs","trap_encoding.rs","tunables.rs","vmoffsets.rs"]],\
 "wasmtime_fiber":["",[["unix",[],["x86_64.rs"]]],["lib.rs","unix.rs"]],\
 "wasmtime_fuzzing":["",[["generators",[],["api.rs","codegen_settings.rs","component_types.rs","config.rs","instance_allocation_strategy.rs","memory.rs","module.rs","pooling_config.rs","single_inst_module.rs","spec_test.rs","stacks.rs","table_ops.rs","value.rs"]],["oracles",[],["diff_spec.rs","diff_v8.rs","diff_wasmi.rs","diff_wasmtime.rs","dummy.rs","engine.rs","stacks.rs"]]],["generators.rs","lib.rs","mutators.rs","oracles.rs"]],\

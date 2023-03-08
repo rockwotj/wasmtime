@@ -139,6 +139,8 @@
 <a href="#139" id="139">139</a>
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Cranelift code generation library.
 </span><span class="attr">#![deny(missing_docs, trivial_numeric_casts, unused_extern_crates)]
 #![warn(unused_import_braces)]
@@ -229,7 +231,9 @@
 <span class="kw">pub mod </span>write;
 
 <span class="kw">pub use </span><span class="kw">crate</span>::entity::packed_option;
-<span class="kw">pub use </span><span class="kw">crate</span>::machinst::buffer::{MachCallSite, MachReloc, MachSrcLoc, MachStackMap, MachTrap};
+<span class="kw">pub use </span><span class="kw">crate</span>::machinst::buffer::{
+    MachCallSite, MachReloc, MachSrcLoc, MachStackMap, MachTextSectionBuilder, MachTrap,
+};
 <span class="kw">pub use </span><span class="kw">crate</span>::machinst::{
     CompiledCode, Final, MachBuffer, MachBufferFinalized, MachInst, MachInstEmit, Reg,
     TextSectionBuilder, Writable,

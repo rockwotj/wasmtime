@@ -529,7 +529,7 @@
 </span><span class="kw">fn </span>gen_constructor(group: <span class="kw-2">&amp;</span>SettingGroup, parent: ParentGroup, fmt: <span class="kw-2">&amp;mut </span>Formatter) {
     <span class="kw">let </span>args = <span class="kw">match </span>parent {
         ParentGroup::None =&gt; <span class="string">&quot;builder: Builder&quot;</span>,
-        ParentGroup::Shared =&gt; <span class="string">&quot;shared: &amp;settings::Flags, builder: Builder&quot;</span>,
+        ParentGroup::Shared =&gt; <span class="string">&quot;shared: &amp;settings::Flags, builder: &amp;Builder&quot;</span>,
     };
     <span class="macro">fmtln!</span>(fmt, <span class="string">&quot;impl Flags {&quot;</span>);
     fmt.indent(|fmt| {

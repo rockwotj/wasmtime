@@ -95,6 +95,23 @@
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
 <a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::abi::ABI;
 <span class="kw">use </span><span class="kw">crate</span>::codegen::{CodeGen, CodeGenContext};
 <span class="kw">use </span><span class="kw">crate</span>::frame::Frame;
@@ -107,9 +124,9 @@
     regset::RegSet,
 };
 <span class="kw">use </span>anyhow::Result;
-<span class="kw">use </span>cranelift_codegen::{
-    isa::x64::settings <span class="kw">as </span>x64_settings, settings::Flags, Final, MachBufferFinalized,
-};
+<span class="kw">use </span>cranelift_codegen::settings::{<span class="self">self</span>, Flags};
+<span class="kw">use </span>cranelift_codegen::{isa::x64::settings <span class="kw">as </span>x64_settings, Final, MachBufferFinalized};
+<span class="kw">use </span>cranelift_codegen::{MachTextSectionBuilder, TextSectionBuilder};
 <span class="kw">use </span>target_lexicon::Triple;
 <span class="kw">use </span>wasmparser::{FuncType, FuncValidator, FunctionBody, ValidatorResources};
 
@@ -127,17 +144,17 @@
 
 <span class="doccomment">/// Create an ISA builder.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>isa_builder(triple: Triple) -&gt; Builder {
-    Builder {
+    Builder::new(
         triple,
-        settings: x64_settings::builder(),
-        constructor: |triple, shared_flags, settings| {
+        x64_settings::builder(),
+        |triple, shared_flags, settings| {
             <span class="comment">// TODO: Once enabling/disabling flags is allowed, and once features like SIMD are supported
             // ensure compatibility between shared flags and ISA flags.
             </span><span class="kw">let </span>isa_flags = x64_settings::Flags::new(<span class="kw-2">&amp;</span>shared_flags, settings);
             <span class="kw">let </span>isa = X64::new(triple, shared_flags, isa_flags);
             <span class="prelude-val">Ok</span>(Box::new(isa))
         },
-    }
+    )
 }
 
 <span class="doccomment">/// x64 ISA.
@@ -170,6 +187,14 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.triple
     }
 
+    <span class="kw">fn </span>flags(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>settings::Flags {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.shared_flags
+    }
+
+    <span class="kw">fn </span>isa_flags(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;settings::Value&gt; {
+        <span class="self">self</span>.isa_flags.iter().collect()
+    }
+
     <span class="kw">fn </span>compile_function(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         sig: <span class="kw-2">&amp;</span>FuncType,
@@ -191,6 +216,15 @@
 
         <span class="prelude-val">Ok</span>(masm.finalize())
     }
+
+    <span class="kw">fn </span>text_section_builder(<span class="kw-2">&amp;</span><span class="self">self</span>, num_funcs: usize) -&gt; Box&lt;<span class="kw">dyn </span>TextSectionBuilder&gt; {
+        Box::new(MachTextSectionBuilder::&lt;cranelift_codegen::isa::x64::Inst&gt;::new(num_funcs))
+    }
+
+    <span class="kw">fn </span>function_alignment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
+        <span class="comment">// See `cranelift_codegen`&#39;s value of this for more information.
+        </span><span class="number">16
+    </span>}
 }
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="winch_codegen" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0-nightly (b70baa4f9 2022-12-14)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>

@@ -553,16 +553,34 @@
 <span class="doccomment">/// The type of a polymorphic TargetISA object which is &#39;static.
 </span><span class="kw">pub type </span>OwnedTargetIsa = Arc&lt;<span class="kw">dyn </span>TargetIsa&gt;;
 
+<span class="doccomment">/// Type alias of `IsaBuilder` used for building Cranelift&#39;s ISAs.
+</span><span class="kw">pub type </span>Builder = IsaBuilder&lt;CodegenResult&lt;OwnedTargetIsa&gt;&gt;;
+
 <span class="doccomment">/// Builder for a `TargetIsa`.
 /// Modify the ISA-specific settings before creating the `TargetIsa` trait object with `finish`.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Builder {
+</span><span class="kw">pub struct </span>IsaBuilder&lt;T&gt; {
     triple: Triple,
     setup: settings::Builder,
-    constructor: <span class="kw">fn</span>(Triple, settings::Flags, settings::Builder) -&gt; CodegenResult&lt;OwnedTargetIsa&gt;,
+    constructor: <span class="kw">fn</span>(Triple, settings::Flags, <span class="kw-2">&amp;</span>settings::Builder) -&gt; T,
 }
 
-<span class="kw">impl </span>Builder {
+<span class="kw">impl</span>&lt;T&gt; IsaBuilder&lt;T&gt; {
+    <span class="doccomment">/// Creates a new ISA-builder from its components, namely the `triple` for
+    /// the ISA, the ISA-specific settings builder, and a final constructor
+    /// function to generate the ISA from its components.
+    </span><span class="kw">pub fn </span>new(
+        triple: Triple,
+        setup: settings::Builder,
+        constructor: <span class="kw">fn</span>(Triple, settings::Flags, <span class="kw-2">&amp;</span>settings::Builder) -&gt; T,
+    ) -&gt; <span class="self">Self </span>{
+        IsaBuilder {
+            triple,
+            setup,
+            constructor,
+        }
+    }
+
     <span class="doccomment">/// Gets the triple for the builder.
     </span><span class="kw">pub fn </span>triple(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Triple {
         <span class="kw-2">&amp;</span><span class="self">self</span>.triple
@@ -579,12 +597,12 @@
     /// flags are inconsistent or incompatible: for example, some
     /// platform-independent features, like general SIMD support, may
     /// need certain ISA extensions to be enabled.
-    </span><span class="kw">pub fn </span>finish(<span class="self">self</span>, shared_flags: settings::Flags) -&gt; CodegenResult&lt;OwnedTargetIsa&gt; {
-        (<span class="self">self</span>.constructor)(<span class="self">self</span>.triple, shared_flags, <span class="self">self</span>.setup)
+    </span><span class="kw">pub fn </span>finish(<span class="kw-2">&amp;</span><span class="self">self</span>, shared_flags: settings::Flags) -&gt; T {
+        (<span class="self">self</span>.constructor)(<span class="self">self</span>.triple.clone(), shared_flags, <span class="kw-2">&amp;</span><span class="self">self</span>.setup)
     }
 }
 
-<span class="kw">impl </span>settings::Configurable <span class="kw">for </span>Builder {
+<span class="kw">impl</span>&lt;T&gt; settings::Configurable <span class="kw">for </span>IsaBuilder&lt;T&gt; {
     <span class="kw">fn </span>set(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>str) -&gt; SetResult&lt;()&gt; {
         <span class="self">self</span>.setup.set(name, value)
     }
@@ -743,24 +761,6 @@
         <span class="kw">match </span><span class="self">self</span>.triple().endianness().unwrap() {
             target_lexicon::Endianness::Little =&gt; ir::Endianness::Little,
             target_lexicon::Endianness::Big =&gt; ir::Endianness::Big,
-        }
-    }
-
-    <span class="doccomment">/// Returns the code (text) section alignment for this ISA.
-    </span><span class="kw">pub fn </span>code_section_alignment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
-        <span class="kw">use </span>target_lexicon::<span class="kw-2">*</span>;
-        <span class="kw">match </span>(<span class="self">self</span>.triple().operating_system, <span class="self">self</span>.triple().architecture) {
-            (
-                OperatingSystem::MacOSX { .. }
-                | OperatingSystem::Darwin
-                | OperatingSystem::Ios
-                | OperatingSystem::Tvos,
-                Architecture::Aarch64(..),
-            ) =&gt; <span class="number">0x4000</span>,
-            <span class="comment">// 64 KB is the maximal page size (i.e. memory translation granule size)
-            // supported by the architecture and is used on some platforms.
-            </span>(<span class="kw">_</span>, Architecture::Aarch64(..)) =&gt; <span class="number">0x10000</span>,
-            <span class="kw">_ </span>=&gt; <span class="number">0x1000</span>,
         }
     }
 

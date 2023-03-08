@@ -315,6 +315,34 @@
 <a href="#315" id="315">315</a>
 <a href="#316" id="316">316</a>
 <a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
 </pre><pre class="rust"><code><span class="doccomment">//! A `Compilation` contains the compiled function bodies for a WebAssembly
 //! module.
 
@@ -429,7 +457,9 @@
 
     <span class="doccomment">/// Enables Cranelift&#39;s incremental compilation cache, using the given `CacheStore`
     /// implementation.
-    </span><span class="kw">fn </span>enable_incremental_compilation(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cache_store: Arc&lt;<span class="kw">dyn </span>CacheStore&gt;);
+    ///
+    /// This will return an error if the compiler does not support incremental compilation.
+    </span><span class="kw">fn </span>enable_incremental_compilation(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cache_store: Arc&lt;<span class="kw">dyn </span>CacheStore&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 
     <span class="doccomment">/// Builds a new [`Compiler`] object from this configuration.
     </span><span class="kw">fn </span>build(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>Compiler&gt;&gt;;
@@ -584,7 +614,22 @@
     /// compilation target. Note that this may be an upper-bound where the
     /// alignment is larger than necessary for some platforms since it may
     /// depend on the platform&#39;s runtime configuration.
-    </span><span class="kw">fn </span>page_size_align(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64;
+    </span><span class="kw">fn </span>page_size_align(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+        <span class="kw">use </span>target_lexicon::<span class="kw-2">*</span>;
+        <span class="kw">match </span>(<span class="self">self</span>.triple().operating_system, <span class="self">self</span>.triple().architecture) {
+            (
+                OperatingSystem::MacOSX { .. }
+                | OperatingSystem::Darwin
+                | OperatingSystem::Ios
+                | OperatingSystem::Tvos,
+                Architecture::Aarch64(..),
+            ) =&gt; <span class="number">0x4000</span>,
+            <span class="comment">// 64 KB is the maximal page size (i.e. memory translation granule size)
+            // supported by the architecture and is used on some platforms.
+            </span>(<span class="kw">_</span>, Architecture::Aarch64(..)) =&gt; <span class="number">0x10000</span>,
+            <span class="kw">_ </span>=&gt; <span class="number">0x1000</span>,
+        }
+    }
 
     <span class="doccomment">/// Returns a list of configured settings for this compiler.
     </span><span class="kw">fn </span>flags(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BTreeMap&lt;String, FlagValue&gt;;
@@ -610,6 +655,17 @@
         translation: <span class="kw-2">&amp;</span>ModuleTranslation&lt;<span class="lifetime">&#39;_</span>&gt;,
         funcs: <span class="kw-2">&amp;</span>PrimaryMap&lt;DefinedFuncIndex, (SymbolId, <span class="kw-2">&amp;</span>(<span class="kw">dyn </span>Any + Send))&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
+
+    <span class="doccomment">/// The function alignment required by this ISA.
+    </span><span class="kw">fn </span>function_alignment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32;
+
+    <span class="doccomment">/// Creates a new System V Common Information Entry for the ISA.
+    ///
+    /// Returns `None` if the ISA does not support System V unwind information.
+    </span><span class="kw">fn </span>create_systemv_cie(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;gimli::write::CommonInformationEntry&gt; {
+        <span class="comment">// By default, an ISA cannot create a System V CIE.
+        </span><span class="prelude-val">None
+    </span>}
 }
 
 <span class="doccomment">/// Value of a configured setting for a [`Compiler`]

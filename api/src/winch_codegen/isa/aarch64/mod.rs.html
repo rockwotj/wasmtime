@@ -89,6 +89,29 @@
 <a href="#89" id="89">89</a>
 <a href="#90" id="90">90</a>
 <a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="self">self</span>::regs::{scratch, ALL_GPR};
 <span class="kw">use crate</span>::{
     abi::ABI,
@@ -101,9 +124,9 @@
     stack::Stack,
 };
 <span class="kw">use </span>anyhow::Result;
-<span class="kw">use </span>cranelift_codegen::{
-    isa::aarch64::settings <span class="kw">as </span>aarch64_settings, settings::Flags, Final, MachBufferFinalized,
-};
+<span class="kw">use </span>cranelift_codegen::settings::{<span class="self">self</span>, Flags};
+<span class="kw">use </span>cranelift_codegen::{isa::aarch64::settings <span class="kw">as </span>aarch64_settings, Final, MachBufferFinalized};
+<span class="kw">use </span>cranelift_codegen::{MachTextSectionBuilder, TextSectionBuilder};
 <span class="kw">use </span>masm::MacroAssembler <span class="kw">as </span>Aarch64Masm;
 <span class="kw">use </span>target_lexicon::Triple;
 <span class="kw">use </span>wasmparser::{FuncType, FuncValidator, FunctionBody, ValidatorResources};
@@ -116,15 +139,15 @@
 
 <span class="doccomment">/// Create an ISA from the given triple.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>isa_builder(triple: Triple) -&gt; Builder {
-    Builder {
+    Builder::new(
         triple,
-        settings: aarch64_settings::builder(),
-        constructor: |triple, shared_flags, settings| {
+        aarch64_settings::builder(),
+        |triple, shared_flags, settings| {
             <span class="kw">let </span>isa_flags = aarch64_settings::Flags::new(<span class="kw-2">&amp;</span>shared_flags, settings);
             <span class="kw">let </span>isa = Aarch64::new(triple, shared_flags, isa_flags);
             <span class="prelude-val">Ok</span>(Box::new(isa))
         },
-    }
+    )
 }
 
 <span class="doccomment">/// Aarch64 ISA.
@@ -159,6 +182,18 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.triple
     }
 
+    <span class="kw">fn </span>flags(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>settings::Flags {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.shared_flags
+    }
+
+    <span class="kw">fn </span>isa_flags(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;settings::Value&gt; {
+        <span class="self">self</span>.isa_flags.iter().collect()
+    }
+
+    <span class="kw">fn </span>is_branch_protection_enabled(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.isa_flags.use_bti()
+    }
+
     <span class="kw">fn </span>compile_function(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         sig: <span class="kw-2">&amp;</span>FuncType,
@@ -179,6 +214,17 @@
         codegen.emit(<span class="kw-2">&amp;mut </span>body, validator)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(masm.finalize())
     }
+
+    <span class="kw">fn </span>text_section_builder(<span class="kw-2">&amp;</span><span class="self">self</span>, num_funcs: usize) -&gt; Box&lt;<span class="kw">dyn </span>TextSectionBuilder&gt; {
+        Box::new(MachTextSectionBuilder::&lt;
+            cranelift_codegen::isa::aarch64::inst::Inst,
+        &gt;::new(num_funcs))
+    }
+
+    <span class="kw">fn </span>function_alignment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
+        <span class="comment">// See `cranelift_codegen::isa::TargetIsa::function_alignment`.
+        </span><span class="number">32
+    </span>}
 }
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="winch_codegen" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0-nightly (b70baa4f9 2022-12-14)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>
