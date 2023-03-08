@@ -1020,14 +1020,14 @@
                             );
                             (inst, result_idx)
                         }
-                        ValueDef::Param(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; {
+                        ValueDef::Param(in_block, <span class="kw">_</span>) =&gt; {
                             <span class="comment">// We don&#39;t need to do anything to compute
                             // this value; just push its result on the
                             // result stack (blockparams are already
                             // available).
                             </span><span class="macro">trace!</span>(<span class="string">&quot; -&gt; value {} is a blockparam&quot;</span>, best_value);
                             <span class="self">self</span>.elab_result_stack.push(ElaboratedValue {
-                                in_block: <span class="self">self</span>.cur_block,
+                                in_block,
                                 value: best_value,
                             });
                             <span class="kw">continue</span>;
