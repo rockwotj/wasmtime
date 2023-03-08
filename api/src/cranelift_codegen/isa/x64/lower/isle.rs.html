@@ -1847,7 +1847,7 @@
     </span><span class="kw">fn </span>shuffle_0_31_mask(<span class="kw-2">&amp;mut </span><span class="self">self</span>, mask: <span class="kw-2">&amp;</span>VecMask) -&gt; VCodeConstant {
         <span class="kw">let </span>mask = mask
             .iter()
-            .map(|<span class="kw-2">&amp;</span>b| <span class="kw">if </span>b &gt; <span class="number">15 </span>{ b.wrapping_sub(<span class="number">15</span>) } <span class="kw">else </span>{ b })
+            .map(|<span class="kw-2">&amp;</span>b| <span class="kw">if </span>b &gt; <span class="number">15 </span>{ b.wrapping_sub(<span class="number">16</span>) } <span class="kw">else </span>{ b })
             .map(|b| <span class="kw">if </span>b &gt; <span class="number">15 </span>{ <span class="number">0b10000000 </span>} <span class="kw">else </span>{ b })
             .collect();
         <span class="self">self</span>.lower_ctx
