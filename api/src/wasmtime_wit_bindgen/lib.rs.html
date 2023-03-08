@@ -1365,6 +1365,35 @@
 <a href="#1365" id="1365">1365</a>
 <a href="#1366" id="1366">1366</a>
 <a href="#1367" id="1367">1367</a>
+<a href="#1368" id="1368">1368</a>
+<a href="#1369" id="1369">1369</a>
+<a href="#1370" id="1370">1370</a>
+<a href="#1371" id="1371">1371</a>
+<a href="#1372" id="1372">1372</a>
+<a href="#1373" id="1373">1373</a>
+<a href="#1374" id="1374">1374</a>
+<a href="#1375" id="1375">1375</a>
+<a href="#1376" id="1376">1376</a>
+<a href="#1377" id="1377">1377</a>
+<a href="#1378" id="1378">1378</a>
+<a href="#1379" id="1379">1379</a>
+<a href="#1380" id="1380">1380</a>
+<a href="#1381" id="1381">1381</a>
+<a href="#1382" id="1382">1382</a>
+<a href="#1383" id="1383">1383</a>
+<a href="#1384" id="1384">1384</a>
+<a href="#1385" id="1385">1385</a>
+<a href="#1386" id="1386">1386</a>
+<a href="#1387" id="1387">1387</a>
+<a href="#1388" id="1388">1388</a>
+<a href="#1389" id="1389">1389</a>
+<a href="#1390" id="1390">1390</a>
+<a href="#1391" id="1391">1391</a>
+<a href="#1392" id="1392">1392</a>
+<a href="#1393" id="1393">1393</a>
+<a href="#1394" id="1394">1394</a>
+<a href="#1395" id="1395">1395</a>
+<a href="#1396" id="1396">1396</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::rust::{to_rust_ident, to_rust_upper_camel_case, RustGenerator, TypeMode};
 <span class="kw">use </span><span class="kw">crate</span>::types::{TypeInfo, Types};
 <span class="kw">use </span>heck::<span class="kw-2">*</span>;
@@ -1399,6 +1428,7 @@
     imports: Vec&lt;Import&gt;,
     exports: Exports,
     types: Types,
+    sizes: SizeAlign,
 }
 
 <span class="kw">enum </span>Import {
@@ -1448,6 +1478,7 @@
 <span class="kw">impl </span>Opts {
     <span class="kw">pub fn </span>generate(<span class="kw-2">&amp;</span><span class="self">self</span>, resolve: <span class="kw-2">&amp;</span>Resolve, world: WorldId) -&gt; String {
         <span class="kw">let </span><span class="kw-2">mut </span>r = Wasmtime::default();
+        r.sizes.fill(resolve);
         r.opts = <span class="self">self</span>.clone();
         r.generate(resolve, world)
     }
@@ -1935,6 +1966,7 @@
                 <span class="self">self</span>.push_str(<span class="kw-2">&amp;</span>name);
                 <span class="self">self</span>.push_str(<span class="string">&quot;{}\n&quot;</span>);
             }
+            <span class="self">self</span>.assert_type(id, <span class="kw-2">&amp;</span>name);
         }
     }
 
@@ -1951,14 +1983,15 @@
                 <span class="self">self</span>.push_str(<span class="string">&quot;,&quot;</span>);
             }
             <span class="self">self</span>.push_str(<span class="string">&quot;);\n&quot;</span>);
+            <span class="self">self</span>.assert_type(id, <span class="kw-2">&amp;</span>name);
         }
     }
 
-    <span class="kw">fn </span>type_flags(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _id: TypeId, name: <span class="kw-2">&amp;</span>str, flags: <span class="kw-2">&amp;</span>Flags, docs: <span class="kw-2">&amp;</span>Docs) {
+    <span class="kw">fn </span>type_flags(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: TypeId, name: <span class="kw-2">&amp;</span>str, flags: <span class="kw-2">&amp;</span>Flags, docs: <span class="kw-2">&amp;</span>Docs) {
         <span class="self">self</span>.rustdoc(docs);
+        <span class="kw">let </span>rust_name = to_rust_upper_camel_case(name);
         <span class="self">self</span>.src.push_str(<span class="string">&quot;wasmtime::component::flags!(\n&quot;</span>);
-        <span class="self">self</span>.src
-            .push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{} {{\n&quot;</span>, to_rust_upper_camel_case(name)));
+        <span class="self">self</span>.src.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{rust_name} {{\n&quot;</span>));
         <span class="kw">for </span>flag <span class="kw">in </span>flags.flags.iter() {
             <span class="comment">// TODO wasmtime-component-macro doesnt support docs for flags rn
             </span><span class="macro">uwrite!</span>(
@@ -1970,6 +2003,7 @@
         }
         <span class="self">self</span>.src.push_str(<span class="string">&quot;}\n&quot;</span>);
         <span class="self">self</span>.src.push_str(<span class="string">&quot;);\n\n&quot;</span>);
+        <span class="self">self</span>.assert_type(id, <span class="kw-2">&amp;</span>rust_name);
     }
 
     <span class="kw">fn </span>type_variant(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: TypeId, _name: <span class="kw-2">&amp;</span>str, variant: <span class="kw-2">&amp;</span>Variant, docs: <span class="kw-2">&amp;</span>Docs) {
@@ -2009,7 +2043,25 @@
             <span class="self">self</span>.push_str(<span class="string">&quot;= Option&lt;&quot;</span>);
             <span class="self">self</span>.print_ty(payload, mode);
             <span class="self">self</span>.push_str(<span class="string">&quot;&gt;;\n&quot;</span>);
+            <span class="self">self</span>.assert_type(id, <span class="kw-2">&amp;</span>name);
         }
+    }
+
+    <span class="comment">// Emit a double-check that the wit-parser-understood size of a type agrees
+    // with the Wasmtime-understood size of a type.
+    </span><span class="kw">fn </span>assert_type(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: TypeId, name: <span class="kw-2">&amp;</span>str) {
+        <span class="self">self</span>.push_str(<span class="string">&quot;const _: () = {\n&quot;</span>);
+        <span class="macro">uwriteln!</span>(
+            <span class="self">self</span>.src,
+            <span class="string">&quot;assert!({} == &lt;{name} as wasmtime::component::ComponentType&gt;::SIZE32);&quot;</span>,
+            <span class="self">self</span>.gen.sizes.size(<span class="kw-2">&amp;</span>Type::Id(id)),
+        );
+        <span class="macro">uwriteln!</span>(
+            <span class="self">self</span>.src,
+            <span class="string">&quot;assert!({} == &lt;{name} as wasmtime::component::ComponentType&gt;::ALIGN32);&quot;</span>,
+            <span class="self">self</span>.gen.sizes.align(<span class="kw-2">&amp;</span>Type::Id(id)),
+        );
+        <span class="self">self</span>.push_str(<span class="string">&quot;};\n&quot;</span>);
     }
 
     <span class="kw">fn </span>print_rust_enum&lt;<span class="lifetime">&#39;b</span>&gt;(
@@ -2089,6 +2141,8 @@
                 <span class="self">self</span>.print_generics(lt);
                 <span class="self">self</span>.push_str(<span class="string">&quot; {}\n&quot;</span>);
             }
+
+            <span class="self">self</span>.assert_type(id, <span class="kw-2">&amp;</span>name);
         }
     }
 
@@ -2144,6 +2198,7 @@
             <span class="self">self</span>.push_str(<span class="string">&quot;,&quot;</span>);
             <span class="self">self</span>.print_optional_ty(result.err.as_ref(), mode);
             <span class="self">self</span>.push_str(<span class="string">&quot;&gt;;\n&quot;</span>);
+            <span class="self">self</span>.assert_type(id, <span class="kw-2">&amp;</span>name);
         }
     }
 
@@ -2241,6 +2296,7 @@
                     .map(|c| (c.name.to_upper_camel_case(), <span class="prelude-val">None</span>)),
             )
         }
+        <span class="self">self</span>.assert_type(id, <span class="kw-2">&amp;</span>name);
     }
 
     <span class="kw">fn </span>type_alias(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: TypeId, _name: <span class="kw-2">&amp;</span>str, ty: <span class="kw-2">&amp;</span>Type, docs: <span class="kw-2">&amp;</span>Docs) {
@@ -2253,6 +2309,7 @@
             <span class="self">self</span>.push_str(<span class="string">&quot; = &quot;</span>);
             <span class="self">self</span>.print_ty(ty, mode);
             <span class="self">self</span>.push_str(<span class="string">&quot;;\n&quot;</span>);
+            <span class="self">self</span>.assert_type(id, <span class="kw-2">&amp;</span>name);
         }
     }
 
@@ -2266,6 +2323,7 @@
             <span class="self">self</span>.push_str(<span class="string">&quot; = &quot;</span>);
             <span class="self">self</span>.print_list(ty, mode);
             <span class="self">self</span>.push_str(<span class="string">&quot;;\n&quot;</span>);
+            <span class="self">self</span>.assert_type(id, <span class="kw-2">&amp;</span>name);
         }
     }
 
