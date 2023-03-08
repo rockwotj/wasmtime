@@ -686,7 +686,7 @@ the wasm bytecode.</p>
 <p>By default parallel compilation is enabled.</p>
 </div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.generate_address_map" class="method has-srclink"><a class="srclink rightside" href="../src/wasmtime/config.rs.html#1376-1379">source</a><h4 class="code-header">pub fn <a href="#method.generate_address_map" class="fn">generate_address_map</a>(&amp;mut self, generate: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;mut </a>Self</h4></section></summary><div class="docblock"><p>Configures whether compiled artifacts will contain information to map
 native program addresses back to the original wasm module.</p>
-<p>This configuration option is <code>true</code> by default and, if enables,
+<p>This configuration option is <code>true</code> by default and, if enabled,
 generates the appropriate tables in compiled modules to map from native
 address back to wasm source addresses. This is used for displaying wasm
 program counters in backtraces as well as generating filenames/line
