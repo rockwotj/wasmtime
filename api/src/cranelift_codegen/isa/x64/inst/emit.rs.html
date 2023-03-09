@@ -3683,6 +3683,18 @@
 <a href="#3683" id="3683">3683</a>
 <a href="#3684" id="3684">3684</a>
 <a href="#3685" id="3685">3685</a>
+<a href="#3686" id="3686">3686</a>
+<a href="#3687" id="3687">3687</a>
+<a href="#3688" id="3688">3688</a>
+<a href="#3689" id="3689">3689</a>
+<a href="#3690" id="3690">3690</a>
+<a href="#3691" id="3691">3691</a>
+<a href="#3692" id="3692">3692</a>
+<a href="#3693" id="3693">3693</a>
+<a href="#3694" id="3694">3694</a>
+<a href="#3695" id="3695">3695</a>
+<a href="#3696" id="3696">3696</a>
+<a href="#3697" id="3697">3697</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -5474,6 +5486,8 @@
                 SseOpcode::Roundpd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3A09</span>, <span class="number">3</span>),
                 SseOpcode::Roundsd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3A0B</span>, <span class="number">3</span>),
                 SseOpcode::Pshufd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F70</span>, <span class="number">2</span>),
+                SseOpcode::Pshuflw =&gt; (LegacyPrefixes::_F2, <span class="number">0x0F70</span>, <span class="number">2</span>),
+                SseOpcode::Pshufhw =&gt; (LegacyPrefixes::_F3, <span class="number">0x0F70</span>, <span class="number">2</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Opcode {:?} not implemented&quot;</span>, op),
             };
             <span class="kw">match </span>src {
@@ -5631,6 +5645,10 @@
                 SseOpcode::Punpckhwd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F69</span>, <span class="number">2</span>),
                 SseOpcode::Punpcklbw =&gt; (LegacyPrefixes::_66, <span class="number">0x0F60</span>, <span class="number">2</span>),
                 SseOpcode::Punpcklwd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F61</span>, <span class="number">2</span>),
+                SseOpcode::Punpckldq =&gt; (LegacyPrefixes::_66, <span class="number">0x0F62</span>, <span class="number">2</span>),
+                SseOpcode::Punpcklqdq =&gt; (LegacyPrefixes::_66, <span class="number">0x0F6C</span>, <span class="number">2</span>),
+                SseOpcode::Punpckhdq =&gt; (LegacyPrefixes::_66, <span class="number">0x0F6A</span>, <span class="number">2</span>),
+                SseOpcode::Punpckhqdq =&gt; (LegacyPrefixes::_66, <span class="number">0x0F6D</span>, <span class="number">2</span>),
                 SseOpcode::Pxor =&gt; (LegacyPrefixes::_66, <span class="number">0x0FEF</span>, <span class="number">2</span>),
                 SseOpcode::Subps =&gt; (LegacyPrefixes::None, <span class="number">0x0F5C</span>, <span class="number">2</span>),
                 SseOpcode::Subpd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F5C</span>, <span class="number">2</span>),
@@ -5856,6 +5874,10 @@
                 AvxOpcode::Vmaxsd =&gt; (LP::_F2, OM::_0F, <span class="number">0x5F</span>),
                 AvxOpcode::Vphaddw =&gt; (LP::_66, OM::_0F38, <span class="number">0x01</span>),
                 AvxOpcode::Vphaddd =&gt; (LP::_66, OM::_0F38, <span class="number">0x02</span>),
+                AvxOpcode::Vpunpckldq =&gt; (LP::_66, OM::_0F, <span class="number">0x62</span>),
+                AvxOpcode::Vpunpckhdq =&gt; (LP::_66, OM::_0F, <span class="number">0x6A</span>),
+                AvxOpcode::Vpunpcklqdq =&gt; (LP::_66, OM::_0F, <span class="number">0x6C</span>),
+                AvxOpcode::Vpunpckhqdq =&gt; (LP::_66, OM::_0F, <span class="number">0x6D</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected rmir vex opcode {op:?}&quot;</span>),
             };
             VexInstruction::new()
@@ -6085,6 +6107,8 @@
             <span class="kw">let </span>(prefix, map, opcode) = <span class="kw">match </span>op {
                 AvxOpcode::Vroundps =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x08</span>),
                 AvxOpcode::Vroundpd =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x09</span>),
+                AvxOpcode::Vpshuflw =&gt; (LegacyPrefixes::_F2, OpcodeMap::_0F, <span class="number">0x70</span>),
+                AvxOpcode::Vpshufhw =&gt; (LegacyPrefixes::_F3, OpcodeMap::_0F, <span class="number">0x70</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected rmr_imm_vex opcode {op:?}&quot;</span>),
             };
 

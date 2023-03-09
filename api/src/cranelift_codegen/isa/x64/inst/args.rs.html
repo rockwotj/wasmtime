@@ -2128,6 +2128,30 @@
 <a href="#2128" id="2128">2128</a>
 <a href="#2129" id="2129">2129</a>
 <a href="#2130" id="2130">2130</a>
+<a href="#2131" id="2131">2131</a>
+<a href="#2132" id="2132">2132</a>
+<a href="#2133" id="2133">2133</a>
+<a href="#2134" id="2134">2134</a>
+<a href="#2135" id="2135">2135</a>
+<a href="#2136" id="2136">2136</a>
+<a href="#2137" id="2137">2137</a>
+<a href="#2138" id="2138">2138</a>
+<a href="#2139" id="2139">2139</a>
+<a href="#2140" id="2140">2140</a>
+<a href="#2141" id="2141">2141</a>
+<a href="#2142" id="2142">2142</a>
+<a href="#2143" id="2143">2143</a>
+<a href="#2144" id="2144">2144</a>
+<a href="#2145" id="2145">2145</a>
+<a href="#2146" id="2146">2146</a>
+<a href="#2147" id="2147">2147</a>
+<a href="#2148" id="2148">2148</a>
+<a href="#2149" id="2149">2149</a>
+<a href="#2150" id="2150">2150</a>
+<a href="#2151" id="2151">2151</a>
+<a href="#2152" id="2152">2152</a>
+<a href="#2153" id="2153">2153</a>
+<a href="#2154" id="2154">2154</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Instruction operand sub-components (aka &quot;parts&quot;): definitions and printing.
 
 </span><span class="kw">use </span><span class="kw">super</span>::regs::{<span class="self">self</span>};
@@ -3247,6 +3271,12 @@
     Xorpd,
     Phaddw,
     Phaddd,
+    Punpckhdq,
+    Punpckldq,
+    Punpckhqdq,
+    Punpcklqdq,
+    Pshuflw,
+    Pshufhw,
 }
 
 <span class="kw">impl </span>SseOpcode {
@@ -3386,7 +3416,13 @@
             | SseOpcode::Subpd
             | SseOpcode::Subsd
             | SseOpcode::Ucomisd
-            | SseOpcode::Xorpd =&gt; SSE2,
+            | SseOpcode::Xorpd
+            | SseOpcode::Punpckldq
+            | SseOpcode::Punpckhdq
+            | SseOpcode::Punpcklqdq
+            | SseOpcode::Punpckhqdq
+            | SseOpcode::Pshuflw
+            | SseOpcode::Pshufhw =&gt; SSE2,
 
             SseOpcode::Pabsb
             | SseOpcode::Pabsw
@@ -3631,6 +3667,12 @@
             SseOpcode::Xorpd =&gt; <span class="string">&quot;xorpd&quot;</span>,
             SseOpcode::Phaddw =&gt; <span class="string">&quot;phaddw&quot;</span>,
             SseOpcode::Phaddd =&gt; <span class="string">&quot;phaddd&quot;</span>,
+            SseOpcode::Punpckldq =&gt; <span class="string">&quot;punpckldq&quot;</span>,
+            SseOpcode::Punpckhdq =&gt; <span class="string">&quot;punpckhdq&quot;</span>,
+            SseOpcode::Punpcklqdq =&gt; <span class="string">&quot;punpcklqdq&quot;</span>,
+            SseOpcode::Punpckhqdq =&gt; <span class="string">&quot;punpckhqdq&quot;</span>,
+            SseOpcode::Pshuflw =&gt; <span class="string">&quot;pshuflw&quot;</span>,
+            SseOpcode::Pshufhw =&gt; <span class="string">&quot;pshufhw&quot;</span>,
         };
         <span class="macro">write!</span>(fmt, <span class="string">&quot;{}&quot;</span>, name)
     }
@@ -3799,7 +3841,13 @@
             | AvxOpcode::Vcvttpd2dq
             | AvxOpcode::Vcvttps2dq
             | AvxOpcode::Vphaddw
-            | AvxOpcode::Vphaddd =&gt; {
+            | AvxOpcode::Vphaddd
+            | AvxOpcode::Vpunpckldq
+            | AvxOpcode::Vpunpckhdq
+            | AvxOpcode::Vpunpcklqdq
+            | AvxOpcode::Vpunpckhqdq
+            | AvxOpcode::Vpshuflw
+            | AvxOpcode::Vpshufhw =&gt; {
                 <span class="macro">smallvec!</span>[InstructionSet::AVX]
             }
         }
