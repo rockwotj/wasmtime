@@ -742,6 +742,14 @@
 <a href="#742" id="742">742</a>
 <a href="#743" id="743">743</a>
 <a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Shared ISLE prelude implementation for optimization (mid-end) and
 //! lowering (backend) ISLE environments.
 
@@ -1154,6 +1162,14 @@
             } <span class="kw">else </span>{
                 <span class="prelude-val">None
             </span>}
+        }
+
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>ty_addr64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type) -&gt; <span class="prelude-ty">Option</span>&lt;Type&gt; {
+            <span class="kw">match </span>ty {
+                I64 | R64 =&gt; <span class="prelude-val">Some</span>(ty),
+                <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
+            }
         }
 
         <span class="attr">#[inline]

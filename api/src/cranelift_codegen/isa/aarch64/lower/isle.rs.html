@@ -739,6 +739,10 @@
 <a href="#739" id="739">739</a>
 <a href="#740" id="740">740</a>
 <a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for aarch64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -1254,10 +1258,14 @@
     }
 
     <span class="kw">fn </span>amode(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type, addr: Value, offset: u32) -&gt; AMode {
+        <span class="kw">let </span>addr_ty = <span class="self">self</span>.value_type(addr);
+        <span class="macro">assert!</span>(addr_ty == I64 || addr_ty == R64);
         lower_address(<span class="self">self</span>.lower_ctx, ty, addr, offset <span class="kw">as </span>i32)
     }
 
     <span class="kw">fn </span>pair_amode(<span class="kw-2">&amp;mut </span><span class="self">self</span>, addr: Value, offset: u32) -&gt; PairAMode {
+        <span class="kw">let </span>addr_ty = <span class="self">self</span>.value_type(addr);
+        <span class="macro">assert!</span>(addr_ty == I64 || addr_ty == R64);
         lower_pair_address(<span class="self">self</span>.lower_ctx, addr, offset <span class="kw">as </span>i32)
     }
 
