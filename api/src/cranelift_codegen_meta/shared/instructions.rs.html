@@ -3711,6 +3711,86 @@
 <a href="#3711" id="3711">3711</a>
 <a href="#3712" id="3712">3712</a>
 <a href="#3713" id="3713">3713</a>
+<a href="#3714" id="3714">3714</a>
+<a href="#3715" id="3715">3715</a>
+<a href="#3716" id="3716">3716</a>
+<a href="#3717" id="3717">3717</a>
+<a href="#3718" id="3718">3718</a>
+<a href="#3719" id="3719">3719</a>
+<a href="#3720" id="3720">3720</a>
+<a href="#3721" id="3721">3721</a>
+<a href="#3722" id="3722">3722</a>
+<a href="#3723" id="3723">3723</a>
+<a href="#3724" id="3724">3724</a>
+<a href="#3725" id="3725">3725</a>
+<a href="#3726" id="3726">3726</a>
+<a href="#3727" id="3727">3727</a>
+<a href="#3728" id="3728">3728</a>
+<a href="#3729" id="3729">3729</a>
+<a href="#3730" id="3730">3730</a>
+<a href="#3731" id="3731">3731</a>
+<a href="#3732" id="3732">3732</a>
+<a href="#3733" id="3733">3733</a>
+<a href="#3734" id="3734">3734</a>
+<a href="#3735" id="3735">3735</a>
+<a href="#3736" id="3736">3736</a>
+<a href="#3737" id="3737">3737</a>
+<a href="#3738" id="3738">3738</a>
+<a href="#3739" id="3739">3739</a>
+<a href="#3740" id="3740">3740</a>
+<a href="#3741" id="3741">3741</a>
+<a href="#3742" id="3742">3742</a>
+<a href="#3743" id="3743">3743</a>
+<a href="#3744" id="3744">3744</a>
+<a href="#3745" id="3745">3745</a>
+<a href="#3746" id="3746">3746</a>
+<a href="#3747" id="3747">3747</a>
+<a href="#3748" id="3748">3748</a>
+<a href="#3749" id="3749">3749</a>
+<a href="#3750" id="3750">3750</a>
+<a href="#3751" id="3751">3751</a>
+<a href="#3752" id="3752">3752</a>
+<a href="#3753" id="3753">3753</a>
+<a href="#3754" id="3754">3754</a>
+<a href="#3755" id="3755">3755</a>
+<a href="#3756" id="3756">3756</a>
+<a href="#3757" id="3757">3757</a>
+<a href="#3758" id="3758">3758</a>
+<a href="#3759" id="3759">3759</a>
+<a href="#3760" id="3760">3760</a>
+<a href="#3761" id="3761">3761</a>
+<a href="#3762" id="3762">3762</a>
+<a href="#3763" id="3763">3763</a>
+<a href="#3764" id="3764">3764</a>
+<a href="#3765" id="3765">3765</a>
+<a href="#3766" id="3766">3766</a>
+<a href="#3767" id="3767">3767</a>
+<a href="#3768" id="3768">3768</a>
+<a href="#3769" id="3769">3769</a>
+<a href="#3770" id="3770">3770</a>
+<a href="#3771" id="3771">3771</a>
+<a href="#3772" id="3772">3772</a>
+<a href="#3773" id="3773">3773</a>
+<a href="#3774" id="3774">3774</a>
+<a href="#3775" id="3775">3775</a>
+<a href="#3776" id="3776">3776</a>
+<a href="#3777" id="3777">3777</a>
+<a href="#3778" id="3778">3778</a>
+<a href="#3779" id="3779">3779</a>
+<a href="#3780" id="3780">3780</a>
+<a href="#3781" id="3781">3781</a>
+<a href="#3782" id="3782">3782</a>
+<a href="#3783" id="3783">3783</a>
+<a href="#3784" id="3784">3784</a>
+<a href="#3785" id="3785">3785</a>
+<a href="#3786" id="3786">3786</a>
+<a href="#3787" id="3787">3787</a>
+<a href="#3788" id="3788">3788</a>
+<a href="#3789" id="3789">3789</a>
+<a href="#3790" id="3790">3790</a>
+<a href="#3791" id="3791">3791</a>
+<a href="#3792" id="3792">3792</a>
+<a href="#3793" id="3793">3793</a>
 </pre><pre class="rust"><code><span class="attr">#![allow(non_snake_case)]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::cdsl::instructions::{
@@ -3730,9 +3810,6 @@
     imm: <span class="kw-2">&amp;</span>Immediates,
     entities: <span class="kw-2">&amp;</span>EntityRefs,
 ) {
-    <span class="kw">let </span>block_call = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;block_call&quot;</span>, <span class="kw-2">&amp;</span>entities.block_call)
-        .with_doc(<span class="string">&quot;Destination basic block, with its arguments provided&quot;</span>);
-
     ig.push(
         Inst::new(
             <span class="string">&quot;jump&quot;</span>,
@@ -3745,7 +3822,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.jump,
         )
-        .operands_in(<span class="macro">vec!</span>[block_call])
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;block_call&quot;</span>, <span class="kw-2">&amp;</span>entities.block_call)
+            .with_doc(<span class="string">&quot;Destination basic block, with its arguments provided&quot;</span>)])
         .branches(),
     );
 
@@ -3755,25 +3833,23 @@
         TypeSetBuilder::new().ints(Interval::All).build(),
     );
 
-    {
-        <span class="kw">let </span>c = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;c&quot;</span>, ScalarTruthy).with_doc(<span class="string">&quot;Controlling value to test&quot;</span>);
-        <span class="kw">let </span>block_then = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;block_then&quot;</span>, <span class="kw-2">&amp;</span>entities.block_then).with_doc(<span class="string">&quot;Then block&quot;</span>);
-        <span class="kw">let </span>block_else = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;block_else&quot;</span>, <span class="kw-2">&amp;</span>entities.block_else).with_doc(<span class="string">&quot;Else block&quot;</span>);
-
-        ig.push(
-            Inst::new(
-                <span class="string">&quot;brif&quot;</span>,
-                <span class="string">r#&quot;
+    ig.push(
+        Inst::new(
+            <span class="string">&quot;brif&quot;</span>,
+            <span class="string">r#&quot;
         Conditional branch when cond is non-zero.
 
         Take the ``then`` branch when ``c != 0``, and the ``else`` branch otherwise.
         &quot;#</span>,
-                <span class="kw-2">&amp;</span>formats.brif,
-            )
-            .operands_in(<span class="macro">vec!</span>[c, block_then, block_else])
-            .branches(),
-        );
-    }
+            <span class="kw-2">&amp;</span>formats.brif,
+        )
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;c&quot;</span>, ScalarTruthy).with_doc(<span class="string">&quot;Controlling value to test&quot;</span>),
+            Operand::new(<span class="string">&quot;block_then&quot;</span>, <span class="kw-2">&amp;</span>entities.block_then).with_doc(<span class="string">&quot;Then block&quot;</span>),
+            Operand::new(<span class="string">&quot;block_else&quot;</span>, <span class="kw-2">&amp;</span>entities.block_else).with_doc(<span class="string">&quot;Else block&quot;</span>),
+        ])
+        .branches(),
+    );
 
     {
         <span class="kw">let </span>_i32 = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -3781,8 +3857,6 @@
             <span class="string">&quot;A 32 bit scalar integer type&quot;</span>,
             TypeSetBuilder::new().ints(<span class="number">32</span>..<span class="number">32</span>).build(),
         );
-        <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, _i32).with_doc(<span class="string">&quot;i32 index into jump table&quot;</span>);
-        <span class="kw">let </span>JT = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;JT&quot;</span>, <span class="kw-2">&amp;</span>entities.jump_table);
 
         ig.push(
             Inst::new(
@@ -3806,7 +3880,10 @@
         &quot;#</span>,
                 <span class="kw-2">&amp;</span>formats.branch_table,
             )
-            .operands_in(<span class="macro">vec!</span>[x, JT])
+            .operands_in(<span class="macro">vec!</span>[
+                Operand::new(<span class="string">&quot;x&quot;</span>, _i32).with_doc(<span class="string">&quot;i32 index into jump table&quot;</span>),
+                Operand::new(<span class="string">&quot;JT&quot;</span>, <span class="kw-2">&amp;</span>entities.jump_table),
+            ])
             .branches(),
         );
     }
@@ -3821,8 +3898,8 @@
         Inst::new(
             <span class="string">&quot;debugtrap&quot;</span>,
             <span class="string">r#&quot;
-    Encodes an assembly debug trap.
-    &quot;#</span>,
+        Encodes an assembly debug trap.
+        &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.nullary,
         )
         .other_side_effects()
@@ -3830,81 +3907,84 @@
         .can_store(),
     );
 
-    {
-        <span class="kw">let </span>code = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;code&quot;</span>, <span class="kw-2">&amp;</span>imm.trapcode);
-        ig.push(
-            Inst::new(
-                <span class="string">&quot;trap&quot;</span>,
-                <span class="string">r#&quot;
+    ig.push(
+        Inst::new(
+            <span class="string">&quot;trap&quot;</span>,
+            <span class="string">r#&quot;
         Terminate execution unconditionally.
         &quot;#</span>,
-                <span class="kw-2">&amp;</span>formats.trap,
-            )
-            .operands_in(<span class="macro">vec!</span>[code])
-            .can_trap()
-            .terminates_block(),
-        );
+            <span class="kw-2">&amp;</span>formats.trap,
+        )
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;code&quot;</span>, <span class="kw-2">&amp;</span>imm.trapcode)])
+        .can_trap()
+        .terminates_block(),
+    );
 
-        <span class="kw">let </span>c = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;c&quot;</span>, ScalarTruthy).with_doc(<span class="string">&quot;Controlling value to test&quot;</span>);
-        ig.push(
-            Inst::new(
-                <span class="string">&quot;trapz&quot;</span>,
-                <span class="string">r#&quot;
+    ig.push(
+        Inst::new(
+            <span class="string">&quot;trapz&quot;</span>,
+            <span class="string">r#&quot;
         Trap when zero.
 
         if ``c`` is non-zero, execution continues at the following instruction.
         &quot;#</span>,
-                <span class="kw-2">&amp;</span>formats.cond_trap,
-            )
-            .operands_in(<span class="macro">vec!</span>[c, code])
-            .can_trap(),
-        );
+            <span class="kw-2">&amp;</span>formats.cond_trap,
+        )
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;c&quot;</span>, ScalarTruthy).with_doc(<span class="string">&quot;Controlling value to test&quot;</span>),
+            Operand::new(<span class="string">&quot;code&quot;</span>, <span class="kw-2">&amp;</span>imm.trapcode),
+        ])
+        .can_trap(),
+    );
 
-        ig.push(
-            Inst::new(
-                <span class="string">&quot;resumable_trap&quot;</span>,
-                <span class="string">r#&quot;
+    ig.push(
+        Inst::new(
+            <span class="string">&quot;resumable_trap&quot;</span>,
+            <span class="string">r#&quot;
         A resumable trap.
 
         This instruction allows non-conditional traps to be used as non-terminal instructions.
         &quot;#</span>,
-                <span class="kw-2">&amp;</span>formats.trap,
-            )
-            .operands_in(<span class="macro">vec!</span>[code])
-            .can_trap(),
-        );
+            <span class="kw-2">&amp;</span>formats.trap,
+        )
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;code&quot;</span>, <span class="kw-2">&amp;</span>imm.trapcode)])
+        .can_trap(),
+    );
 
-        <span class="kw">let </span>c = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;c&quot;</span>, ScalarTruthy).with_doc(<span class="string">&quot;Controlling value to test&quot;</span>);
-        ig.push(
-            Inst::new(
-                <span class="string">&quot;trapnz&quot;</span>,
-                <span class="string">r#&quot;
+    ig.push(
+        Inst::new(
+            <span class="string">&quot;trapnz&quot;</span>,
+            <span class="string">r#&quot;
         Trap when non-zero.
 
         If ``c`` is zero, execution continues at the following instruction.
         &quot;#</span>,
-                <span class="kw-2">&amp;</span>formats.cond_trap,
-            )
-            .operands_in(<span class="macro">vec!</span>[c, code])
-            .can_trap(),
-        );
+            <span class="kw-2">&amp;</span>formats.cond_trap,
+        )
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;c&quot;</span>, ScalarTruthy).with_doc(<span class="string">&quot;Controlling value to test&quot;</span>),
+            Operand::new(<span class="string">&quot;code&quot;</span>, <span class="kw-2">&amp;</span>imm.trapcode),
+        ])
+        .can_trap(),
+    );
 
-        ig.push(
-            Inst::new(
-                <span class="string">&quot;resumable_trapnz&quot;</span>,
-                <span class="string">r#&quot;
+    ig.push(
+        Inst::new(
+            <span class="string">&quot;resumable_trapnz&quot;</span>,
+            <span class="string">r#&quot;
         A resumable trap to be called when the passed condition is non-zero.
 
         If ``c`` is zero, execution continues at the following instruction.
         &quot;#</span>,
-                <span class="kw-2">&amp;</span>formats.cond_trap,
-            )
-            .operands_in(<span class="macro">vec!</span>[c, code])
-            .can_trap(),
-        );
-    }
+            <span class="kw-2">&amp;</span>formats.cond_trap,
+        )
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;c&quot;</span>, ScalarTruthy).with_doc(<span class="string">&quot;Controlling value to test&quot;</span>),
+            Operand::new(<span class="string">&quot;code&quot;</span>, <span class="kw-2">&amp;</span>imm.trapcode),
+        ])
+        .can_trap(),
+    );
 
-    <span class="kw">let </span>rvals = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;rvals&quot;</span>, <span class="kw-2">&amp;</span>entities.varargs).with_doc(<span class="string">&quot;return values&quot;</span>);
     ig.push(
         Inst::new(
             <span class="string">&quot;return&quot;</span>,
@@ -3917,14 +3997,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.multiary,
         )
-        .operands_in(<span class="macro">vec!</span>[rvals])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;rvals&quot;</span>, <span class="kw-2">&amp;</span>entities.varargs).with_doc(<span class="string">&quot;return values&quot;</span>)
+        ])
         .returns(),
     );
 
-    <span class="kw">let </span>FN = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;FN&quot;</span>, <span class="kw-2">&amp;</span>entities.func_ref)
-        .with_doc(<span class="string">&quot;function to call, declared by `function`&quot;</span>);
-    <span class="kw">let </span>args = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;args&quot;</span>, <span class="kw-2">&amp;</span>entities.varargs).with_doc(<span class="string">&quot;call arguments&quot;</span>);
-    <span class="kw">let </span>rvals = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;rvals&quot;</span>, <span class="kw-2">&amp;</span>entities.varargs).with_doc(<span class="string">&quot;return values&quot;</span>);
     ig.push(
         Inst::new(
             <span class="string">&quot;call&quot;</span>,
@@ -3936,15 +4014,17 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.call,
         )
-        .operands_in(<span class="macro">vec!</span>[FN, args])
-        .operands_out(<span class="macro">vec!</span>[rvals])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;FN&quot;</span>, <span class="kw-2">&amp;</span>entities.func_ref)
+                .with_doc(<span class="string">&quot;function to call, declared by `function`&quot;</span>),
+            Operand::new(<span class="string">&quot;args&quot;</span>, <span class="kw-2">&amp;</span>entities.varargs).with_doc(<span class="string">&quot;call arguments&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;rvals&quot;</span>, <span class="kw-2">&amp;</span>entities.varargs).with_doc(<span class="string">&quot;return values&quot;</span>)
+        ])
         .call(),
     );
 
-    <span class="kw">let </span>SIG = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;SIG&quot;</span>, <span class="kw-2">&amp;</span>entities.sig_ref).with_doc(<span class="string">&quot;function signature&quot;</span>);
-    <span class="kw">let </span>callee = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;callee&quot;</span>, iAddr).with_doc(<span class="string">&quot;address of function to call&quot;</span>);
-    <span class="kw">let </span>args = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;args&quot;</span>, <span class="kw-2">&amp;</span>entities.varargs).with_doc(<span class="string">&quot;call arguments&quot;</span>);
-    <span class="kw">let </span>rvals = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;rvals&quot;</span>, <span class="kw-2">&amp;</span>entities.varargs).with_doc(<span class="string">&quot;return values&quot;</span>);
     ig.push(
         Inst::new(
             <span class="string">&quot;call_indirect&quot;</span>,
@@ -3961,8 +4041,14 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.call_indirect,
         )
-        .operands_in(<span class="macro">vec!</span>[SIG, callee, args])
-        .operands_out(<span class="macro">vec!</span>[rvals])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;SIG&quot;</span>, <span class="kw-2">&amp;</span>entities.sig_ref).with_doc(<span class="string">&quot;function signature&quot;</span>),
+            Operand::new(<span class="string">&quot;callee&quot;</span>, iAddr).with_doc(<span class="string">&quot;address of function to call&quot;</span>),
+            Operand::new(<span class="string">&quot;args&quot;</span>, <span class="kw-2">&amp;</span>entities.varargs).with_doc(<span class="string">&quot;call arguments&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;rvals&quot;</span>, <span class="kw-2">&amp;</span>entities.varargs).with_doc(<span class="string">&quot;return values&quot;</span>)
+        ])
         .call(),
     );
 
@@ -3981,7 +4067,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.call,
         )
-        .operands_in(<span class="macro">vec!</span>[FN, args])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;FN&quot;</span>, <span class="kw-2">&amp;</span>entities.func_ref)
+                .with_doc(<span class="string">&quot;function to call, declared by `function`&quot;</span>),
+            Operand::new(<span class="string">&quot;args&quot;</span>, <span class="kw-2">&amp;</span>entities.varargs).with_doc(<span class="string">&quot;call arguments&quot;</span>),
+        ])
         .returns()
         .call(),
     );
@@ -4006,14 +4096,15 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.call_indirect,
         )
-        .operands_in(<span class="macro">vec!</span>[SIG, callee, args])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;SIG&quot;</span>, <span class="kw-2">&amp;</span>entities.sig_ref).with_doc(<span class="string">&quot;function signature&quot;</span>),
+            Operand::new(<span class="string">&quot;callee&quot;</span>, iAddr).with_doc(<span class="string">&quot;address of function to call&quot;</span>),
+            Operand::new(<span class="string">&quot;args&quot;</span>, <span class="kw-2">&amp;</span>entities.varargs).with_doc(<span class="string">&quot;call arguments&quot;</span>),
+        ])
         .returns()
         .call(),
     );
 
-    <span class="kw">let </span>FN = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;FN&quot;</span>, <span class="kw-2">&amp;</span>entities.func_ref)
-        .with_doc(<span class="string">&quot;function to call, declared by `function`&quot;</span>);
-    <span class="kw">let </span>addr = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;addr&quot;</span>, iAddr);
     ig.push(
         Inst::new(
             <span class="string">&quot;func_addr&quot;</span>,
@@ -4028,8 +4119,9 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.func_addr,
         )
-        .operands_in(<span class="macro">vec!</span>[FN])
-        .operands_out(<span class="macro">vec!</span>[addr]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;FN&quot;</span>, <span class="kw-2">&amp;</span>entities.func_ref)
+            .with_doc(<span class="string">&quot;function to call, declared by `function`&quot;</span>)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;addr&quot;</span>, iAddr)]),
     );
 }
 
@@ -4052,9 +4144,6 @@
             .build(),
     );
 
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, <span class="kw-2">&amp;</span>TxN.lane_of()).with_doc(<span class="string">&quot;Value to splat to all lanes&quot;</span>);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, TxN);
-
     ig.push(
         Inst::new(
             <span class="string">&quot;splat&quot;</span>,
@@ -4065,8 +4154,10 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, <span class="kw-2">&amp;</span>TxN.lane_of()).with_doc(<span class="string">&quot;Value to splat to all lanes&quot;</span>)
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, TxN)]),
     );
 
     <span class="kw">let </span>I8x16 = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -4078,9 +4169,6 @@
             .includes_scalars(<span class="bool-val">false</span>)
             .build(),
     );
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, I8x16).with_doc(<span class="string">&quot;Vector to modify by re-arranging lanes&quot;</span>);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, I8x16).with_doc(<span class="string">&quot;Mask for re-arranging lanes&quot;</span>);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, I8x16);
 
     ig.push(
         Inst::new(
@@ -4095,8 +4183,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, I8x16).with_doc(<span class="string">&quot;Vector to modify by re-arranging lanes&quot;</span>),
+            Operand::new(<span class="string">&quot;y&quot;</span>, I8x16).with_doc(<span class="string">&quot;Mask for re-arranging lanes&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, I8x16)]),
     );
 
     ig.push(
@@ -4116,14 +4207,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, I8x16).with_doc(<span class="string">&quot;Vector to modify by re-arranging lanes&quot;</span>),
+            Operand::new(<span class="string">&quot;y&quot;</span>, I8x16).with_doc(<span class="string">&quot;Mask for re-arranging lanes&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, I8x16)]),
     );
-
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, TxN).with_doc(<span class="string">&quot;The vector to modify&quot;</span>);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, <span class="kw-2">&amp;</span>TxN.lane_of()).with_doc(<span class="string">&quot;New lane value&quot;</span>);
-    <span class="kw">let </span>Idx = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;Idx&quot;</span>, <span class="kw-2">&amp;</span>imm.uimm8).with_doc(<span class="string">&quot;Lane index&quot;</span>);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, TxN);
 
     ig.push(
         Inst::new(
@@ -4136,12 +4225,13 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.ternary_imm8,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y, Idx])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, TxN).with_doc(<span class="string">&quot;The vector to modify&quot;</span>),
+            Operand::new(<span class="string">&quot;y&quot;</span>, <span class="kw-2">&amp;</span>TxN.lane_of()).with_doc(<span class="string">&quot;New lane value&quot;</span>),
+            Operand::new(<span class="string">&quot;Idx&quot;</span>, <span class="kw-2">&amp;</span>imm.uimm8).with_doc(<span class="string">&quot;Lane index&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, TxN)]),
     );
-
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, TxN);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>TxN.lane_of());
 
     ig.push(
         Inst::new(
@@ -4156,8 +4246,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm8,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Idx])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, TxN),
+            Operand::new(<span class="string">&quot;Idx&quot;</span>, <span class="kw-2">&amp;</span>imm.uimm8).with_doc(<span class="string">&quot;Lane index&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>TxN.lane_of())]),
     );
 }
 
@@ -4177,10 +4270,6 @@
             .build(),
     );
 
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Int);
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Int);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, Int);
-
     ig.push(
         Inst::new(
             <span class="string">&quot;smin&quot;</span>,
@@ -4189,8 +4278,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int), Operand::new(<span class="string">&quot;y&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -4201,8 +4290,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int), Operand::new(<span class="string">&quot;y&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -4213,8 +4302,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int), Operand::new(<span class="string">&quot;y&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -4225,8 +4314,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int), Operand::new(<span class="string">&quot;y&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     <span class="kw">let </span>IxN = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -4239,10 +4328,6 @@
             .build(),
     );
 
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, IxN);
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, IxN);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, IxN);
-
     ig.push(
         Inst::new(
             <span class="string">&quot;avg_round&quot;</span>,
@@ -4253,8 +4338,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, IxN), Operand::new(<span class="string">&quot;y&quot;</span>, IxN)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IxN)]),
     );
 
     ig.push(
@@ -4269,8 +4354,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, IxN), Operand::new(<span class="string">&quot;y&quot;</span>, IxN)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IxN)]),
     );
 
     ig.push(
@@ -4287,8 +4372,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, IxN), Operand::new(<span class="string">&quot;y&quot;</span>, IxN)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IxN)]),
     );
 
     ig.push(
@@ -4303,8 +4388,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, IxN), Operand::new(<span class="string">&quot;y&quot;</span>, IxN)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IxN)]),
     );
 
     ig.push(
@@ -4319,8 +4404,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, IxN), Operand::new(<span class="string">&quot;y&quot;</span>, IxN)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IxN)]),
     );
 }
 
@@ -4429,16 +4514,6 @@
 
     <span class="kw">let </span>MemTo = <span class="kw-2">&amp;</span>TypeVar::copy_from(Mem, <span class="string">&quot;MemTo&quot;</span>.to_string());
 
-    <span class="kw">let </span>addr = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;addr&quot;</span>, iAddr);
-
-    <span class="kw">let </span>SS = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;SS&quot;</span>, <span class="kw-2">&amp;</span>entities.stack_slot);
-    <span class="kw">let </span>DSS = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;DSS&quot;</span>, <span class="kw-2">&amp;</span>entities.dynamic_stack_slot);
-    <span class="kw">let </span>Offset = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>);
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Mem).with_doc(<span class="string">&quot;Value to be stored&quot;</span>);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Mem).with_doc(<span class="string">&quot;Value loaded&quot;</span>);
-    <span class="kw">let </span>p = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;p&quot;</span>, iAddr);
-    <span class="kw">let </span>MemFlags = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags);
-
     ig.push(
         Inst::new(
             <span class="string">&quot;load&quot;</span>,
@@ -4450,8 +4525,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p, Offset])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Mem).with_doc(<span class="string">&quot;Value loaded&quot;</span>)])
         .can_load(),
     );
 
@@ -4466,7 +4545,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.store,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, x, p, Offset])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;x&quot;</span>, Mem).with_doc(<span class="string">&quot;Value to be stored&quot;</span>),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
         .can_store(),
     );
 
@@ -4475,8 +4559,6 @@
         <span class="string">&quot;An integer type with more than 8 bits&quot;</span>,
         TypeSetBuilder::new().ints(<span class="number">16</span>..<span class="number">64</span>).build(),
     );
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, iExt8);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, iExt8);
 
     ig.push(
         Inst::new(
@@ -4488,8 +4570,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p, Offset])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iExt8)])
         .can_load(),
     );
 
@@ -4503,8 +4589,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p, Offset])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iExt8)])
         .can_load(),
     );
 
@@ -4518,7 +4608,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.store,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, x, p, Offset])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;x&quot;</span>, iExt8),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
         .can_store(),
     );
 
@@ -4527,8 +4622,6 @@
         <span class="string">&quot;An integer type with more than 16 bits&quot;</span>,
         TypeSetBuilder::new().ints(<span class="number">32</span>..<span class="number">64</span>).build(),
     );
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, iExt16);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, iExt16);
 
     ig.push(
         Inst::new(
@@ -4540,8 +4633,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p, Offset])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iExt16)])
         .can_load(),
     );
 
@@ -4555,8 +4652,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p, Offset])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iExt16)])
         .can_load(),
     );
 
@@ -4570,7 +4671,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.store,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, x, p, Offset])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;x&quot;</span>, iExt16),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
         .can_store(),
     );
 
@@ -4579,8 +4685,6 @@
         <span class="string">&quot;An integer type with more than 32 bits&quot;</span>,
         TypeSetBuilder::new().ints(<span class="number">64</span>..<span class="number">64</span>).build(),
     );
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, iExt32);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, iExt32);
 
     ig.push(
         Inst::new(
@@ -4592,8 +4696,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p, Offset])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iExt32)])
         .can_load(),
     );
 
@@ -4607,8 +4715,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p, Offset])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iExt32)])
         .can_load(),
     );
 
@@ -4622,7 +4734,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.store,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, x, p, Offset])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;x&quot;</span>, iExt32),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
         .can_store(),
     );
 
@@ -4635,7 +4752,6 @@
             .includes_scalars(<span class="bool-val">false</span>)
             .build(),
     );
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, I16x8).with_doc(<span class="string">&quot;Value loaded&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -4646,8 +4762,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p, Offset])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, I16x8).with_doc(<span class="string">&quot;Value loaded&quot;</span>)])
         .can_load(),
     );
 
@@ -4660,8 +4780,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p, Offset])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, I16x8).with_doc(<span class="string">&quot;Value loaded&quot;</span>)])
         .can_load(),
     );
 
@@ -4674,7 +4798,6 @@
             .includes_scalars(<span class="bool-val">false</span>)
             .build(),
     );
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, I32x4).with_doc(<span class="string">&quot;Value loaded&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -4685,8 +4808,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p, Offset])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, I32x4).with_doc(<span class="string">&quot;Value loaded&quot;</span>)])
         .can_load(),
     );
 
@@ -4699,8 +4826,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p, Offset])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, I32x4).with_doc(<span class="string">&quot;Value loaded&quot;</span>)])
         .can_load(),
     );
 
@@ -4713,7 +4844,6 @@
             .includes_scalars(<span class="bool-val">false</span>)
             .build(),
     );
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, I64x2).with_doc(<span class="string">&quot;Value loaded&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -4724,8 +4854,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p, Offset])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, I64x2).with_doc(<span class="string">&quot;Value loaded&quot;</span>)])
         .can_load(),
     );
 
@@ -4738,15 +4872,14 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p, Offset])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from base address&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, I64x2).with_doc(<span class="string">&quot;Value loaded&quot;</span>)])
         .can_load(),
     );
-
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Mem).with_doc(<span class="string">&quot;Value to be stored&quot;</span>);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Mem).with_doc(<span class="string">&quot;Value loaded&quot;</span>);
-    <span class="kw">let </span>Offset =
-        <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;In-bounds offset into stack slot&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -4763,8 +4896,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.stack_load,
         )
-        .operands_in(<span class="macro">vec!</span>[SS, Offset])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;SS&quot;</span>, <span class="kw-2">&amp;</span>entities.stack_slot),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;In-bounds offset into stack slot&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Mem).with_doc(<span class="string">&quot;Value loaded&quot;</span>)])
         .can_load(),
     );
 
@@ -4783,7 +4919,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.stack_store,
         )
-        .operands_in(<span class="macro">vec!</span>[x, SS, Offset])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, Mem).with_doc(<span class="string">&quot;Value to be stored&quot;</span>),
+            Operand::new(<span class="string">&quot;SS&quot;</span>, <span class="kw-2">&amp;</span>entities.stack_slot),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;In-bounds offset into stack slot&quot;</span>),
+        ])
         .can_store(),
     );
 
@@ -4799,8 +4939,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.stack_load,
         )
-        .operands_in(<span class="macro">vec!</span>[SS, Offset])
-        .operands_out(<span class="macro">vec!</span>[addr]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;SS&quot;</span>, <span class="kw-2">&amp;</span>entities.stack_slot),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;In-bounds offset into stack slot&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;addr&quot;</span>, iAddr)]),
     );
 
     ig.push(
@@ -4814,8 +4957,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.dynamic_stack_load,
         )
-        .operands_in(<span class="macro">vec!</span>[DSS])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;DSS&quot;</span>, <span class="kw-2">&amp;</span>entities.dynamic_stack_slot)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Mem).with_doc(<span class="string">&quot;Value loaded&quot;</span>)])
         .can_load(),
     );
 
@@ -4830,11 +4973,13 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.dynamic_stack_store,
         )
-        .operands_in(<span class="macro">vec!</span>[x, DSS])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, Mem).with_doc(<span class="string">&quot;Value to be stored&quot;</span>),
+            Operand::new(<span class="string">&quot;DSS&quot;</span>, <span class="kw-2">&amp;</span>entities.dynamic_stack_slot),
+        ])
         .can_store(),
     );
 
-    <span class="kw">let </span>GV = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;GV&quot;</span>, <span class="kw-2">&amp;</span>entities.global_value);
     ig.push(
         Inst::new(
             <span class="string">&quot;dynamic_stack_addr&quot;</span>,
@@ -4845,8 +4990,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.dynamic_stack_load,
         )
-        .operands_in(<span class="macro">vec!</span>[DSS])
-        .operands_out(<span class="macro">vec!</span>[addr]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;DSS&quot;</span>, <span class="kw-2">&amp;</span>entities.dynamic_stack_slot)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;addr&quot;</span>, iAddr)]),
     );
 
     ig.push(
@@ -4857,8 +5002,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary_global_value,
         )
-        .operands_in(<span class="macro">vec!</span>[GV])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;GV&quot;</span>, <span class="kw-2">&amp;</span>entities.global_value)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Mem).with_doc(<span class="string">&quot;Value loaded&quot;</span>)]),
     );
 
     ig.push(
@@ -4869,8 +5014,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary_global_value,
         )
-        .operands_in(<span class="macro">vec!</span>[GV])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;GV&quot;</span>, <span class="kw-2">&amp;</span>entities.global_value)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Mem).with_doc(<span class="string">&quot;Value loaded&quot;</span>)]),
     );
 
     ig.push(
@@ -4881,8 +5026,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary_global_value,
         )
-        .operands_in(<span class="macro">vec!</span>[GV])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;GV&quot;</span>, <span class="kw-2">&amp;</span>entities.global_value)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Mem).with_doc(<span class="string">&quot;Value loaded&quot;</span>)]),
     );
 
     <span class="comment">// Note this instruction is marked as having other side-effects, so GVN won&#39;t try to hoist it,
@@ -4899,7 +5044,7 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.nullary,
         )
-        .operands_out(<span class="macro">vec!</span>[addr])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;addr&quot;</span>, iAddr)])
         .other_side_effects(),
     );
 
@@ -4911,7 +5056,7 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[addr])
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;addr&quot;</span>, iAddr)])
         .other_side_effects(),
     );
 
@@ -4925,7 +5070,7 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.nullary,
         )
-        .operands_out(<span class="macro">vec!</span>[addr]),
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;addr&quot;</span>, iAddr)]),
     );
 
     ig.push(
@@ -4936,7 +5081,7 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.nullary,
         )
-        .operands_out(<span class="macro">vec!</span>[addr]),
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;addr&quot;</span>, iAddr)]),
     );
 
     ig.push(
@@ -4949,7 +5094,7 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.nullary,
         )
-        .operands_out(<span class="macro">vec!</span>[addr]),
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;addr&quot;</span>, iAddr)]),
     );
 
     <span class="kw">let </span>TableOffset = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -4957,10 +5102,6 @@
         <span class="string">&quot;An unsigned table offset&quot;</span>,
         TypeSetBuilder::new().ints(<span class="number">32</span>..<span class="number">64</span>).build(),
     );
-    <span class="kw">let </span>T = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;T&quot;</span>, <span class="kw-2">&amp;</span>entities.table);
-    <span class="kw">let </span>p = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;p&quot;</span>, TableOffset);
-    <span class="kw">let </span>Offset =
-        <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from element address&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -4980,12 +5121,13 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.table_addr,
         )
-        .operands_in(<span class="macro">vec!</span>[T, p, Offset])
-        .operands_out(<span class="macro">vec!</span>[addr]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;T&quot;</span>, <span class="kw-2">&amp;</span>entities.table),
+            Operand::new(<span class="string">&quot;p&quot;</span>, TableOffset),
+            Operand::new(<span class="string">&quot;Offset&quot;</span>, <span class="kw-2">&amp;</span>imm.offset32).with_doc(<span class="string">&quot;Byte offset from element address&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;addr&quot;</span>, iAddr)]),
     );
-
-    <span class="kw">let </span>N = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;N&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, NarrowInt).with_doc(<span class="string">&quot;A constant integer scalar or vector value&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -4998,12 +5140,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary_imm,
         )
-        .operands_in(<span class="macro">vec!</span>[N])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;N&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, NarrowInt).with_doc(<span class="string">&quot;A constant integer scalar or vector value&quot;</span>)
+        ]),
     );
-
-    <span class="kw">let </span>N = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;N&quot;</span>, <span class="kw-2">&amp;</span>imm.ieee32);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, f32_).with_doc(<span class="string">&quot;A constant f32 scalar value&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -5015,12 +5156,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary_ieee32,
         )
-        .operands_in(<span class="macro">vec!</span>[N])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;N&quot;</span>, <span class="kw-2">&amp;</span>imm.ieee32)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, f32_).with_doc(<span class="string">&quot;A constant f32 scalar value&quot;</span>)
+        ]),
     );
-
-    <span class="kw">let </span>N = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;N&quot;</span>, <span class="kw-2">&amp;</span>imm.ieee64);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, f64_).with_doc(<span class="string">&quot;A constant f64 scalar value&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -5032,13 +5172,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary_ieee64,
         )
-        .operands_in(<span class="macro">vec!</span>[N])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;N&quot;</span>, <span class="kw-2">&amp;</span>imm.ieee64)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, f64_).with_doc(<span class="string">&quot;A constant f64 scalar value&quot;</span>)
+        ]),
     );
-
-    <span class="kw">let </span>N = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;N&quot;</span>, <span class="kw-2">&amp;</span>imm.pool_constant)
-        .with_doc(<span class="string">&quot;The 16 immediate bytes of a 128-bit vector&quot;</span>);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, TxN).with_doc(<span class="string">&quot;A constant vector value&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -5050,12 +5188,13 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary_const,
         )
-        .operands_in(<span class="macro">vec!</span>[N])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;N&quot;</span>, <span class="kw-2">&amp;</span>imm.pool_constant)
+            .with_doc(<span class="string">&quot;The 16 immediate bytes of a 128-bit vector&quot;</span>)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, TxN).with_doc(<span class="string">&quot;A constant vector value&quot;</span>)
+        ]),
     );
 
-    <span class="kw">let </span>mask = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;mask&quot;</span>, <span class="kw-2">&amp;</span>imm.uimm128)
-        .with_doc(<span class="string">&quot;The 16 immediate bytes used for selecting the elements to shuffle&quot;</span>);
     <span class="kw">let </span>Tx16 = <span class="kw-2">&amp;</span>TypeVar::new(
         <span class="string">&quot;Tx16&quot;</span>,
         <span class="string">&quot;A SIMD vector with exactly 16 lanes of 8-bit values; eventually this may support other \
@@ -5066,8 +5205,6 @@
             .includes_scalars(<span class="bool-val">false</span>)
             .build(),
     );
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Tx16).with_doc(<span class="string">&quot;A vector value&quot;</span>);
-    <span class="kw">let </span>b = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;b&quot;</span>, Tx16).with_doc(<span class="string">&quot;A vector value&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -5082,11 +5219,14 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.shuffle,
         )
-        .operands_in(<span class="macro">vec!</span>[a, b, mask])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Tx16).with_doc(<span class="string">&quot;A vector value&quot;</span>),
+            Operand::new(<span class="string">&quot;b&quot;</span>, Tx16).with_doc(<span class="string">&quot;A vector value&quot;</span>),
+            Operand::new(<span class="string">&quot;mask&quot;</span>, <span class="kw-2">&amp;</span>imm.uimm128)
+                .with_doc(<span class="string">&quot;The 16 immediate bytes used for selecting the elements to shuffle&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Tx16).with_doc(<span class="string">&quot;A vector value&quot;</span>)]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Ref).with_doc(<span class="string">&quot;A constant reference null value&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -5098,7 +5238,9 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.nullary,
         )
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Ref).with_doc(<span class="string">&quot;A constant reference null value&quot;</span>)
+        ]),
     );
 
     ig.push(Inst::new(
@@ -5111,11 +5253,6 @@
         <span class="kw-2">&amp;</span>formats.nullary,
     ));
 
-    <span class="kw">let </span>c = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;c&quot;</span>, ScalarTruthy).with_doc(<span class="string">&quot;Controlling value to test&quot;</span>);
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Any).with_doc(<span class="string">&quot;Value to use when `c` is true&quot;</span>);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, Any).with_doc(<span class="string">&quot;Value to use when `c` is false&quot;</span>);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Any);
-
     ig.push(
         Inst::new(
             <span class="string">&quot;select&quot;</span>,
@@ -5127,8 +5264,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.ternary,
         )
-        .operands_in(<span class="macro">vec!</span>[c, x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;c&quot;</span>, ScalarTruthy).with_doc(<span class="string">&quot;Controlling value to test&quot;</span>),
+            Operand::new(<span class="string">&quot;x&quot;</span>, Any).with_doc(<span class="string">&quot;Value to use when `c` is true&quot;</span>),
+            Operand::new(<span class="string">&quot;y&quot;</span>, Any).with_doc(<span class="string">&quot;Value to use when `c` is false&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Any)]),
     );
 
     ig.push(
@@ -5154,15 +5295,18 @@
             &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.ternary,
         )
-        .operands_in(<span class="macro">vec!</span>[c, x, y])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;c&quot;</span>, ScalarTruthy).with_doc(<span class="string">&quot;Controlling value to test&quot;</span>),
+            Operand::new(<span class="string">&quot;x&quot;</span>, Any).with_doc(<span class="string">&quot;Value to use when `c` is true&quot;</span>),
+            Operand::new(<span class="string">&quot;y&quot;</span>, Any).with_doc(<span class="string">&quot;Value to use when `c` is false&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Any)])
         .other_side_effects()
         <span class="comment">// We can de-duplicate spectre selects since the side effect is
         // idempotent.
         </span>.side_effects_idempotent(),
     );
 
-    <span class="kw">let </span>c = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;c&quot;</span>, Any).with_doc(<span class="string">&quot;Controlling value to test&quot;</span>);
     ig.push(
         Inst::new(
             <span class="string">&quot;bitselect&quot;</span>,
@@ -5175,8 +5319,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.ternary,
         )
-        .operands_in(<span class="macro">vec!</span>[c, x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;c&quot;</span>, Any).with_doc(<span class="string">&quot;Controlling value to test&quot;</span>),
+            Operand::new(<span class="string">&quot;x&quot;</span>, Any).with_doc(<span class="string">&quot;Value to use when `c` is true&quot;</span>),
+            Operand::new(<span class="string">&quot;y&quot;</span>, Any).with_doc(<span class="string">&quot;Value to use when `c` is false&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Any)]),
     );
 
     ig.push(
@@ -5193,12 +5341,13 @@
             &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.ternary,
         )
-        .operands_in(<span class="macro">vec!</span>[c, x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;c&quot;</span>, Any).with_doc(<span class="string">&quot;Controlling value to test&quot;</span>),
+            Operand::new(<span class="string">&quot;x&quot;</span>, Any).with_doc(<span class="string">&quot;Value to use when `c` is true&quot;</span>),
+            Operand::new(<span class="string">&quot;y&quot;</span>, Any).with_doc(<span class="string">&quot;Value to use when `c` is false&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Any)]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, TxN);
-    <span class="kw">let </span>s = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;s&quot;</span>, i8);
 
     ig.push(
         Inst::new(
@@ -5210,8 +5359,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[a])
-        .operands_out(<span class="macro">vec!</span>[s]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, TxN)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;s&quot;</span>, i8)]),
     );
 
     ig.push(
@@ -5224,12 +5373,9 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[a])
-        .operands_out(<span class="macro">vec!</span>[s]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, TxN)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;s&quot;</span>, i8)]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, TxN);
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Int);
 
     ig.push(
         Inst::new(
@@ -5242,14 +5388,9 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[a])
-        .operands_out(<span class="macro">vec!</span>[x]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, TxN)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int)]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>Int.as_bool());
-    <span class="kw">let </span>Cond = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;Cond&quot;</span>, <span class="kw-2">&amp;</span>imm.intcc);
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Int);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, Int);
 
     ig.push(
         Inst::new(
@@ -5274,13 +5415,13 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.int_compare,
         )
-        .operands_in(<span class="macro">vec!</span>[Cond, x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;Cond&quot;</span>, <span class="kw-2">&amp;</span>imm.intcc),
+            Operand::new(<span class="string">&quot;x&quot;</span>, Int),
+            Operand::new(<span class="string">&quot;y&quot;</span>, Int),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>Int.as_bool())]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, i8);
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, iB);
-    <span class="kw">let </span>Y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64);
 
     ig.push(
         Inst::new(
@@ -5296,13 +5437,13 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.int_compare_imm,
         )
-        .operands_in(<span class="macro">vec!</span>[Cond, x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;Cond&quot;</span>, <span class="kw-2">&amp;</span>imm.intcc),
+            Operand::new(<span class="string">&quot;x&quot;</span>, iB),
+            Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, i8)]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Int);
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Int);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, Int);
 
     ig.push(
         Inst::new(
@@ -5315,8 +5456,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int), Operand::new(<span class="string">&quot;y&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -5330,8 +5471,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int), Operand::new(<span class="string">&quot;y&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -5342,8 +5483,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -5354,8 +5495,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -5371,8 +5512,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int), Operand::new(<span class="string">&quot;y&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -5386,8 +5527,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int), Operand::new(<span class="string">&quot;y&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -5401,8 +5542,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int), Operand::new(<span class="string">&quot;y&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     <span class="kw">let </span>I16or32 = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -5410,10 +5551,6 @@
         <span class="string">&quot;A vector integer type with 16- or 32-bit numbers&quot;</span>,
         TypeSetBuilder::new().ints(<span class="number">16</span>..<span class="number">32</span>).simd_lanes(<span class="number">4</span>..<span class="number">8</span>).build(),
     );
-
-    <span class="kw">let </span>qx = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, I16or32);
-    <span class="kw">let </span>qy = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, I16or32);
-    <span class="kw">let </span>qa = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, I16or32);
 
     ig.push(
         Inst::new(
@@ -5427,8 +5564,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[qx, qy])
-        .operands_out(<span class="macro">vec!</span>[qa]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, I16or32), Operand::new(<span class="string">&quot;y&quot;</span>, I16or32)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, I16or32)]),
     );
 
     ig.push(
@@ -5443,89 +5580,79 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[qx, qy])
-        .operands_out(<span class="macro">vec!</span>[qa]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, I16or32), Operand::new(<span class="string">&quot;y&quot;</span>, I16or32)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, I16or32)]),
     );
 
-    {
-        <span class="comment">// Integer division and remainder are scalar-only; most
-        // hardware does not directly support vector integer division.
+    <span class="comment">// Integer division and remainder are scalar-only; most
+    // hardware does not directly support vector integer division.
 
-        </span><span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, iB);
-        <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, iB);
-        <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, iB);
+    </span>ig.push(
+        Inst::new(
+            <span class="string">&quot;udiv&quot;</span>,
+            <span class="string">r#&quot;
+        Unsigned integer division: `a := \lfloor {x \over y} \rfloor`.
 
-        ig.push(
-            Inst::new(
-                <span class="string">&quot;udiv&quot;</span>,
-                <span class="string">r#&quot;
-            Unsigned integer division: `a := \lfloor {x \over y} \rfloor`.
+        This operation traps if the divisor is zero.
+        &quot;#</span>,
+            <span class="kw-2">&amp;</span>formats.binary,
+        )
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;y&quot;</span>, iB)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)])
+        .can_trap()
+        .side_effects_idempotent(),
+    );
 
-            This operation traps if the divisor is zero.
-            &quot;#</span>,
-                <span class="kw-2">&amp;</span>formats.binary,
-            )
-            .operands_in(<span class="macro">vec!</span>[x, y])
-            .operands_out(<span class="macro">vec!</span>[a])
-            .can_trap()
-            .side_effects_idempotent(),
-        );
+    ig.push(
+        Inst::new(
+            <span class="string">&quot;sdiv&quot;</span>,
+            <span class="string">r#&quot;
+        Signed integer division rounded toward zero: `a := sign(xy)
+        \lfloor {|x| \over |y|}\rfloor`.
 
-        ig.push(
-            Inst::new(
-                <span class="string">&quot;sdiv&quot;</span>,
-                <span class="string">r#&quot;
-            Signed integer division rounded toward zero: `a := sign(xy)
-            \lfloor {|x| \over |y|}\rfloor`.
+        This operation traps if the divisor is zero, or if the result is not
+        representable in `B` bits two&#39;s complement. This only happens
+        when `x = -2^{B-1}, y = -1`.
+        &quot;#</span>,
+            <span class="kw-2">&amp;</span>formats.binary,
+        )
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;y&quot;</span>, iB)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)])
+        .can_trap()
+        .side_effects_idempotent(),
+    );
 
-            This operation traps if the divisor is zero, or if the result is not
-            representable in `B` bits two&#39;s complement. This only happens
-            when `x = -2^{B-1}, y = -1`.
-            &quot;#</span>,
-                <span class="kw-2">&amp;</span>formats.binary,
-            )
-            .operands_in(<span class="macro">vec!</span>[x, y])
-            .operands_out(<span class="macro">vec!</span>[a])
-            .can_trap()
-            .side_effects_idempotent(),
-        );
+    ig.push(
+        Inst::new(
+            <span class="string">&quot;urem&quot;</span>,
+            <span class="string">r#&quot;
+        Unsigned integer remainder.
 
-        ig.push(
-            Inst::new(
-                <span class="string">&quot;urem&quot;</span>,
-                <span class="string">r#&quot;
-            Unsigned integer remainder.
+        This operation traps if the divisor is zero.
+        &quot;#</span>,
+            <span class="kw-2">&amp;</span>formats.binary,
+        )
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;y&quot;</span>, iB)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)])
+        .can_trap()
+        .side_effects_idempotent(),
+    );
 
-            This operation traps if the divisor is zero.
-            &quot;#</span>,
-                <span class="kw-2">&amp;</span>formats.binary,
-            )
-            .operands_in(<span class="macro">vec!</span>[x, y])
-            .operands_out(<span class="macro">vec!</span>[a])
-            .can_trap()
-            .side_effects_idempotent(),
-        );
+    ig.push(
+        Inst::new(
+            <span class="string">&quot;srem&quot;</span>,
+            <span class="string">r#&quot;
+        Signed integer remainder. The result has the sign of the dividend.
 
-        ig.push(
-            Inst::new(
-                <span class="string">&quot;srem&quot;</span>,
-                <span class="string">r#&quot;
-            Signed integer remainder. The result has the sign of the dividend.
-
-            This operation traps if the divisor is zero.
-            &quot;#</span>,
-                <span class="kw-2">&amp;</span>formats.binary,
-            )
-            .operands_in(<span class="macro">vec!</span>[x, y])
-            .operands_out(<span class="macro">vec!</span>[a])
-            .can_trap()
-            .side_effects_idempotent(),
-        );
-    }
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, iB);
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, iB);
-    <span class="kw">let </span>Y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64);
+        This operation traps if the divisor is zero.
+        &quot;#</span>,
+            <span class="kw-2">&amp;</span>formats.binary,
+        )
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;y&quot;</span>, iB)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)])
+        .can_trap()
+        .side_effects_idempotent(),
+    );
 
     ig.push(
         Inst::new(
@@ -5540,8 +5667,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
 
     ig.push(
@@ -5557,8 +5684,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
 
     ig.push(
@@ -5573,8 +5700,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
 
     ig.push(
@@ -5591,8 +5718,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
 
     ig.push(
@@ -5607,8 +5734,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
 
     ig.push(
@@ -5623,8 +5750,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
 
     ig.push(
@@ -5644,18 +5771,9 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, iB);
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, iB);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, iB);
-
-    <span class="kw">let </span>c_in = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;c_in&quot;</span>, i8).with_doc(<span class="string">&quot;Input carry flag&quot;</span>);
-    <span class="kw">let </span>c_out = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;c_out&quot;</span>, i8).with_doc(<span class="string">&quot;Output carry flag&quot;</span>);
-    <span class="kw">let </span>b_in = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;b_in&quot;</span>, i8).with_doc(<span class="string">&quot;Input borrow flag&quot;</span>);
-    <span class="kw">let </span>b_out = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;b_out&quot;</span>, i8).with_doc(<span class="string">&quot;Output borrow flag&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -5674,8 +5792,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.ternary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y, c_in])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, iB),
+            Operand::new(<span class="string">&quot;y&quot;</span>, iB),
+            Operand::new(<span class="string">&quot;c_in&quot;</span>, i8).with_doc(<span class="string">&quot;Input carry flag&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
 
     ig.push(
@@ -5696,8 +5818,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a, c_out]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;y&quot;</span>, iB)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, iB),
+            Operand::new(<span class="string">&quot;c_out&quot;</span>, i8).with_doc(<span class="string">&quot;Output carry flag&quot;</span>),
+        ]),
     );
 
     ig.push(
@@ -5718,38 +5843,42 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.ternary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y, c_in])
-        .operands_out(<span class="macro">vec!</span>[a, c_out]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, iB),
+            Operand::new(<span class="string">&quot;y&quot;</span>, iB),
+            Operand::new(<span class="string">&quot;c_in&quot;</span>, i8).with_doc(<span class="string">&quot;Input carry flag&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, iB),
+            Operand::new(<span class="string">&quot;c_out&quot;</span>, i8).with_doc(<span class="string">&quot;Output carry flag&quot;</span>),
+        ]),
     );
 
-    {
-        <span class="kw">let </span>code = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;code&quot;</span>, <span class="kw-2">&amp;</span>imm.trapcode);
+    <span class="kw">let </span>i32_64 = <span class="kw-2">&amp;</span>TypeVar::new(
+        <span class="string">&quot;i32_64&quot;</span>,
+        <span class="string">&quot;A 32 or 64-bit scalar integer type&quot;</span>,
+        TypeSetBuilder::new().ints(<span class="number">32</span>..<span class="number">64</span>).build(),
+    );
 
-        <span class="kw">let </span>i32_64 = <span class="kw-2">&amp;</span>TypeVar::new(
-            <span class="string">&quot;i32_64&quot;</span>,
-            <span class="string">&quot;A 32 or 64-bit scalar integer type&quot;</span>,
-            TypeSetBuilder::new().ints(<span class="number">32</span>..<span class="number">64</span>).build(),
-        );
+    ig.push(
+        Inst::new(
+            <span class="string">&quot;uadd_overflow_trap&quot;</span>,
+            <span class="string">r#&quot;
+        Unsigned addition of x and y, trapping if the result overflows.
 
-        <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, i32_64);
-        <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, i32_64);
-        <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, i32_64);
-        ig.push(
-            Inst::new(
-                <span class="string">&quot;uadd_overflow_trap&quot;</span>,
-                <span class="string">r#&quot;
-            Unsigned addition of x and y, trapping if the result overflows.
-
-            Accepts 32 or 64-bit integers, and does not support vector types.
-            &quot;#</span>,
-                <span class="kw-2">&amp;</span>formats.int_add_trap,
-            )
-            .operands_in(<span class="macro">vec!</span>[x, y, code])
-            .operands_out(<span class="macro">vec!</span>[a])
-            .can_trap()
-            .side_effects_idempotent(),
-        );
-    }
+        Accepts 32 or 64-bit integers, and does not support vector types.
+        &quot;#</span>,
+            <span class="kw-2">&amp;</span>formats.int_add_trap,
+        )
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, i32_64),
+            Operand::new(<span class="string">&quot;y&quot;</span>, i32_64),
+            Operand::new(<span class="string">&quot;code&quot;</span>, <span class="kw-2">&amp;</span>imm.trapcode),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, i32_64)])
+        .can_trap()
+        .side_effects_idempotent(),
+    );
 
     ig.push(
         Inst::new(
@@ -5768,8 +5897,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.ternary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y, b_in])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, iB),
+            Operand::new(<span class="string">&quot;y&quot;</span>, iB),
+            Operand::new(<span class="string">&quot;b_in&quot;</span>, i8).with_doc(<span class="string">&quot;Input borrow flag&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
 
     ig.push(
@@ -5790,8 +5923,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a, b_out]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;y&quot;</span>, iB)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, iB),
+            Operand::new(<span class="string">&quot;b_out&quot;</span>, i8).with_doc(<span class="string">&quot;Output borrow flag&quot;</span>),
+        ]),
     );
 
     ig.push(
@@ -5812,8 +5948,15 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.ternary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y, b_in])
-        .operands_out(<span class="macro">vec!</span>[a, b_out]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, iB),
+            Operand::new(<span class="string">&quot;y&quot;</span>, iB),
+            Operand::new(<span class="string">&quot;b_in&quot;</span>, i8).with_doc(<span class="string">&quot;Input borrow flag&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, iB),
+            Operand::new(<span class="string">&quot;b_out&quot;</span>, i8).with_doc(<span class="string">&quot;Output borrow flag&quot;</span>),
+        ]),
     );
 
     <span class="kw">let </span>bits = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -5826,9 +5969,6 @@
             .includes_scalars(<span class="bool-val">true</span>)
             .build(),
     );
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, bits);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, bits);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, bits);
 
     ig.push(
         Inst::new(
@@ -5838,8 +5978,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, bits), Operand::new(<span class="string">&quot;y&quot;</span>, bits)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, bits)]),
     );
 
     ig.push(
@@ -5850,8 +5990,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, bits), Operand::new(<span class="string">&quot;y&quot;</span>, bits)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, bits)]),
     );
 
     ig.push(
@@ -5862,8 +6002,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, bits), Operand::new(<span class="string">&quot;y&quot;</span>, bits)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, bits)]),
     );
 
     ig.push(
@@ -5874,8 +6014,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, bits)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, bits)]),
     );
 
     ig.push(
@@ -5888,8 +6028,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, bits), Operand::new(<span class="string">&quot;y&quot;</span>, bits)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, bits)]),
     );
 
     ig.push(
@@ -5902,8 +6042,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, bits), Operand::new(<span class="string">&quot;y&quot;</span>, bits)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, bits)]),
     );
 
     ig.push(
@@ -5916,13 +6056,9 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, bits), Operand::new(<span class="string">&quot;y&quot;</span>, bits)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, bits)]),
     );
-
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, iB);
-    <span class="kw">let </span>Y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, iB);
 
     ig.push(
         Inst::new(
@@ -5937,8 +6073,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
 
     ig.push(
@@ -5954,8 +6090,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
 
     ig.push(
@@ -5971,14 +6107,9 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB), Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
-
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Int).with_doc(<span class="string">&quot;Scalar or vector value to shift&quot;</span>);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, iB).with_doc(<span class="string">&quot;Number of bits to shift&quot;</span>);
-    <span class="kw">let </span>Y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Int);
 
     ig.push(
         Inst::new(
@@ -5990,8 +6121,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, Int).with_doc(<span class="string">&quot;Scalar or vector value to shift&quot;</span>),
+            Operand::new(<span class="string">&quot;y&quot;</span>, iB).with_doc(<span class="string">&quot;Number of bits to shift&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -6004,8 +6138,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, Int).with_doc(<span class="string">&quot;Scalar or vector value to shift&quot;</span>),
+            Operand::new(<span class="string">&quot;y&quot;</span>, iB).with_doc(<span class="string">&quot;Number of bits to shift&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -6018,8 +6155,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, Int).with_doc(<span class="string">&quot;Scalar or vector value to shift&quot;</span>),
+            Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -6032,8 +6172,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, Int).with_doc(<span class="string">&quot;Scalar or vector value to shift&quot;</span>),
+            Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -6054,8 +6197,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, Int).with_doc(<span class="string">&quot;Scalar or vector value to shift&quot;</span>),
+            Operand::new(<span class="string">&quot;y&quot;</span>, iB).with_doc(<span class="string">&quot;Number of bits to shift&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -6077,8 +6223,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, Int).with_doc(<span class="string">&quot;Scalar or vector value to shift&quot;</span>),
+            Operand::new(<span class="string">&quot;y&quot;</span>, iB).with_doc(<span class="string">&quot;Number of bits to shift&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -6093,8 +6242,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, Int).with_doc(<span class="string">&quot;Scalar or vector value to shift&quot;</span>),
+            Operand::new(<span class="string">&quot;y&quot;</span>, iB).with_doc(<span class="string">&quot;Number of bits to shift&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -6107,8 +6259,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, Int).with_doc(<span class="string">&quot;Scalar or vector value to shift&quot;</span>),
+            Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -6121,8 +6276,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, Int).with_doc(<span class="string">&quot;Scalar or vector value to shift&quot;</span>),
+            Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     ig.push(
@@ -6135,12 +6293,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm64,
         )
-        .operands_in(<span class="macro">vec!</span>[x, Y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, Int).with_doc(<span class="string">&quot;Scalar or vector value to shift&quot;</span>),
+            Operand::new(<span class="string">&quot;Y&quot;</span>, <span class="kw-2">&amp;</span>imm.imm64),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
-
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, iB);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, iB);
 
     ig.push(
         Inst::new(
@@ -6152,8 +6310,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
 
     ig.push(
@@ -6168,8 +6326,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
 
     ig.push(
@@ -6184,8 +6342,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
 
     ig.push(
@@ -6200,12 +6358,9 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iB)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iB)]),
     );
-
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, iSwappable);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, iSwappable);
 
     ig.push(
         Inst::new(
@@ -6217,12 +6372,9 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, iSwappable)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, iSwappable)]),
     );
-
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Int);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Int);
 
     ig.push(
         Inst::new(
@@ -6234,8 +6386,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     <span class="kw">let </span>Float = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -6247,10 +6399,6 @@
             .dynamic_simd_lanes(Interval::All)
             .build(),
     );
-    <span class="kw">let </span>Cond = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;Cond&quot;</span>, <span class="kw-2">&amp;</span>imm.floatcc);
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Float);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, Float);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>Float.as_bool());
 
     ig.push(
         Inst::new(
@@ -6324,14 +6472,13 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.float_compare,
         )
-        .operands_in(<span class="macro">vec!</span>[Cond, x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;Cond&quot;</span>, <span class="kw-2">&amp;</span>imm.floatcc),
+            Operand::new(<span class="string">&quot;x&quot;</span>, Float),
+            Operand::new(<span class="string">&quot;y&quot;</span>, Float),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>Float.as_bool())]),
     );
-
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Float);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, Float);
-    <span class="kw">let </span>z = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;z&quot;</span>, Float);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;Result of applying operator to each lane&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -6341,8 +6488,10 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float), Operand::new(<span class="string">&quot;y&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;Result of applying operator to each lane&quot;</span>)
+        ]),
     );
 
     ig.push(
@@ -6353,8 +6502,10 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float), Operand::new(<span class="string">&quot;y&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;Result of applying operator to each lane&quot;</span>)
+        ]),
     );
 
     ig.push(
@@ -6365,8 +6516,10 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float), Operand::new(<span class="string">&quot;y&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;Result of applying operator to each lane&quot;</span>)
+        ]),
     );
 
     ig.push(
@@ -6381,8 +6534,10 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float), Operand::new(<span class="string">&quot;y&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;Result of applying operator to each lane&quot;</span>)
+        ]),
     );
 
     ig.push(
@@ -6393,8 +6548,10 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;Result of applying operator to each lane&quot;</span>)
+        ]),
     );
 
     ig.push(
@@ -6408,11 +6565,15 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.ternary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y, z])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, Float),
+            Operand::new(<span class="string">&quot;y&quot;</span>, Float),
+            Operand::new(<span class="string">&quot;z&quot;</span>, Float),
+        ])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;Result of applying operator to each lane&quot;</span>)
+        ]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;``x`` with its sign bit inverted&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -6424,11 +6585,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;``x`` with its sign bit inverted&quot;</span>)
+        ]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;``x`` with its sign bit cleared&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -6440,11 +6601,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;``x`` with its sign bit cleared&quot;</span>)
+        ]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;``x`` with its sign bit changed to that of ``y``&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -6457,11 +6618,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float), Operand::new(<span class="string">&quot;y&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;``x`` with its sign bit changed to that of ``y``&quot;</span>)
+        ]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;The smaller of ``x`` and ``y``&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -6476,8 +6637,10 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float), Operand::new(<span class="string">&quot;y&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;The smaller of ``x`` and ``y``&quot;</span>)
+        ]),
     );
 
     ig.push(
@@ -6492,11 +6655,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float), Operand::new(<span class="string">&quot;y&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;The smaller of ``x`` and ``y``&quot;</span>)
+        ]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;The larger of ``x`` and ``y``&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -6511,8 +6674,10 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float), Operand::new(<span class="string">&quot;y&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;The larger of ``x`` and ``y``&quot;</span>)
+        ]),
     );
 
     ig.push(
@@ -6527,11 +6692,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float), Operand::new(<span class="string">&quot;y&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;The larger of ``x`` and ``y``&quot;</span>)
+        ]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;``x`` rounded to integral value&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -6541,8 +6706,10 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;``x`` rounded to integral value&quot;</span>)
+        ]),
     );
 
     ig.push(
@@ -6553,8 +6720,10 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;``x`` rounded to integral value&quot;</span>)
+        ]),
     );
 
     ig.push(
@@ -6565,8 +6734,10 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;``x`` rounded to integral value&quot;</span>)
+        ]),
     );
 
     ig.push(
@@ -6578,12 +6749,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, Float).with_doc(<span class="string">&quot;``x`` rounded to integral value&quot;</span>)
+        ]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, i8);
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Ref);
 
     ig.push(
         Inst::new(
@@ -6596,12 +6766,9 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Ref)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, i8)]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, i8);
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Ref);
 
     ig.push(
         Inst::new(
@@ -6614,13 +6781,9 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Ref)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, i8)]),
     );
-
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Mem);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, MemTo).with_doc(<span class="string">&quot;Bits of `x` reinterpreted&quot;</span>);
-    <span class="kw">let </span>MemFlags = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags);
 
     ig.push(
         Inst::new(
@@ -6639,12 +6802,14 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load_no_offset,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;x&quot;</span>, Mem),
+        ])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, MemTo).with_doc(<span class="string">&quot;Bits of `x` reinterpreted&quot;</span>)
+        ]),
     );
-
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, TxN).with_doc(<span class="string">&quot;A vector value&quot;</span>);
-    <span class="kw">let </span>s = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;s&quot;</span>, <span class="kw-2">&amp;</span>TxN.lane_of()).with_doc(<span class="string">&quot;A scalar value&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -6655,8 +6820,10 @@
             &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[s])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;s&quot;</span>, <span class="kw-2">&amp;</span>TxN.lane_of()).with_doc(<span class="string">&quot;A scalar value&quot;</span>)
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, TxN).with_doc(<span class="string">&quot;A vector value&quot;</span>)]),
     );
 
     <span class="kw">let </span>Truthy = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -6669,8 +6836,6 @@
         <span class="string">&quot;An integer type&quot;</span>,
         TypeSetBuilder::new().ints(Interval::All).build(),
     );
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Truthy);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, IntTo);
 
     ig.push(
         Inst::new(
@@ -6682,8 +6847,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Truthy)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IntTo)]),
     );
 
     <span class="kw">let </span>Int = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -6697,8 +6862,6 @@
         <span class="string">&quot;A smaller integer type&quot;</span>,
         TypeSetBuilder::new().ints(Interval::All).build(),
     );
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Int);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, IntTo);
 
     ig.push(
         Inst::new(
@@ -6711,8 +6874,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IntTo)]),
     );
 
     <span class="kw">let </span>I16or32or64xN = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -6725,10 +6888,6 @@
             .includes_scalars(<span class="bool-val">false</span>)
             .build(),
     );
-
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, I16or32or64xN);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, I16or32or64xN);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>I16or32or64xN.split_lanes());
 
     ig.push(
         Inst::new(
@@ -6743,8 +6902,11 @@
             &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, I16or32or64xN),
+            Operand::new(<span class="string">&quot;y&quot;</span>, I16or32or64xN),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>I16or32or64xN.split_lanes())]),
     );
 
     ig.push(
@@ -6763,8 +6925,11 @@
             &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, I16or32or64xN),
+            Operand::new(<span class="string">&quot;y&quot;</span>, I16or32or64xN),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>I16or32or64xN.split_lanes())]),
     );
 
     ig.push(
@@ -6782,8 +6947,8 @@
             &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, I16or32or64xN), Operand::new(<span class="string">&quot;y&quot;</span>, I16or32or64xN)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>I16or32or64xN.split_lanes())]),
     );
 
     <span class="kw">let </span>I8or16or32xN = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -6797,9 +6962,6 @@
             .build(),
     );
 
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, I8or16or32xN);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>I8or16or32xN.merge_lanes());
-
     ig.push(
         Inst::new(
             <span class="string">&quot;swiden_low&quot;</span>,
@@ -6810,8 +6972,8 @@
             &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, I8or16or32xN)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>I8or16or32xN.merge_lanes())]),
     );
 
     ig.push(
@@ -6824,8 +6986,8 @@
             &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, I8or16or32xN)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>I8or16or32xN.merge_lanes())]),
     );
 
     ig.push(
@@ -6838,8 +7000,8 @@
             &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, I8or16or32xN)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>I8or16or32xN.merge_lanes())]),
     );
 
     ig.push(
@@ -6852,13 +7014,9 @@
             &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, I8or16or32xN)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>I8or16or32xN.merge_lanes())]),
     );
-
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, I8or16or32xN);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, I8or16or32xN);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, I8or16or32xN);
 
     ig.push(
         Inst::new(
@@ -6873,8 +7031,11 @@
             &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, I8or16or32xN),
+            Operand::new(<span class="string">&quot;y&quot;</span>, I8or16or32xN),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, I8or16or32xN)]),
     );
 
     <span class="kw">let </span>I8x16 = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -6886,9 +7047,6 @@
             .includes_scalars(<span class="bool-val">false</span>)
             .build(),
     );
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, I8x16);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, I8x16);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, I16x8);
 
     ig.push(
         Inst::new(
@@ -6903,8 +7061,8 @@
             &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, I8x16), Operand::new(<span class="string">&quot;y&quot;</span>, I8x16)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, I16x8)]),
     );
 
     {
@@ -6913,9 +7071,6 @@
             <span class="string">&quot;A larger integer type with the same number of lanes&quot;</span>,
             TypeSetBuilder::new().ints(Interval::All).build(),
         );
-
-        <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Int);
-        <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, IntTo);
 
         ig.push(
             Inst::new(
@@ -6933,8 +7088,8 @@
         &quot;#</span>,
                 <span class="kw-2">&amp;</span>formats.unary,
             )
-            .operands_in(<span class="macro">vec!</span>[x])
-            .operands_out(<span class="macro">vec!</span>[a]),
+            .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int)])
+            .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IntTo)]),
         );
 
         ig.push(
@@ -6953,8 +7108,8 @@
         &quot;#</span>,
                 <span class="kw-2">&amp;</span>formats.unary,
             )
-            .operands_in(<span class="macro">vec!</span>[x])
-            .operands_out(<span class="macro">vec!</span>[a]),
+            .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int)])
+            .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IntTo)]),
         );
     }
 
@@ -6966,9 +7121,6 @@
             .simd_lanes(Interval::All)
             .build(),
     );
-
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Float);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, FloatTo);
 
     ig.push(
         Inst::new(
@@ -6987,8 +7139,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, FloatTo)]),
     );
 
     ig.push(
@@ -7008,8 +7160,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, FloatTo)]),
     );
 
     <span class="kw">let </span>F64x2 = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -7031,9 +7183,6 @@
             .build(),
     );
 
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, F64x2);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, F32x4);
-
     ig.push(
         Inst::new(
             <span class="string">&quot;fvdemote&quot;</span>,
@@ -7053,8 +7202,8 @@
                 &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, F64x2)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, F32x4)]),
     );
 
     ig.push(
@@ -7071,8 +7220,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[a])
-        .operands_out(<span class="macro">vec!</span>[x]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, F32x4)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, F64x2)]),
     );
 
     <span class="kw">let </span>FloatScalar = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -7085,8 +7234,6 @@
         <span class="string">&quot;An scalar only integer type&quot;</span>,
         TypeSetBuilder::new().ints(Interval::All).build(),
     );
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, FloatScalar);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, IntTo);
 
     ig.push(
         Inst::new(
@@ -7101,8 +7248,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, FloatScalar)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IntTo)])
         .can_trap()
         .side_effects_idempotent(),
     );
@@ -7120,8 +7267,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, FloatScalar)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IntTo)])
         .can_trap()
         .side_effects_idempotent(),
     );
@@ -7135,9 +7282,6 @@
             .build(),
     );
 
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Float);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, IntTo);
-
     ig.push(
         Inst::new(
             <span class="string">&quot;fcvt_to_uint_sat&quot;</span>,
@@ -7148,8 +7292,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IntTo)]),
     );
 
     ig.push(
@@ -7161,8 +7305,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IntTo)]),
     );
 
     ig.push(
@@ -7175,8 +7319,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IntTo)]),
     );
 
     <span class="kw">let </span>Int = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -7187,8 +7331,6 @@
             .simd_lanes(Interval::All)
             .build(),
     );
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, Int);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, FloatTo);
 
     ig.push(
         Inst::new(
@@ -7203,8 +7345,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, FloatTo)]),
     );
 
     ig.push(
@@ -7220,8 +7362,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, FloatTo)]),
     );
 
     ig.push(
@@ -7240,8 +7382,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, FloatTo)]),
     );
 
     <span class="kw">let </span>WideInt = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -7252,9 +7394,6 @@
             .simd_lanes(Interval::All)
             .build(),
     );
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, WideInt);
-    <span class="kw">let </span>lo = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;lo&quot;</span>, <span class="kw-2">&amp;</span>WideInt.half_width()).with_doc(<span class="string">&quot;The low bits of `x`&quot;</span>);
-    <span class="kw">let </span>hi = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;hi&quot;</span>, <span class="kw-2">&amp;</span>WideInt.half_width()).with_doc(<span class="string">&quot;The high bits of `x`&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -7270,14 +7409,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[x])
-        .operands_out(<span class="macro">vec!</span>[lo, hi]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, WideInt)])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;lo&quot;</span>, <span class="kw-2">&amp;</span>WideInt.half_width()).with_doc(<span class="string">&quot;The low bits of `x`&quot;</span>),
+            Operand::new(<span class="string">&quot;hi&quot;</span>, <span class="kw-2">&amp;</span>WideInt.half_width()).with_doc(<span class="string">&quot;The high bits of `x`&quot;</span>),
+        ]),
     );
-
-    <span class="kw">let </span>lo = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;lo&quot;</span>, NarrowInt);
-    <span class="kw">let </span>hi = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;hi&quot;</span>, NarrowInt);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>NarrowInt.double_width())
-        .with_doc(<span class="string">&quot;The concatenation of `lo` and `hi`&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -7291,8 +7428,12 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary,
         )
-        .operands_in(<span class="macro">vec!</span>[lo, hi])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;lo&quot;</span>, NarrowInt),
+            Operand::new(<span class="string">&quot;hi&quot;</span>, NarrowInt),
+        ])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>NarrowInt.double_width())
+            .with_doc(<span class="string">&quot;The concatenation of `lo` and `hi`&quot;</span>)]),
     );
 
     <span class="comment">// Instructions relating to atomic memory accesses and fences
@@ -7301,12 +7442,6 @@
         <span class="string">&quot;Any type that can be stored in memory, which can be used in an atomic operation&quot;</span>,
         TypeSetBuilder::new().ints(<span class="number">8</span>..<span class="number">64</span>).build(),
     );
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, AtomicMem).with_doc(<span class="string">&quot;Value to be atomically stored&quot;</span>);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, AtomicMem).with_doc(<span class="string">&quot;Value atomically loaded&quot;</span>);
-    <span class="kw">let </span>e = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;e&quot;</span>, AtomicMem).with_doc(<span class="string">&quot;Expected value in CAS&quot;</span>);
-    <span class="kw">let </span>p = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;p&quot;</span>, iAddr);
-    <span class="kw">let </span>MemFlags = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags);
-    <span class="kw">let </span>AtomicRmwOp = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;AtomicRmwOp&quot;</span>, <span class="kw-2">&amp;</span>imm.atomic_rmw_op);
 
     ig.push(
         Inst::new(
@@ -7320,8 +7455,15 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.atomic_rmw,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, AtomicRmwOp, p, x])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;AtomicRmwOp&quot;</span>, <span class="kw-2">&amp;</span>imm.atomic_rmw_op),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;x&quot;</span>, AtomicMem).with_doc(<span class="string">&quot;Value to be atomically stored&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, AtomicMem).with_doc(<span class="string">&quot;Value atomically loaded&quot;</span>)
+        ])
         .can_load()
         .can_store()
         .other_side_effects(),
@@ -7342,8 +7484,15 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.atomic_cas,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p, e, x])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+            Operand::new(<span class="string">&quot;e&quot;</span>, AtomicMem).with_doc(<span class="string">&quot;Expected value in CAS&quot;</span>),
+            Operand::new(<span class="string">&quot;x&quot;</span>, AtomicMem).with_doc(<span class="string">&quot;Value to be atomically stored&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, AtomicMem).with_doc(<span class="string">&quot;Value atomically loaded&quot;</span>)
+        ])
         .can_load()
         .can_store()
         .other_side_effects(),
@@ -7362,8 +7511,13 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.load_no_offset,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, p])
-        .operands_out(<span class="macro">vec!</span>[a])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+        ])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, AtomicMem).with_doc(<span class="string">&quot;Value atomically loaded&quot;</span>)
+        ])
         .can_load()
         .other_side_effects(),
     );
@@ -7381,7 +7535,11 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.store_no_offset,
         )
-        .operands_in(<span class="macro">vec!</span>[MemFlags, x, p])
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;MemFlags&quot;</span>, <span class="kw-2">&amp;</span>imm.memflags),
+            Operand::new(<span class="string">&quot;x&quot;</span>, AtomicMem).with_doc(<span class="string">&quot;Value to be atomically stored&quot;</span>),
+            Operand::new(<span class="string">&quot;p&quot;</span>, iAddr),
+        ])
         .can_store()
         .other_side_effects(),
     );
@@ -7408,9 +7566,6 @@
             .dynamic_simd_lanes(Interval::All)
             .build(),
     );
-    <span class="kw">let </span>x = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;x&quot;</span>, TxN).with_doc(<span class="string">&quot;The dynamic vector to extract from&quot;</span>);
-    <span class="kw">let </span>y = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;y&quot;</span>, <span class="kw-2">&amp;</span>imm.uimm8).with_doc(<span class="string">&quot;128-bit vector index&quot;</span>);
-    <span class="kw">let </span>a = <span class="kw-2">&amp;</span>Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>TxN.dynamic_to_vector()).with_doc(<span class="string">&quot;New fixed vector&quot;</span>);
 
     ig.push(
         Inst::new(
@@ -7420,8 +7575,13 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.binary_imm8,
         )
-        .operands_in(<span class="macro">vec!</span>[x, y])
-        .operands_out(<span class="macro">vec!</span>[a]),
+        .operands_in(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;x&quot;</span>, TxN).with_doc(<span class="string">&quot;The dynamic vector to extract from&quot;</span>),
+            Operand::new(<span class="string">&quot;y&quot;</span>, <span class="kw-2">&amp;</span>imm.uimm8).with_doc(<span class="string">&quot;128-bit vector index&quot;</span>),
+        ])
+        .operands_out(<span class="macro">vec!</span>[
+            Operand::new(<span class="string">&quot;a&quot;</span>, <span class="kw-2">&amp;</span>TxN.dynamic_to_vector()).with_doc(<span class="string">&quot;New fixed vector&quot;</span>)
+        ]),
     );
 }
 </code></pre></div>
