@@ -3093,6 +3093,13 @@
 <a href="#3093" id="3093">3093</a>
 <a href="#3094" id="3094">3094</a>
 <a href="#3095" id="3095">3095</a>
+<a href="#3096" id="3096">3096</a>
+<a href="#3097" id="3097">3097</a>
+<a href="#3098" id="3098">3098</a>
+<a href="#3099" id="3099">3099</a>
+<a href="#3100" id="3100">3100</a>
+<a href="#3101" id="3101">3101</a>
+<a href="#3102" id="3102">3102</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines aarch64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc};
@@ -5218,9 +5225,9 @@
                 <span class="kw">let </span>rn = pretty_print_ireg(rn, size.operand_size(), allocs);
                 <span class="macro">format!</span>(<span class="string">&quot;dup {}, {}&quot;</span>, rd, rn)
             }
-            <span class="kw-2">&amp;</span>Inst::VecDupFromFpu { rd, rn, size } =&gt; {
+            <span class="kw-2">&amp;</span>Inst::VecDupFromFpu { rd, rn, size, lane } =&gt; {
                 <span class="kw">let </span>rd = pretty_print_vreg_vector(rd.to_reg(), size, allocs);
-                <span class="kw">let </span>rn = pretty_print_vreg_element(rn, <span class="number">0</span>, size.lane_size(), allocs);
+                <span class="kw">let </span>rn = pretty_print_vreg_element(rn, lane.into(), size.lane_size(), allocs);
                 <span class="macro">format!</span>(<span class="string">&quot;dup {}, {}&quot;</span>, rd, rn)
             }
             <span class="kw-2">&amp;</span>Inst::VecDupFPImm { rd, imm, size } =&gt; {
@@ -5440,7 +5447,12 @@
                     VecALUOp::Fmul =&gt; (<span class="string">&quot;fmul&quot;</span>, size),
                     VecALUOp::Addp =&gt; (<span class="string">&quot;addp&quot;</span>, size),
                     VecALUOp::Zip1 =&gt; (<span class="string">&quot;zip1&quot;</span>, size),
+                    VecALUOp::Zip2 =&gt; (<span class="string">&quot;zip2&quot;</span>, size),
                     VecALUOp::Sqrdmulh =&gt; (<span class="string">&quot;sqrdmulh&quot;</span>, size),
+                    VecALUOp::Uzp1 =&gt; (<span class="string">&quot;uzp1&quot;</span>, size),
+                    VecALUOp::Uzp2 =&gt; (<span class="string">&quot;uzp2&quot;</span>, size),
+                    VecALUOp::Trn1 =&gt; (<span class="string">&quot;trn1&quot;</span>, size),
+                    VecALUOp::Trn2 =&gt; (<span class="string">&quot;trn2&quot;</span>, size),
                 };
                 <span class="kw">let </span>rd = pretty_print_vreg_vector(rd.to_reg(), size, allocs);
                 <span class="kw">let </span>rn = pretty_print_vreg_vector(rn, size, allocs);
@@ -5566,6 +5578,8 @@
                     VecMisc2::Fabs =&gt; (<span class="string">&quot;fabs&quot;</span>, size, <span class="string">&quot;&quot;</span>),
                     VecMisc2::Fneg =&gt; (<span class="string">&quot;fneg&quot;</span>, size, <span class="string">&quot;&quot;</span>),
                     VecMisc2::Fsqrt =&gt; (<span class="string">&quot;fsqrt&quot;</span>, size, <span class="string">&quot;&quot;</span>),
+                    VecMisc2::Rev16 =&gt; (<span class="string">&quot;rev16&quot;</span>, size, <span class="string">&quot;&quot;</span>),
+                    VecMisc2::Rev32 =&gt; (<span class="string">&quot;rev32&quot;</span>, size, <span class="string">&quot;&quot;</span>),
                     VecMisc2::Rev64 =&gt; (<span class="string">&quot;rev64&quot;</span>, size, <span class="string">&quot;&quot;</span>),
                     VecMisc2::Fcvtzs =&gt; (<span class="string">&quot;fcvtzs&quot;</span>, size, <span class="string">&quot;&quot;</span>),
                     VecMisc2::Fcvtzu =&gt; (<span class="string">&quot;fcvtzu&quot;</span>, size, <span class="string">&quot;&quot;</span>),

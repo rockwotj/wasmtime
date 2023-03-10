@@ -3555,6 +3555,37 @@
 <a href="#3555" id="3555">3555</a>
 <a href="#3556" id="3556">3556</a>
 <a href="#3557" id="3557">3557</a>
+<a href="#3558" id="3558">3558</a>
+<a href="#3559" id="3559">3559</a>
+<a href="#3560" id="3560">3560</a>
+<a href="#3561" id="3561">3561</a>
+<a href="#3562" id="3562">3562</a>
+<a href="#3563" id="3563">3563</a>
+<a href="#3564" id="3564">3564</a>
+<a href="#3565" id="3565">3565</a>
+<a href="#3566" id="3566">3566</a>
+<a href="#3567" id="3567">3567</a>
+<a href="#3568" id="3568">3568</a>
+<a href="#3569" id="3569">3569</a>
+<a href="#3570" id="3570">3570</a>
+<a href="#3571" id="3571">3571</a>
+<a href="#3572" id="3572">3572</a>
+<a href="#3573" id="3573">3573</a>
+<a href="#3574" id="3574">3574</a>
+<a href="#3575" id="3575">3575</a>
+<a href="#3576" id="3576">3576</a>
+<a href="#3577" id="3577">3577</a>
+<a href="#3578" id="3578">3578</a>
+<a href="#3579" id="3579">3579</a>
+<a href="#3580" id="3580">3580</a>
+<a href="#3581" id="3581">3581</a>
+<a href="#3582" id="3582">3582</a>
+<a href="#3583" id="3583">3583</a>
+<a href="#3584" id="3584">3584</a>
+<a href="#3585" id="3585">3585</a>
+<a href="#3586" id="3586">3586</a>
+<a href="#3587" id="3587">3587</a>
+<a href="#3588" id="3588">3588</a>
 </pre><pre class="rust"><code><span class="doccomment">//! AArch64 ISA: binary code emission.
 
 </span><span class="kw">use </span>regalloc2::Allocation;
@@ -5534,8 +5565,20 @@
                         );
                         (<span class="number">0b1</span>, <span class="number">0b11111</span>, enc_size)
                     }
+                    VecMisc2::Rev16 =&gt; {
+                        <span class="macro">debug_assert_eq!</span>(size, VectorSize::Size8x16);
+                        (<span class="number">0b0</span>, <span class="number">0b00001</span>, enc_size)
+                    }
+                    VecMisc2::Rev32 =&gt; {
+                        <span class="macro">debug_assert!</span>(size == VectorSize::Size8x16 || size == VectorSize::Size16x8);
+                        (<span class="number">0b1</span>, <span class="number">0b00000</span>, enc_size)
+                    }
                     VecMisc2::Rev64 =&gt; {
-                        <span class="macro">debug_assert_ne!</span>(VectorSize::Size64x2, size);
+                        <span class="macro">debug_assert!</span>(
+                            size == VectorSize::Size8x16
+                                || size == VectorSize::Size16x8
+                                || size == VectorSize::Size32x4
+                        );
                         (<span class="number">0b0</span>, <span class="number">0b00000</span>, enc_size)
                     }
                     VecMisc2::Fcvtzs =&gt; {
@@ -6050,13 +6093,27 @@
                         | machreg_to_vec(rd.to_reg()),
                 );
             }
-            <span class="kw-2">&amp;</span>Inst::VecDupFromFpu { rd, rn, size } =&gt; {
+            <span class="kw-2">&amp;</span>Inst::VecDupFromFpu { rd, rn, size, lane } =&gt; {
                 <span class="kw">let </span>rd = allocs.next_writable(rd);
                 <span class="kw">let </span>rn = allocs.next(rn);
                 <span class="kw">let </span>q = size.is_128bits() <span class="kw">as </span>u32;
                 <span class="kw">let </span>imm5 = <span class="kw">match </span>size.lane_size() {
-                    ScalarSize::Size32 =&gt; <span class="number">0b00100</span>,
-                    ScalarSize::Size64 =&gt; <span class="number">0b01000</span>,
+                    ScalarSize::Size8 =&gt; {
+                        <span class="macro">assert!</span>(lane &lt; <span class="number">16</span>);
+                        <span class="number">0b00001 </span>| (u32::from(lane) &lt;&lt; <span class="number">1</span>)
+                    }
+                    ScalarSize::Size16 =&gt; {
+                        <span class="macro">assert!</span>(lane &lt; <span class="number">8</span>);
+                        <span class="number">0b00010 </span>| (u32::from(lane) &lt;&lt; <span class="number">2</span>)
+                    }
+                    ScalarSize::Size32 =&gt; {
+                        <span class="macro">assert!</span>(lane &lt; <span class="number">4</span>);
+                        <span class="number">0b00100 </span>| (u32::from(lane) &lt;&lt; <span class="number">3</span>)
+                    }
+                    ScalarSize::Size64 =&gt; {
+                        <span class="macro">assert!</span>(lane &lt; <span class="number">2</span>);
+                        <span class="number">0b01000 </span>| (u32::from(lane) &lt;&lt; <span class="number">4</span>)
+                    }
                     <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(),
                 };
                 sink.put4(
@@ -6427,6 +6484,7 @@
                     VecALUOp::Fmul =&gt; (<span class="number">0b001_01110_00_1</span>, <span class="number">0b110111</span>),
                     VecALUOp::Addp =&gt; (<span class="number">0b000_01110_00_1 </span>| enc_size &lt;&lt; <span class="number">1</span>, <span class="number">0b101111</span>),
                     VecALUOp::Zip1 =&gt; (<span class="number">0b01001110_00_0 </span>| enc_size &lt;&lt; <span class="number">1</span>, <span class="number">0b001110</span>),
+                    VecALUOp::Zip2 =&gt; (<span class="number">0b01001110_00_0 </span>| enc_size &lt;&lt; <span class="number">1</span>, <span class="number">0b011110</span>),
                     VecALUOp::Sqrdmulh =&gt; {
                         <span class="macro">debug_assert!</span>(
                             size.lane_size() == ScalarSize::Size16
@@ -6435,6 +6493,10 @@
 
                         (<span class="number">0b001_01110_00_1 </span>| enc_size &lt;&lt; <span class="number">1</span>, <span class="number">0b101101</span>)
                     }
+                    VecALUOp::Uzp1 =&gt; (<span class="number">0b01001110_00_0 </span>| enc_size &lt;&lt; <span class="number">1</span>, <span class="number">0b000110</span>),
+                    VecALUOp::Uzp2 =&gt; (<span class="number">0b01001110_00_0 </span>| enc_size &lt;&lt; <span class="number">1</span>, <span class="number">0b010110</span>),
+                    VecALUOp::Trn1 =&gt; (<span class="number">0b01001110_00_0 </span>| enc_size &lt;&lt; <span class="number">1</span>, <span class="number">0b001010</span>),
+                    VecALUOp::Trn2 =&gt; (<span class="number">0b01001110_00_0 </span>| enc_size &lt;&lt; <span class="number">1</span>, <span class="number">0b011010</span>),
                 };
                 <span class="kw">let </span>top11 = <span class="kw">if </span>is_float {
                     top11 | size.enc_float_size() &lt;&lt; <span class="number">1

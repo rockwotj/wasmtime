@@ -831,6 +831,17 @@
 <a href="#831" id="831">831</a>
 <a href="#832" id="832">832</a>
 <a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
+<a href="#835" id="835">835</a>
+<a href="#836" id="836">836</a>
+<a href="#837" id="837">837</a>
+<a href="#838" id="838">838</a>
+<a href="#839" id="839">839</a>
+<a href="#840" id="840">840</a>
+<a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::ir::{BlockCall, Value, ValueList};
 <span class="kw">use </span>alloc::boxed::Box;
 <span class="kw">use </span>alloc::vec::Vec;
@@ -1417,6 +1428,17 @@
                 })
                 .collect();
             <span class="self">self</span>.lower_ctx.gen_return(rets);
+        }
+
+        <span class="doccomment">/// Same as `shuffle32_from_imm`, but for 64-bit lane shuffles.
+        </span><span class="kw">fn </span>shuffle64_from_imm(<span class="kw-2">&amp;mut </span><span class="self">self</span>, imm: Immediate) -&gt; <span class="prelude-ty">Option</span>&lt;(u8, u8)&gt; {
+            <span class="kw">use </span><span class="kw">crate</span>::machinst::isle::shuffle_imm_as_le_lane_idx;
+
+            <span class="kw">let </span>bytes = <span class="self">self</span>.lower_ctx.get_immediate_data(imm).as_slice();
+            <span class="prelude-val">Some</span>((
+                shuffle_imm_as_le_lane_idx(<span class="number">8</span>, <span class="kw-2">&amp;</span>bytes[<span class="number">0</span>..<span class="number">8</span>])<span class="question-mark">?</span>,
+                shuffle_imm_as_le_lane_idx(<span class="number">8</span>, <span class="kw-2">&amp;</span>bytes[<span class="number">8</span>..<span class="number">16</span>])<span class="question-mark">?</span>,
+            ))
         }
 
         <span class="doccomment">/// Attempts to interpret the shuffle immediate `imm` as a shuffle of
