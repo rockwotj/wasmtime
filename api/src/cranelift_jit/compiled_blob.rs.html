@@ -140,6 +140,14 @@
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
 <a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
 </pre><pre class="rust"><code><span class="kw">use </span>cranelift_codegen::binemit::Reloc;
 <span class="kw">use </span>cranelift_module::ModuleExtName;
 <span class="kw">use </span>cranelift_module::ModuleReloc;
@@ -262,10 +270,18 @@
                     <span class="comment">// See https://github.com/riscv-non-isa/riscv-elf-psabi-doc/blob/master/riscv-elf.adoc#pc-relative-symbol-addresses
                     // for a better explanation of the following code.
                     //
-                    // Unlike the regular symbol relocations, here both &quot;sub-relocations&quot; point
-                    // to the same address.
+                    // Unlike the regular symbol relocations, here both &quot;sub-relocations&quot; point to the same address.
+                    //
+                    // `pcrel` is a signed value (+/- 2GiB range), when splitting it into two parts, we need to
+                    // ensure that `hi20` is close enough to `pcrel` to be able to add `lo12` to it and still
+                    // get a valid address.
+                    //
+                    // `lo12` is also a signed offset (+/- 2KiB range) relative to the `hi20` value.
+                    //
+                    // `hi20` should also be shifted right to be the &quot;true&quot; value. But we also need it
+                    // left shifted for the `lo12` calculation and it also matches the instruction encoding.
                     </span><span class="kw">let </span>hi20 = pcrel.wrapping_add(<span class="number">0x800</span>) &amp; <span class="number">0xFFFFF000</span>;
-                    <span class="kw">let </span>lo12 = (pcrel - hi20) &amp; <span class="number">0xFFF</span>;
+                    <span class="kw">let </span>lo12 = pcrel.wrapping_sub(hi20) &amp; <span class="number">0xFFF</span>;
 
                     <span class="kw">unsafe </span>{
                         <span class="comment">// Do a R_RISCV_PCREL_HI20 on the `auipc`
