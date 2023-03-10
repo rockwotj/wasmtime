@@ -757,6 +757,14 @@
 <a href="#757" id="757">757</a>
 <a href="#758" id="758">758</a>
 <a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Contains the common Wasmtime command line interface (CLI) flags.
 
 </span><span class="attr">#![deny(trivial_numeric_casts, unused_extern_crates, unstable_features)]
@@ -955,6 +963,11 @@
     </span><span class="attr">#[clap(long, value_name = <span class="string">&quot;SIZE&quot;</span>)]
     </span><span class="kw">pub </span>dynamic_memory_guard_size: <span class="prelude-ty">Option</span>&lt;u64&gt;,
 
+    <span class="doccomment">/// Bytes to reserve at the end of linear memory for growth for dynamic
+    /// memories.
+    </span><span class="attr">#[clap(long, value_name = <span class="string">&quot;SIZE&quot;</span>)]
+    </span><span class="kw">pub </span>dynamic_memory_reserved_for_growth: <span class="prelude-ty">Option</span>&lt;u64&gt;,
+
     <span class="doccomment">/// Enable Cranelift&#39;s internal debug verifier (expensive)
     </span><span class="attr">#[clap(long)]
     </span><span class="kw">pub </span>enable_cranelift_debug_verifier: bool,
@@ -1081,6 +1094,9 @@
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.dynamic_memory_guard_size {
             config.dynamic_memory_guard_size(size);
+        }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = <span class="self">self</span>.dynamic_memory_reserved_for_growth {
+            config.dynamic_memory_reserved_for_growth(size);
         }
 
         <span class="comment">// If fuel has been configured, set the `consume fuel` flag on the config.
