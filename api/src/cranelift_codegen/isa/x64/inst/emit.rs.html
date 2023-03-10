@@ -3695,6 +3695,31 @@
 <a href="#3695" id="3695">3695</a>
 <a href="#3696" id="3696">3696</a>
 <a href="#3697" id="3697">3697</a>
+<a href="#3698" id="3698">3698</a>
+<a href="#3699" id="3699">3699</a>
+<a href="#3700" id="3700">3700</a>
+<a href="#3701" id="3701">3701</a>
+<a href="#3702" id="3702">3702</a>
+<a href="#3703" id="3703">3703</a>
+<a href="#3704" id="3704">3704</a>
+<a href="#3705" id="3705">3705</a>
+<a href="#3706" id="3706">3706</a>
+<a href="#3707" id="3707">3707</a>
+<a href="#3708" id="3708">3708</a>
+<a href="#3709" id="3709">3709</a>
+<a href="#3710" id="3710">3710</a>
+<a href="#3711" id="3711">3711</a>
+<a href="#3712" id="3712">3712</a>
+<a href="#3713" id="3713">3713</a>
+<a href="#3714" id="3714">3714</a>
+<a href="#3715" id="3715">3715</a>
+<a href="#3716" id="3716">3716</a>
+<a href="#3717" id="3717">3717</a>
+<a href="#3718" id="3718">3718</a>
+<a href="#3719" id="3719">3719</a>
+<a href="#3720" id="3720">3720</a>
+<a href="#3721" id="3721">3721</a>
+<a href="#3722" id="3722">3722</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -5673,22 +5698,6 @@
             }
         }
 
-        Inst::XmmConstOp { op, dst } =&gt; {
-            <span class="kw">let </span>dst = allocs.next(dst.to_reg().to_reg());
-            emit(
-                <span class="kw-2">&amp;</span>Inst::XmmRmR {
-                    op: <span class="kw-2">*</span>op,
-                    dst: Writable::from_reg(Xmm::new(dst).unwrap()),
-                    src1: Xmm::new(dst).unwrap(),
-                    src2: Xmm::new(dst).unwrap().into(),
-                },
-                allocs,
-                sink,
-                info,
-                state,
-            );
-        }
-
         Inst::XmmRmRBlend {
             op,
             src1,
@@ -5878,6 +5887,7 @@
                 AvxOpcode::Vpunpckhdq =&gt; (LP::_66, OM::_0F, <span class="number">0x6A</span>),
                 AvxOpcode::Vpunpcklqdq =&gt; (LP::_66, OM::_0F, <span class="number">0x6C</span>),
                 AvxOpcode::Vpunpckhqdq =&gt; (LP::_66, OM::_0F, <span class="number">0x6D</span>),
+                AvxOpcode::Vmovsd =&gt; (LP::_F2, OM::_0F, <span class="number">0x10</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected rmir vex opcode {op:?}&quot;</span>),
             };
             VexInstruction::new()
@@ -6082,6 +6092,23 @@
                 AvxOpcode::Vcvtps2pd =&gt; (LegacyPrefixes::None, OpcodeMap::_0F, <span class="number">0x5A</span>),
                 AvxOpcode::Vcvttpd2dq =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F, <span class="number">0xE6</span>),
                 AvxOpcode::Vcvttps2dq =&gt; (LegacyPrefixes::_F3, OpcodeMap::_0F, <span class="number">0x5B</span>),
+                AvxOpcode::Vmovdqu =&gt; (LegacyPrefixes::_F3, OpcodeMap::_0F, <span class="number">0x6F</span>),
+                AvxOpcode::Vmovups =&gt; (LegacyPrefixes::None, OpcodeMap::_0F, <span class="number">0x10</span>),
+                AvxOpcode::Vmovupd =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F, <span class="number">0x10</span>),
+
+                <span class="comment">// Note that for `vmov{s,d}` the `inst.isle` rules should
+                // statically ensure that only `Amode` operands are used here.
+                // Otherwise the other encodings of `vmovss` are more like
+                // 2-operand instructions which this unary encoding does not
+                // have.
+                </span>AvxOpcode::Vmovss =&gt; <span class="kw">match </span><span class="kw-2">&amp;</span>src {
+                    RegisterOrAmode::Amode(<span class="kw">_</span>) =&gt; (LegacyPrefixes::_F3, OpcodeMap::_0F, <span class="number">0x10</span>),
+                    <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+                },
+                AvxOpcode::Vmovsd =&gt; <span class="kw">match </span><span class="kw-2">&amp;</span>src {
+                    RegisterOrAmode::Amode(<span class="kw">_</span>) =&gt; (LegacyPrefixes::_F2, OpcodeMap::_0F, <span class="number">0x10</span>),
+                    <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+                },
                 <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected rmr_imm_vex opcode {op:?}&quot;</span>),
             };
 
@@ -6109,6 +6136,7 @@
                 AvxOpcode::Vroundpd =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x09</span>),
                 AvxOpcode::Vpshuflw =&gt; (LegacyPrefixes::_F2, OpcodeMap::_0F, <span class="number">0x70</span>),
                 AvxOpcode::Vpshufhw =&gt; (LegacyPrefixes::_F3, OpcodeMap::_0F, <span class="number">0x70</span>),
+                AvxOpcode::Vpshufd =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F, <span class="number">0x70</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected rmr_imm_vex opcode {op:?}&quot;</span>),
             };
 
@@ -6120,6 +6148,28 @@
                 .reg(dst.to_real_reg().unwrap().hw_enc())
                 .rm(src)
                 .imm(<span class="kw-2">*</span>imm)
+                .encode(sink);
+        }
+
+        Inst::XmmMovRMVex { op, src, dst } =&gt; {
+            <span class="kw">let </span>src = allocs.next(<span class="kw-2">*</span>src);
+            <span class="kw">let </span>dst = dst.with_allocs(allocs).finalize(state, sink);
+
+            <span class="kw">let </span>(prefix, map, opcode) = <span class="kw">match </span>op {
+                AvxOpcode::Vmovdqu =&gt; (LegacyPrefixes::_F3, OpcodeMap::_0F, <span class="number">0x7F</span>),
+                AvxOpcode::Vmovss =&gt; (LegacyPrefixes::_F3, OpcodeMap::_0F, <span class="number">0x11</span>),
+                AvxOpcode::Vmovsd =&gt; (LegacyPrefixes::_F2, OpcodeMap::_0F, <span class="number">0x11</span>),
+                AvxOpcode::Vmovups =&gt; (LegacyPrefixes::None, OpcodeMap::_0F, <span class="number">0x11</span>),
+                AvxOpcode::Vmovupd =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F, <span class="number">0x11</span>),
+                <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Opcode {:?} not implemented&quot;</span>, op),
+            };
+            VexInstruction::new()
+                .length(VexVectorLength::V128)
+                .prefix(prefix)
+                .map(map)
+                .opcode(opcode)
+                .rm(dst)
+                .reg(src.to_real_reg().unwrap().hw_enc())
                 .encode(sink);
         }
 

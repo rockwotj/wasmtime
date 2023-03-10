@@ -2152,6 +2152,12 @@
 <a href="#2152" id="2152">2152</a>
 <a href="#2153" id="2153">2153</a>
 <a href="#2154" id="2154">2154</a>
+<a href="#2155" id="2155">2155</a>
+<a href="#2156" id="2156">2156</a>
+<a href="#2157" id="2157">2157</a>
+<a href="#2158" id="2158">2158</a>
+<a href="#2159" id="2159">2159</a>
+<a href="#2160" id="2160">2160</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Instruction operand sub-components (aka &quot;parts&quot;): definitions and printing.
 
 </span><span class="kw">use </span><span class="kw">super</span>::regs::{<span class="self">self</span>};
@@ -3847,7 +3853,13 @@
             | AvxOpcode::Vpunpcklqdq
             | AvxOpcode::Vpunpckhqdq
             | AvxOpcode::Vpshuflw
-            | AvxOpcode::Vpshufhw =&gt; {
+            | AvxOpcode::Vpshufhw
+            | AvxOpcode::Vpshufd
+            | AvxOpcode::Vmovss
+            | AvxOpcode::Vmovsd
+            | AvxOpcode::Vmovups
+            | AvxOpcode::Vmovupd
+            | AvxOpcode::Vmovdqu =&gt; {
                 <span class="macro">smallvec!</span>[InstructionSet::AVX]
             }
         }

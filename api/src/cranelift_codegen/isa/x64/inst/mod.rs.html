@@ -2639,8 +2639,6 @@
 <a href="#2639" id="2639">2639</a>
 <a href="#2640" id="2640">2640</a>
 <a href="#2641" id="2641">2641</a>
-<a href="#2642" id="2642">2642</a>
-<a href="#2643" id="2643">2643</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines x86_64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc, StackMap};
@@ -2783,8 +2781,7 @@
             | Inst::XmmToGprImm { op, .. }
             | Inst::XmmUnaryRmRImm { op, .. }
             | Inst::XmmUnaryRmRUnaligned { op, .. }
-            | Inst::XmmUnaryRmR { op, .. }
-            | Inst::XmmConstOp { op, .. } =&gt; <span class="macro">smallvec!</span>[op.available_from()],
+            | Inst::XmmUnaryRmR { op, .. } =&gt; <span class="macro">smallvec!</span>[op.available_from()],
 
             Inst::XmmUnaryRmREvex { op, .. }
             | Inst::XmmRmREvex { op, .. }
@@ -2796,7 +2793,8 @@
             | Inst::XmmRmRBlendVex { op, .. }
             | Inst::XmmVexPinsr { op, .. }
             | Inst::XmmUnaryRmRVex { op, .. }
-            | Inst::XmmUnaryRmRImmVex { op, .. } =&gt; op.available_from(),
+            | Inst::XmmUnaryRmRImmVex { op, .. }
+            | Inst::XmmMovRMVex { op, .. } =&gt; op.available_from(),
         }
     }
 }
@@ -3581,6 +3579,12 @@
                 <span class="macro">format!</span>(<span class="string">&quot;{} {}, {}&quot;</span>, ljustify(op.to_string()), src, dst)
             }
 
+            Inst::XmmMovRMVex { op, src, dst, .. } =&gt; {
+                <span class="kw">let </span>src = pretty_print_reg(<span class="kw-2">*</span>src, <span class="number">8</span>, allocs);
+                <span class="kw">let </span>dst = dst.pretty_print(<span class="number">8</span>, allocs);
+                <span class="macro">format!</span>(<span class="string">&quot;{} {}, {}&quot;</span>, ljustify(op.to_string()), src, dst)
+            }
+
             Inst::XmmRmR {
                 op,
                 src1,
@@ -3605,11 +3609,6 @@
                 <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), <span class="number">8</span>, allocs);
                 <span class="kw">let </span>src2 = src2.pretty_print(<span class="number">8</span>, allocs);
                 <span class="macro">format!</span>(<span class="string">&quot;{} {}, {}, {}&quot;</span>, ljustify(op.to_string()), src1, src2, dst)
-            }
-
-            Inst::XmmConstOp { op, dst } =&gt; {
-                <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), <span class="number">8</span>, allocs);
-                <span class="macro">format!</span>(<span class="string">&quot;{} {dst}, {dst}, {dst}&quot;</span>, ljustify(op.to_string()))
             }
 
             Inst::XmmRmRBlend {
@@ -4662,9 +4661,6 @@
             collector.reg_reuse_def(<span class="kw-2">*</span>dst, <span class="number">0</span>);
             src2.get_operands(collector);
         }
-        Inst::XmmConstOp { dst, .. } =&gt; {
-            collector.reg_def(dst.to_writable_reg());
-        }
         Inst::XmmUninitializedValue { dst } =&gt; collector.reg_def(dst.to_writable_reg()),
         Inst::XmmMinMaxSeq { lhs, rhs, dst, .. } =&gt; {
             collector.reg_use(rhs.to_reg());
@@ -4678,7 +4674,7 @@
             collector.reg_reuse_def(dst.to_writable_reg(), <span class="number">0</span>); <span class="comment">// Reuse RHS.
             </span>src2.get_operands(collector);
         }
-        Inst::XmmMovRM { src, dst, .. } =&gt; {
+        Inst::XmmMovRM { src, dst, .. } | Inst::XmmMovRMVex { src, dst, .. } =&gt; {
             collector.reg_use(<span class="kw-2">*</span>src);
             dst.get_operands(collector);
         }

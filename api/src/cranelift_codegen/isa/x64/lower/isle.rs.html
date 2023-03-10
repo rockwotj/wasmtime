@@ -1364,7 +1364,9 @@
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(load) = <span class="self">self</span>.sinkable_load(val) {
-            <span class="kw">return </span><span class="self">self</span>.sink_load(<span class="kw-2">&amp;</span>load);
+            <span class="kw">return </span>RegMem::Mem {
+                addr: <span class="self">self</span>.sink_load(<span class="kw-2">&amp;</span>load),
+            };
         }
 
         RegMem::reg(<span class="self">self</span>.put_in_reg(val))
@@ -1490,12 +1492,10 @@
         <span class="prelude-val">None
     </span>}
 
-    <span class="kw">fn </span>sink_load(<span class="kw-2">&amp;mut </span><span class="self">self</span>, load: <span class="kw-2">&amp;</span>SinkableLoad) -&gt; RegMem {
+    <span class="kw">fn </span>sink_load(<span class="kw-2">&amp;mut </span><span class="self">self</span>, load: <span class="kw-2">&amp;</span>SinkableLoad) -&gt; SyntheticAmode {
         <span class="self">self</span>.lower_ctx.sink_inst(load.inst);
         <span class="kw">let </span>addr = lower_to_amode(<span class="self">self</span>.lower_ctx, load.addr_input, load.offset);
-        RegMem::Mem {
-            addr: SyntheticAmode::Real(addr),
-        }
+        SyntheticAmode::Real(addr)
     }
 
     <span class="attr">#[inline]
