@@ -383,12 +383,6 @@
 <a href="#383" id="383">383</a>
 <a href="#384" id="384">384</a>
 <a href="#385" id="385">385</a>
-<a href="#386" id="386">386</a>
-<a href="#387" id="387">387</a>
-<a href="#388" id="388">388</a>
-<a href="#389" id="389">389</a>
-<a href="#390" id="390">390</a>
-<a href="#391" id="391">391</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Test runner.
 //!
 //! This module implements the `TestRunner` struct which manages executing tests as well as
@@ -396,7 +390,6 @@
 
 </span><span class="kw">use </span><span class="kw">crate</span>::concurrent::{ConcurrentRunner, Reply};
 <span class="kw">use </span><span class="kw">crate</span>::runone;
-<span class="kw">use </span>cranelift_codegen::timing;
 <span class="kw">use </span>std::error::Error;
 <span class="kw">use </span>std::ffi::OsStr;
 <span class="kw">use </span>std::fmt::{<span class="self">self</span>, Display};
@@ -689,9 +682,9 @@
                     <span class="prelude-val">None </span>=&gt; <span class="kw">break</span>,
                 }
             }
-            conc.join();
+            <span class="kw">let </span>pass_times = conc.join();
             <span class="kw">if </span><span class="self">self</span>.report_times {
-                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, timing::take_current());
+                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, pass_times);
             }
         }
     }
@@ -746,8 +739,7 @@
     }
 
     <span class="doccomment">/// Scan pushed directories for tests and run them.
-    </span><span class="kw">pub fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; anyhow::Result&lt;time::Duration&gt; {
-        <span class="kw">let </span>started = time::Instant::now();
+    </span><span class="kw">pub fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; anyhow::Result&lt;()&gt; {
         <span class="self">self</span>.scan_dirs(IsPass::NotPass);
         <span class="self">self</span>.schedule_jobs();
         <span class="self">self</span>.report_slow_tests();
@@ -755,26 +747,22 @@
 
         <span class="macro">println!</span>(<span class="string">&quot;{} tests&quot;</span>, <span class="self">self</span>.tests.len());
         <span class="kw">match </span><span class="self">self</span>.errors {
-            <span class="number">0 </span>=&gt; <span class="prelude-val">Ok</span>(started.elapsed()),
+            <span class="number">0 </span>=&gt; <span class="prelude-val">Ok</span>(()),
             <span class="number">1 </span>=&gt; <span class="macro">anyhow::bail!</span>(<span class="string">&quot;1 failure&quot;</span>),
             n =&gt; <span class="macro">anyhow::bail!</span>(<span class="string">&quot;{} failures&quot;</span>, n),
         }
     }
 
     <span class="doccomment">/// Scan pushed directories for tests and run specified passes from commandline on them.
-    </span><span class="kw">pub fn </span>run_passes(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        passes: <span class="kw-2">&amp;</span>[String],
-        target: <span class="kw-2">&amp;</span>str,
-    ) -&gt; anyhow::Result&lt;time::Duration&gt; {
-        <span class="kw">let </span>started = time::Instant::now();
+    </span><span class="kw">pub fn </span>run_passes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, passes: <span class="kw-2">&amp;</span>[String], target: <span class="kw-2">&amp;</span>str) -&gt; anyhow::Result&lt;()&gt; {
         <span class="self">self</span>.scan_dirs(IsPass::Pass);
         <span class="self">self</span>.schedule_pass_job(passes, target);
         <span class="self">self</span>.report_slow_tests();
+        <span class="self">self</span>.drain_threads();
 
         <span class="macro">println!</span>(<span class="string">&quot;{} tests&quot;</span>, <span class="self">self</span>.tests.len());
         <span class="kw">match </span><span class="self">self</span>.errors {
-            <span class="number">0 </span>=&gt; <span class="prelude-val">Ok</span>(started.elapsed()),
+            <span class="number">0 </span>=&gt; <span class="prelude-val">Ok</span>(()),
             <span class="number">1 </span>=&gt; <span class="macro">anyhow::bail!</span>(<span class="string">&quot;1 failure&quot;</span>),
             n =&gt; <span class="macro">anyhow::bail!</span>(<span class="string">&quot;{} failures&quot;</span>, n),
         }

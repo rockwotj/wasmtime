@@ -261,13 +261,24 @@
 <a href="#261" id="261">261</a>
 <a href="#262" id="262">262</a>
 <a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Pass timing.
 //!
 //! This modules provides facilities for timing the execution of individual compilation passes.
 
 </span><span class="kw">use </span>core::fmt;
-
-<span class="kw">pub use </span><span class="self">self</span>::details::{add_to_current, take_current, PassTimes, TimingToken};
+<span class="kw">use </span>std::any::Any;
+<span class="kw">use </span>std::boxed::Box;
+<span class="kw">use </span>std::cell::{Cell, RefCell};
+<span class="kw">use </span>std::mem;
+<span class="kw">use </span>std::time::{Duration, Instant};
 
 <span class="comment">// Each pass that can be timed is predefined with the `define_passes!` macro. Each pass has a
 // snake_case name and a plain text description used when printing out the timing report.
@@ -279,22 +290,26 @@
 // - A const array of pass descriptions.
 // - A public function per pass used to start the timing of that pass.
 </span><span class="macro">macro_rules! </span>define_passes {
-    { <span class="macro-nonterminal">$</span><span class="kw">enum</span>:<span class="macro-nonterminal">ident</span>, <span class="macro-nonterminal">$num_passes</span>:ident, <span class="macro-nonterminal">$descriptions</span>:ident;
-      $(<span class="macro-nonterminal">$pass</span>:ident: <span class="macro-nonterminal">$desc</span>:expr,)+
-    } =&gt; {
-        <span class="attr">#[allow(non_camel_case_types)]
+    ($(<span class="macro-nonterminal">$pass</span>:ident: <span class="macro-nonterminal">$desc</span>:expr,)+) =&gt; {
+        <span class="doccomment">/// A single profiled pass.
+        </span><span class="attr">#[allow(non_camel_case_types)]
         #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-        </span><span class="kw">enum </span><span class="macro-nonterminal">$</span><span class="kw">enum </span>{ $(<span class="macro-nonterminal">$pass</span>,)+ <span class="prelude-val">None</span>}
+        </span><span class="kw">pub enum </span>Pass {
+            $(<span class="attr">#[doc=<span class="macro-nonterminal">$desc</span>] </span><span class="macro-nonterminal">$pass</span>,)+
+            <span class="doccomment">/// No active pass.
+            </span><span class="prelude-val">None</span>,
+        }
 
-        <span class="kw">const </span><span class="macro-nonterminal">$num_passes</span>: usize = <span class="macro-nonterminal">$</span><span class="kw">enum</span><span class="macro-nonterminal">::None </span><span class="kw">as </span>usize;
+        <span class="doccomment">/// The amount of profiled passes.
+        </span><span class="kw">pub const </span>NUM_PASSES: usize = Pass::None <span class="kw">as </span>usize;
 
-        <span class="kw">const </span><span class="macro-nonterminal">$descriptions</span>: [<span class="kw-2">&amp;</span>str; <span class="macro-nonterminal">$num_passes</span>] = [ $(<span class="macro-nonterminal">$desc</span>),+ ];
+        <span class="kw">const </span>DESCRIPTIONS: [<span class="kw-2">&amp;</span>str; NUM_PASSES] = [ $(<span class="macro-nonterminal">$desc</span>),+ ];
 
         $(
             <span class="attr">#[doc=<span class="macro-nonterminal">$desc</span>]
             #[must_use]
-            </span><span class="kw">pub fn </span><span class="macro-nonterminal">$pass</span>() -&gt; TimingToken {
-                details::start_pass(<span class="macro-nonterminal">$</span><span class="kw">enum</span>::<span class="macro-nonterminal">$pass</span>)
+            </span><span class="kw">pub fn </span><span class="macro-nonterminal">$pass</span>() -&gt; Box&lt;<span class="kw">dyn </span>Any&gt; {
+                start_pass(Pass::<span class="macro-nonterminal">$pass</span>)
             }
         )+
     }
@@ -302,8 +317,6 @@
 
 <span class="comment">// Pass definitions.
 </span><span class="macro">define_passes! </span>{
-    Pass, NUM_PASSES, DESCRIPTIONS;
-
     <span class="comment">// All these are used in other crates but defined here so they appear in the unified
     // `PassTimes` output.
     </span>process_file: <span class="string">&quot;Processing test file&quot;</span>,
@@ -321,6 +334,7 @@
     loop_analysis: <span class="string">&quot;Loop analysis&quot;</span>,
     preopt: <span class="string">&quot;Pre-legalization rewriting&quot;</span>,
     dce: <span class="string">&quot;Dead code elimination&quot;</span>,
+    egraph: <span class="string">&quot;Egraph based optimizations&quot;</span>,
     gvn: <span class="string">&quot;Global value numbering&quot;</span>,
     licm: <span class="string">&quot;Loop invariant code motion&quot;</span>,
     unreachable_code: <span class="string">&quot;Remove unreachable blocks&quot;</span>,
@@ -338,179 +352,181 @@
 }
 
 <span class="kw">impl </span>Pass {
-    <span class="kw">pub fn </span>idx(<span class="self">self</span>) -&gt; usize {
+    <span class="kw">fn </span>idx(<span class="self">self</span>) -&gt; usize {
         <span class="self">self </span><span class="kw">as </span>usize
+    }
+
+    <span class="doccomment">/// Description of the pass.
+    </span><span class="kw">pub fn </span>description(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+        <span class="kw">match </span>DESCRIPTIONS.get(<span class="self">self</span>.idx()) {
+            <span class="prelude-val">Some</span>(s) =&gt; s,
+            <span class="prelude-val">None </span>=&gt; <span class="string">&quot;&lt;no pass&gt;&quot;</span>,
+        }
     }
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Pass {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="kw">match </span>DESCRIPTIONS.get(<span class="self">self</span>.idx()) {
-            <span class="prelude-val">Some</span>(s) =&gt; f.write_str(s),
-            <span class="prelude-val">None </span>=&gt; f.write_str(<span class="string">&quot;&lt;no pass&gt;&quot;</span>),
+        f.write_str(<span class="self">self</span>.description())
+    }
+}
+
+<span class="doccomment">/// A profiler.
+</span><span class="kw">pub trait </span>Profiler {
+    <span class="doccomment">/// Start a profiling pass.
+    ///
+    /// Will return a token which when dropped indicates the end of the pass.
+    ///
+    /// Multiple passes can be active at the same time, but they must be started and stopped in a
+    /// LIFO fashion.
+    </span><span class="kw">fn </span>start_pass(<span class="kw-2">&amp;</span><span class="self">self</span>, pass: Pass) -&gt; Box&lt;<span class="kw">dyn </span>Any&gt;;
+}
+
+<span class="comment">// Information about passes in a single thread.
+</span><span class="macro">thread_local! </span>{
+    <span class="kw">static </span>PROFILER: RefCell&lt;Box&lt;<span class="kw">dyn </span>Profiler&gt;&gt; = RefCell::new(Box::new(DefaultProfiler));
+}
+
+<span class="doccomment">/// Set the profiler for the current thread.
+///
+/// Returns the old profiler.
+</span><span class="kw">pub fn </span>set_thread_profiler(new_profiler: Box&lt;<span class="kw">dyn </span>Profiler&gt;) -&gt; Box&lt;<span class="kw">dyn </span>Profiler&gt; {
+    PROFILER.with(|profiler| std::mem::replace(<span class="kw-2">&amp;mut *</span>profiler.borrow_mut(), new_profiler))
+}
+
+<span class="doccomment">/// Start timing `pass` as a child of the currently running pass, if any.
+///
+/// This function is called by the publicly exposed pass functions.
+</span><span class="kw">fn </span>start_pass(pass: Pass) -&gt; Box&lt;<span class="kw">dyn </span>Any&gt; {
+    PROFILER.with(|profiler| profiler.borrow().start_pass(pass))
+}
+
+<span class="doccomment">/// A timing token is responsible for timing the currently running pass. Timing starts when it
+/// is created and ends when it is dropped.
+///
+/// Multiple passes can be active at the same time, but they must be started and stopped in a
+/// LIFO fashion.
+</span><span class="kw">struct </span>DefaultTimingToken {
+    <span class="doccomment">/// Start time for this pass.
+    </span>start: Instant,
+
+    <span class="comment">// Pass being timed by this token.
+    </span>pass: Pass,
+
+    <span class="comment">// The previously active pass which will be restored when this token is dropped.
+    </span>prev: Pass,
+}
+
+<span class="doccomment">/// Accumulated timing information for a single pass.
+</span><span class="attr">#[derive(Default, Copy, Clone)]
+</span><span class="kw">struct </span>PassTime {
+    <span class="doccomment">/// Total time spent running this pass including children.
+    </span>total: Duration,
+
+    <span class="doccomment">/// Time spent running in child passes.
+    </span>child: Duration,
+}
+
+<span class="doccomment">/// Accumulated timing for all passes.
+</span><span class="kw">pub struct </span>PassTimes {
+    pass: [PassTime; NUM_PASSES],
+}
+
+<span class="kw">impl </span>PassTimes {
+    <span class="doccomment">/// Add `other` to the timings of this `PassTimes`.
+    </span><span class="kw">pub fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) {
+        <span class="kw">for </span>(a, b) <span class="kw">in </span><span class="self">self</span>.pass.iter_mut().zip(<span class="kw-2">&amp;</span>other.pass[..]) {
+            a.total += b.total;
+            a.child += b.child;
+        }
+    }
+
+    <span class="doccomment">/// Returns the total amount of time taken by all the passes measured.
+    </span><span class="kw">pub fn </span>total(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Duration {
+        <span class="self">self</span>.pass.iter().map(|p| p.total - p.child).sum()
+    }
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>PassTimes {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            pass: [Default::default(); NUM_PASSES],
         }
     }
 }
 
-<span class="doccomment">/// Implementation details.
-///
-/// This whole module can be gated on a `cfg` feature to provide a dummy implementation for
-/// performance-sensitive builds or restricted environments. The dummy implementation must provide
-/// `TimingToken` and `PassTimes` types and `take_current`, `add_to_current`, and `start_pass` funcs
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="kw">mod </span>details {
-    <span class="kw">use super</span>::{Pass, DESCRIPTIONS, NUM_PASSES};
-    <span class="kw">use </span>std::cell::{Cell, RefCell};
-    <span class="kw">use </span>std::fmt;
-    <span class="kw">use </span>std::mem;
-    <span class="kw">use </span>std::time::{Duration, Instant};
-
-    <span class="doccomment">/// A timing token is responsible for timing the currently running pass. Timing starts when it
-    /// is created and ends when it is dropped.
-    ///
-    /// Multiple passes can be active at the same time, but they must be started and stopped in a
-    /// LIFO fashion.
-    </span><span class="kw">pub struct </span>TimingToken {
-        <span class="doccomment">/// Start time for this pass.
-        </span>start: Instant,
-
-        <span class="comment">// Pass being timed by this token.
-        </span>pass: Pass,
-
-        <span class="comment">// The previously active pass which will be restored when this token is dropped.
-        </span>prev: Pass,
-    }
-
-    <span class="doccomment">/// Accumulated timing information for a single pass.
-    </span><span class="attr">#[derive(Default, Copy, Clone)]
-    </span><span class="kw">struct </span>PassTime {
-        <span class="doccomment">/// Total time spent running this pass including children.
-        </span>total: Duration,
-
-        <span class="doccomment">/// Time spent running in child passes.
-        </span>child: Duration,
-    }
-
-    <span class="doccomment">/// Accumulated timing for all passes.
-    </span><span class="kw">pub struct </span>PassTimes {
-        pass: [PassTime; NUM_PASSES],
-    }
-
-    <span class="kw">impl </span>PassTimes {
-        <span class="doccomment">/// Returns the total amount of time taken by all the passes measured.
-        </span><span class="kw">pub fn </span>total(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Duration {
-            <span class="self">self</span>.pass.iter().map(|p| p.total - p.child).sum()
-        }
-    }
-
-    <span class="kw">impl </span>Default <span class="kw">for </span>PassTimes {
-        <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-            <span class="self">Self </span>{
-                pass: [Default::default(); NUM_PASSES],
+<span class="kw">impl </span>fmt::Display <span class="kw">for </span>PassTimes {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
+        <span class="macro">writeln!</span>(f, <span class="string">&quot;======== ========  ==================================&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(f, <span class="string">&quot;   Total     Self  Pass&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(f, <span class="string">&quot;-------- --------  ----------------------------------&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">for </span>(time, desc) <span class="kw">in </span><span class="self">self</span>.pass.iter().zip(<span class="kw-2">&amp;</span>DESCRIPTIONS[..]) {
+            <span class="comment">// Omit passes that haven&#39;t run.
+            </span><span class="kw">if </span>time.total == Duration::default() {
+                <span class="kw">continue</span>;
             }
-        }
-    }
 
-    <span class="kw">impl </span>fmt::Display <span class="kw">for </span>PassTimes {
-        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-            <span class="macro">writeln!</span>(f, <span class="string">&quot;======== ========  ==================================&quot;</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln!</span>(f, <span class="string">&quot;   Total     Self  Pass&quot;</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln!</span>(f, <span class="string">&quot;-------- --------  ----------------------------------&quot;</span>)<span class="question-mark">?</span>;
-            <span class="kw">for </span>(time, desc) <span class="kw">in </span><span class="self">self</span>.pass.iter().zip(<span class="kw-2">&amp;</span>DESCRIPTIONS[..]) {
-                <span class="comment">// Omit passes that haven&#39;t run.
-                </span><span class="kw">if </span>time.total == Duration::default() {
-                    <span class="kw">continue</span>;
-                }
-
-                <span class="comment">// Write a duration as secs.millis, trailing space.
-                </span><span class="kw">fn </span>fmtdur(<span class="kw-2">mut </span>dur: Duration, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-                    <span class="comment">// Round to nearest ms by adding 500us.
-                    </span>dur += Duration::new(<span class="number">0</span>, <span class="number">500_000</span>);
-                    <span class="kw">let </span>ms = dur.subsec_millis();
-                    <span class="macro">write!</span>(f, <span class="string">&quot;{:4}.{:03} &quot;</span>, dur.as_secs(), ms)
-                }
-
-                fmtdur(time.total, f)<span class="question-mark">?</span>;
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(s) = time.total.checked_sub(time.child) {
-                    fmtdur(s, f)<span class="question-mark">?</span>;
-                }
-                <span class="macro">writeln!</span>(f, <span class="string">&quot; {}&quot;</span>, desc)<span class="question-mark">?</span>;
+            <span class="comment">// Write a duration as secs.millis, trailing space.
+            </span><span class="kw">fn </span>fmtdur(<span class="kw-2">mut </span>dur: Duration, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
+                <span class="comment">// Round to nearest ms by adding 500us.
+                </span>dur += Duration::new(<span class="number">0</span>, <span class="number">500_000</span>);
+                <span class="kw">let </span>ms = dur.subsec_millis();
+                <span class="macro">write!</span>(f, <span class="string">&quot;{:4}.{:03} &quot;</span>, dur.as_secs(), ms)
             }
-            <span class="macro">writeln!</span>(f, <span class="string">&quot;======== ========  ==================================&quot;</span>)
+
+            fmtdur(time.total, f)<span class="question-mark">?</span>;
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(s) = time.total.checked_sub(time.child) {
+                fmtdur(s, f)<span class="question-mark">?</span>;
+            }
+            <span class="macro">writeln!</span>(f, <span class="string">&quot; {}&quot;</span>, desc)<span class="question-mark">?</span>;
         }
+        <span class="macro">writeln!</span>(f, <span class="string">&quot;======== ========  ==================================&quot;</span>)
     }
+}
 
-    <span class="comment">// Information about passes in a single thread.
-    </span><span class="macro">thread_local! </span>{
-        <span class="kw">static </span>CURRENT_PASS: Cell&lt;Pass&gt; = <span class="kw">const </span>{ Cell::new(Pass::None) };
-        <span class="kw">static </span>PASS_TIME: RefCell&lt;PassTimes&gt; = RefCell::new(Default::default());
-    }
+<span class="comment">// Information about passes in a single thread.
+</span><span class="macro">thread_local! </span>{
+    <span class="kw">static </span>CURRENT_PASS: Cell&lt;Pass&gt; = <span class="kw">const </span>{ Cell::new(Pass::None) };
+    <span class="kw">static </span>PASS_TIME: RefCell&lt;PassTimes&gt; = RefCell::new(Default::default());
+}
 
-    <span class="doccomment">/// Start timing `pass` as a child of the currently running pass, if any.
-    ///
-    /// This function is called by the publicly exposed pass functions.
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>start_pass(pass: Pass) -&gt; TimingToken {
+<span class="doccomment">/// The default profiler. You can get the results using [`take_current`].
+</span><span class="kw">pub struct </span>DefaultProfiler;
+
+<span class="kw">impl </span>Profiler <span class="kw">for </span>DefaultProfiler {
+    <span class="kw">fn </span>start_pass(<span class="kw-2">&amp;</span><span class="self">self</span>, pass: Pass) -&gt; Box&lt;<span class="kw">dyn </span>Any&gt; {
         <span class="kw">let </span>prev = CURRENT_PASS.with(|p| p.replace(pass));
         <span class="macro">log::debug!</span>(<span class="string">&quot;timing: Starting {}, (during {})&quot;</span>, pass, prev);
-        TimingToken {
+        Box::new(DefaultTimingToken {
             start: Instant::now(),
             pass,
             prev,
-        }
+        })
     }
+}
 
-    <span class="doccomment">/// Dropping a timing token indicated the end of the pass.
-    </span><span class="kw">impl </span>Drop <span class="kw">for </span>TimingToken {
-        <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-            <span class="kw">let </span>duration = <span class="self">self</span>.start.elapsed();
-            <span class="macro">log::debug!</span>(<span class="string">&quot;timing: Ending {}&quot;</span>, <span class="self">self</span>.pass);
-            <span class="kw">let </span>old_cur = CURRENT_PASS.with(|p| p.replace(<span class="self">self</span>.prev));
-            <span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.pass, old_cur, <span class="string">&quot;Timing tokens dropped out of order&quot;</span>);
-            PASS_TIME.with(|rc| {
-                <span class="kw">let </span><span class="kw-2">mut </span>table = rc.borrow_mut();
-                table.pass[<span class="self">self</span>.pass.idx()].total += duration;
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(parent) = table.pass.get_mut(<span class="self">self</span>.prev.idx()) {
-                    parent.child += duration;
-                }
-            })
-        }
-    }
-
-    <span class="doccomment">/// Take the current accumulated pass timings and reset the timings for the current thread.
-    </span><span class="kw">pub fn </span>take_current() -&gt; PassTimes {
-        PASS_TIME.with(|rc| mem::replace(<span class="kw-2">&amp;mut *</span>rc.borrow_mut(), Default::default()))
-    }
-
-    <span class="doccomment">/// Add `timings` to the accumulated timings for the current thread.
-    </span><span class="kw">pub fn </span>add_to_current(times: <span class="kw-2">&amp;</span>PassTimes) {
+<span class="doccomment">/// Dropping a timing token indicated the end of the pass.
+</span><span class="kw">impl </span>Drop <span class="kw">for </span>DefaultTimingToken {
+    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">let </span>duration = <span class="self">self</span>.start.elapsed();
+        <span class="macro">log::debug!</span>(<span class="string">&quot;timing: Ending {}&quot;</span>, <span class="self">self</span>.pass);
+        <span class="kw">let </span>old_cur = CURRENT_PASS.with(|p| p.replace(<span class="self">self</span>.prev));
+        <span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.pass, old_cur, <span class="string">&quot;Timing tokens dropped out of order&quot;</span>);
         PASS_TIME.with(|rc| {
-            <span class="kw">for </span>(a, b) <span class="kw">in </span>rc.borrow_mut().pass.iter_mut().zip(<span class="kw-2">&amp;</span>times.pass[..]) {
-                a.total += b.total;
-                a.child += b.child;
+            <span class="kw">let </span><span class="kw-2">mut </span>table = rc.borrow_mut();
+            table.pass[<span class="self">self</span>.pass.idx()].total += duration;
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(parent) = table.pass.get_mut(<span class="self">self</span>.prev.idx()) {
+                parent.child += duration;
             }
         })
     }
 }
 
-<span class="doccomment">/// Dummy `debug` implementation
-</span><span class="attr">#[cfg(not(feature = <span class="string">&quot;std&quot;</span>))]
-</span><span class="kw">mod </span>details {
-    <span class="kw">use </span><span class="kw">super</span>::Pass;
-    <span class="doccomment">/// Dummy `TimingToken`
-    </span><span class="kw">pub struct </span>TimingToken;
-    <span class="doccomment">/// Dummy `PassTimes`
-    </span><span class="kw">pub struct </span>PassTimes;
-    <span class="doccomment">/// Returns dummy `PassTimes`
-    </span><span class="kw">pub fn </span>take_current() -&gt; PassTimes {
-        PassTimes
-    }
-    <span class="doccomment">/// does nothing
-    </span><span class="kw">pub fn </span>add_to_current(_times: PassTimes) {}
-
-    <span class="doccomment">/// does nothing
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>start_pass(_pass: Pass) -&gt; TimingToken {
-        TimingToken
-    }
+<span class="doccomment">/// Take the current accumulated pass timings and reset the timings for the current thread.
+///
+/// Only applies when [`DefaultProfiler`] is used.
+</span><span class="kw">pub fn </span>take_current() -&gt; PassTimes {
+    PASS_TIME.with(|rc| mem::take(<span class="kw-2">&amp;mut *</span>rc.borrow_mut()))
 }
 
 <span class="attr">#[cfg(test)]

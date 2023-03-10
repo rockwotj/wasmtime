@@ -134,11 +134,6 @@
 <a href="#134" id="134">134</a>
 <a href="#135" id="135">135</a>
 <a href="#136" id="136">136</a>
-<a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
-<a href="#141" id="141">141</a>
 </pre><pre class="rust"><code><span class="doccomment">//! File tests.
 //!
 //! This crate contains the main test driver as well as implementations of the
@@ -165,10 +160,8 @@
 
 </span><span class="kw">pub use </span><span class="kw">crate</span>::function_runner::TestFileCompiler;
 <span class="kw">use </span><span class="kw">crate</span>::runner::TestRunner;
-<span class="kw">use </span>cranelift_codegen::timing;
 <span class="kw">use </span>cranelift_reader::TestCommand;
 <span class="kw">use </span>std::path::Path;
-<span class="kw">use </span>std::time;
 
 <span class="kw">mod </span>concurrent;
 <span class="kw">pub mod </span>function_runner;
@@ -204,7 +197,7 @@
 /// Directories are scanned recursively for test cases ending in `.clif`. These test cases are
 /// executed on background threads.
 ///
-</span><span class="kw">pub fn </span>run(verbose: bool, report_times: bool, files: <span class="kw-2">&amp;</span>[String]) -&gt; anyhow::Result&lt;time::Duration&gt; {
+</span><span class="kw">pub fn </span>run(verbose: bool, report_times: bool, files: <span class="kw-2">&amp;</span>[String]) -&gt; anyhow::Result&lt;()&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>runner = TestRunner::new(verbose, report_times);
 
     <span class="kw">for </span>path <span class="kw">in </span>files.iter().map(Path::new) {
@@ -230,8 +223,8 @@
     passes: <span class="kw-2">&amp;</span>[String],
     target: <span class="kw-2">&amp;</span>str,
     file: <span class="kw-2">&amp;</span>str,
-) -&gt; anyhow::Result&lt;time::Duration&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>runner = TestRunner::new(verbose, <span class="comment">/* report_times */ </span><span class="bool-val">false</span>);
+) -&gt; anyhow::Result&lt;()&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>runner = TestRunner::new(verbose, report_times);
 
     <span class="kw">let </span>path = Path::new(file);
     <span class="kw">if </span>path == Path::new(<span class="string">&quot;-&quot;</span>) || path.is_file() {
@@ -240,11 +233,8 @@
         runner.push_dir(path);
     }
 
-    <span class="kw">let </span>result = runner.run_passes(passes, target);
-    <span class="kw">if </span>report_times {
-        <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, timing::take_current());
-    }
-    result
+    runner.start_threads();
+    runner.run_passes(passes, target)
 }
 
 <span class="doccomment">/// Create a new subcommand trait object to match `parsed.command`.

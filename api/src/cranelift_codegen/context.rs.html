@@ -397,6 +397,7 @@
 <a href="#397" id="397">397</a>
 <a href="#398" id="398">398</a>
 <a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Cranelift compilation context and main entry point.
 //!
 //! When compiling many small functions, it is important to avoid repeatedly allocating and
@@ -612,7 +613,6 @@
     ///
     /// Returns information about the function&#39;s code and read-only data.
     </span><span class="kw">pub fn </span>compile(<span class="kw-2">&amp;mut </span><span class="self">self</span>, isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa) -&gt; CompileResult&lt;<span class="kw-2">&amp;</span>CompiledCode&gt; {
-        <span class="kw">let </span>_tt = timing::compile();
         <span class="kw">let </span>stencil = <span class="self">self</span>.compile_stencil(isa).map_err(|error| CompileError {
             inner: error,
             func: <span class="kw-2">&amp;</span><span class="self">self</span>.func,
@@ -778,6 +778,8 @@
 
     <span class="doccomment">/// Run optimizations via the egraph infrastructure.
     </span><span class="kw">pub fn </span>egraph_pass(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; CodegenResult&lt;()&gt; {
+        <span class="kw">let </span>_tt = timing::egraph();
+
         <span class="macro">trace!</span>(
             <span class="string">&quot;About to optimize with egraph phase:\n{}&quot;</span>,
             <span class="self">self</span>.func.display()

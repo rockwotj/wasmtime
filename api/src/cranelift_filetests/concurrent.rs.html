@@ -173,6 +173,8 @@
 <a href="#173" id="173">173</a>
 <a href="#174" id="174">174</a>
 <a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Run tests concurrently.
 //!
 //! This module provides the `ConcurrentRunner` struct which uses a pool of threads to run tests
@@ -257,14 +259,16 @@
 
     <span class="doccomment">/// Join all the worker threads.
     /// Transfer pass timings from the worker threads to the current thread.
-    </span><span class="kw">pub fn </span>join(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    </span><span class="kw">pub fn </span>join(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; timing::PassTimes {
         <span class="macro">assert!</span>(<span class="self">self</span>.request_tx.is_none(), <span class="string">&quot;must shutdown before join&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>pass_times = timing::PassTimes::default();
         <span class="kw">for </span>h <span class="kw">in </span><span class="self">self</span>.handles.drain(..) {
             <span class="kw">match </span>h.join() {
-                <span class="prelude-val">Ok</span>(t) =&gt; timing::add_to_current(<span class="kw-2">&amp;</span>t),
+                <span class="prelude-val">Ok</span>(t) =&gt; pass_times.add(<span class="kw-2">&amp;</span>t),
                 <span class="prelude-val">Err</span>(e) =&gt; <span class="macro">println!</span>(<span class="string">&quot;worker panicked: {:?}&quot;</span>, e),
             }
         }
+        pass_times
     }
 
     <span class="doccomment">/// Add a new job to the queues.
