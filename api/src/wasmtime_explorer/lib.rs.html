@@ -173,6 +173,20 @@
 <a href="#173" id="173">173</a>
 <a href="#174" id="174">174</a>
 <a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
 </pre><pre class="rust"><code><span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>capstone::arch::BuildsCapstone;
 <span class="kw">use </span>serde::Serialize;
@@ -286,9 +300,17 @@
 
     <span class="kw">let </span><span class="kw-2">mut </span>address_map_iter = address_map.into_iter().peekable();
     <span class="kw">let </span><span class="kw-2">mut </span>current_entry = address_map_iter.next();
-    <span class="kw">let </span><span class="kw-2">mut </span>wasm_offset_for_address = |address: u32| -&gt; <span class="prelude-ty">Option</span>&lt;WasmOffset&gt; {
-        <span class="kw">while </span>address_map_iter.peek().map_or(<span class="bool-val">false</span>, |next_entry| {
-            u32::try_from(next_entry.<span class="number">0</span>).unwrap() &lt; address
+    <span class="kw">let </span><span class="kw-2">mut </span>wasm_offset_for_address = |start: usize, address: u32| -&gt; <span class="prelude-ty">Option</span>&lt;WasmOffset&gt; {
+        <span class="comment">// Consume any entries that happened before the current function for the
+        // first instruction.
+        </span><span class="kw">while </span>current_entry.map_or(<span class="bool-val">false</span>, |cur| cur.<span class="number">0 </span>&lt; start) {
+            current_entry = address_map_iter.next();
+        }
+
+        <span class="comment">// Next advance the address map up to the current `address` specified,
+        // including it.
+        </span><span class="kw">while </span>address_map_iter.peek().map_or(<span class="bool-val">false</span>, |next_entry| {
+            u32::try_from(next_entry.<span class="number">0</span>).unwrap() &lt;= address
         }) {
             current_entry = address_map_iter.next();
         }
@@ -301,7 +323,7 @@
         .map(|(start, len)| {
             <span class="kw">let </span>body = <span class="kw-2">&amp;</span>text[start..][..len];
 
-            <span class="kw">let </span>cs = <span class="kw">match </span>target.architecture {
+            <span class="kw">let </span><span class="kw-2">mut </span>cs = <span class="kw">match </span>target.architecture {
                 target_lexicon::Architecture::Aarch64(<span class="kw">_</span>) =&gt; capstone::Capstone::new()
                     .arm64()
                     .mode(capstone::arch::arm64::ArchMode::Arm)
@@ -325,6 +347,12 @@
                 <span class="kw">_ </span>=&gt; <span class="macro">anyhow::bail!</span>(<span class="string">&quot;Unsupported target: {target}&quot;</span>),
             };
 
+            <span class="comment">// This tells capstone to skip over anything that looks like data,
+            // such as inline constant pools and things like that. This also
+            // additionally is required to skip over trapping instructions on
+            // AArch64.
+            </span>cs.set_skipdata(<span class="bool-val">true</span>).unwrap();
+
             <span class="kw">let </span>instructions = cs
                 .disasm_all(body, start <span class="kw">as </span>u64)
                 .map_err(|e| <span class="macro">anyhow::anyhow!</span>(<span class="string">&quot;{e}&quot;</span>))<span class="question-mark">?</span>;
@@ -332,7 +360,7 @@
                 .iter()
                 .map(|inst| {
                     <span class="kw">let </span>address = u32::try_from(inst.address()).unwrap();
-                    <span class="kw">let </span>wasm_offset = wasm_offset_for_address(address);
+                    <span class="kw">let </span>wasm_offset = wasm_offset_for_address(start, address);
                     <span class="prelude-val">Ok</span>(AnnotatedInstruction {
                         wasm_offset,
                         address,
