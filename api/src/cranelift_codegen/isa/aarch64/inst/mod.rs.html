@@ -3100,6 +3100,14 @@
 <a href="#3100" id="3100">3100</a>
 <a href="#3101" id="3101">3101</a>
 <a href="#3102" id="3102">3102</a>
+<a href="#3103" id="3103">3103</a>
+<a href="#3104" id="3104">3104</a>
+<a href="#3105" id="3105">3105</a>
+<a href="#3106" id="3106">3106</a>
+<a href="#3107" id="3107">3107</a>
+<a href="#3108" id="3108">3108</a>
+<a href="#3109" id="3109">3109</a>
+<a href="#3110" id="3110">3110</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines aarch64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc};
@@ -3518,21 +3526,29 @@
                 size
             }]
         } <span class="kw">else if let </span><span class="prelude-val">Some</span>(imm) = widen_32_bit_pattern(pattern, lane_size) {
-            <span class="kw">let </span>tmp = alloc_tmp(types::I64X2);
-            <span class="kw">let </span><span class="kw-2">mut </span>insts = <span class="macro">smallvec!</span>[Inst::VecDupImm {
-                rd: tmp,
-                imm,
-                invert: <span class="bool-val">false</span>,
-                size: VectorSize::Size64x2,
-            }];
+            <span class="kw">let </span><span class="kw-2">mut </span>insts = <span class="macro">smallvec!</span>[];
 
             <span class="comment">// TODO: Implement support for 64-bit scalar MOVI; we zero-extend the
             // lower 64 bits instead.
             </span><span class="kw">if </span>!size.is_128bits() {
+                <span class="kw">let </span>tmp = alloc_tmp(types::I64X2);
+                insts.push(Inst::VecDupImm {
+                    rd: tmp,
+                    imm,
+                    invert: <span class="bool-val">false</span>,
+                    size: VectorSize::Size64x2,
+                });
                 insts.push(Inst::FpuExtend {
                     rd,
                     rn: tmp.to_reg(),
                     size: ScalarSize::Size64,
+                });
+            } <span class="kw">else </span>{
+                insts.push(Inst::VecDupImm {
+                    rd,
+                    imm,
+                    invert: <span class="bool-val">false</span>,
+                    size: VectorSize::Size64x2,
                 });
             }
 
