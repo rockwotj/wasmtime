@@ -2417,6 +2417,9 @@
 <a href="#2417" id="2417">2417</a>
 <a href="#2418" id="2418">2418</a>
 <a href="#2419" id="2419">2419</a>
+<a href="#2420" id="2420">2420</a>
+<a href="#2421" id="2421">2421</a>
+<a href="#2422" id="2422">2422</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::config::Config;
 <span class="kw">use </span><span class="kw">crate</span>::cranelift_arbitrary::CraneliftArbitrary;
 <span class="kw">use </span>anyhow::Result;
@@ -2758,7 +2761,10 @@
     <span class="kw">let </span>rhs = builder.use_var(fgen.get_variable_of_type(ctrl_type)<span class="question-mark">?</span>);
 
     <span class="kw">let </span>mask = {
-        <span class="kw">let </span>lanes = fgen.u.arbitrary::&lt;[u8; <span class="number">16</span>]&gt;()<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>lanes = [<span class="number">0u8</span>; <span class="number">16</span>];
+        <span class="kw">for </span>lane <span class="kw">in </span>lanes.iter_mut() {
+            <span class="kw-2">*</span>lane = fgen.u.int_in_range(<span class="number">0</span>..=<span class="number">31</span>)<span class="question-mark">?</span>;
+        }
         <span class="kw">let </span>lanes = ConstantData::from(lanes.as_ref());
         builder.func.dfg.immediates.push(lanes)
     };
