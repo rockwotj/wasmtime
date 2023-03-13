@@ -3720,6 +3720,73 @@
 <a href="#3720" id="3720">3720</a>
 <a href="#3721" id="3721">3721</a>
 <a href="#3722" id="3722">3722</a>
+<a href="#3723" id="3723">3723</a>
+<a href="#3724" id="3724">3724</a>
+<a href="#3725" id="3725">3725</a>
+<a href="#3726" id="3726">3726</a>
+<a href="#3727" id="3727">3727</a>
+<a href="#3728" id="3728">3728</a>
+<a href="#3729" id="3729">3729</a>
+<a href="#3730" id="3730">3730</a>
+<a href="#3731" id="3731">3731</a>
+<a href="#3732" id="3732">3732</a>
+<a href="#3733" id="3733">3733</a>
+<a href="#3734" id="3734">3734</a>
+<a href="#3735" id="3735">3735</a>
+<a href="#3736" id="3736">3736</a>
+<a href="#3737" id="3737">3737</a>
+<a href="#3738" id="3738">3738</a>
+<a href="#3739" id="3739">3739</a>
+<a href="#3740" id="3740">3740</a>
+<a href="#3741" id="3741">3741</a>
+<a href="#3742" id="3742">3742</a>
+<a href="#3743" id="3743">3743</a>
+<a href="#3744" id="3744">3744</a>
+<a href="#3745" id="3745">3745</a>
+<a href="#3746" id="3746">3746</a>
+<a href="#3747" id="3747">3747</a>
+<a href="#3748" id="3748">3748</a>
+<a href="#3749" id="3749">3749</a>
+<a href="#3750" id="3750">3750</a>
+<a href="#3751" id="3751">3751</a>
+<a href="#3752" id="3752">3752</a>
+<a href="#3753" id="3753">3753</a>
+<a href="#3754" id="3754">3754</a>
+<a href="#3755" id="3755">3755</a>
+<a href="#3756" id="3756">3756</a>
+<a href="#3757" id="3757">3757</a>
+<a href="#3758" id="3758">3758</a>
+<a href="#3759" id="3759">3759</a>
+<a href="#3760" id="3760">3760</a>
+<a href="#3761" id="3761">3761</a>
+<a href="#3762" id="3762">3762</a>
+<a href="#3763" id="3763">3763</a>
+<a href="#3764" id="3764">3764</a>
+<a href="#3765" id="3765">3765</a>
+<a href="#3766" id="3766">3766</a>
+<a href="#3767" id="3767">3767</a>
+<a href="#3768" id="3768">3768</a>
+<a href="#3769" id="3769">3769</a>
+<a href="#3770" id="3770">3770</a>
+<a href="#3771" id="3771">3771</a>
+<a href="#3772" id="3772">3772</a>
+<a href="#3773" id="3773">3773</a>
+<a href="#3774" id="3774">3774</a>
+<a href="#3775" id="3775">3775</a>
+<a href="#3776" id="3776">3776</a>
+<a href="#3777" id="3777">3777</a>
+<a href="#3778" id="3778">3778</a>
+<a href="#3779" id="3779">3779</a>
+<a href="#3780" id="3780">3780</a>
+<a href="#3781" id="3781">3781</a>
+<a href="#3782" id="3782">3782</a>
+<a href="#3783" id="3783">3783</a>
+<a href="#3784" id="3784">3784</a>
+<a href="#3785" id="3785">3785</a>
+<a href="#3786" id="3786">3786</a>
+<a href="#3787" id="3787">3787</a>
+<a href="#3788" id="3788">3788</a>
+<a href="#3789" id="3789">3789</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -6152,7 +6219,7 @@
         }
 
         Inst::XmmMovRMVex { op, src, dst } =&gt; {
-            <span class="kw">let </span>src = allocs.next(<span class="kw-2">*</span>src);
+            <span class="kw">let </span>src = allocs.next(src.to_reg());
             <span class="kw">let </span>dst = dst.with_allocs(allocs).finalize(state, sink);
 
             <span class="kw">let </span>(prefix, map, opcode) = <span class="kw">match </span>op {
@@ -6170,6 +6237,52 @@
                 .opcode(opcode)
                 .rm(dst)
                 .reg(src.to_real_reg().unwrap().hw_enc())
+                .encode(sink);
+        }
+
+        Inst::XmmMovRMImmVex { op, src, dst, imm } =&gt; {
+            <span class="kw">let </span>src = allocs.next(src.to_reg());
+            <span class="kw">let </span>dst = dst.with_allocs(allocs).finalize(state, sink);
+
+            <span class="kw">let </span>(w, prefix, map, opcode) = <span class="kw">match </span>op {
+                AvxOpcode::Vpextrb =&gt; (<span class="bool-val">false</span>, LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x14</span>),
+                AvxOpcode::Vpextrw =&gt; (<span class="bool-val">false</span>, LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x15</span>),
+                AvxOpcode::Vpextrd =&gt; (<span class="bool-val">false</span>, LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x16</span>),
+                AvxOpcode::Vpextrq =&gt; (<span class="bool-val">true</span>, LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x16</span>),
+                <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Opcode {:?} not implemented&quot;</span>, op),
+            };
+            VexInstruction::new()
+                .length(VexVectorLength::V128)
+                .w(w)
+                .prefix(prefix)
+                .map(map)
+                .opcode(opcode)
+                .rm(dst)
+                .reg(src.to_real_reg().unwrap().hw_enc())
+                .imm(<span class="kw-2">*</span>imm)
+                .encode(sink);
+        }
+
+        Inst::XmmToGprImmVex { op, src, dst, imm } =&gt; {
+            <span class="kw">let </span>src = allocs.next(src.to_reg());
+            <span class="kw">let </span>dst = allocs.next(dst.to_reg().to_reg());
+
+            <span class="kw">let </span>(w, prefix, map, opcode) = <span class="kw">match </span>op {
+                AvxOpcode::Vpextrb =&gt; (<span class="bool-val">false</span>, LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x14</span>),
+                AvxOpcode::Vpextrw =&gt; (<span class="bool-val">false</span>, LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x15</span>),
+                AvxOpcode::Vpextrd =&gt; (<span class="bool-val">false</span>, LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x16</span>),
+                AvxOpcode::Vpextrq =&gt; (<span class="bool-val">true</span>, LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x16</span>),
+                <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Opcode {:?} not implemented&quot;</span>, op),
+            };
+            VexInstruction::new()
+                .length(VexVectorLength::V128)
+                .w(w)
+                .prefix(prefix)
+                .map(map)
+                .opcode(opcode)
+                .rm(dst.to_real_reg().unwrap().hw_enc())
+                .reg(src.to_real_reg().unwrap().hw_enc())
+                .imm(<span class="kw-2">*</span>imm)
                 .encode(sink);
         }
 
@@ -6371,7 +6484,7 @@
         </span>}
 
         Inst::XmmMovRM { op, src, dst } =&gt; {
-            <span class="kw">let </span>src = allocs.next(<span class="kw-2">*</span>src);
+            <span class="kw">let </span>src = allocs.next(src.to_reg());
             <span class="kw">let </span>dst = dst.with_allocs(allocs);
 
             <span class="kw">let </span>(prefix, opcode) = <span class="kw">match </span>op {
@@ -6386,6 +6499,27 @@
             };
             <span class="kw">let </span>dst = <span class="kw-2">&amp;</span>dst.finalize(state, sink);
             emit_std_reg_mem(sink, prefix, opcode, <span class="number">2</span>, src, dst, RexFlags::clear_w(), <span class="number">0</span>);
+        }
+
+        Inst::XmmMovRMImm { op, src, dst, imm } =&gt; {
+            <span class="kw">let </span>src = allocs.next(src.to_reg());
+            <span class="kw">let </span>dst = dst.with_allocs(allocs);
+
+            <span class="kw">let </span>(w, prefix, opcode) = <span class="kw">match </span>op {
+                SseOpcode::Pextrb =&gt; (<span class="bool-val">false</span>, LegacyPrefixes::_66, <span class="number">0x0F3A14</span>),
+                SseOpcode::Pextrw =&gt; (<span class="bool-val">false</span>, LegacyPrefixes::_66, <span class="number">0x0F3A15</span>),
+                SseOpcode::Pextrd =&gt; (<span class="bool-val">false</span>, LegacyPrefixes::_66, <span class="number">0x0F3A16</span>),
+                SseOpcode::Pextrq =&gt; (<span class="bool-val">true</span>, LegacyPrefixes::_66, <span class="number">0x0F3A16</span>),
+                <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Opcode {:?} not implemented&quot;</span>, op),
+            };
+            <span class="kw">let </span>rex = <span class="kw">if </span>w {
+                RexFlags::set_w()
+            } <span class="kw">else </span>{
+                RexFlags::clear_w()
+            };
+            <span class="kw">let </span>dst = <span class="kw-2">&amp;</span>dst.finalize(state, sink);
+            emit_std_reg_mem(sink, prefix, opcode, <span class="number">3</span>, src, dst, rex, <span class="number">1</span>);
+            sink.put1(<span class="kw-2">*</span>imm);
         }
 
         Inst::XmmToGpr {

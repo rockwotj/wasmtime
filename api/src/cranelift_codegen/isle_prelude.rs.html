@@ -750,6 +750,19 @@
 <a href="#750" id="750">750</a>
 <a href="#751" id="751">751</a>
 <a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Shared ISLE prelude implementation for optimization (mid-end) and
 //! lowering (backend) ISLE environments.
 
@@ -830,6 +843,11 @@
         <span class="attr">#[inline]
         </span><span class="kw">fn </span>u64_xor(<span class="kw-2">&amp;mut </span><span class="self">self</span>, x: u64, y: u64) -&gt; u64 {
             x ^ y
+        }
+
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>u64_shl(<span class="kw-2">&amp;mut </span><span class="self">self</span>, x: u64, y: u64) -&gt; u64 {
+            x &lt;&lt; y
         }
 
         <span class="attr">#[inline]
@@ -1254,8 +1272,8 @@
             </span>}
         }
 
-        <span class="kw">fn </span>u64_from_ieee32(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: Ieee32) -&gt; u64 {
-            val.bits().into()
+        <span class="kw">fn </span>u32_from_ieee32(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: Ieee32) -&gt; u32 {
+            val.bits()
         }
 
         <span class="kw">fn </span>u64_from_ieee64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: Ieee64) -&gt; u64 {
@@ -1499,6 +1517,14 @@
         <span class="attr">#[inline]
         </span><span class="kw">fn </span>pack_block_array_2(<span class="kw-2">&amp;mut </span><span class="self">self</span>, a: BlockCall, b: BlockCall) -&gt; BlockArray2 {
             [a, b]
+        }
+
+        <span class="kw">fn </span>u128_as_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: u128) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+            u64::try_from(val).ok()
+        }
+
+        <span class="kw">fn </span>u64_as_u32(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: u64) -&gt; <span class="prelude-ty">Option</span>&lt;u32&gt; {
+            u32::try_from(val).ok()
         }
     };
 }

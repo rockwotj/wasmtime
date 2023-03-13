@@ -786,6 +786,27 @@
 <a href="#786" id="786">786</a>
 <a href="#787" id="787">787</a>
 <a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for aarch64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -795,17 +816,16 @@
 
 <span class="comment">// Types that the generated ISLE code uses via `use super::*`.
 </span><span class="kw">use super</span>::{
-    fp_reg, lower_condcode, lower_constant_f128, lower_constant_f32, lower_constant_f64,
-    lower_fp_condcode, stack_reg, writable_link_reg, writable_zero_reg, zero_reg, AMode,
-    ASIMDFPModImm, ASIMDMovModImm, BranchTarget, CallIndInfo, CallInfo, Cond, CondBrKind, ExtendOp,
-    FPUOpRI, FPUOpRIMod, FloatCC, Imm12, ImmLogic, ImmShift, Inst <span class="kw">as </span>MInst, IntCC, JTSequenceInfo,
-    MachLabel, MemLabel, MoveWideConst, MoveWideOp, NarrowValueMode, Opcode, OperandSize,
-    PairAMode, Reg, SImm9, ScalarSize, ShiftOpAndAmt, UImm12Scaled, UImm5, VecMisc2, VectorSize,
-    NZCV,
+    fp_reg, lower_condcode, lower_fp_condcode, stack_reg, writable_link_reg, writable_zero_reg,
+    zero_reg, AMode, ASIMDFPModImm, ASIMDMovModImm, BranchTarget, CallIndInfo, CallInfo, Cond,
+    CondBrKind, ExtendOp, FPUOpRI, FPUOpRIMod, FloatCC, Imm12, ImmLogic, ImmShift, Inst <span class="kw">as </span>MInst,
+    IntCC, JTSequenceInfo, MachLabel, MemLabel, MoveWideConst, MoveWideOp, NarrowValueMode, Opcode,
+    OperandSize, PairAMode, Reg, SImm9, ScalarSize, ShiftOpAndAmt, UImm12Scaled, UImm5, VecMisc2,
+    VectorSize, NZCV,
 };
 <span class="kw">use </span><span class="kw">crate</span>::ir::condcodes;
 <span class="kw">use </span><span class="kw">crate</span>::isa::aarch64::inst::{FPULeftShiftImm, FPURightShiftImm};
-<span class="kw">use </span><span class="kw">crate</span>::isa::aarch64::lower::{lower_address, lower_pair_address, lower_splat_const};
+<span class="kw">use </span><span class="kw">crate</span>::isa::aarch64::lower::{lower_address, lower_pair_address};
 <span class="kw">use </span><span class="kw">crate</span>::isa::aarch64::AArch64Backend;
 <span class="kw">use </span><span class="kw">crate</span>::machinst::valueregs;
 <span class="kw">use </span><span class="kw">crate</span>::machinst::{isle::<span class="kw-2">*</span>, InputSourceInst};
@@ -1312,38 +1332,6 @@
         lower_pair_address(<span class="self">self</span>.lower_ctx, addr, offset <span class="kw">as </span>i32)
     }
 
-    <span class="kw">fn </span>constant_f32(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: u64) -&gt; Reg {
-        <span class="kw">let </span>rd = <span class="self">self</span>.temp_writable_reg(I8X16);
-
-        lower_constant_f32(<span class="self">self</span>.lower_ctx, rd, f32::from_bits(value <span class="kw">as </span>u32));
-
-        rd.to_reg()
-    }
-
-    <span class="kw">fn </span>constant_f64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: u64) -&gt; Reg {
-        <span class="kw">let </span>rd = <span class="self">self</span>.temp_writable_reg(I8X16);
-
-        lower_constant_f64(<span class="self">self</span>.lower_ctx, rd, f64::from_bits(value));
-
-        rd.to_reg()
-    }
-
-    <span class="kw">fn </span>constant_f128(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: u128) -&gt; Reg {
-        <span class="kw">let </span>rd = <span class="self">self</span>.temp_writable_reg(I8X16);
-
-        lower_constant_f128(<span class="self">self</span>.lower_ctx, rd, value);
-
-        rd.to_reg()
-    }
-
-    <span class="kw">fn </span>splat_const(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: u64, size: <span class="kw-2">&amp;</span>VectorSize) -&gt; Reg {
-        <span class="kw">let </span>rd = <span class="self">self</span>.temp_writable_reg(I8X16);
-
-        lower_splat_const(<span class="self">self</span>.lower_ctx, rd, value, <span class="kw-2">*</span>size);
-
-        rd.to_reg()
-    }
-
     <span class="kw">fn </span>fp_cond_code(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cc: <span class="kw-2">&amp;</span>condcodes::FloatCC) -&gt; Cond {
         lower_fp_condcode(<span class="kw-2">*</span>cc)
     }
@@ -1400,8 +1388,6 @@
     }
 
     <span class="kw">fn </span>min_fp_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, signed: bool, in_bits: u8, out_bits: u8) -&gt; Reg {
-        <span class="kw">let </span>tmp = <span class="self">self</span>.lower_ctx.alloc_tmp(I8X16).only_reg().unwrap();
-
         <span class="kw">if </span>in_bits == <span class="number">32 </span>{
             <span class="comment">// From float32.
             </span><span class="kw">let </span>min = <span class="kw">match </span>(signed, out_bits) {
@@ -1418,7 +1404,7 @@
                 ),
             };
 
-            lower_constant_f32(<span class="self">self</span>.lower_ctx, tmp, min);
+            generated_code::constructor_constant_f32(<span class="self">self</span>, min.to_bits())
         } <span class="kw">else if </span>in_bits == <span class="number">64 </span>{
             <span class="comment">// From float64.
             </span><span class="kw">let </span>min = <span class="kw">match </span>(signed, out_bits) {
@@ -1435,7 +1421,7 @@
                 ),
             };
 
-            lower_constant_f64(<span class="self">self</span>.lower_ctx, tmp, min);
+            generated_code::constructor_constant_f64(<span class="self">self</span>, min.to_bits())
         } <span class="kw">else </span>{
             <span class="macro">unimplemented!</span>(
                 <span class="string">&quot;unexpected input size for min_fp_value: {} (signed: {}, output size: {})&quot;</span>,
@@ -1444,13 +1430,9 @@
                 out_bits
             );
         }
-
-        tmp.to_reg()
     }
 
     <span class="kw">fn </span>max_fp_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, signed: bool, in_bits: u8, out_bits: u8) -&gt; Reg {
-        <span class="kw">let </span>tmp = <span class="self">self</span>.lower_ctx.alloc_tmp(I8X16).only_reg().unwrap();
-
         <span class="kw">if </span>in_bits == <span class="number">32 </span>{
             <span class="comment">// From float32.
             </span><span class="kw">let </span>max = <span class="kw">match </span>(signed, out_bits) {
@@ -1470,7 +1452,7 @@
                 ),
             };
 
-            lower_constant_f32(<span class="self">self</span>.lower_ctx, tmp, max);
+            generated_code::constructor_constant_f32(<span class="self">self</span>, max.to_bits())
         } <span class="kw">else if </span>in_bits == <span class="number">64 </span>{
             <span class="comment">// From float64.
             </span><span class="kw">let </span>max = <span class="kw">match </span>(signed, out_bits) {
@@ -1490,7 +1472,7 @@
                 ),
             };
 
-            lower_constant_f64(<span class="self">self</span>.lower_ctx, tmp, max);
+            generated_code::constructor_constant_f64(<span class="self">self</span>, max.to_bits())
         } <span class="kw">else </span>{
             <span class="macro">unimplemented!</span>(
                 <span class="string">&quot;unexpected input size for max_fp_value: {} (signed: {}, output size: {})&quot;</span>,
@@ -1499,8 +1481,6 @@
                 out_bits
             );
         }
-
-        tmp.to_reg()
     }
 
     <span class="kw">fn </span>fpu_op_ri_ushr(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty_bits: u8, shift: u8) -&gt; FPUOpRI {
@@ -1569,6 +1549,68 @@
         <span class="kw">let </span>(a, b) = <span class="self">self</span>.shuffle64_from_imm(imm)<span class="question-mark">?</span>;
         <span class="kw">if </span>a == b &amp;&amp; a &lt; <span class="number">2 </span>{
             <span class="prelude-val">Some</span>(a)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
+    }
+
+    <span class="kw">fn </span>asimd_mov_mod_imm_zero(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: <span class="kw-2">&amp;</span>ScalarSize) -&gt; ASIMDMovModImm {
+        ASIMDMovModImm::zero(<span class="kw-2">*</span>size)
+    }
+
+    <span class="kw">fn </span>asimd_mov_mod_imm_from_u64(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        val: u64,
+        size: <span class="kw-2">&amp;</span>ScalarSize,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;ASIMDMovModImm&gt; {
+        ASIMDMovModImm::maybe_from_u64(val, <span class="kw-2">*</span>size)
+    }
+
+    <span class="kw">fn </span>asimd_fp_mod_imm_from_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: u64, size: <span class="kw-2">&amp;</span>ScalarSize) -&gt; <span class="prelude-ty">Option</span>&lt;ASIMDFPModImm&gt; {
+        ASIMDFPModImm::maybe_from_u64(val, <span class="kw-2">*</span>size)
+    }
+
+    <span class="kw">fn </span>u64_low32_bits_unset(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: u64) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+        <span class="kw">if </span>val &amp; <span class="number">0xffffffff </span>== <span class="number">0 </span>{
+            <span class="prelude-val">Some</span>(val)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
+    }
+
+    <span class="kw">fn </span>u128_replicated_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: u128) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+        <span class="kw">let </span>low64 = val <span class="kw">as </span>u64 <span class="kw">as </span>u128;
+        <span class="kw">if </span>(low64 | (low64 &lt;&lt; <span class="number">64</span>)) == val {
+            <span class="prelude-val">Some</span>(low64 <span class="kw">as </span>u64)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
+    }
+
+    <span class="kw">fn </span>u64_replicated_u32(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: u64) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+        <span class="kw">let </span>low32 = val <span class="kw">as </span>u32 <span class="kw">as </span>u64;
+        <span class="kw">if </span>(low32 | (low32 &lt;&lt; <span class="number">32</span>)) == val {
+            <span class="prelude-val">Some</span>(low32)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
+    }
+
+    <span class="kw">fn </span>u32_replicated_u16(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: u64) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+        <span class="kw">let </span>val = val <span class="kw">as </span>u32;
+        <span class="kw">let </span>low16 = val <span class="kw">as </span>u16 <span class="kw">as </span>u32;
+        <span class="kw">if </span>(low16 | (low16 &lt;&lt; <span class="number">16</span>)) == val {
+            <span class="prelude-val">Some</span>(low16.into())
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
+    }
+
+    <span class="kw">fn </span>u16_replicated_u8(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: u64) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+        <span class="kw">let </span>val = val <span class="kw">as </span>u16;
+        <span class="kw">let </span>low8 = val <span class="kw">as </span>u8 <span class="kw">as </span>u16;
+        <span class="kw">if </span>(low8 | (low8 &lt;&lt; <span class="number">8</span>)) == val {
+            <span class="prelude-val">Some</span>(low8.into())
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}

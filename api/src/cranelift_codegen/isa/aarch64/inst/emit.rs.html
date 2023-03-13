@@ -3557,40 +3557,11 @@
 <a href="#3557" id="3557">3557</a>
 <a href="#3558" id="3558">3558</a>
 <a href="#3559" id="3559">3559</a>
-<a href="#3560" id="3560">3560</a>
-<a href="#3561" id="3561">3561</a>
-<a href="#3562" id="3562">3562</a>
-<a href="#3563" id="3563">3563</a>
-<a href="#3564" id="3564">3564</a>
-<a href="#3565" id="3565">3565</a>
-<a href="#3566" id="3566">3566</a>
-<a href="#3567" id="3567">3567</a>
-<a href="#3568" id="3568">3568</a>
-<a href="#3569" id="3569">3569</a>
-<a href="#3570" id="3570">3570</a>
-<a href="#3571" id="3571">3571</a>
-<a href="#3572" id="3572">3572</a>
-<a href="#3573" id="3573">3573</a>
-<a href="#3574" id="3574">3574</a>
-<a href="#3575" id="3575">3575</a>
-<a href="#3576" id="3576">3576</a>
-<a href="#3577" id="3577">3577</a>
-<a href="#3578" id="3578">3578</a>
-<a href="#3579" id="3579">3579</a>
-<a href="#3580" id="3580">3580</a>
-<a href="#3581" id="3581">3581</a>
-<a href="#3582" id="3582">3582</a>
-<a href="#3583" id="3583">3583</a>
-<a href="#3584" id="3584">3584</a>
-<a href="#3585" id="3585">3585</a>
-<a href="#3586" id="3586">3586</a>
-<a href="#3587" id="3587">3587</a>
-<a href="#3588" id="3588">3588</a>
 </pre><pre class="rust"><code><span class="doccomment">//! AArch64 ISA: binary code emission.
 
 </span><span class="kw">use </span>regalloc2::Allocation;
 
-<span class="kw">use </span><span class="kw">crate</span>::binemit::{CodeOffset, Reloc, StackMap};
+<span class="kw">use </span><span class="kw">crate</span>::binemit::{Reloc, StackMap};
 <span class="kw">use </span><span class="kw">crate</span>::ir::{types::<span class="kw-2">*</span>, RelSourceLoc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::{LibCall, MemFlags, TrapCode};
 <span class="kw">use </span><span class="kw">crate</span>::isa::aarch64::inst::<span class="kw-2">*</span>;
@@ -3598,20 +3569,12 @@
 <span class="kw">use </span><span class="kw">crate</span>::trace;
 <span class="kw">use </span>core::convert::TryFrom;
 
-<span class="doccomment">/// Memory label/reference finalization: convert a MemLabel to a PC-relative
-/// offset, possibly emitting relocation(s) as necessary.
-</span><span class="kw">pub fn </span>memlabel_finalize(_insn_off: CodeOffset, label: <span class="kw-2">&amp;</span>MemLabel) -&gt; i32 {
-    <span class="kw">match </span>label {
-        <span class="kw-2">&amp;</span>MemLabel::PCRel(rel) =&gt; rel,
-    }
-}
-
 <span class="doccomment">/// Memory addressing mode finalization: convert &quot;special&quot; modes (e.g.,
 /// generic arbitrary stack offset) into real addressing modes, possibly by
 /// emitting some helper instructions that come immediately before the use
 /// of this amode.
 </span><span class="kw">pub fn </span>mem_finalize(
-    insn_off: CodeOffset,
+    sink: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>MachBuffer&lt;Inst&gt;&gt;,
     mem: <span class="kw-2">&amp;</span>AMode,
     state: <span class="kw-2">&amp;</span>EmitState,
 ) -&gt; (SmallVec&lt;[Inst; <span class="number">4</span>]&gt;, AMode) {
@@ -3662,14 +3625,14 @@
             }
         }
 
-        <span class="kw-2">&amp;</span>AMode::Label { <span class="kw-2">ref </span>label } =&gt; {
-            <span class="kw">let </span>off = memlabel_finalize(insn_off, label);
-            (
-                <span class="macro">smallvec!</span>[],
-                AMode::Label {
-                    label: MemLabel::PCRel(off),
-                },
-            )
+        AMode::Const { addr } =&gt; {
+            <span class="kw">let </span>sink = <span class="kw">match </span>sink {
+                <span class="prelude-val">Some</span>(sink) =&gt; sink,
+                <span class="prelude-val">None </span>=&gt; <span class="kw">return </span>(<span class="macro">smallvec!</span>[], mem.clone()),
+            };
+            <span class="kw">let </span>label = sink.get_label_for_constant(<span class="kw-2">*</span>addr);
+            <span class="kw">let </span>label = MemLabel::Mach(label);
+            (<span class="macro">smallvec!</span>[], AMode::Label { label })
         }
 
         <span class="kw">_ </span>=&gt; (<span class="macro">smallvec!</span>[], mem.clone()),
@@ -4547,7 +4510,7 @@
             | <span class="kw-2">&amp;</span>Inst::FpuLoad128 { rd, <span class="kw-2">ref </span>mem, flags } =&gt; {
                 <span class="kw">let </span>rd = allocs.next_writable(rd);
                 <span class="kw">let </span>mem = mem.with_allocs(<span class="kw-2">&amp;mut </span>allocs);
-                <span class="kw">let </span>(mem_insts, mem) = mem_finalize(sink.cur_offset(), <span class="kw-2">&amp;</span>mem, state);
+                <span class="kw">let </span>(mem_insts, mem) = mem_finalize(<span class="prelude-val">Some</span>(sink), <span class="kw-2">&amp;</span>mem, state);
 
                 <span class="kw">for </span>inst <span class="kw">in </span>mem_insts.into_iter() {
                     inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
@@ -4627,7 +4590,19 @@
                     <span class="kw-2">&amp;</span>AMode::Label { <span class="kw-2">ref </span>label } =&gt; {
                         <span class="kw">let </span>offset = <span class="kw">match </span>label {
                             <span class="comment">// cast i32 to u32 (two&#39;s-complement)
-                            </span><span class="kw-2">&amp;</span>MemLabel::PCRel(off) =&gt; off <span class="kw">as </span>u32,
+                            </span>MemLabel::PCRel(off) =&gt; <span class="kw-2">*</span>off <span class="kw">as </span>u32,
+                            <span class="comment">// Emit a relocation into the `MachBuffer`
+                            // for the label that&#39;s being loaded from and
+                            // encode an address of 0 in its place which will
+                            // get filled in by relocation resolution later on.
+                            </span>MemLabel::Mach(label) =&gt; {
+                                sink.use_label_at_offset(
+                                    sink.cur_offset(),
+                                    <span class="kw-2">*</span>label,
+                                    LabelUse::Ldr19,
+                                );
+                                <span class="number">0
+                            </span>}
                         } / <span class="number">4</span>;
                         <span class="macro">assert!</span>(offset &lt; (<span class="number">1 </span>&lt;&lt; <span class="number">19</span>));
                         <span class="kw">match </span><span class="self">self </span>{
@@ -4664,6 +4639,7 @@
                     </span><span class="kw-2">&amp;</span>AMode::SPOffset { .. }
                     | <span class="kw-2">&amp;</span>AMode::FPOffset { .. }
                     | <span class="kw-2">&amp;</span>AMode::NominalSPOffset { .. }
+                    | <span class="kw-2">&amp;</span>AMode::Const { .. }
                     | <span class="kw-2">&amp;</span>AMode::RegOffset { .. } =&gt; {
                         <span class="macro">panic!</span>(<span class="string">&quot;Should not see {:?} here!&quot;</span>, mem)
                     }
@@ -4679,7 +4655,7 @@
             | <span class="kw-2">&amp;</span>Inst::FpuStore128 { rd, <span class="kw-2">ref </span>mem, flags } =&gt; {
                 <span class="kw">let </span>rd = allocs.next(rd);
                 <span class="kw">let </span>mem = mem.with_allocs(<span class="kw-2">&amp;mut </span>allocs);
-                <span class="kw">let </span>(mem_insts, mem) = mem_finalize(sink.cur_offset(), <span class="kw-2">&amp;</span>mem, state);
+                <span class="kw">let </span>(mem_insts, mem) = mem_finalize(<span class="prelude-val">Some</span>(sink), <span class="kw-2">&amp;</span>mem, state);
 
                 <span class="kw">for </span>inst <span class="kw">in </span>mem_insts.into_iter() {
                     inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
@@ -4760,6 +4736,7 @@
                     </span><span class="kw-2">&amp;</span>AMode::SPOffset { .. }
                     | <span class="kw-2">&amp;</span>AMode::FPOffset { .. }
                     | <span class="kw-2">&amp;</span>AMode::NominalSPOffset { .. }
+                    | <span class="kw-2">&amp;</span>AMode::Const { .. }
                     | <span class="kw-2">&amp;</span>AMode::RegOffset { .. } =&gt; {
                         <span class="macro">panic!</span>(<span class="string">&quot;Should not see {:?} here!&quot;</span>, mem)
                     }
@@ -5907,41 +5884,6 @@
                 };
                 sink.put4(enc_inttofpu(top16, rd, rn));
             }
-            <span class="kw-2">&amp;</span>Inst::LoadFpuConst64 { rd, const_data } =&gt; {
-                <span class="kw">let </span>rd = allocs.next_writable(rd);
-                <span class="kw">let </span>inst = Inst::FpuLoad64 {
-                    rd,
-                    mem: AMode::Label {
-                        label: MemLabel::PCRel(<span class="number">8</span>),
-                    },
-                    flags: MemFlags::trusted(),
-                };
-                inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                <span class="kw">let </span>inst = Inst::Jump {
-                    dest: BranchTarget::ResolvedOffset(<span class="number">12</span>),
-                };
-                inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                sink.put8(const_data);
-            }
-            <span class="kw-2">&amp;</span>Inst::LoadFpuConst128 { rd, const_data } =&gt; {
-                <span class="kw">let </span>rd = allocs.next_writable(rd);
-                <span class="kw">let </span>inst = Inst::FpuLoad128 {
-                    rd,
-                    mem: AMode::Label {
-                        label: MemLabel::PCRel(<span class="number">8</span>),
-                    },
-                    flags: MemFlags::trusted(),
-                };
-                inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                <span class="kw">let </span>inst = Inst::Jump {
-                    dest: BranchTarget::ResolvedOffset(<span class="number">20</span>),
-                };
-                inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-
-                <span class="kw">for </span>i <span class="kw">in </span>const_data.to_le_bytes().iter() {
-                    sink.put1(<span class="kw-2">*</span>i);
-                }
-            }
             <span class="kw-2">&amp;</span>Inst::FpuCSel32 { rd, rn, rm, cond } =&gt; {
                 <span class="kw">let </span>rd = allocs.next_writable(rd);
                 <span class="kw">let </span>rn = allocs.next(rn);
@@ -6938,7 +6880,7 @@
             <span class="kw-2">&amp;</span>Inst::LoadAddr { rd, <span class="kw-2">ref </span>mem } =&gt; {
                 <span class="kw">let </span>rd = allocs.next_writable(rd);
                 <span class="kw">let </span>mem = mem.with_allocs(<span class="kw-2">&amp;mut </span>allocs);
-                <span class="kw">let </span>(mem_insts, mem) = mem_finalize(sink.cur_offset(), <span class="kw-2">&amp;</span>mem, state);
+                <span class="kw">let </span>(mem_insts, mem) = mem_finalize(<span class="prelude-val">Some</span>(sink), <span class="kw-2">&amp;</span>mem, state);
                 <span class="kw">for </span>inst <span class="kw">in </span>mem_insts.into_iter() {
                     inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 }

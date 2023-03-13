@@ -732,6 +732,13 @@
 <a href="#732" id="732">732</a>
 <a href="#733" id="733">733</a>
 <a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
 </pre><pre class="rust"><code><span class="doccomment">//! AArch64 ISA definitions: instruction arguments.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::ir::types::<span class="kw-2">*</span>;
@@ -858,6 +865,9 @@
     /// offset from this instruction. This form must be used at emission time;
     /// see `memlabel_finalize()` for how other forms are lowered to this one.
     </span>PCRel(i32),
+    <span class="doccomment">/// An address that refers to a label within a `MachBuffer`, for example a
+    /// constant that lives in the pool at the end of the function.
+    </span>Mach(MachLabel),
 }
 
 <span class="kw">impl </span>AMode {
@@ -928,6 +938,7 @@
             | <span class="kw-2">&amp;</span>AMode::FPOffset { .. }
             | <span class="kw-2">&amp;</span>AMode::SPOffset { .. }
             | <span class="kw-2">&amp;</span>AMode::NominalSPOffset { .. }
+            | <span class="kw-2">&amp;</span>AMode::Const { .. }
             | AMode::Label { .. } =&gt; <span class="self">self</span>.clone(),
         }
     }
@@ -1116,7 +1127,8 @@
 <span class="kw">impl </span>PrettyPrint <span class="kw">for </span>MemLabel {
     <span class="kw">fn </span>pretty_print(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: u8, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>AllocationConsumer&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; String {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="kw-2">&amp;</span>MemLabel::PCRel(off) =&gt; <span class="macro">format!</span>(<span class="string">&quot;pc+{}&quot;</span>, off),
+            MemLabel::PCRel(off) =&gt; <span class="macro">format!</span>(<span class="string">&quot;pc+{}&quot;</span>, off),
+            MemLabel::Mach(off) =&gt; <span class="macro">format!</span>(<span class="string">&quot;label({})&quot;</span>, off.get()),
         }
     }
 }
@@ -1199,6 +1211,8 @@
                 <span class="kw">let </span>simm9 = simm9.pretty_print(<span class="number">8</span>, allocs);
                 <span class="macro">format!</span>(<span class="string">&quot;[sp], {}&quot;</span>, simm9)
             }
+            AMode::Const { addr } =&gt; <span class="macro">format!</span>(<span class="string">&quot;[const({})]&quot;</span>, addr.as_u32()),
+
             <span class="comment">// Eliminated by `mem_finalize()`.
             </span><span class="kw-2">&amp;</span>AMode::SPOffset { .. }
             | <span class="kw-2">&amp;</span>AMode::FPOffset { .. }
