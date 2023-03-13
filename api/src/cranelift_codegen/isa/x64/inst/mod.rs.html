@@ -2671,7 +2671,7 @@
 // `Inst` is defined inside ISLE as `MInst`. We publicly re-export it here.
 </span><span class="kw">pub use </span><span class="kw">super</span>::lower::isle::generated_code::MInst <span class="kw">as </span>Inst;
 
-<span class="comment">// Out-of-line data for calls, to keep the size of `Inst` downn.
+<span class="doccomment">/// Out-of-line data for calls, to keep the size of `Inst` down.
 </span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>CallInfo {
     <span class="doccomment">/// Register uses of this call.
