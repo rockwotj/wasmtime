@@ -807,6 +807,10 @@
 <a href="#807" id="807">807</a>
 <a href="#808" id="808">808</a>
 <a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
+<a href="#812" id="812">812</a>
+<a href="#813" id="813">813</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for aarch64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -1614,6 +1618,10 @@
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
+    }
+
+    <span class="kw">fn </span>shift_masked_imm(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type, imm: u64) -&gt; u8 {
+        (imm <span class="kw">as </span>u8) &amp; ((ty.lane_bits() - <span class="number">1</span>) <span class="kw">as </span>u8)
     }
 }
 </code></pre></div>
