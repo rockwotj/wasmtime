@@ -250,12 +250,20 @@
 <a href="#250" id="250">250</a>
 <a href="#251" id="251">251</a>
 <a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Densely numbered entity references as set keys.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::keys::Keys;
 <span class="kw">use </span><span class="kw">crate</span>::EntityRef;
 <span class="kw">use </span>alloc::vec::Vec;
 <span class="kw">use </span>core::marker::PhantomData;
+
+<span class="comment">// How many bits are used to represent a single element in `EntitySet`.
+</span><span class="kw">const </span>BITS: usize = core::mem::size_of::&lt;usize&gt;() * <span class="number">8</span>;
 
 <span class="doccomment">/// A set of `K` for densely indexed entity references.
 ///
@@ -266,7 +274,7 @@
 <span class="kw">where
     </span>K: EntityRef,
 {
-    elems: Vec&lt;u8&gt;,
+    elems: Vec&lt;usize&gt;,
     len: usize,
     unused: PhantomData&lt;K&gt;,
 }
@@ -294,7 +302,7 @@
     <span class="doccomment">/// Creates a new empty set with the specified capacity.
     </span><span class="kw">pub fn </span>with_capacity(capacity: usize) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            elems: Vec::with_capacity((capacity + <span class="number">7</span>) / <span class="number">8</span>),
+            elems: Vec::with_capacity((capacity + (BITS - <span class="number">1</span>)) / BITS),
             ..<span class="self">Self</span>::new()
         }
     }
@@ -303,7 +311,7 @@
     </span><span class="kw">pub fn </span>contains(<span class="kw-2">&amp;</span><span class="self">self</span>, k: K) -&gt; bool {
         <span class="kw">let </span>index = k.index();
         <span class="kw">if </span>index &lt; <span class="self">self</span>.len {
-            (<span class="self">self</span>.elems[index / <span class="number">8</span>] &amp; (<span class="number">1 </span>&lt;&lt; (index % <span class="number">8</span>))) != <span class="number">0
+            (<span class="self">self</span>.elems[index / BITS] &amp; (<span class="number">1 </span>&lt;&lt; (index % BITS))) != <span class="number">0
         </span>} <span class="kw">else </span>{
             <span class="bool-val">false
         </span>}
@@ -323,11 +331,11 @@
     /// `clear`ed or created with `new`.
     </span><span class="kw">pub fn </span>cardinality(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="kw">let </span><span class="kw-2">mut </span>n: usize = <span class="number">0</span>;
-        <span class="kw">for </span>byte_ix <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.len / <span class="number">8 </span>{
-            n += <span class="self">self</span>.elems[byte_ix].count_ones() <span class="kw">as </span>usize;
+        <span class="kw">for </span>idx <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.len / BITS {
+            n += <span class="self">self</span>.elems[idx].count_ones() <span class="kw">as </span>usize;
         }
-        <span class="kw">for </span>bit_ix <span class="kw">in </span>(<span class="self">self</span>.len / <span class="number">8</span>) * <span class="number">8</span>..<span class="self">self</span>.len {
-            <span class="kw">if </span>(<span class="self">self</span>.elems[bit_ix / <span class="number">8</span>] &amp; (<span class="number">1 </span>&lt;&lt; (bit_ix % <span class="number">8</span>))) != <span class="number">0 </span>{
+        <span class="kw">for </span>bit_ix <span class="kw">in </span>(<span class="self">self</span>.len / BITS) * BITS..<span class="self">self</span>.len {
+            <span class="kw">if </span>(<span class="self">self</span>.elems[bit_ix / BITS] &amp; (<span class="number">1 </span>&lt;&lt; (bit_ix % BITS))) != <span class="number">0 </span>{
                 n += <span class="number">1</span>;
             }
         }
@@ -347,7 +355,7 @@
 
     <span class="doccomment">/// Resize the set to have `n` entries by adding default entries as needed.
     </span><span class="kw">pub fn </span>resize(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) {
-        <span class="self">self</span>.elems.resize((n + <span class="number">7</span>) / <span class="number">8</span>, <span class="number">0</span>);
+        <span class="self">self</span>.elems.resize((n + (BITS - <span class="number">1</span>)) / BITS, <span class="number">0</span>);
         <span class="self">self</span>.len = n
     }
 
@@ -358,7 +366,7 @@
             <span class="self">self</span>.resize(index + <span class="number">1</span>)
         }
         <span class="kw">let </span>result = !<span class="self">self</span>.contains(k);
-        <span class="self">self</span>.elems[index / <span class="number">8</span>] |= <span class="number">1 </span>&lt;&lt; (index % <span class="number">8</span>);
+        <span class="self">self</span>.elems[index / BITS] |= <span class="number">1 </span>&lt;&lt; (index % BITS);
         result
     }
 
@@ -370,7 +378,7 @@
 
         <span class="comment">// Clear the last known entity in the list.
         </span><span class="kw">let </span>last_index = <span class="self">self</span>.len - <span class="number">1</span>;
-        <span class="self">self</span>.elems[last_index / <span class="number">8</span>] &amp;= !(<span class="number">1 </span>&lt;&lt; (last_index % <span class="number">8</span>));
+        <span class="self">self</span>.elems[last_index / BITS] &amp;= !(<span class="number">1 </span>&lt;&lt; (last_index % BITS));
 
         <span class="comment">// Set the length to the next last stored entity or zero if we pop&#39;ed
         // the last entity.
@@ -379,12 +387,14 @@
             .iter()
             .enumerate()
             .rev()
-            .find(|(<span class="kw">_</span>, <span class="kw-2">&amp;</span>byte)| byte != <span class="number">0</span>)
-            <span class="comment">// Map `i` from byte index to bit level index.
-            // `(i + 1) * 8` = Last bit in byte.
-            // `last - byte.leading_zeros()` = last set bit in byte.
+            .find(|(<span class="kw">_</span>, <span class="kw-2">&amp;</span>elem)| elem != <span class="number">0</span>)
+            <span class="comment">// Map `i` from `elem` index to bit level index.
+            // `(i + 1) * BITS` = Last bit in `elem`.
+            // `last - elem.leading_zeros()` = last set bit in `elem`.
             // `as usize` won&#39;t ever truncate as the potential range is `0..=8`.
-            </span>.map_or(<span class="number">0</span>, |(i, byte)| ((i + <span class="number">1</span>) * <span class="number">8</span>) - byte.leading_zeros() <span class="kw">as </span>usize);
+            </span>.map_or(<span class="number">0</span>, |(i, elem)| {
+                ((i + <span class="number">1</span>) * BITS) - elem.leading_zeros() <span class="kw">as </span>usize
+            });
 
         <span class="prelude-val">Some</span>(K::new(last_index))
     }
