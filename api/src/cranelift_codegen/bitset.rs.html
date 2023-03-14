@@ -174,7 +174,7 @@
 <span class="kw">use </span>core::ops::{Add, BitOr, Shl, Sub};
 
 <span class="doccomment">/// A small bitset built on a single primitive integer type
-</span><span class="attr">#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+</span><span class="attr">#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[cfg_attr(feature = <span class="string">&quot;enable-serde&quot;</span>, derive(serde::Serialize, serde::Deserialize))]
 </span><span class="kw">pub struct </span>BitSet&lt;T&gt;(<span class="kw">pub </span>T);
 

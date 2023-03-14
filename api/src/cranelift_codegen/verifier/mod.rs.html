@@ -1879,61 +1879,6 @@
 <a href="#1879" id="1879">1879</a>
 <a href="#1880" id="1880">1880</a>
 <a href="#1881" id="1881">1881</a>
-<a href="#1882" id="1882">1882</a>
-<a href="#1883" id="1883">1883</a>
-<a href="#1884" id="1884">1884</a>
-<a href="#1885" id="1885">1885</a>
-<a href="#1886" id="1886">1886</a>
-<a href="#1887" id="1887">1887</a>
-<a href="#1888" id="1888">1888</a>
-<a href="#1889" id="1889">1889</a>
-<a href="#1890" id="1890">1890</a>
-<a href="#1891" id="1891">1891</a>
-<a href="#1892" id="1892">1892</a>
-<a href="#1893" id="1893">1893</a>
-<a href="#1894" id="1894">1894</a>
-<a href="#1895" id="1895">1895</a>
-<a href="#1896" id="1896">1896</a>
-<a href="#1897" id="1897">1897</a>
-<a href="#1898" id="1898">1898</a>
-<a href="#1899" id="1899">1899</a>
-<a href="#1900" id="1900">1900</a>
-<a href="#1901" id="1901">1901</a>
-<a href="#1902" id="1902">1902</a>
-<a href="#1903" id="1903">1903</a>
-<a href="#1904" id="1904">1904</a>
-<a href="#1905" id="1905">1905</a>
-<a href="#1906" id="1906">1906</a>
-<a href="#1907" id="1907">1907</a>
-<a href="#1908" id="1908">1908</a>
-<a href="#1909" id="1909">1909</a>
-<a href="#1910" id="1910">1910</a>
-<a href="#1911" id="1911">1911</a>
-<a href="#1912" id="1912">1912</a>
-<a href="#1913" id="1913">1913</a>
-<a href="#1914" id="1914">1914</a>
-<a href="#1915" id="1915">1915</a>
-<a href="#1916" id="1916">1916</a>
-<a href="#1917" id="1917">1917</a>
-<a href="#1918" id="1918">1918</a>
-<a href="#1919" id="1919">1919</a>
-<a href="#1920" id="1920">1920</a>
-<a href="#1921" id="1921">1921</a>
-<a href="#1922" id="1922">1922</a>
-<a href="#1923" id="1923">1923</a>
-<a href="#1924" id="1924">1924</a>
-<a href="#1925" id="1925">1925</a>
-<a href="#1926" id="1926">1926</a>
-<a href="#1927" id="1927">1927</a>
-<a href="#1928" id="1928">1928</a>
-<a href="#1929" id="1929">1929</a>
-<a href="#1930" id="1930">1930</a>
-<a href="#1931" id="1931">1931</a>
-<a href="#1932" id="1932">1932</a>
-<a href="#1933" id="1933">1933</a>
-<a href="#1934" id="1934">1934</a>
-<a href="#1935" id="1935">1935</a>
-<a href="#1936" id="1936">1936</a>
 </pre><pre class="rust"><code><span class="doccomment">//! A verifier for ensuring that functions are well formed.
 //! It verifies:
 //!
@@ -3127,7 +3072,7 @@
         <span class="kw">let _ </span>= <span class="self">self</span>.typecheck_fixed_args(inst, ctrl_type, errors);
         <span class="kw">let _ </span>= <span class="self">self</span>.typecheck_variable_args(inst, errors);
         <span class="kw">let _ </span>= <span class="self">self</span>.typecheck_return(inst, errors);
-        <span class="kw">let _ </span>= <span class="self">self</span>.typecheck_special(inst, ctrl_type, errors);
+        <span class="kw">let _ </span>= <span class="self">self</span>.typecheck_special(inst, errors);
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -3414,63 +3359,8 @@
 
     <span class="comment">// Check special-purpose type constraints that can&#39;t be expressed in the normal opcode
     // constraints.
-    </span><span class="kw">fn </span>typecheck_special(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        inst: Inst,
-        ctrl_type: Type,
-        errors: <span class="kw-2">&amp;mut </span>VerifierErrors,
-    ) -&gt; VerifierStepResult&lt;()&gt; {
+    </span><span class="kw">fn </span>typecheck_special(<span class="kw-2">&amp;</span><span class="self">self</span>, inst: Inst, errors: <span class="kw-2">&amp;mut </span>VerifierErrors) -&gt; VerifierStepResult&lt;()&gt; {
         <span class="kw">match </span><span class="self">self</span>.func.dfg.insts[inst] {
-            ir::InstructionData::Unary { opcode, arg } =&gt; {
-                <span class="kw">let </span>arg_type = <span class="self">self</span>.func.dfg.value_type(arg);
-                <span class="kw">match </span>opcode {
-                    Opcode::Uextend | Opcode::Sextend | Opcode::Fpromote =&gt; {
-                        <span class="kw">if </span>arg_type.lane_count() != ctrl_type.lane_count() {
-                            <span class="kw">return </span>errors.nonfatal((
-                                inst,
-                                <span class="self">self</span>.context(inst),
-                                <span class="macro">format!</span>(
-                                    <span class="string">&quot;input {} and output {} must have same number of lanes&quot;</span>,
-                                    arg_type, ctrl_type,
-                                ),
-                            ));
-                        }
-                        <span class="kw">if </span>arg_type.lane_bits() &gt;= ctrl_type.lane_bits() {
-                            <span class="kw">return </span>errors.nonfatal((
-                                inst,
-                                <span class="self">self</span>.context(inst),
-                                <span class="macro">format!</span>(
-                                    <span class="string">&quot;input {} must be smaller than output {}&quot;</span>,
-                                    arg_type, ctrl_type,
-                                ),
-                            ));
-                        }
-                    }
-                    Opcode::Ireduce | Opcode::Fdemote =&gt; {
-                        <span class="kw">if </span>arg_type.lane_count() != ctrl_type.lane_count() {
-                            <span class="kw">return </span>errors.nonfatal((
-                                inst,
-                                <span class="self">self</span>.context(inst),
-                                <span class="macro">format!</span>(
-                                    <span class="string">&quot;input {} and output {} must have same number of lanes&quot;</span>,
-                                    arg_type, ctrl_type,
-                                ),
-                            ));
-                        }
-                        <span class="kw">if </span>arg_type.lane_bits() &lt;= ctrl_type.lane_bits() {
-                            <span class="kw">return </span>errors.nonfatal((
-                                inst,
-                                <span class="self">self</span>.context(inst),
-                                <span class="macro">format!</span>(
-                                    <span class="string">&quot;input {} must be larger than output {}&quot;</span>,
-                                    arg_type, ctrl_type,
-                                ),
-                            ));
-                        }
-                    }
-                    <span class="kw">_ </span>=&gt; {}
-                }
-            }
             ir::InstructionData::TableAddr { table, arg, .. } =&gt; {
                 <span class="kw">let </span>index_type = <span class="self">self</span>.func.dfg.value_type(arg);
                 <span class="kw">let </span>table_index_type = <span class="self">self</span>.func.tables[table].index_type;

@@ -7475,15 +7475,15 @@
     ///
     /// Inputs:
     ///
-    /// - IntTo (controlling type variable): A smaller integer type
-    /// - x: A scalar integer type
+    /// - Int (controlling type variable): A scalar integer type
+    /// - x: A scalar integer type, wider than the controlling type
     ///
     /// Outputs:
     ///
-    /// - a: A smaller integer type
+    /// - a: A scalar integer type
     </span><span class="attr">#[allow(non_snake_case)]
-    </span><span class="kw">fn </span>ireduce(<span class="self">self</span>, IntTo: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
-        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Ireduce, IntTo, x);
+    </span><span class="kw">fn </span>ireduce(<span class="self">self</span>, Int: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
+        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Ireduce, Int, x);
         dfg.first_result(inst)
     }
 
@@ -7685,15 +7685,15 @@
     ///
     /// Inputs:
     ///
-    /// - IntTo (controlling type variable): A larger integer type with the same number of lanes
-    /// - x: A scalar integer type
+    /// - Int (controlling type variable): A scalar integer type
+    /// - x: A scalar integer type, narrower than the controlling type
     ///
     /// Outputs:
     ///
-    /// - a: A larger integer type with the same number of lanes
+    /// - a: A scalar integer type
     </span><span class="attr">#[allow(non_snake_case)]
-    </span><span class="kw">fn </span>uextend(<span class="self">self</span>, IntTo: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
-        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Uextend, IntTo, x);
+    </span><span class="kw">fn </span>uextend(<span class="self">self</span>, Int: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
+        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Uextend, Int, x);
         dfg.first_result(inst)
     }
 
@@ -7709,15 +7709,15 @@
     ///
     /// Inputs:
     ///
-    /// - IntTo (controlling type variable): A larger integer type with the same number of lanes
-    /// - x: A scalar integer type
+    /// - Int (controlling type variable): A scalar integer type
+    /// - x: A scalar integer type, narrower than the controlling type
     ///
     /// Outputs:
     ///
-    /// - a: A larger integer type with the same number of lanes
+    /// - a: A scalar integer type
     </span><span class="attr">#[allow(non_snake_case)]
-    </span><span class="kw">fn </span>sextend(<span class="self">self</span>, IntTo: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
-        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Sextend, IntTo, x);
+    </span><span class="kw">fn </span>sextend(<span class="self">self</span>, Int: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
+        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Sextend, Int, x);
         dfg.first_result(inst)
     }
 
@@ -7734,15 +7734,15 @@
     ///
     /// Inputs:
     ///
-    /// - FloatScalarTo (controlling type variable): A scalar only floating point number
-    /// - x: A scalar only floating point number
+    /// - FloatScalar (controlling type variable): A scalar only floating point number
+    /// - x: A scalar only floating point number, narrower than the controlling type
     ///
     /// Outputs:
     ///
     /// - a: A scalar only floating point number
     </span><span class="attr">#[allow(non_snake_case)]
-    </span><span class="kw">fn </span>fpromote(<span class="self">self</span>, FloatScalarTo: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
-        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Fpromote, FloatScalarTo, x);
+    </span><span class="kw">fn </span>fpromote(<span class="self">self</span>, FloatScalar: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
+        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Fpromote, FloatScalar, x);
         dfg.first_result(inst)
     }
 
@@ -7759,15 +7759,15 @@
     ///
     /// Inputs:
     ///
-    /// - FloatScalarTo (controlling type variable): A scalar only floating point number
-    /// - x: A scalar only floating point number
+    /// - FloatScalar (controlling type variable): A scalar only floating point number
+    /// - x: A scalar only floating point number, wider than the controlling type
     ///
     /// Outputs:
     ///
     /// - a: A scalar only floating point number
     </span><span class="attr">#[allow(non_snake_case)]
-    </span><span class="kw">fn </span>fdemote(<span class="self">self</span>, FloatScalarTo: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
-        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Fdemote, FloatScalarTo, x);
+    </span><span class="kw">fn </span>fdemote(<span class="self">self</span>, FloatScalar: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
+        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Fdemote, FloatScalar, x);
         dfg.first_result(inst)
     }
 

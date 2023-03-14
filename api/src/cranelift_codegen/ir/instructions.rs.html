@@ -943,6 +943,52 @@
 <a href="#943" id="943">943</a>
 <a href="#944" id="944">944</a>
 <a href="#945" id="945">945</a>
+<a href="#946" id="946">946</a>
+<a href="#947" id="947">947</a>
+<a href="#948" id="948">948</a>
+<a href="#949" id="949">949</a>
+<a href="#950" id="950">950</a>
+<a href="#951" id="951">951</a>
+<a href="#952" id="952">952</a>
+<a href="#953" id="953">953</a>
+<a href="#954" id="954">954</a>
+<a href="#955" id="955">955</a>
+<a href="#956" id="956">956</a>
+<a href="#957" id="957">957</a>
+<a href="#958" id="958">958</a>
+<a href="#959" id="959">959</a>
+<a href="#960" id="960">960</a>
+<a href="#961" id="961">961</a>
+<a href="#962" id="962">962</a>
+<a href="#963" id="963">963</a>
+<a href="#964" id="964">964</a>
+<a href="#965" id="965">965</a>
+<a href="#966" id="966">966</a>
+<a href="#967" id="967">967</a>
+<a href="#968" id="968">968</a>
+<a href="#969" id="969">969</a>
+<a href="#970" id="970">970</a>
+<a href="#971" id="971">971</a>
+<a href="#972" id="972">972</a>
+<a href="#973" id="973">973</a>
+<a href="#974" id="974">974</a>
+<a href="#975" id="975">975</a>
+<a href="#976" id="976">976</a>
+<a href="#977" id="977">977</a>
+<a href="#978" id="978">978</a>
+<a href="#979" id="979">979</a>
+<a href="#980" id="980">980</a>
+<a href="#981" id="981">981</a>
+<a href="#982" id="982">982</a>
+<a href="#983" id="983">983</a>
+<a href="#984" id="984">984</a>
+<a href="#985" id="985">985</a>
+<a href="#986" id="986">986</a>
+<a href="#987" id="987">987</a>
+<a href="#988" id="988">988</a>
+<a href="#989" id="989">989</a>
+<a href="#990" id="990">990</a>
+<a href="#991" id="991">991</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Instruction formats and opcodes.
 //!
 //! The `instructions` module contains definitions for instruction formats, opcodes, and the
@@ -1520,12 +1566,9 @@
     /// `ctrl_type`.
     </span><span class="kw">pub fn </span>result_type(<span class="self">self</span>, n: usize, ctrl_type: Type) -&gt; Type {
         <span class="macro">debug_assert!</span>(n &lt; <span class="self">self</span>.num_fixed_results(), <span class="string">&quot;Invalid result index&quot;</span>);
-        <span class="kw">if let </span>ResolvedConstraint::Bound(t) =
-            OPERAND_CONSTRAINTS[<span class="self">self</span>.constraint_offset() + n].resolve(ctrl_type)
-        {
-            t
-        } <span class="kw">else </span>{
-            <span class="macro">panic!</span>(<span class="string">&quot;Result constraints can&#39;t be free&quot;</span>);
+        <span class="kw">match </span>OPERAND_CONSTRAINTS[<span class="self">self</span>.constraint_offset() + n].resolve(ctrl_type) {
+            ResolvedConstraint::Bound(t) =&gt; t,
+            ResolvedConstraint::Free(ts) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Result constraints can&#39;t be free: {:?}&quot;</span>, ts),
         }
     }
 
@@ -1559,7 +1602,7 @@
 <span class="kw">type </span>BitSet16 = BitSet&lt;u16&gt;;
 
 <span class="doccomment">/// A value type set describes the permitted set of types for a type variable.
-</span><span class="attr">#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+</span><span class="attr">#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>ValueTypeSet {
     <span class="doccomment">/// Allowed lane sizes
     </span><span class="kw">pub </span>lanes: BitSet16,
@@ -1648,6 +1691,12 @@
 
     <span class="doccomment">/// This operands is `ctrlType.dynamic_to_vector()`.
     </span>DynamicToVector,
+
+    <span class="doccomment">/// This operand is `ctrlType.narrower()`.
+    </span>Narrower,
+
+    <span class="doccomment">/// This operand is `ctrlType.wider()`.
+    </span>Wider,
 }
 
 <span class="kw">impl </span>OperandConstraint {
@@ -1711,6 +1760,49 @@
                     .dynamic_to_vector()
                     .expect(<span class="string">&quot;invalid type for dynamic_to_vector&quot;</span>),
             ),
+            Narrower =&gt; {
+                <span class="kw">let </span>ctrl_type_bits = ctrl_type.log2_lane_bits();
+                <span class="kw">let </span><span class="kw-2">mut </span>tys = ValueTypeSet::default();
+
+                <span class="comment">// We&#39;re testing scalar values, only.
+                </span>tys.lanes = BitSet::from_range(<span class="number">0</span>, <span class="number">1</span>);
+
+                <span class="kw">if </span>ctrl_type.is_int() {
+                    <span class="comment">// The upper bound in from_range is exclusive, and we want to exclude the
+                    // control type to construct the interval of [I8, ctrl_type).
+                    </span>tys.ints = BitSet::from_range(<span class="number">3</span>, ctrl_type_bits <span class="kw">as </span>u8);
+                } <span class="kw">else if </span>ctrl_type.is_float() {
+                    <span class="comment">// The upper bound in from_range is exclusive, and we want to exclude the
+                    // control type to construct the interval of [F32, ctrl_type).
+                    </span>tys.floats = BitSet::from_range(<span class="number">5</span>, ctrl_type_bits <span class="kw">as </span>u8);
+                } <span class="kw">else </span>{
+                    <span class="macro">panic!</span>(<span class="string">&quot;The Narrower constraint only operates on floats or ints&quot;</span>);
+                }
+                ResolvedConstraint::Free(tys)
+            }
+            Wider =&gt; {
+                <span class="kw">let </span>ctrl_type_bits = ctrl_type.log2_lane_bits();
+                <span class="kw">let </span><span class="kw-2">mut </span>tys = ValueTypeSet::default();
+
+                <span class="comment">// We&#39;re testing scalar values, only.
+                </span>tys.lanes = BitSet::from_range(<span class="number">0</span>, <span class="number">1</span>);
+
+                <span class="kw">if </span>ctrl_type.is_int() {
+                    <span class="comment">// The interval should include all types wider than `ctrl_type`, so we use
+                    // `2^8` as the upper bound, and add one to the bits of `ctrl_type` to define
+                    // the interval `(ctrl_type, I128]`.
+                    </span>tys.ints = BitSet::from_range(ctrl_type_bits <span class="kw">as </span>u8 + <span class="number">1</span>, <span class="number">8</span>);
+                } <span class="kw">else if </span>ctrl_type.is_float() {
+                    <span class="comment">// The interval should include all float types wider than `ctrl_type`, so we
+                    // use `2^7` as the upper bound, and add one to the bits of `ctrl_type` to
+                    // define the interval `(ctrl_type, F64]`.
+                    </span>tys.floats = BitSet::from_range(ctrl_type_bits <span class="kw">as </span>u8 + <span class="number">1</span>, <span class="number">7</span>);
+                } <span class="kw">else </span>{
+                    <span class="macro">panic!</span>(<span class="string">&quot;The Wider constraint only operates on floats or ints&quot;</span>);
+                }
+
+                ResolvedConstraint::Free(tys)
+            }
         }
     }
 }

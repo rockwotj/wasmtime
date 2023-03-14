@@ -3787,17 +3787,6 @@
 <a href="#3787" id="3787">3787</a>
 <a href="#3788" id="3788">3788</a>
 <a href="#3789" id="3789">3789</a>
-<a href="#3790" id="3790">3790</a>
-<a href="#3791" id="3791">3791</a>
-<a href="#3792" id="3792">3792</a>
-<a href="#3793" id="3793">3793</a>
-<a href="#3794" id="3794">3794</a>
-<a href="#3795" id="3795">3795</a>
-<a href="#3796" id="3796">3796</a>
-<a href="#3797" id="3797">3797</a>
-<a href="#3798" id="3798">3798</a>
-<a href="#3799" id="3799">3799</a>
-<a href="#3800" id="3800">3800</a>
 </pre><pre class="rust"><code><span class="attr">#![allow(non_snake_case)]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::cdsl::instructions::{
@@ -6864,12 +6853,6 @@
         TypeSetBuilder::new().ints(Interval::All).build(),
     );
 
-    <span class="kw">let </span>IntTo = <span class="kw-2">&amp;</span>TypeVar::new(
-        <span class="string">&quot;IntTo&quot;</span>,
-        <span class="string">&quot;A smaller integer type&quot;</span>,
-        TypeSetBuilder::new().ints(Interval::All).build(),
-    );
-
     ig.push(
         Inst::new(
             <span class="string">&quot;ireduce&quot;</span>,
@@ -6881,8 +6864,9 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int)])
-        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IntTo)]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, <span class="kw-2">&amp;</span>Int.wider())
+            .with_doc(<span class="string">&quot;A scalar integer type, wider than the controlling type&quot;</span>)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
     );
 
     <span class="kw">let </span>I16or32or64xN = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -7072,17 +7056,10 @@
         .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, I16x8)]),
     );
 
-    {
-        <span class="kw">let </span>IntTo = <span class="kw-2">&amp;</span>TypeVar::new(
-            <span class="string">&quot;IntTo&quot;</span>,
-            <span class="string">&quot;A larger integer type with the same number of lanes&quot;</span>,
-            TypeSetBuilder::new().ints(Interval::All).build(),
-        );
-
-        ig.push(
-            Inst::new(
-                <span class="string">&quot;uextend&quot;</span>,
-                <span class="string">r#&quot;
+    ig.push(
+        Inst::new(
+            <span class="string">&quot;uextend&quot;</span>,
+            <span class="string">r#&quot;
         Convert `x` to a larger integer type by zero-extending.
 
         Each lane in `x` is converted to a larger integer type by adding
@@ -7093,16 +7070,18 @@
         and each lane must not have fewer bits that the input lanes. If the
         input and output types are the same, this is a no-op.
         &quot;#</span>,
-                <span class="kw-2">&amp;</span>formats.unary,
-            )
-            .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int)])
-            .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IntTo)]),
-        );
+            <span class="kw-2">&amp;</span>formats.unary,
+        )
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, <span class="kw-2">&amp;</span>Int.narrower()).with_doc(
+            <span class="string">&quot;A scalar integer type, narrower than the controlling type&quot;</span>,
+        )])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
+    );
 
-        ig.push(
-            Inst::new(
-                <span class="string">&quot;sextend&quot;</span>,
-                <span class="string">r#&quot;
+    ig.push(
+        Inst::new(
+            <span class="string">&quot;sextend&quot;</span>,
+            <span class="string">r#&quot;
         Convert `x` to a larger integer type by sign-extending.
 
         Each lane in `x` is converted to a larger integer type by replicating
@@ -7113,21 +7092,16 @@
         and each lane must not have fewer bits that the input lanes. If the
         input and output types are the same, this is a no-op.
         &quot;#</span>,
-                <span class="kw-2">&amp;</span>formats.unary,
-            )
-            .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Int)])
-            .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, IntTo)]),
-        );
-    }
+            <span class="kw-2">&amp;</span>formats.unary,
+        )
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, <span class="kw-2">&amp;</span>Int.narrower()).with_doc(
+            <span class="string">&quot;A scalar integer type, narrower than the controlling type&quot;</span>,
+        )])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, Int)]),
+    );
 
     <span class="kw">let </span>FloatScalar = <span class="kw-2">&amp;</span>TypeVar::new(
         <span class="string">&quot;FloatScalar&quot;</span>,
-        <span class="string">&quot;A scalar only floating point number&quot;</span>,
-        TypeSetBuilder::new().floats(Interval::All).build(),
-    );
-
-    <span class="kw">let </span>FloatScalarTo = <span class="kw-2">&amp;</span>TypeVar::new(
-        <span class="string">&quot;FloatScalarTo&quot;</span>,
         <span class="string">&quot;A scalar only floating point number&quot;</span>,
         TypeSetBuilder::new().floats(Interval::All).build(),
     );
@@ -7149,8 +7123,10 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, FloatScalar)])
-        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, FloatScalarTo)]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, <span class="kw-2">&amp;</span>FloatScalar.narrower()).with_doc(
+            <span class="string">&quot;A scalar only floating point number, narrower than the controlling type&quot;</span>,
+        )])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, FloatScalar)]),
     );
 
     ig.push(
@@ -7170,8 +7146,10 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, FloatScalar)])
-        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, FloatScalarTo)]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, <span class="kw-2">&amp;</span>FloatScalar.wider()).with_doc(
+            <span class="string">&quot;A scalar only floating point number, wider than the controlling type&quot;</span>,
+        )])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, FloatScalar)]),
     );
 
     <span class="kw">let </span>F64x2 = <span class="kw-2">&amp;</span>TypeVar::new(
