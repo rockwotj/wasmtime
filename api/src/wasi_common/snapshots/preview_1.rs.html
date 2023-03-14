@@ -1683,7 +1683,6 @@
 <a href="#1683" id="1683">1683</a>
 <a href="#1684" id="1684">1684</a>
 <a href="#1685" id="1685">1685</a>
-<a href="#1686" id="1686">1686</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     dir::{DirCaps, DirEntry, DirEntryExt, DirFdStat, ReaddirCursor, ReaddirEntity, TableDirExt},
     file::{
@@ -1754,8 +1753,8 @@
 
     <span class="kw">async fn </span>clock_res_get(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: types::Clockid) -&gt; <span class="prelude-ty">Result</span>&lt;types::Timestamp, Error&gt; {
         <span class="kw">let </span>resolution = <span class="kw">match </span>id {
-            types::Clockid::Realtime =&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>.clocks.system.resolution()),
-            types::Clockid::Monotonic =&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>.clocks.monotonic.resolution()),
+            types::Clockid::Realtime =&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>.clocks.system()<span class="question-mark">?</span>.resolution()),
+            types::Clockid::Monotonic =&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>.clocks.monotonic()<span class="question-mark">?</span>.abs_clock.resolution()),
             types::Clockid::ProcessCputimeId | types::Clockid::ThreadCputimeId =&gt; {
                 <span class="prelude-val">Err</span>(Error::badf().context(<span class="string">&quot;process and thread clocks are not supported&quot;</span>))
             }
@@ -1771,7 +1770,7 @@
         <span class="kw">let </span>precision = Duration::from_nanos(precision);
         <span class="kw">match </span>id {
             types::Clockid::Realtime =&gt; {
-                <span class="kw">let </span>now = <span class="self">self</span>.clocks.system.now(precision).into_std();
+                <span class="kw">let </span>now = <span class="self">self</span>.clocks.system()<span class="question-mark">?</span>.now(precision).into_std();
                 <span class="kw">let </span>d = now
                     .duration_since(std::time::SystemTime::UNIX_EPOCH)
                     .map_err(|<span class="kw">_</span>| {
@@ -1780,8 +1779,9 @@
                 <span class="prelude-val">Ok</span>(d.as_nanos().try_into()<span class="question-mark">?</span>)
             }
             types::Clockid::Monotonic =&gt; {
-                <span class="kw">let </span>now = <span class="self">self</span>.clocks.monotonic.now(precision);
-                <span class="kw">let </span>d = now.duration_since(<span class="self">self</span>.clocks.creation_time);
+                <span class="kw">let </span>clock = <span class="self">self</span>.clocks.monotonic()<span class="question-mark">?</span>;
+                <span class="kw">let </span>now = clock.abs_clock.now(precision);
+                <span class="kw">let </span>d = now.duration_since(clock.creation_time);
                 <span class="prelude-val">Ok</span>(d.as_nanos().try_into()<span class="question-mark">?</span>)
             }
             types::Clockid::ProcessCputimeId | types::Clockid::ThreadCputimeId =&gt; {
@@ -2595,25 +2595,22 @@
             <span class="kw">match </span>sub.u {
                 types::SubscriptionU::Clock(clocksub) =&gt; <span class="kw">match </span>clocksub.id {
                     types::Clockid::Monotonic =&gt; {
-                        <span class="kw">let </span>clock = <span class="self">self</span>.clocks.monotonic.deref();
+                        <span class="kw">let </span>clock = <span class="self">self</span>.clocks.monotonic()<span class="question-mark">?</span>;
                         <span class="kw">let </span>precision = Duration::from_nanos(clocksub.precision);
                         <span class="kw">let </span>duration = Duration::from_nanos(clocksub.timeout);
-                        <span class="kw">let </span>deadline = <span class="kw">if </span>clocksub
+                        <span class="kw">let </span>start = <span class="kw">if </span>clocksub
                             .flags
                             .contains(types::Subclockflags::SUBSCRIPTION_CLOCK_ABSTIME)
                         {
-                            <span class="self">self</span>.clocks
-                                .creation_time
-                                .checked_add(duration)
-                                .ok_or_else(|| Error::overflow().context(<span class="string">&quot;deadline&quot;</span>))<span class="question-mark">?
-                        </span>} <span class="kw">else </span>{
-                            clock
-                                .now(precision)
-                                .checked_add(duration)
-                                .ok_or_else(|| Error::overflow().context(<span class="string">&quot;deadline&quot;</span>))<span class="question-mark">?
-                        </span>};
+                            clock.creation_time
+                        } <span class="kw">else </span>{
+                            clock.abs_clock.now(precision)
+                        };
+                        <span class="kw">let </span>deadline = start
+                            .checked_add(duration)
+                            .ok_or_else(|| Error::overflow().context(<span class="string">&quot;deadline&quot;</span>))<span class="question-mark">?</span>;
                         poll.subscribe_monotonic_clock(
-                            clock,
+                            <span class="kw-2">&amp;*</span>clock.abs_clock,
                             deadline,
                             precision,
                             sub.userdata.into(),
@@ -2625,7 +2622,7 @@
                         // on threads waiting in these functions. MONOTONIC should always have
                         // resolution at least as good as REALTIME, so we can translate a
                         // non-absolute `REALTIME` request into a `MONOTONIC` request.
-                        </span><span class="kw">let </span>clock = <span class="self">self</span>.clocks.monotonic.deref();
+                        </span><span class="kw">let </span>clock = <span class="self">self</span>.clocks.monotonic()<span class="question-mark">?</span>;
                         <span class="kw">let </span>precision = Duration::from_nanos(clocksub.precision);
                         <span class="kw">let </span>duration = Duration::from_nanos(clocksub.timeout);
                         <span class="kw">let </span>deadline = <span class="kw">if </span>clocksub
@@ -2635,12 +2632,13 @@
                             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::not_supported());
                         } <span class="kw">else </span>{
                             clock
+                                .abs_clock
                                 .now(precision)
                                 .checked_add(duration)
                                 .ok_or_else(|| Error::overflow().context(<span class="string">&quot;deadline&quot;</span>))<span class="question-mark">?
                         </span>};
                         poll.subscribe_monotonic_clock(
-                            clock,
+                            <span class="kw-2">&amp;*</span>clock.abs_clock,
                             deadline,
                             precision,
                             sub.userdata.into(),
