@@ -164,8 +164,8 @@
 <span class="item-spacer"></span>    fn <a href="#method.x86_pmaddubsw" class="fn">x86_pmaddubsw</a>(self, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>, y: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a> { ... }
 <span class="item-spacer"></span>    fn <a href="#method.uextend" class="fn">uextend</a>(self, IntTo: <a class="struct" href="types/struct.Type.html" title="struct cranelift_codegen::ir::types::Type">Type</a>, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a> { ... }
 <span class="item-spacer"></span>    fn <a href="#method.sextend" class="fn">sextend</a>(self, IntTo: <a class="struct" href="types/struct.Type.html" title="struct cranelift_codegen::ir::types::Type">Type</a>, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a> { ... }
-<span class="item-spacer"></span>    fn <a href="#method.fpromote" class="fn">fpromote</a>(self, FloatTo: <a class="struct" href="types/struct.Type.html" title="struct cranelift_codegen::ir::types::Type">Type</a>, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a> { ... }
-<span class="item-spacer"></span>    fn <a href="#method.fdemote" class="fn">fdemote</a>(self, FloatTo: <a class="struct" href="types/struct.Type.html" title="struct cranelift_codegen::ir::types::Type">Type</a>, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.fpromote" class="fn">fpromote</a>(self, FloatScalarTo: <a class="struct" href="types/struct.Type.html" title="struct cranelift_codegen::ir::types::Type">Type</a>, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.fdemote" class="fn">fdemote</a>(self, FloatScalarTo: <a class="struct" href="types/struct.Type.html" title="struct cranelift_codegen::ir::types::Type">Type</a>, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a> { ... }
 <span class="item-spacer"></span>    fn <a href="#method.fvdemote" class="fn">fvdemote</a>(self, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a> { ... }
 <span class="item-spacer"></span>    fn <a href="#method.fvpromote_low" class="fn">fvpromote_low</a>(self, a: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a> { ... }
 <span class="item-spacer"></span>    fn <a href="#method.fcvt_to_uint" class="fn">fcvt_to_uint</a>(self, IntTo: <a class="struct" href="types/struct.Type.html" title="struct cranelift_codegen::ir::types::Type">Type</a>, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a> { ... }
@@ -2261,7 +2261,7 @@ input and output types are the same, this is a no-op.</p>
 <ul>
 <li>a: A larger integer type with the same number of lanes</li>
 </ul>
-</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.fpromote" class="method has-srclink"><a class="srclink rightside" href="../../src/cranelift_codegen/home/runner/work/wasmtime/wasmtime/target/debug/build/cranelift-codegen-e25d4caf4193e3b2/out/inst_builder.rs.html#3453-3456">source</a><h4 class="code-header">fn <a href="#method.fpromote" class="fn">fpromote</a>(self, FloatTo: <a class="struct" href="types/struct.Type.html" title="struct cranelift_codegen::ir::types::Type">Type</a>, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a></h4></section></summary><div class="docblock"><p>Convert <code>x</code> to a larger floating point format.</p>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.fpromote" class="method has-srclink"><a class="srclink rightside" href="../../src/cranelift_codegen/home/runner/work/wasmtime/wasmtime/target/debug/build/cranelift-codegen-e25d4caf4193e3b2/out/inst_builder.rs.html#3453-3456">source</a><h4 class="code-header">fn <a href="#method.fpromote" class="fn">fpromote</a>(self, FloatScalarTo: <a class="struct" href="types/struct.Type.html" title="struct cranelift_codegen::ir::types::Type">Type</a>, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a></h4></section></summary><div class="docblock"><p>Convert <code>x</code> to a larger floating point format.</p>
 <p>Each lane in <code>x</code> is converted to the destination floating point format.
 This is an exact operation.</p>
 <p>Cranelift currently only supports two floating point formats</p>
@@ -2272,14 +2272,14 @@ This is an exact operation.</p>
 and the result lanes must not have fewer bits than the input lanes.</p>
 <p>Inputs:</p>
 <ul>
-<li>FloatTo (controlling type variable): A scalar or vector floating point number</li>
-<li>x: A scalar or vector floating point number</li>
+<li>FloatScalarTo (controlling type variable): A scalar only floating point number</li>
+<li>x: A scalar only floating point number</li>
 </ul>
 <p>Outputs:</p>
 <ul>
-<li>a: A scalar or vector floating point number</li>
+<li>a: A scalar only floating point number</li>
 </ul>
-</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.fdemote" class="method has-srclink"><a class="srclink rightside" href="../../src/cranelift_codegen/home/runner/work/wasmtime/wasmtime/target/debug/build/cranelift-codegen-e25d4caf4193e3b2/out/inst_builder.rs.html#3478-3481">source</a><h4 class="code-header">fn <a href="#method.fdemote" class="fn">fdemote</a>(self, FloatTo: <a class="struct" href="types/struct.Type.html" title="struct cranelift_codegen::ir::types::Type">Type</a>, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a></h4></section></summary><div class="docblock"><p>Convert <code>x</code> to a smaller floating point format.</p>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.fdemote" class="method has-srclink"><a class="srclink rightside" href="../../src/cranelift_codegen/home/runner/work/wasmtime/wasmtime/target/debug/build/cranelift-codegen-e25d4caf4193e3b2/out/inst_builder.rs.html#3478-3481">source</a><h4 class="code-header">fn <a href="#method.fdemote" class="fn">fdemote</a>(self, FloatScalarTo: <a class="struct" href="types/struct.Type.html" title="struct cranelift_codegen::ir::types::Type">Type</a>, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a></h4></section></summary><div class="docblock"><p>Convert <code>x</code> to a smaller floating point format.</p>
 <p>Each lane in <code>x</code> is converted to the destination floating point format
 by rounding to nearest, ties to even.</p>
 <p>Cranelift currently only supports two floating point formats</p>
@@ -2290,12 +2290,12 @@ by rounding to nearest, ties to even.</p>
 and the result lanes must not have more bits than the input lanes.</p>
 <p>Inputs:</p>
 <ul>
-<li>FloatTo (controlling type variable): A scalar or vector floating point number</li>
-<li>x: A scalar or vector floating point number</li>
+<li>FloatScalarTo (controlling type variable): A scalar only floating point number</li>
+<li>x: A scalar only floating point number</li>
 </ul>
 <p>Outputs:</p>
 <ul>
-<li>a: A scalar or vector floating point number</li>
+<li>a: A scalar only floating point number</li>
 </ul>
 </div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.fvdemote" class="method has-srclink"><a class="srclink rightside" href="../../src/cranelift_codegen/home/runner/work/wasmtime/wasmtime/target/debug/build/cranelift-codegen-e25d4caf4193e3b2/out/inst_builder.rs.html#3504-3507">source</a><h4 class="code-header">fn <a href="#method.fvdemote" class="fn">fvdemote</a>(self, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a></h4></section></summary><div class="docblock"><p>Convert <code>x</code> to a smaller floating point format.</p>
 <p>Each lane in <code>x</code> is converted to the destination floating point format

@@ -3791,6 +3791,13 @@
 <a href="#3791" id="3791">3791</a>
 <a href="#3792" id="3792">3792</a>
 <a href="#3793" id="3793">3793</a>
+<a href="#3794" id="3794">3794</a>
+<a href="#3795" id="3795">3795</a>
+<a href="#3796" id="3796">3796</a>
+<a href="#3797" id="3797">3797</a>
+<a href="#3798" id="3798">3798</a>
+<a href="#3799" id="3799">3799</a>
+<a href="#3800" id="3800">3800</a>
 </pre><pre class="rust"><code><span class="attr">#![allow(non_snake_case)]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::cdsl::instructions::{
@@ -7113,13 +7120,16 @@
         );
     }
 
-    <span class="kw">let </span>FloatTo = <span class="kw-2">&amp;</span>TypeVar::new(
-        <span class="string">&quot;FloatTo&quot;</span>,
-        <span class="string">&quot;A scalar or vector floating point number&quot;</span>,
-        TypeSetBuilder::new()
-            .floats(Interval::All)
-            .simd_lanes(Interval::All)
-            .build(),
+    <span class="kw">let </span>FloatScalar = <span class="kw-2">&amp;</span>TypeVar::new(
+        <span class="string">&quot;FloatScalar&quot;</span>,
+        <span class="string">&quot;A scalar only floating point number&quot;</span>,
+        TypeSetBuilder::new().floats(Interval::All).build(),
+    );
+
+    <span class="kw">let </span>FloatScalarTo = <span class="kw-2">&amp;</span>TypeVar::new(
+        <span class="string">&quot;FloatScalarTo&quot;</span>,
+        <span class="string">&quot;A scalar only floating point number&quot;</span>,
+        TypeSetBuilder::new().floats(Interval::All).build(),
     );
 
     ig.push(
@@ -7139,8 +7149,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float)])
-        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, FloatTo)]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, FloatScalar)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, FloatScalarTo)]),
     );
 
     ig.push(
@@ -7160,8 +7170,8 @@
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.unary,
         )
-        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, Float)])
-        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, FloatTo)]),
+        .operands_in(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, FloatScalar)])
+        .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;a&quot;</span>, FloatScalarTo)]),
     );
 
     <span class="kw">let </span>F64x2 = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -7224,11 +7234,6 @@
         .operands_out(<span class="macro">vec!</span>[Operand::new(<span class="string">&quot;x&quot;</span>, F64x2)]),
     );
 
-    <span class="kw">let </span>FloatScalar = <span class="kw-2">&amp;</span>TypeVar::new(
-        <span class="string">&quot;FloatScalar&quot;</span>,
-        <span class="string">&quot;A scalar only floating point number&quot;</span>,
-        TypeSetBuilder::new().floats(Interval::All).build(),
-    );
     <span class="kw">let </span>IntTo = <span class="kw-2">&amp;</span>TypeVar::new(
         <span class="string">&quot;IntTo&quot;</span>,
         <span class="string">&quot;An scalar only integer type&quot;</span>,
@@ -7328,6 +7333,15 @@
         <span class="string">&quot;A scalar or vector integer type&quot;</span>,
         TypeSetBuilder::new()
             .ints(Interval::All)
+            .simd_lanes(Interval::All)
+            .build(),
+    );
+
+    <span class="kw">let </span>FloatTo = <span class="kw-2">&amp;</span>TypeVar::new(
+        <span class="string">&quot;FloatTo&quot;</span>,
+        <span class="string">&quot;A scalar or vector floating point number&quot;</span>,
+        TypeSetBuilder::new()
+            .floats(Interval::All)
             .simd_lanes(Interval::All)
             .build(),
     );

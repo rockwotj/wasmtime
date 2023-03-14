@@ -7734,15 +7734,15 @@
     ///
     /// Inputs:
     ///
-    /// - FloatTo (controlling type variable): A scalar or vector floating point number
-    /// - x: A scalar or vector floating point number
+    /// - FloatScalarTo (controlling type variable): A scalar only floating point number
+    /// - x: A scalar only floating point number
     ///
     /// Outputs:
     ///
-    /// - a: A scalar or vector floating point number
+    /// - a: A scalar only floating point number
     </span><span class="attr">#[allow(non_snake_case)]
-    </span><span class="kw">fn </span>fpromote(<span class="self">self</span>, FloatTo: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
-        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Fpromote, FloatTo, x);
+    </span><span class="kw">fn </span>fpromote(<span class="self">self</span>, FloatScalarTo: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
+        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Fpromote, FloatScalarTo, x);
         dfg.first_result(inst)
     }
 
@@ -7759,15 +7759,15 @@
     ///
     /// Inputs:
     ///
-    /// - FloatTo (controlling type variable): A scalar or vector floating point number
-    /// - x: A scalar or vector floating point number
+    /// - FloatScalarTo (controlling type variable): A scalar only floating point number
+    /// - x: A scalar only floating point number
     ///
     /// Outputs:
     ///
-    /// - a: A scalar or vector floating point number
+    /// - a: A scalar only floating point number
     </span><span class="attr">#[allow(non_snake_case)]
-    </span><span class="kw">fn </span>fdemote(<span class="self">self</span>, FloatTo: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
-        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Fdemote, FloatTo, x);
+    </span><span class="kw">fn </span>fdemote(<span class="self">self</span>, FloatScalarTo: <span class="kw">crate</span>::ir::Type, x: ir::Value) -&gt; Value {
+        <span class="kw">let </span>(inst, dfg) = <span class="self">self</span>.Unary(Opcode::Fdemote, FloatScalarTo, x);
         dfg.first_result(inst)
     }
 
