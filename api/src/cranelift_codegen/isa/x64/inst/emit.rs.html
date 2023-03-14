@@ -3785,8 +3785,6 @@
 <a href="#3785" id="3785">3785</a>
 <a href="#3786" id="3786">3786</a>
 <a href="#3787" id="3787">3787</a>
-<a href="#3788" id="3788">3788</a>
-<a href="#3789" id="3789">3789</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -4188,25 +4186,36 @@
             emit_std_enc_enc(sink, prefix, opcode, <span class="number">1</span>, subopcode, enc_src, rex_flags)
         }
 
-        Inst::Div {
-            size,
-            signed,
-            dividend_lo,
-            dividend_hi,
-            divisor,
-            dst_quotient,
-            dst_remainder,
-        } =&gt; {
-            <span class="kw">let </span>dividend_lo = allocs.next(dividend_lo.to_reg());
-            <span class="kw">let </span>dst_quotient = allocs.next(dst_quotient.to_reg().to_reg());
-            <span class="macro">debug_assert_eq!</span>(dividend_lo, regs::rax());
-            <span class="macro">debug_assert_eq!</span>(dst_quotient, regs::rax());
-            <span class="kw">if </span>size.to_bits() &gt; <span class="number">8 </span>{
-                <span class="kw">let </span>dst_remainder = allocs.next(dst_remainder.to_reg().to_reg());
-                <span class="macro">debug_assert_eq!</span>(dst_remainder, regs::rdx());
-                <span class="kw">let </span>dividend_hi = allocs.next(dividend_hi.to_reg());
-                <span class="macro">debug_assert_eq!</span>(dividend_hi, regs::rdx());
-            }
+        Inst::Div { sign, divisor, .. } | Inst::Div8 { sign, divisor, .. } =&gt; {
+            <span class="kw">let </span>divisor = divisor.clone().to_reg_mem().with_allocs(allocs);
+            <span class="kw">let </span>size = <span class="kw">match </span>inst {
+                Inst::Div {
+                    size,
+                    dividend_lo,
+                    dividend_hi,
+                    dst_quotient,
+                    dst_remainder,
+                    ..
+                } =&gt; {
+                    <span class="kw">let </span>dividend_lo = allocs.next(dividend_lo.to_reg());
+                    <span class="kw">let </span>dividend_hi = allocs.next(dividend_hi.to_reg());
+                    <span class="kw">let </span>dst_quotient = allocs.next(dst_quotient.to_reg().to_reg());
+                    <span class="kw">let </span>dst_remainder = allocs.next(dst_remainder.to_reg().to_reg());
+                    <span class="macro">debug_assert_eq!</span>(dividend_lo, regs::rax());
+                    <span class="macro">debug_assert_eq!</span>(dividend_hi, regs::rdx());
+                    <span class="macro">debug_assert_eq!</span>(dst_quotient, regs::rax());
+                    <span class="macro">debug_assert_eq!</span>(dst_remainder, regs::rdx());
+                    <span class="kw-2">*</span>size
+                }
+                Inst::Div8 { dividend, dst, .. } =&gt; {
+                    <span class="kw">let </span>dividend = allocs.next(dividend.to_reg());
+                    <span class="kw">let </span>dst = allocs.next(dst.to_reg().to_reg());
+                    <span class="macro">debug_assert_eq!</span>(dividend, regs::rax());
+                    <span class="macro">debug_assert_eq!</span>(dst, regs::rax());
+                    OperandSize::Size8
+                }
+                <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+            };
 
             <span class="kw">let </span>(opcode, prefix) = <span class="kw">match </span>size {
                 OperandSize::Size8 =&gt; (<span class="number">0xF6</span>, LegacyPrefixes::None),
@@ -4217,10 +4226,12 @@
 
             sink.add_trap(TrapCode::IntegerDivisionByZero);
 
-            <span class="kw">let </span>subopcode = <span class="kw">if </span><span class="kw-2">*</span>signed { <span class="number">7 </span>} <span class="kw">else </span>{ <span class="number">6 </span>};
-            <span class="kw">match </span>divisor.clone().to_reg_mem() {
+            <span class="kw">let </span>subopcode = <span class="kw">match </span>sign {
+                DivSignedness::Signed =&gt; <span class="number">7</span>,
+                DivSignedness::Unsigned =&gt; <span class="number">6</span>,
+            };
+            <span class="kw">match </span>divisor {
                 RegMem::Reg { reg } =&gt; {
-                    <span class="kw">let </span>reg = allocs.next(reg);
                     <span class="kw">let </span>src = int_reg_enc(reg);
                     emit_std_enc_enc(
                         sink,
@@ -4229,11 +4240,11 @@
                         <span class="number">1</span>,
                         subopcode,
                         src,
-                        RexFlags::from((<span class="kw-2">*</span>size, reg)),
+                        RexFlags::from((size, reg)),
                     )
                 }
                 RegMem::Mem { addr: src } =&gt; {
-                    <span class="kw">let </span>amode = src.finalize(state, sink).with_allocs(allocs);
+                    <span class="kw">let </span>amode = src.finalize(state, sink);
                     emit_std_enc_mem(
                         sink,
                         prefix,
@@ -4241,7 +4252,7 @@
                         <span class="number">1</span>,
                         subopcode,
                         <span class="kw-2">&amp;</span>amode,
-                        RexFlags::from(<span class="kw-2">*</span>size),
+                        RexFlags::from(size),
                         <span class="number">0</span>,
                     );
                 }
@@ -4311,164 +4322,149 @@
             }
         }
 
-        Inst::CheckedDivOrRemSeq {
-            kind,
-            size,
-            dividend_lo,
-            dividend_hi,
-            divisor,
-            tmp,
-            dst_quotient,
-            dst_remainder,
-        } =&gt; {
-            <span class="kw">let </span>dividend_lo = allocs.next(dividend_lo.to_reg());
-            <span class="kw">let </span>dividend_hi = allocs.next(dividend_hi.to_reg());
+        Inst::CheckedSRemSeq { divisor, .. } | Inst::CheckedSRemSeq8 { divisor, .. } =&gt; {
             <span class="kw">let </span>divisor = allocs.next(divisor.to_reg());
-            <span class="kw">let </span>dst_quotient = allocs.next(dst_quotient.to_reg().to_reg());
-            <span class="kw">let </span>dst_remainder = allocs.next(dst_remainder.to_reg().to_reg());
-            <span class="kw">let </span>tmp = tmp.map(|tmp| allocs.next(tmp.to_reg().to_reg()));
-            <span class="macro">debug_assert_eq!</span>(dividend_lo, regs::rax());
-            <span class="macro">debug_assert_eq!</span>(dividend_hi, regs::rdx());
-            <span class="macro">debug_assert_eq!</span>(dst_quotient, regs::rax());
-            <span class="macro">debug_assert_eq!</span>(dst_remainder, regs::rdx());
+
+            <span class="comment">// Validate that the register constraints of the dividend and the
+            // destination are all as expected.
+            </span><span class="kw">let </span>(dst, size) = <span class="kw">match </span>inst {
+                Inst::CheckedSRemSeq {
+                    dividend_lo,
+                    dividend_hi,
+                    dst_quotient,
+                    dst_remainder,
+                    size,
+                    ..
+                } =&gt; {
+                    <span class="kw">let </span>dividend_lo = allocs.next(dividend_lo.to_reg());
+                    <span class="kw">let </span>dividend_hi = allocs.next(dividend_hi.to_reg());
+                    <span class="kw">let </span>dst_quotient = allocs.next(dst_quotient.to_reg().to_reg());
+                    <span class="kw">let </span>dst_remainder = allocs.next(dst_remainder.to_reg().to_reg());
+                    <span class="macro">debug_assert_eq!</span>(dividend_lo, regs::rax());
+                    <span class="macro">debug_assert_eq!</span>(dividend_hi, regs::rdx());
+                    <span class="macro">debug_assert_eq!</span>(dst_quotient, regs::rax());
+                    <span class="macro">debug_assert_eq!</span>(dst_remainder, regs::rdx());
+                    (regs::rdx(), <span class="kw-2">*</span>size)
+                }
+                Inst::CheckedSRemSeq8 { dividend, dst, .. } =&gt; {
+                    <span class="kw">let </span>dividend = allocs.next(dividend.to_reg());
+                    <span class="kw">let </span>dst = allocs.next(dst.to_reg().to_reg());
+                    <span class="macro">debug_assert_eq!</span>(dividend, regs::rax());
+                    <span class="macro">debug_assert_eq!</span>(dst, regs::rax());
+                    (regs::rax(), OperandSize::Size8)
+                }
+                <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+            };
 
             <span class="comment">// Generates the following code sequence:
             //
-            // ;; check divide by zero:
-            // cmp 0 %divisor
-            // jnz $after_trap
-            // ud2
-            // $after_trap:
-            //
-            // ;; for signed modulo/div:
             // cmp -1 %divisor
             // jnz $do_op
-            // ;;   for signed modulo, result is 0
-            //    mov #0, %rdx
-            //    j $done
-            // ;;   for signed div, check for integer overflow against INT_MIN of the right size
-            // cmp INT_MIN, %rax
-            // jnz $do_op
-            // ud2
+            //
+            // ;; for srem, result is 0
+            // mov #0, %dst
+            // j $done
             //
             // $do_op:
-            // ;; if signed
-            //     cdq ;; sign-extend from rax into rdx
-            // ;; else
-            //     mov #0, %rdx
             // idiv %divisor
             //
             // $done:
 
-            // Check if the divisor is zero, first.
-            </span><span class="kw">let </span>inst = Inst::cmp_rmi_r(<span class="kw-2">*</span>size, RegMemImm::imm(<span class="number">0</span>), divisor);
+            </span><span class="kw">let </span>do_op = sink.get_label();
+            <span class="kw">let </span>done_label = sink.get_label();
+
+            <span class="comment">// Check if the divisor is -1, and if it isn&#39;t then immediately
+            // go to the `idiv`.
+            </span><span class="kw">let </span>inst = Inst::cmp_rmi_r(size, RegMemImm::imm(<span class="number">0xffffffff</span>), divisor);
+            inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
+            one_way_jmp(sink, CC::NZ, do_op);
+
+            <span class="comment">// ... otherwise the divisor is -1 and the result is always 0. This
+            // is written to the destination register which will be %rax for
+            // 8-bit srem and %rdx otherwise.
+            //
+            // Note that for 16-to-64-bit srem operations this leaves the
+            // second destination, %rax, unchanged. This isn&#39;t semantically
+            // correct if a lowering actually tries to use the `dst_quotient`
+            // output but for srem only the `dst_remainder` output is used for
+            // now.
+            </span><span class="kw">let </span>inst = Inst::imm(OperandSize::Size64, <span class="number">0</span>, Writable::from_reg(dst));
+            inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
+            <span class="kw">let </span>inst = Inst::jmp_known(done_label);
             inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
+            <span class="comment">// Here the `idiv` is executed, which is different depending on the
+            // size
+            </span>sink.bind_label(do_op);
+            <span class="kw">let </span>inst = <span class="kw">match </span>size {
+                OperandSize::Size8 =&gt; Inst::div8(
+                    DivSignedness::Signed,
+                    RegMem::reg(divisor),
+                    Gpr::new(regs::rax()).unwrap(),
+                    Writable::from_reg(Gpr::new(regs::rax()).unwrap()),
+                ),
+                <span class="kw">_ </span>=&gt; Inst::div(
+                    size,
+                    DivSignedness::Signed,
+                    RegMem::reg(divisor),
+                    Gpr::new(regs::rax()).unwrap(),
+                    Gpr::new(regs::rdx()).unwrap(),
+                    Writable::from_reg(Gpr::new(regs::rax()).unwrap()),
+                    Writable::from_reg(Gpr::new(regs::rdx()).unwrap()),
+                ),
+            };
+            inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
+
+            sink.bind_label(done_label);
+        }
+
+        Inst::ValidateSdivDivisor {
+            dividend, divisor, ..
+        }
+        | Inst::ValidateSdivDivisor64 {
+            dividend, divisor, ..
+        } =&gt; {
+            <span class="kw">let </span>orig_inst = <span class="kw-2">&amp;</span>inst;
+            <span class="kw">let </span>divisor = allocs.next(divisor.to_reg());
+            <span class="kw">let </span>dividend = allocs.next(dividend.to_reg());
+            <span class="kw">let </span>size = <span class="kw">match </span>inst {
+                Inst::ValidateSdivDivisor { size, .. } =&gt; <span class="kw-2">*</span>size,
+                <span class="kw">_ </span>=&gt; OperandSize::Size64,
+            };
+
+            <span class="comment">// First trap if the divisor is zero
+            </span><span class="kw">let </span>inst = Inst::cmp_rmi_r(size, RegMemImm::imm(<span class="number">0</span>), divisor);
+            inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
             <span class="kw">let </span>inst = Inst::trap_if(CC::Z, TrapCode::IntegerDivisionByZero);
             inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
-            <span class="kw">let </span>(do_op, done_label) = <span class="kw">if </span>kind.is_signed() {
-                <span class="comment">// Now check if the divisor is -1.
-                </span><span class="kw">let </span>inst = Inst::cmp_rmi_r(<span class="kw-2">*</span>size, RegMemImm::imm(<span class="number">0xffffffff</span>), divisor);
-                inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-                <span class="kw">let </span>do_op = sink.get_label();
-
-                <span class="comment">// If not equal, jump to do-op.
-                </span>one_way_jmp(sink, CC::NZ, do_op);
-
-                <span class="comment">// Here, divisor == -1.
-                </span><span class="kw">if </span>!kind.is_div() {
-                    <span class="comment">// x % -1 = 0; put the result into the destination, $rax.
-                    </span><span class="kw">let </span>done_label = sink.get_label();
-
-                    <span class="kw">let </span>inst = Inst::imm(OperandSize::Size64, <span class="number">0</span>, Writable::from_reg(regs::rax()));
+            <span class="comment">// Now check if the divisor is -1. If it is then additionally
+            // check if the dividend is INT_MIN. If it isn&#39;t then jump to the
+            // end. If both conditions here are true then trap.
+            </span><span class="kw">let </span>inst = Inst::cmp_rmi_r(size, RegMemImm::imm(<span class="number">0xffffffff</span>), divisor);
+            inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
+            <span class="kw">let </span>done = sink.get_label();
+            one_way_jmp(sink, CC::NZ, done);
+            <span class="kw">let </span>int_min = <span class="kw">match </span>orig_inst {
+                Inst::ValidateSdivDivisor64 { tmp, .. } =&gt; {
+                    <span class="kw">let </span>tmp = allocs.next(tmp.to_reg().to_reg());
+                    <span class="kw">let </span>inst = Inst::imm(size, i64::MIN <span class="kw">as </span>u64, Writable::from_reg(tmp));
                     inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-
-                    <span class="kw">let </span>inst = Inst::jmp_known(done_label);
-                    inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-
-                    (<span class="prelude-val">Some</span>(do_op), <span class="prelude-val">Some</span>(done_label))
-                } <span class="kw">else </span>{
-                    <span class="comment">// Check for integer overflow.
-                    </span><span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size64 {
-                        <span class="kw">let </span>tmp = tmp.expect(<span class="string">&quot;temporary for i64 sdiv&quot;</span>);
-
-                        <span class="kw">let </span>inst = Inst::imm(
-                            OperandSize::Size64,
-                            <span class="number">0x8000000000000000</span>,
-                            Writable::from_reg(tmp),
-                        );
-                        inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-
-                        <span class="kw">let </span>inst =
-                            Inst::cmp_rmi_r(OperandSize::Size64, RegMemImm::reg(tmp), regs::rax());
-                        inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-                    } <span class="kw">else </span>{
-                        <span class="kw">let </span>inst = Inst::cmp_rmi_r(<span class="kw-2">*</span>size, RegMemImm::imm(<span class="number">0x80000000</span>), regs::rax());
-                        inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-                    }
-
-                    <span class="comment">// If not equal, jump over the trap.
-                    </span><span class="kw">let </span>inst = Inst::trap_if(CC::Z, TrapCode::IntegerOverflow);
-                    inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-
-                    (<span class="prelude-val">Some</span>(do_op), <span class="prelude-val">None</span>)
+                    RegMemImm::reg(tmp)
                 }
-            } <span class="kw">else </span>{
-                (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>)
+                <span class="kw">_ </span>=&gt; RegMemImm::imm(<span class="kw">match </span>size {
+                    OperandSize::Size8 =&gt; <span class="number">0x80</span>,
+                    OperandSize::Size16 =&gt; <span class="number">0x8000</span>,
+                    OperandSize::Size32 =&gt; <span class="number">0x80000000</span>,
+                    OperandSize::Size64 =&gt; <span class="macro">unreachable!</span>(),
+                }),
             };
-
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(do_op) = do_op {
-                sink.bind_label(do_op);
-            }
-
-            <span class="kw">let </span>dividend_lo = Gpr::new(regs::rax()).unwrap();
-            <span class="kw">let </span>dst_quotient = WritableGpr::from_reg(Gpr::new(regs::rax()).unwrap());
-            <span class="kw">let </span>(dividend_hi, dst_remainder) = <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size8 {
-                (
-                    Gpr::new(regs::rax()).unwrap(),
-                    Writable::from_reg(Gpr::new(regs::rax()).unwrap()),
-                )
-            } <span class="kw">else </span>{
-                (
-                    Gpr::new(regs::rdx()).unwrap(),
-                    Writable::from_reg(Gpr::new(regs::rdx()).unwrap()),
-                )
-            };
-
-            <span class="comment">// Fill in the high parts:
-            </span><span class="kw">if </span>kind.is_signed() {
-                <span class="comment">// sign-extend the sign-bit of rax into rdx, for signed opcodes.
-                </span><span class="kw">let </span>inst =
-                    Inst::sign_extend_data(<span class="kw-2">*</span>size, dividend_lo, WritableGpr::from_reg(dividend_hi));
-                inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-            } <span class="kw">else if </span><span class="kw-2">*</span>size != OperandSize::Size8 {
-                <span class="comment">// zero for unsigned opcodes.
-                </span><span class="kw">let </span>inst = Inst::imm(
-                    OperandSize::Size64,
-                    <span class="number">0</span>,
-                    Writable::from_reg(dividend_hi.to_reg()),
-                );
-                inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-            }
-
-            <span class="kw">let </span>inst = Inst::div(
-                <span class="kw-2">*</span>size,
-                kind.is_signed(),
-                RegMem::reg(divisor),
-                dividend_lo,
-                dividend_hi,
-                dst_quotient,
-                dst_remainder,
-            );
+            <span class="kw">let </span>inst = Inst::cmp_rmi_r(size, int_min, dividend);
+            inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
+            <span class="kw">let </span>inst = Inst::trap_if(CC::Z, TrapCode::IntegerOverflow);
             inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
-            <span class="comment">// Lowering takes care of moving the result back into the right register, see comment
-            // there.
-
-            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(done) = done_label {
-                sink.bind_label(done);
-            }
+            sink.bind_label(done);
         }
 
         Inst::Imm {

@@ -2135,33 +2135,6 @@
 <a href="#2135" id="2135">2135</a>
 <a href="#2136" id="2136">2136</a>
 <a href="#2137" id="2137">2137</a>
-<a href="#2138" id="2138">2138</a>
-<a href="#2139" id="2139">2139</a>
-<a href="#2140" id="2140">2140</a>
-<a href="#2141" id="2141">2141</a>
-<a href="#2142" id="2142">2142</a>
-<a href="#2143" id="2143">2143</a>
-<a href="#2144" id="2144">2144</a>
-<a href="#2145" id="2145">2145</a>
-<a href="#2146" id="2146">2146</a>
-<a href="#2147" id="2147">2147</a>
-<a href="#2148" id="2148">2148</a>
-<a href="#2149" id="2149">2149</a>
-<a href="#2150" id="2150">2150</a>
-<a href="#2151" id="2151">2151</a>
-<a href="#2152" id="2152">2152</a>
-<a href="#2153" id="2153">2153</a>
-<a href="#2154" id="2154">2154</a>
-<a href="#2155" id="2155">2155</a>
-<a href="#2156" id="2156">2156</a>
-<a href="#2157" id="2157">2157</a>
-<a href="#2158" id="2158">2158</a>
-<a href="#2159" id="2159">2159</a>
-<a href="#2160" id="2160">2160</a>
-<a href="#2161" id="2161">2161</a>
-<a href="#2162" id="2162">2162</a>
-<a href="#2163" id="2163">2163</a>
-<a href="#2164" id="2164">2164</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Instruction operand sub-components (aka &quot;parts&quot;): definitions and printing.
 
 </span><span class="kw">use </span><span class="kw">super</span>::regs::{<span class="self">self</span>};
@@ -2175,6 +2148,8 @@
 <span class="kw">use </span>smallvec::{smallvec, SmallVec};
 <span class="kw">use </span>std::fmt;
 <span class="kw">use </span>std::string::String;
+
+<span class="kw">pub use </span><span class="kw">crate</span>::isa::x64::lower::isle::generated_code::DivSignedness;
 
 <span class="doccomment">/// An extenstion trait for converting `Writable{Xmm,Gpr}` to `Writable&lt;Reg&gt;`.
 </span><span class="kw">pub trait </span>ToWritableReg {
@@ -4039,35 +4014,6 @@
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>ShiftKind {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         fmt::Debug::fmt(<span class="self">self</span>, f)
-    }
-}
-
-<span class="doccomment">/// What kind of division or remainder instruction this is?
-</span><span class="attr">#[derive(Clone, Eq, PartialEq)]
-</span><span class="kw">pub enum </span>DivOrRemKind {
-    <span class="doccomment">/// Signed division.
-    </span>SignedDiv,
-    <span class="doccomment">/// Unsigned division.
-    </span>UnsignedDiv,
-    <span class="doccomment">/// Signed remainder.
-    </span>SignedRem,
-    <span class="doccomment">/// Unsigned remainder.
-    </span>UnsignedRem,
-}
-
-<span class="kw">impl </span>DivOrRemKind {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>is_signed(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">match </span><span class="self">self </span>{
-            DivOrRemKind::SignedDiv | DivOrRemKind::SignedRem =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-        }
-    }
-
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>is_div(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">match </span><span class="self">self </span>{
-            DivOrRemKind::SignedDiv | DivOrRemKind::UnsignedDiv =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-        }
     }
 }
 

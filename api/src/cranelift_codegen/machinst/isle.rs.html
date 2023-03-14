@@ -842,6 +842,16 @@
 <a href="#842" id="842">842</a>
 <a href="#843" id="843">843</a>
 <a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
+<a href="#853" id="853">853</a>
+<a href="#854" id="854">854</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::ir::{BlockCall, Value, ValueList};
 <span class="kw">use </span>alloc::boxed::Box;
 <span class="kw">use </span>alloc::vec::Vec;
@@ -1129,12 +1139,8 @@
             </span>}
         }
 
-        <span class="kw">fn </span>avoid_div_traps(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Type) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
-            <span class="kw">if </span><span class="self">self</span>.backend.flags().avoid_div_traps() {
-                <span class="prelude-val">Some</span>(())
-            } <span class="kw">else </span>{
-                <span class="prelude-val">None
-            </span>}
+        <span class="kw">fn </span>avoid_div_traps(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
+            <span class="self">self</span>.backend.flags().avoid_div_traps()
         }
 
         <span class="attr">#[inline]
@@ -1480,6 +1486,20 @@
                 shuffle_imm_as_le_lane_idx(<span class="number">2</span>, <span class="kw-2">&amp;</span>bytes[<span class="number">12</span>..<span class="number">14</span>])<span class="question-mark">?</span>,
                 shuffle_imm_as_le_lane_idx(<span class="number">2</span>, <span class="kw-2">&amp;</span>bytes[<span class="number">14</span>..<span class="number">16</span>])<span class="question-mark">?</span>,
             ))
+        }
+
+        <span class="kw">fn </span>safe_divisor_from_imm64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type, val: Imm64) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+            <span class="kw">let </span>minus_one = <span class="kw">if </span>ty.bytes() == <span class="number">8 </span>{
+                -<span class="number">1
+            </span>} <span class="kw">else </span>{
+                (<span class="number">1 </span>&lt;&lt; (ty.bytes() * <span class="number">8</span>)) - <span class="number">1
+            </span>};
+            <span class="kw">let </span>bits = val.bits() &amp; minus_one;
+            <span class="kw">if </span>bits == <span class="number">0 </span>|| bits == minus_one {
+                <span class="prelude-val">None
+            </span>} <span class="kw">else </span>{
+                <span class="prelude-val">Some</span>(bits <span class="kw">as </span>u64)
+            }
         }
     };
 }
