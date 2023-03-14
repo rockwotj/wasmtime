@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["isa",""]]};
+window.SIDEBAR_ITEMS = {"mod":[["isa",""]],"struct":[["Callee","Metadata about a function callee.  Use by the code generation to emit function calls."]],"trait":[["FuncEnv","Function environment used the by the code generation to resolve module and runtime-specific information."]]};

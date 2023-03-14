@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["FuncEnv","Function environment containing module and runtime specific information."]]};
