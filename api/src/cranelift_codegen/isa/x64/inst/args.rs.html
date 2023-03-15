@@ -2135,6 +2135,10 @@
 <a href="#2135" id="2135">2135</a>
 <a href="#2136" id="2136">2136</a>
 <a href="#2137" id="2137">2137</a>
+<a href="#2138" id="2138">2138</a>
+<a href="#2139" id="2139">2139</a>
+<a href="#2140" id="2140">2140</a>
+<a href="#2141" id="2141">2141</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Instruction operand sub-components (aka &quot;parts&quot;): definitions and printing.
 
 </span><span class="kw">use </span><span class="kw">super</span>::regs::{<span class="self">self</span>};
@@ -3262,6 +3266,7 @@
     Punpcklqdq,
     Pshuflw,
     Pshufhw,
+    Pblendw,
 }
 
 <span class="kw">impl </span>SseOpcode {
@@ -3455,7 +3460,8 @@
             | SseOpcode::Roundps
             | SseOpcode::Roundpd
             | SseOpcode::Roundss
-            | SseOpcode::Roundsd =&gt; SSE41,
+            | SseOpcode::Roundsd
+            | SseOpcode::Pblendw =&gt; SSE41,
 
             SseOpcode::Pcmpgtq =&gt; SSE42,
         }
@@ -3658,6 +3664,7 @@
             SseOpcode::Punpckhqdq =&gt; <span class="string">&quot;punpckhqdq&quot;</span>,
             SseOpcode::Pshuflw =&gt; <span class="string">&quot;pshuflw&quot;</span>,
             SseOpcode::Pshufhw =&gt; <span class="string">&quot;pshufhw&quot;</span>,
+            SseOpcode::Pblendw =&gt; <span class="string">&quot;pblendw&quot;</span>,
         };
         <span class="macro">write!</span>(fmt, <span class="string">&quot;{}&quot;</span>, name)
     }
@@ -3842,7 +3849,8 @@
             | AvxOpcode::Vpextrb
             | AvxOpcode::Vpextrw
             | AvxOpcode::Vpextrd
-            | AvxOpcode::Vpextrq =&gt; {
+            | AvxOpcode::Vpextrq
+            | AvxOpcode::Vpblendw =&gt; {
                 <span class="macro">smallvec!</span>[InstructionSet::AVX]
             }
         }

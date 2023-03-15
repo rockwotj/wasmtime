@@ -3849,6 +3849,8 @@
 <a href="#3849" id="3849">3849</a>
 <a href="#3850" id="3850">3850</a>
 <a href="#3851" id="3851">3851</a>
+<a href="#3852" id="3852">3852</a>
+<a href="#3853" id="3853">3853</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -6114,6 +6116,7 @@
                 AvxOpcode::Vpalignr =&gt; (<span class="bool-val">false</span>, LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x0F</span>),
                 AvxOpcode::Vinsertps =&gt; (<span class="bool-val">false</span>, LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x21</span>),
                 AvxOpcode::Vshufps =&gt; (<span class="bool-val">false</span>, LegacyPrefixes::None, OpcodeMap::_0F, <span class="number">0xC6</span>),
+                AvxOpcode::Vpblendw =&gt; (<span class="bool-val">false</span>, LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x0E</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected rmr_imm_vex opcode {op:?}&quot;</span>),
             };
 
@@ -6570,6 +6573,7 @@
                 SseOpcode::Pinsrw =&gt; (LegacyPrefixes::_66, <span class="number">0x0FC4</span>, <span class="number">2</span>),
                 SseOpcode::Pinsrd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3A22</span>, <span class="number">3</span>),
                 SseOpcode::Shufps =&gt; (LegacyPrefixes::None, <span class="number">0x0FC6</span>, <span class="number">2</span>),
+                SseOpcode::Pblendw =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3A0E</span>, <span class="number">3</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Opcode {:?} not implemented&quot;</span>, op),
             };
             <span class="kw">let </span>rex = RexFlags::from(<span class="kw-2">*</span>size);
