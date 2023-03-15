@@ -339,6 +339,8 @@
 <a href="#339" id="339">339</a>
 <a href="#340" id="340">340</a>
 <a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Legalize instructions.
 //!
 //! A legal instruction is one that can be mapped directly to a machine code instruction for the
@@ -423,8 +425,10 @@
 
                     <span class="kw">let </span>addr = pos.ins().stack_addr(addr_ty, stack_slot, offset);
 
-                    <span class="comment">// Stack slots are required to be accessible and aligned.
-                    </span><span class="kw">let </span>mflags = MemFlags::trusted();
+                    <span class="comment">// Stack slots are required to be accessible.
+                    // We can&#39;t currently ensure that they are aligned.
+                    </span><span class="kw">let </span><span class="kw-2">mut </span>mflags = MemFlags::new();
+                    mflags.set_notrap();
                     pos.func.dfg.replace(inst).load(ty, mflags, addr, <span class="number">0</span>);
                 }
                 InstructionData::StackStore {
@@ -440,10 +444,10 @@
 
                     <span class="kw">let </span>addr = pos.ins().stack_addr(addr_ty, stack_slot, offset);
 
-                    <span class="kw">let </span><span class="kw-2">mut </span>mflags = MemFlags::new();
-                    <span class="comment">// Stack slots are required to be accessible and aligned.
-                    </span>mflags.set_notrap();
-                    mflags.set_aligned();
+                    <span class="comment">// Stack slots are required to be accessible.
+                    // We can&#39;t currently ensure that they are aligned.
+                    </span><span class="kw">let </span><span class="kw-2">mut </span>mflags = MemFlags::new();
+                    mflags.set_notrap();
                     pos.func.dfg.replace(inst).store(mflags, arg, addr, <span class="number">0</span>);
                 }
                 InstructionData::DynamicStackLoad {
