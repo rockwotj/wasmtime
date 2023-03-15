@@ -3785,6 +3785,70 @@
 <a href="#3785" id="3785">3785</a>
 <a href="#3786" id="3786">3786</a>
 <a href="#3787" id="3787">3787</a>
+<a href="#3788" id="3788">3788</a>
+<a href="#3789" id="3789">3789</a>
+<a href="#3790" id="3790">3790</a>
+<a href="#3791" id="3791">3791</a>
+<a href="#3792" id="3792">3792</a>
+<a href="#3793" id="3793">3793</a>
+<a href="#3794" id="3794">3794</a>
+<a href="#3795" id="3795">3795</a>
+<a href="#3796" id="3796">3796</a>
+<a href="#3797" id="3797">3797</a>
+<a href="#3798" id="3798">3798</a>
+<a href="#3799" id="3799">3799</a>
+<a href="#3800" id="3800">3800</a>
+<a href="#3801" id="3801">3801</a>
+<a href="#3802" id="3802">3802</a>
+<a href="#3803" id="3803">3803</a>
+<a href="#3804" id="3804">3804</a>
+<a href="#3805" id="3805">3805</a>
+<a href="#3806" id="3806">3806</a>
+<a href="#3807" id="3807">3807</a>
+<a href="#3808" id="3808">3808</a>
+<a href="#3809" id="3809">3809</a>
+<a href="#3810" id="3810">3810</a>
+<a href="#3811" id="3811">3811</a>
+<a href="#3812" id="3812">3812</a>
+<a href="#3813" id="3813">3813</a>
+<a href="#3814" id="3814">3814</a>
+<a href="#3815" id="3815">3815</a>
+<a href="#3816" id="3816">3816</a>
+<a href="#3817" id="3817">3817</a>
+<a href="#3818" id="3818">3818</a>
+<a href="#3819" id="3819">3819</a>
+<a href="#3820" id="3820">3820</a>
+<a href="#3821" id="3821">3821</a>
+<a href="#3822" id="3822">3822</a>
+<a href="#3823" id="3823">3823</a>
+<a href="#3824" id="3824">3824</a>
+<a href="#3825" id="3825">3825</a>
+<a href="#3826" id="3826">3826</a>
+<a href="#3827" id="3827">3827</a>
+<a href="#3828" id="3828">3828</a>
+<a href="#3829" id="3829">3829</a>
+<a href="#3830" id="3830">3830</a>
+<a href="#3831" id="3831">3831</a>
+<a href="#3832" id="3832">3832</a>
+<a href="#3833" id="3833">3833</a>
+<a href="#3834" id="3834">3834</a>
+<a href="#3835" id="3835">3835</a>
+<a href="#3836" id="3836">3836</a>
+<a href="#3837" id="3837">3837</a>
+<a href="#3838" id="3838">3838</a>
+<a href="#3839" id="3839">3839</a>
+<a href="#3840" id="3840">3840</a>
+<a href="#3841" id="3841">3841</a>
+<a href="#3842" id="3842">3842</a>
+<a href="#3843" id="3843">3843</a>
+<a href="#3844" id="3844">3844</a>
+<a href="#3845" id="3845">3845</a>
+<a href="#3846" id="3846">3846</a>
+<a href="#3847" id="3847">3847</a>
+<a href="#3848" id="3848">3848</a>
+<a href="#3849" id="3849">3849</a>
+<a href="#3850" id="3850">3850</a>
+<a href="#3851" id="3851">3851</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -4656,20 +4720,84 @@
             )
         }
 
-        Inst::LoadEffectiveAddress { addr, dst } =&gt; {
+        Inst::LoadEffectiveAddress { addr, dst, size } =&gt; {
             <span class="kw">let </span>dst = allocs.next(dst.to_reg().to_reg());
             <span class="kw">let </span>amode = addr.finalize(state, sink).with_allocs(allocs);
 
-            emit_std_reg_mem(
-                sink,
-                LegacyPrefixes::None,
-                <span class="number">0x8D</span>,
-                <span class="number">1</span>,
-                dst,
-                <span class="kw-2">&amp;</span>amode,
-                RexFlags::set_w(),
-                <span class="number">0</span>,
-            );
+            <span class="comment">// If this `lea` can actually get encoded as an `add` then do that
+            // instead. Currently all candidate `iadd`s become an `lea`
+            // pseudo-instruction here but maximizing the sue of `lea` is not
+            // necessarily optimal. The `lea` instruction goes through dedicated
+            // address units on cores which are finite and disjoint from the
+            // general ALU, so if everything uses `lea` then those units can get
+            // saturated while leaving the ALU idle.
+            //
+            // To help make use of more parts of a cpu, this attempts to use
+            // `add` when it&#39;s semantically equivalent to `lea`, or otherwise
+            // when the `dst` register is the same as the `base` or `index`
+            // register.
+            //
+            // FIXME: ideally regalloc is informed of this constraint. Register
+            // allocation of `lea` should &quot;attempt&quot; to put the `base` in the
+            // same register as `dst` but not at the expense of generating a
+            // `mov` instruction. Currently that&#39;s not possible but perhaps one
+            // day it may be worth it.
+            </span><span class="kw">match </span>amode {
+                <span class="comment">// If `base == dst` then this is `add $imm, %dst`, so encode
+                // that instead.
+                </span>Amode::ImmReg {
+                    simm32,
+                    base,
+                    flags: <span class="kw">_</span>,
+                } <span class="kw">if </span>base == dst =&gt; {
+                    <span class="kw">let </span>inst = Inst::alu_rmi_r(
+                        <span class="kw-2">*</span>size,
+                        AluRmiROpcode::Add,
+                        RegMemImm::imm(simm32),
+                        Writable::from_reg(dst),
+                    );
+                    inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
+                }
+                <span class="comment">// If the offset is 0 and the shift is 0 (meaning multiplication
+                // by 1) then:
+                //
+                // * If `base == dst`, then this is `add %index, %base`
+                // * If `index == dst`, then this is `add %base, %index`
+                //
+                // Encode the appropriate instruction here in that case.
+                </span>Amode::ImmRegRegShift {
+                    simm32: <span class="number">0</span>,
+                    base,
+                    index,
+                    shift: <span class="number">0</span>,
+                    flags: <span class="kw">_</span>,
+                } <span class="kw">if </span>base == dst || index == dst =&gt; {
+                    <span class="kw">let </span>(dst, operand) = <span class="kw">if </span>base == dst {
+                        (base, index)
+                    } <span class="kw">else </span>{
+                        (index, base)
+                    };
+                    <span class="kw">let </span>inst = Inst::alu_rmi_r(
+                        <span class="kw-2">*</span>size,
+                        AluRmiROpcode::Add,
+                        RegMemImm::reg(operand.to_reg()),
+                        Writable::from_reg(dst.to_reg()),
+                    );
+                    inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
+                }
+
+                <span class="comment">// If `lea`&#39;s 3-operand mode is leveraged by regalloc, or if
+                // it&#39;s fancy like imm-plus-shift-plus-base, then `lea` is
+                // actually emitted.
+                </span><span class="kw">_ </span>=&gt; {
+                    <span class="kw">let </span>flags = <span class="kw">match </span>size {
+                        OperandSize::Size32 =&gt; RexFlags::clear_w(),
+                        OperandSize::Size64 =&gt; RexFlags::set_w(),
+                        <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+                    };
+                    emit_std_reg_mem(sink, LegacyPrefixes::None, <span class="number">0x8D</span>, <span class="number">1</span>, dst, <span class="kw-2">&amp;</span>amode, flags, <span class="number">0</span>);
+                }
+            };
         }
 
         Inst::MovsxRmR { ext_mode, src, dst } =&gt; {

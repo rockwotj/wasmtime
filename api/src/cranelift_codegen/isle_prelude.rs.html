@@ -763,6 +763,11 @@
 <a href="#763" id="763">763</a>
 <a href="#764" id="764">764</a>
 <a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Shared ISLE prelude implementation for optimization (mid-end) and
 //! lowering (backend) ISLE environments.
 
@@ -1411,6 +1416,11 @@
         </span><span class="kw">fn </span>offset32_to_u32(<span class="kw-2">&amp;mut </span><span class="self">self</span>, offset: Offset32) -&gt; u32 {
             <span class="kw">let </span>offset: i32 = offset.into();
             offset <span class="kw">as </span>u32
+        }
+
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>u32_to_offset32(<span class="kw-2">&amp;mut </span><span class="self">self</span>, offset: u32) -&gt; Offset32 {
+            Offset32::new(offset <span class="kw">as </span>i32)
         }
 
         <span class="kw">fn </span>range(<span class="kw-2">&amp;mut </span><span class="self">self</span>, start: usize, end: usize) -&gt; Range {

@@ -2695,6 +2695,7 @@
 <a href="#2695" id="2695">2695</a>
 <a href="#2696" id="2696">2696</a>
 <a href="#2697" id="2697">2697</a>
+<a href="#2698" id="2698">2698</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines x86_64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc, StackMap};
@@ -3126,6 +3127,7 @@
         Inst::LoadEffectiveAddress {
             addr: addr.into(),
             dst: WritableGpr::from_writable_reg(dst).unwrap(),
+            size: OperandSize::Size64,
         }
     }
 
@@ -4129,8 +4131,8 @@
                 <span class="macro">format!</span>(<span class="string">&quot;{} {}, {}&quot;</span>, ljustify(<span class="string">&quot;movq&quot;</span>.to_string()), src, dst)
             }
 
-            Inst::LoadEffectiveAddress { addr, dst } =&gt; {
-                <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), <span class="number">8</span>, allocs);
+            Inst::LoadEffectiveAddress { addr, dst, size } =&gt; {
+                <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), size.to_bytes(), allocs);
                 <span class="kw">let </span>addr = addr.pretty_print(<span class="number">8</span>, allocs);
                 <span class="macro">format!</span>(<span class="string">&quot;{} {}, {}&quot;</span>, ljustify(<span class="string">&quot;lea&quot;</span>.to_string()), addr, dst)
             }
@@ -4870,7 +4872,7 @@
             collector.reg_def(dst.to_writable_reg());
             src.get_operands(collector);
         }
-        Inst::LoadEffectiveAddress { addr: src, dst } =&gt; {
+        Inst::LoadEffectiveAddress { addr: src, dst, .. } =&gt; {
             collector.reg_def(dst.to_writable_reg());
             src.get_operands(collector);
         }
