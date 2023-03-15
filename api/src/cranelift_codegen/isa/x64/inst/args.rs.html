@@ -2139,6 +2139,16 @@
 <a href="#2139" id="2139">2139</a>
 <a href="#2140" id="2140">2140</a>
 <a href="#2141" id="2141">2141</a>
+<a href="#2142" id="2142">2142</a>
+<a href="#2143" id="2143">2143</a>
+<a href="#2144" id="2144">2144</a>
+<a href="#2145" id="2145">2145</a>
+<a href="#2146" id="2146">2146</a>
+<a href="#2147" id="2147">2147</a>
+<a href="#2148" id="2148">2148</a>
+<a href="#2149" id="2149">2149</a>
+<a href="#2150" id="2150">2150</a>
+<a href="#2151" id="2151">2151</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Instruction operand sub-components (aka &quot;parts&quot;): definitions and printing.
 
 </span><span class="kw">use </span><span class="kw">super</span>::regs::{<span class="self">self</span>};
@@ -3069,6 +3079,7 @@
     </span>BMI2,
     FMA,
     AVX,
+    AVX2,
     AVX512BITALG,
     AVX512DQ,
     AVX512F,
@@ -3267,6 +3278,7 @@
     Pshuflw,
     Pshufhw,
     Pblendw,
+    Movddup,
 }
 
 <span class="kw">impl </span>SseOpcode {
@@ -3421,7 +3433,8 @@
             | SseOpcode::Pmulhrsw
             | SseOpcode::Pshufb
             | SseOpcode::Phaddw
-            | SseOpcode::Phaddd =&gt; SSSE3,
+            | SseOpcode::Phaddd
+            | SseOpcode::Movddup =&gt; SSSE3,
 
             SseOpcode::Blendvpd
             | SseOpcode::Blendvps
@@ -3665,6 +3678,7 @@
             SseOpcode::Pshuflw =&gt; <span class="string">&quot;pshuflw&quot;</span>,
             SseOpcode::Pshufhw =&gt; <span class="string">&quot;pshufhw&quot;</span>,
             SseOpcode::Pblendw =&gt; <span class="string">&quot;pblendw&quot;</span>,
+            SseOpcode::Movddup =&gt; <span class="string">&quot;movddup&quot;</span>,
         };
         <span class="macro">write!</span>(fmt, <span class="string">&quot;{}&quot;</span>, name)
     }
@@ -3850,8 +3864,14 @@
             | AvxOpcode::Vpextrw
             | AvxOpcode::Vpextrd
             | AvxOpcode::Vpextrq
-            | AvxOpcode::Vpblendw =&gt; {
+            | AvxOpcode::Vpblendw
+            | AvxOpcode::Vmovddup
+            | AvxOpcode::Vbroadcastss =&gt; {
                 <span class="macro">smallvec!</span>[InstructionSet::AVX]
+            }
+
+            AvxOpcode::Vpbroadcastb | AvxOpcode::Vpbroadcastw | AvxOpcode::Vpbroadcastd =&gt; {
+                <span class="macro">smallvec!</span>[InstructionSet::AVX2]
             }
         }
     }

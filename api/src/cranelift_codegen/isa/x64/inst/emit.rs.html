@@ -3851,6 +3851,15 @@
 <a href="#3851" id="3851">3851</a>
 <a href="#3852" id="3852">3852</a>
 <a href="#3853" id="3853">3853</a>
+<a href="#3854" id="3854">3854</a>
+<a href="#3855" id="3855">3855</a>
+<a href="#3856" id="3856">3856</a>
+<a href="#3857" id="3857">3857</a>
+<a href="#3858" id="3858">3858</a>
+<a href="#3859" id="3859">3859</a>
+<a href="#3860" id="3860">3860</a>
+<a href="#3861" id="3861">3861</a>
+<a href="#3862" id="3862">3862</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -3975,6 +3984,7 @@
             InstructionSet::BMI2 =&gt; info.isa_flags.has_bmi2(),
             InstructionSet::FMA =&gt; info.isa_flags.has_fma(),
             InstructionSet::AVX =&gt; info.isa_flags.has_avx(),
+            InstructionSet::AVX2 =&gt; info.isa_flags.has_avx2(),
             InstructionSet::AVX512BITALG =&gt; info.isa_flags.has_avx512bitalg(),
             InstructionSet::AVX512DQ =&gt; info.isa_flags.has_avx512dq(),
             InstructionSet::AVX512F =&gt; info.isa_flags.has_avx512f(),
@@ -5679,6 +5689,7 @@
                 SseOpcode::Sqrtpd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F51</span>, <span class="number">2</span>),
                 SseOpcode::Sqrtss =&gt; (LegacyPrefixes::_F3, <span class="number">0x0F51</span>, <span class="number">2</span>),
                 SseOpcode::Sqrtsd =&gt; (LegacyPrefixes::_F2, <span class="number">0x0F51</span>, <span class="number">2</span>),
+                SseOpcode::Movddup =&gt; (LegacyPrefixes::_F2, <span class="number">0x0F12</span>, <span class="number">2</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Opcode {:?} not implemented&quot;</span>, op),
             };
 
@@ -6303,6 +6314,13 @@
                     RegisterOrAmode::Amode(<span class="kw">_</span>) =&gt; (LegacyPrefixes::_F2, OpcodeMap::_0F, <span class="number">0x10</span>),
                     <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
                 },
+
+                AvxOpcode::Vpbroadcastb =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F38, <span class="number">0x78</span>),
+                AvxOpcode::Vpbroadcastw =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F38, <span class="number">0x79</span>),
+                AvxOpcode::Vpbroadcastd =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F38, <span class="number">0x58</span>),
+                AvxOpcode::Vbroadcastss =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F38, <span class="number">0x18</span>),
+                AvxOpcode::Vmovddup =&gt; (LegacyPrefixes::_F2, OpcodeMap::_0F, <span class="number">0x12</span>),
+
                 <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected rmr_imm_vex opcode {op:?}&quot;</span>),
             };
 

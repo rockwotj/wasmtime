@@ -1109,6 +1109,29 @@
 <a href="#1109" id="1109">1109</a>
 <a href="#1110" id="1110">1110</a>
 <a href="#1111" id="1111">1111</a>
+<a href="#1112" id="1112">1112</a>
+<a href="#1113" id="1113">1113</a>
+<a href="#1114" id="1114">1114</a>
+<a href="#1115" id="1115">1115</a>
+<a href="#1116" id="1116">1116</a>
+<a href="#1117" id="1117">1117</a>
+<a href="#1118" id="1118">1118</a>
+<a href="#1119" id="1119">1119</a>
+<a href="#1120" id="1120">1120</a>
+<a href="#1121" id="1121">1121</a>
+<a href="#1122" id="1122">1122</a>
+<a href="#1123" id="1123">1123</a>
+<a href="#1124" id="1124">1124</a>
+<a href="#1125" id="1125">1125</a>
+<a href="#1126" id="1126">1126</a>
+<a href="#1127" id="1127">1127</a>
+<a href="#1128" id="1128">1128</a>
+<a href="#1129" id="1129">1129</a>
+<a href="#1130" id="1130">1130</a>
+<a href="#1131" id="1131">1131</a>
+<a href="#1132" id="1132">1132</a>
+<a href="#1133" id="1133">1133</a>
+<a href="#1134" id="1134">1134</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for x64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -1122,7 +1145,7 @@
 <span class="kw">use </span>generated_code::{Context, MInst, RegisterClass};
 
 <span class="comment">// Types that the generated ISLE code uses via `use super::*`.
-</span><span class="kw">use super</span>::{is_int_or_ref_ty, is_mergeable_load, lower_to_amode};
+</span><span class="kw">use super</span>::{is_int_or_ref_ty, is_mergeable_load, lower_to_amode, MergeableLoadSize};
 <span class="kw">use </span><span class="kw">crate</span>::ir::LibCall;
 <span class="kw">use </span><span class="kw">crate</span>::isa::x64::lower::emit_vm_call;
 <span class="kw">use </span><span class="kw">crate</span>::isa::x64::X64Backend;
@@ -1286,6 +1309,11 @@
     }
 
     <span class="attr">#[inline]
+    </span><span class="kw">fn </span>has_avx2(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.backend.x64_flags.has_avx2()
+    }
+
+    <span class="attr">#[inline]
     </span><span class="kw">fn </span>avx512vl_enabled(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Type) -&gt; bool {
         <span class="self">self</span>.backend.x64_flags.use_avx512vl_simd()
     }
@@ -1379,7 +1407,25 @@
     <span class="kw">fn </span>sinkable_load(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: Value) -&gt; <span class="prelude-ty">Option</span>&lt;SinkableLoad&gt; {
         <span class="kw">let </span>input = <span class="self">self</span>.lower_ctx.get_value_as_source_or_const(val);
         <span class="kw">if let </span>InputSourceInst::UniqueUse(inst, <span class="number">0</span>) = input.inst {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>((addr_input, offset)) = is_mergeable_load(<span class="self">self</span>.lower_ctx, inst) {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>((addr_input, offset)) =
+                is_mergeable_load(<span class="self">self</span>.lower_ctx, inst, MergeableLoadSize::Min32)
+            {
+                <span class="kw">return </span><span class="prelude-val">Some</span>(SinkableLoad {
+                    inst,
+                    addr_input,
+                    offset,
+                });
+            }
+        }
+        <span class="prelude-val">None
+    </span>}
+
+    <span class="kw">fn </span>sinkable_load_exact(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: Value) -&gt; <span class="prelude-ty">Option</span>&lt;SinkableLoad&gt; {
+        <span class="kw">let </span>input = <span class="self">self</span>.lower_ctx.get_value_as_source_or_const(val);
+        <span class="kw">if let </span>InputSourceInst::UniqueUse(inst, <span class="number">0</span>) = input.inst {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>((addr_input, offset)) =
+                is_mergeable_load(<span class="self">self</span>.lower_ctx, inst, MergeableLoadSize::Exact)
+            {
                 <span class="kw">return </span><span class="prelude-val">Some</span>(SinkableLoad {
                     inst,
                     addr_input,
