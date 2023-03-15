@@ -422,27 +422,6 @@
 <a href="#422" id="422">422</a>
 <a href="#423" id="423">423</a>
 <a href="#424" id="424">424</a>
-<a href="#425" id="425">425</a>
-<a href="#426" id="426">426</a>
-<a href="#427" id="427">427</a>
-<a href="#428" id="428">428</a>
-<a href="#429" id="429">429</a>
-<a href="#430" id="430">430</a>
-<a href="#431" id="431">431</a>
-<a href="#432" id="432">432</a>
-<a href="#433" id="433">433</a>
-<a href="#434" id="434">434</a>
-<a href="#435" id="435">435</a>
-<a href="#436" id="436">436</a>
-<a href="#437" id="437">437</a>
-<a href="#438" id="438">438</a>
-<a href="#439" id="439">439</a>
-<a href="#440" id="440">440</a>
-<a href="#441" id="441">441</a>
-<a href="#442" id="442">442</a>
-<a href="#443" id="443">443</a>
-<a href="#444" id="444">444</a>
-<a href="#445" id="445">445</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Support for jitdump files which can be used by perf for profiling jitted code.
 //! Spec definitions for the output format is as described here:
 //! &lt;https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/tools/perf/Documentation/jitdump-specification.txt&gt;
@@ -469,61 +448,43 @@
 
 <span class="doccomment">/// Interface for driving the creation of jitdump files
 </span><span class="kw">pub struct </span>JitDumpAgent {
-    <span class="comment">// Note that we use a mutex internally to serialize writing out to our
-    // `jitdump_file` within this process, since multiple threads may be sharing
-    // this jit agent.
-    </span>state: Mutex&lt;State&gt;,
-}
-
-<span class="kw">struct </span>State {
-    jitdump_file: JitDumpFile,
-
     <span class="doccomment">/// Flag for experimenting with dumping code load record
     /// after each function (true) or after each module. This
     /// flag is currently set to true.
     </span>dump_funcs: bool,
 }
 
+<span class="doccomment">/// Process-wide JIT dump file. Perf only accepts a unique file per process, in the injection step.
+</span><span class="kw">static </span>JITDUMP_FILE: Mutex&lt;<span class="prelude-ty">Option</span>&lt;JitDumpFile&gt;&gt; = Mutex::new(<span class="prelude-val">None</span>);
+
 <span class="kw">impl </span>JitDumpAgent {
-    <span class="doccomment">/// Intialize a JitDumpAgent and write out the header
+    <span class="doccomment">/// Intialize a JitDumpAgent and write out the header.
     </span><span class="kw">pub fn </span>new() -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>filename = <span class="macro">format!</span>(<span class="string">&quot;./jit-{}.dump&quot;</span>, process::id());
+        <span class="kw">let </span><span class="kw-2">mut </span>jitdump_file = JITDUMP_FILE.lock().unwrap();
 
-        <span class="kw">let </span>e_machine = <span class="kw">match </span>target_lexicon::HOST.architecture {
-            Architecture::X86_64 =&gt; elf::EM_X86_64 <span class="kw">as </span>u32,
-            Architecture::X86_32(<span class="kw">_</span>) =&gt; elf::EM_386 <span class="kw">as </span>u32,
-            Architecture::Arm(<span class="kw">_</span>) =&gt; elf::EM_ARM <span class="kw">as </span>u32,
-            Architecture::Aarch64(<span class="kw">_</span>) =&gt; elf::EM_AARCH64 <span class="kw">as </span>u32,
-            Architecture::S390x =&gt; elf::EM_S390 <span class="kw">as </span>u32,
-            <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;unrecognized architecture&quot;</span>),
-        };
+        <span class="kw">if </span>jitdump_file.is_none() {
+            <span class="kw">let </span>filename = <span class="macro">format!</span>(<span class="string">&quot;./jit-{}.dump&quot;</span>, process::id());
+            <span class="kw">let </span>e_machine = <span class="kw">match </span>target_lexicon::HOST.architecture {
+                Architecture::X86_64 =&gt; elf::EM_X86_64 <span class="kw">as </span>u32,
+                Architecture::X86_32(<span class="kw">_</span>) =&gt; elf::EM_386 <span class="kw">as </span>u32,
+                Architecture::Arm(<span class="kw">_</span>) =&gt; elf::EM_ARM <span class="kw">as </span>u32,
+                Architecture::Aarch64(<span class="kw">_</span>) =&gt; elf::EM_AARCH64 <span class="kw">as </span>u32,
+                Architecture::S390x =&gt; elf::EM_S390 <span class="kw">as </span>u32,
+                <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;unrecognized architecture&quot;</span>),
+            };
+            <span class="kw-2">*</span>jitdump_file = <span class="prelude-val">Some</span>(JitDumpFile::new(filename, e_machine)<span class="question-mark">?</span>);
+        }
 
-        <span class="kw">let </span>jitdump_file = JitDumpFile::new(filename, e_machine)<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(JitDumpAgent {
-            state: Mutex::new(State {
-                jitdump_file,
-                dump_funcs: <span class="bool-val">true</span>,
-            }),
-        })
+        <span class="prelude-val">Ok</span>(JitDumpAgent { dump_funcs: <span class="bool-val">true </span>})
     }
 }
 
 <span class="kw">impl </span>ProfilingAgent <span class="kw">for </span>JitDumpAgent {
-    <span class="kw">fn </span>module_load(<span class="kw-2">&amp;</span><span class="self">self</span>, module: <span class="kw-2">&amp;</span>CompiledModule, dbg_image: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;) {
-        <span class="self">self</span>.state.lock().unwrap().module_load(module, dbg_image);
-    }
-    <span class="kw">fn </span>load_single_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str, addr: <span class="kw-2">*const </span>u8, size: usize, pid: u32, tid: u32) {
-        <span class="self">self</span>.state
-            .lock()
-            .unwrap()
-            .load_single_trampoline(name, addr, size, pid, tid);
-    }
-}
-
-<span class="kw">impl </span>State {
     <span class="doccomment">/// Sent when a method is compiled and loaded into memory by the VM.
-    </span><span class="kw">pub fn </span>module_load(<span class="kw-2">&amp;mut </span><span class="self">self</span>, module: <span class="kw-2">&amp;</span>CompiledModule, dbg_image: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;) {
+    </span><span class="kw">fn </span>module_load(<span class="kw-2">&amp;</span><span class="self">self</span>, module: <span class="kw-2">&amp;</span>CompiledModule, dbg_image: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;) {
+        <span class="kw">let </span><span class="kw-2">mut </span>jitdump_file = JITDUMP_FILE.lock().unwrap();
+        <span class="kw">let </span>jitdump_file = jitdump_file.as_mut().unwrap();
+
         <span class="kw">let </span>pid = process::id();
         <span class="kw">let </span>tid = pid; <span class="comment">// ThreadId does appear to track underlying thread. Using PID.
 
@@ -531,18 +492,19 @@
             <span class="kw">let </span>addr = func.as_ptr();
             <span class="kw">let </span>len = func.len();
             <span class="kw">if let </span><span class="prelude-val">Some</span>(img) = <span class="kw-2">&amp;</span>dbg_image {
-                <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">self</span>.dump_from_debug_image(img, <span class="string">&quot;wasm&quot;</span>, addr, len, pid, tid) {
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(err) =
+                    <span class="self">self</span>.dump_from_debug_image(jitdump_file, img, <span class="string">&quot;wasm&quot;</span>, addr, len, pid, tid)
+                {
                     <span class="macro">println!</span>(
                         <span class="string">&quot;Jitdump: module_load failed dumping from debug image: {:?}\n&quot;</span>,
                         err
                     );
                 }
             } <span class="kw">else </span>{
-                <span class="kw">let </span>timestamp = <span class="self">self</span>.jitdump_file.get_time_stamp();
+                <span class="kw">let </span>timestamp = jitdump_file.get_time_stamp();
                 <span class="kw">let </span>name = <span class="kw">super</span>::debug_name(module, idx);
-                <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">self
-                    </span>.jitdump_file
-                    .dump_code_load_record(<span class="kw-2">&amp;</span>name, addr, len, timestamp, pid, tid)
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(err) =
+                    jitdump_file.dump_code_load_record(<span class="kw-2">&amp;</span>name, addr, len, timestamp, pid, tid)
                 {
                     <span class="macro">println!</span>(<span class="string">&quot;Jitdump: write_code_load_failed_record failed: {:?}\n&quot;</span>, err);
                 }
@@ -552,38 +514,34 @@
         <span class="comment">// Note: these are the trampolines into exported functions.
         </span><span class="kw">for </span>(idx, func, len) <span class="kw">in </span>module.trampolines() {
             <span class="kw">let </span>(addr, len) = (func <span class="kw">as </span>usize <span class="kw">as </span><span class="kw-2">*const </span>u8, len);
-            <span class="kw">let </span>timestamp = <span class="self">self</span>.jitdump_file.get_time_stamp();
+            <span class="kw">let </span>timestamp = jitdump_file.get_time_stamp();
             <span class="kw">let </span>name = <span class="macro">format!</span>(<span class="string">&quot;wasm::trampoline[{}]&quot;</span>, idx.index());
-            <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">self
-                </span>.jitdump_file
-                .dump_code_load_record(<span class="kw-2">&amp;</span>name, addr, len, timestamp, pid, tid)
+            <span class="kw">if let </span><span class="prelude-val">Err</span>(err) =
+                jitdump_file.dump_code_load_record(<span class="kw-2">&amp;</span>name, addr, len, timestamp, pid, tid)
             {
                 <span class="macro">println!</span>(<span class="string">&quot;Jitdump: write_code_load_failed_record failed: {:?}\n&quot;</span>, err);
             }
         }
     }
 
-    <span class="kw">fn </span>load_single_trampoline(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        name: <span class="kw-2">&amp;</span>str,
-        addr: <span class="kw-2">*const </span>u8,
-        size: usize,
-        pid: u32,
-        tid: u32,
-    ) {
-        <span class="kw">let </span>timestamp = <span class="self">self</span>.jitdump_file.get_time_stamp();
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">self
-            </span>.jitdump_file
-            .dump_code_load_record(<span class="kw-2">&amp;</span>name, addr, size, timestamp, pid, tid)
+    <span class="kw">fn </span>load_single_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str, addr: <span class="kw-2">*const </span>u8, size: usize, pid: u32, tid: u32) {
+        <span class="kw">let </span><span class="kw-2">mut </span>jitdump_file = JITDUMP_FILE.lock().unwrap();
+        <span class="kw">let </span>jitdump_file = jitdump_file.as_mut().unwrap();
+
+        <span class="kw">let </span>timestamp = jitdump_file.get_time_stamp();
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = jitdump_file.dump_code_load_record(<span class="kw-2">&amp;</span>name, addr, size, timestamp, pid, tid)
         {
             <span class="macro">println!</span>(<span class="string">&quot;Jitdump: write_code_load_failed_record failed: {:?}\n&quot;</span>, err);
         }
     }
+}
 
+<span class="kw">impl </span>JitDumpAgent {
     <span class="doccomment">/// Attempts to dump debuginfo data structures, adding method and line level
     /// for the jitted function.
     </span><span class="kw">pub fn </span>dump_from_debug_image(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        jitdump_file: <span class="kw-2">&amp;mut </span>JitDumpFile,
         dbg_image: <span class="kw-2">&amp;</span>[u8],
         module_name: <span class="kw-2">&amp;</span>str,
         addr: <span class="kw-2">*const </span>u8,
@@ -623,16 +581,15 @@
                     <span class="kw">return </span><span class="prelude-val">Ok</span>(());
                 }
             };
-            <span class="self">self</span>.dump_entries(unit, <span class="kw-2">&amp;</span>dwarf, module_name, addr, len, pid, tid)<span class="question-mark">?</span>;
+            <span class="self">self</span>.dump_entries(jitdump_file, unit, <span class="kw-2">&amp;</span>dwarf, module_name, addr, len, pid, tid)<span class="question-mark">?</span>;
             <span class="comment">// TODO: Temp exit to avoid duplicate addresses being covered by only
             // processing the top unit
             </span><span class="kw">break</span>;
         }
         <span class="kw">if </span>!<span class="self">self</span>.dump_funcs {
-            <span class="kw">let </span>timestamp = <span class="self">self</span>.jitdump_file.get_time_stamp();
+            <span class="kw">let </span>timestamp = jitdump_file.get_time_stamp();
             <span class="kw">if let </span><span class="prelude-val">Err</span>(err) =
-                <span class="self">self</span>.jitdump_file
-                    .dump_code_load_record(module_name, addr, len, timestamp, pid, tid)
+                jitdump_file.dump_code_load_record(module_name, addr, len, timestamp, pid, tid)
             {
                 <span class="macro">println!</span>(<span class="string">&quot;Jitdump: write_code_load_failed_record failed: {:?}\n&quot;</span>, err);
             }
@@ -641,7 +598,8 @@
     }
 
     <span class="kw">fn </span>dump_entries&lt;R: Reader&gt;(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        jitdump_file: <span class="kw-2">&amp;mut </span>JitDumpFile,
         unit: gimli::Unit&lt;R&gt;,
         dwarf: <span class="kw-2">&amp;</span>gimli::Dwarf&lt;R&gt;,
         module_name: <span class="kw-2">&amp;</span>str,
@@ -730,17 +688,15 @@
                     clr.header.record_size = mem::size_of::&lt;CodeLoadRecord&gt;() <span class="kw">as </span>u32
                         + (clr_name.len() + <span class="number">1</span>) <span class="kw">as </span>u32
                         + clr.size <span class="kw">as </span>u32;
-                    clr.index = <span class="self">self</span>.jitdump_file.next_code_index();
-                    <span class="self">self</span>.dump_debug_info(<span class="kw-2">&amp;</span>unit, <span class="kw-2">&amp;</span>dwarf, clr.address, clr.size, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
+                    clr.index = jitdump_file.next_code_index();
+                    <span class="self">self</span>.dump_debug_info(jitdump_file, <span class="kw-2">&amp;</span>unit, <span class="kw-2">&amp;</span>dwarf, clr.address, clr.size, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
 
-                    clr.header.timestamp = <span class="self">self</span>.jitdump_file.get_time_stamp();
+                    clr.header.timestamp = jitdump_file.get_time_stamp();
 
                     <span class="kw">unsafe </span>{
                         <span class="kw">let </span>code_buffer: <span class="kw-2">&amp;</span>[u8] =
                             std::slice::from_raw_parts(clr.address <span class="kw">as </span><span class="kw-2">*const </span>u8, clr.size <span class="kw">as </span>usize);
-                        <span class="kw">let _ </span>=
-                            <span class="self">self</span>.jitdump_file
-                                .write_code_load_record(<span class="kw-2">&amp;</span>clr_name, clr, code_buffer);
+                        <span class="kw">let _ </span>= jitdump_file.write_code_load_record(<span class="kw-2">&amp;</span>clr_name, clr, code_buffer);
                     }
                 }
             } <span class="kw">else </span>{
@@ -798,6 +754,7 @@
                         <span class="kw">continue</span>;
                     }
                     <span class="self">self</span>.dump_debug_info(
+                        jitdump_file,
                         <span class="kw-2">&amp;</span>unit,
                         <span class="kw-2">&amp;</span>dwarf,
                         func_addr,
@@ -811,14 +768,15 @@
     }
 
     <span class="kw">fn </span>dump_debug_info&lt;R: Reader&gt;(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        jitdump_file: <span class="kw-2">&amp;mut </span>JitDumpFile,
         unit: <span class="kw-2">&amp;</span>gimli::Unit&lt;R&gt;,
         dwarf: <span class="kw-2">&amp;</span>gimli::Dwarf&lt;R&gt;,
         address: u64,
         size: u64,
         file_suffix: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>timestamp = <span class="self">self</span>.jitdump_file.get_time_stamp();
+        <span class="kw">let </span>timestamp = jitdump_file.get_time_stamp();
         <span class="kw">if let </span><span class="prelude-val">Some</span>(program) = unit.line_program.clone() {
             <span class="kw">let </span><span class="kw-2">mut </span>debug_info_record = DebugInfoRecord {
                 header: RecordHeader {
@@ -875,8 +833,8 @@
             debug_info_record.header.record_size =
                 mem::size_of::&lt;DebugInfoRecord&gt;() <span class="kw">as </span>u32 + debug_entries_size <span class="kw">as </span>u32;
 
-            <span class="kw">let _ </span>= <span class="self">self</span>.jitdump_file.write_debug_info_record(debug_info_record);
-            <span class="kw">let _ </span>= <span class="self">self</span>.jitdump_file.write_debug_info_entries(debug_entries);
+            <span class="kw">let _ </span>= jitdump_file.write_debug_info_record(debug_info_record);
+            <span class="kw">let _ </span>= jitdump_file.write_debug_info_entries(debug_entries);
         }
         <span class="prelude-val">Ok</span>(())
     }
