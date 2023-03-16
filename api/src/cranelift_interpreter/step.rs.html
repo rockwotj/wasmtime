@@ -1644,6 +1644,21 @@
 <a href="#1644" id="1644">1644</a>
 <a href="#1645" id="1645">1645</a>
 <a href="#1646" id="1646">1646</a>
+<a href="#1647" id="1647">1647</a>
+<a href="#1648" id="1648">1648</a>
+<a href="#1649" id="1649">1649</a>
+<a href="#1650" id="1650">1650</a>
+<a href="#1651" id="1651">1651</a>
+<a href="#1652" id="1652">1652</a>
+<a href="#1653" id="1653">1653</a>
+<a href="#1654" id="1654">1654</a>
+<a href="#1655" id="1655">1655</a>
+<a href="#1656" id="1656">1656</a>
+<a href="#1657" id="1657">1657</a>
+<a href="#1658" id="1658">1658</a>
+<a href="#1659" id="1659">1659</a>
+<a href="#1660" id="1660">1660</a>
+<a href="#1661" id="1661">1661</a>
 </pre><pre class="rust"><code><span class="doccomment">//! The [step] function interprets a single Cranelift instruction given its [State] and
 //! [InstructionContext]; the interpretation is generic over [Value]s.
 </span><span class="kw">use </span><span class="kw">crate</span>::address::{Address, AddressSize};
@@ -1845,45 +1860,51 @@
         <span class="prelude-val">Ok</span>(sum(imm, args)<span class="question-mark">? </span><span class="kw">as </span>u64)
     };
 
+    <span class="comment">// Interpret a unary instruction with the given `op`, assigning the resulting value to the
+    // instruction&#39;s results.
+    </span><span class="kw">let </span>unary = |op: <span class="kw">fn</span>(V) -&gt; ValueResult&lt;V&gt;, arg: V| -&gt; ValueResult&lt;ControlFlow&lt;V&gt;&gt; {
+        <span class="kw">let </span>ctrl_ty = inst_context.controlling_type().unwrap();
+        <span class="kw">let </span>res = unary_arith(arg, ctrl_ty, op, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(assign(res))
+    };
+
     <span class="comment">// Interpret a binary instruction with the given `op`, assigning the resulting value to the
     // instruction&#39;s results.
-    </span><span class="kw">let </span>binary = |op: <span class="kw">fn</span>(V, V) -&gt; ValueResult&lt;V&gt;,
-                  left: V,
-                  right: V|
-     -&gt; ValueResult&lt;ControlFlow&lt;V&gt;&gt; { <span class="prelude-val">Ok</span>(assign(op(left, right)<span class="question-mark">?</span>)) };
+    </span><span class="kw">let </span>binary =
+        |op: <span class="kw">fn</span>(V, V) -&gt; ValueResult&lt;V&gt;, left: V, right: V| -&gt; ValueResult&lt;ControlFlow&lt;V&gt;&gt; {
+            <span class="kw">let </span>ctrl_ty = inst_context.controlling_type().unwrap();
+            <span class="kw">let </span>res = binary_arith(left, right, ctrl_ty, op, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>(assign(res))
+        };
 
     <span class="comment">// Same as `binary_unsigned`, but converts the values to their unsigned form before the
     // operation and back to signed form afterwards. Since Cranelift types have no notion of
     // signedness, this enables operations that depend on sign.
     </span><span class="kw">let </span>binary_unsigned =
         |op: <span class="kw">fn</span>(V, V) -&gt; ValueResult&lt;V&gt;, left: V, right: V| -&gt; ValueResult&lt;ControlFlow&lt;V&gt;&gt; {
-            <span class="prelude-val">Ok</span>(assign(
-                op(
-                    left.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>,
-                    right.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>,
-                )
-                .and_then(|v| v.convert(ValueConversionKind::ToSigned))<span class="question-mark">?</span>,
-            ))
+            <span class="kw">let </span>ctrl_ty = inst_context.controlling_type().unwrap();
+            <span class="kw">let </span>res = binary_arith(left, right, ctrl_ty, op, <span class="bool-val">true</span>)
+                .and_then(|v| v.convert(ValueConversionKind::ToSigned))<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>(assign(res))
         };
 
     <span class="comment">// Similar to `binary` but converts select `ValueError`&#39;s into trap `ControlFlow`&#39;s
-    </span><span class="kw">let </span>binary_can_trap = |op: <span class="kw">fn</span>(V, V) -&gt; ValueResult&lt;V&gt;,
-                           left: V,
-                           right: V|
-     -&gt; ValueResult&lt;ControlFlow&lt;V&gt;&gt; { assign_or_trap(op(left, right)) };
+    </span><span class="kw">let </span>binary_can_trap =
+        |op: <span class="kw">fn</span>(V, V) -&gt; ValueResult&lt;V&gt;, left: V, right: V| -&gt; ValueResult&lt;ControlFlow&lt;V&gt;&gt; {
+            <span class="kw">let </span>ctrl_ty = inst_context.controlling_type().unwrap();
+            <span class="kw">let </span>res = binary_arith(left, right, ctrl_ty, op, <span class="bool-val">false</span>);
+            assign_or_trap(res)
+        };
 
     <span class="comment">// Same as `binary_can_trap`, but converts the values to their unsigned form before the
     // operation and back to signed form afterwards. Since Cranelift types have no notion of
     // signedness, this enables operations that depend on sign.
     </span><span class="kw">let </span>binary_unsigned_can_trap =
         |op: <span class="kw">fn</span>(V, V) -&gt; ValueResult&lt;V&gt;, left: V, right: V| -&gt; ValueResult&lt;ControlFlow&lt;V&gt;&gt; {
-            assign_or_trap(
-                op(
-                    left.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>,
-                    right.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>,
-                )
-                .and_then(|v| v.convert(ValueConversionKind::ToSigned)),
-            )
+            <span class="kw">let </span>ctrl_ty = inst_context.controlling_type().unwrap();
+            <span class="kw">let </span>res = binary_arith(left, right, ctrl_ty, op, <span class="bool-val">true</span>)
+                .and_then(|v| v.convert(ValueConversionKind::ToSigned));
+            assign_or_trap(res)
         };
 
     <span class="comment">// Choose whether to assign `left` or `right` to the instruction&#39;s result based on a `condition`.
@@ -2457,7 +2478,7 @@
         Opcode::Band =&gt; binary(Value::and, arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::Bor =&gt; binary(Value::or, arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::Bxor =&gt; binary(Value::xor, arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
-        Opcode::Bnot =&gt; assign(Value::not(arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>),
+        Opcode::Bnot =&gt; unary(Value::not, arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::BandNot =&gt; binary(Value::and, arg(<span class="number">0</span>)<span class="question-mark">?</span>, Value::not(arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::BorNot =&gt; binary(Value::or, arg(<span class="number">0</span>)<span class="question-mark">?</span>, Value::not(arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::BxorNot =&gt; binary(Value::xor, arg(<span class="number">0</span>)<span class="question-mark">?</span>, Value::not(arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
@@ -2474,9 +2495,9 @@
         Opcode::IshlImm =&gt; binary(Value::shl, arg(<span class="number">0</span>)<span class="question-mark">?</span>, imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::UshrImm =&gt; binary_unsigned(Value::ushr, arg(<span class="number">0</span>)<span class="question-mark">?</span>, imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::SshrImm =&gt; binary(Value::ishr, arg(<span class="number">0</span>)<span class="question-mark">?</span>, imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
-        Opcode::Bitrev =&gt; assign(Value::reverse_bits(arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>),
-        Opcode::Bswap =&gt; assign(Value::swap_bytes(arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>),
-        Opcode::Clz =&gt; assign(arg(<span class="number">0</span>)<span class="question-mark">?</span>.leading_zeros()<span class="question-mark">?</span>),
+        Opcode::Bitrev =&gt; unary(Value::reverse_bits, arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
+        Opcode::Bswap =&gt; unary(Value::swap_bytes, arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
+        Opcode::Clz =&gt; unary(Value::leading_zeros, arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::Cls =&gt; {
             <span class="kw">let </span>count = <span class="kw">if </span>Value::lt(<span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>, <span class="kw-2">&amp;</span>Value::int(<span class="number">0</span>, ctrl_ty)<span class="question-mark">?</span>)<span class="question-mark">? </span>{
                 arg(<span class="number">0</span>)<span class="question-mark">?</span>.leading_ones()<span class="question-mark">?
@@ -2485,7 +2506,7 @@
             </span>};
             assign(Value::sub(count, Value::int(<span class="number">1</span>, ctrl_ty)<span class="question-mark">?</span>)<span class="question-mark">?</span>)
         }
-        Opcode::Ctz =&gt; assign(arg(<span class="number">0</span>)<span class="question-mark">?</span>.trailing_zeros()<span class="question-mark">?</span>),
+        Opcode::Ctz =&gt; unary(Value::trailing_zeros, arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::Popcnt =&gt; {
             <span class="kw">let </span>count = <span class="kw">if </span>arg(<span class="number">0</span>)<span class="question-mark">?</span>.ty().is_int() {
                 arg(<span class="number">0</span>)<span class="question-mark">?</span>.count_ones()<span class="question-mark">?
@@ -2522,7 +2543,7 @@
         Opcode::Fsub =&gt; binary(Value::sub, arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::Fmul =&gt; binary(Value::mul, arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::Fdiv =&gt; binary(Value::div, arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
-        Opcode::Sqrt =&gt; assign(Value::sqrt(arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>),
+        Opcode::Sqrt =&gt; unary(Value::sqrt, arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::Fma =&gt; {
             <span class="kw">let </span>arg0 = extractlanes(<span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>, ctrl_ty)<span class="question-mark">?</span>;
             <span class="kw">let </span>arg1 = extractlanes(<span class="kw-2">&amp;</span>arg(<span class="number">1</span>)<span class="question-mark">?</span>, ctrl_ty)<span class="question-mark">?</span>;
@@ -2538,21 +2559,9 @@
                 ctrl_ty,
             )<span class="question-mark">?</span>)
         }
-        Opcode::Fneg =&gt; assign(Value::neg(arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>),
-        Opcode::Fabs =&gt; assign(Value::abs(arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>),
-        Opcode::Fcopysign =&gt; {
-            <span class="kw">let </span>arg0 = extractlanes(<span class="kw-2">&amp;</span>arg(<span class="number">0</span>)<span class="question-mark">?</span>, ctrl_ty)<span class="question-mark">?</span>;
-            <span class="kw">let </span>arg1 = extractlanes(<span class="kw-2">&amp;</span>arg(<span class="number">1</span>)<span class="question-mark">?</span>, ctrl_ty)<span class="question-mark">?</span>;
-
-            assign(vectorizelanes(
-                <span class="kw-2">&amp;</span>arg0
-                    .into_iter()
-                    .zip(arg1.into_iter())
-                    .map(|(x, y)| V::copysign(x, y))
-                    .collect::&lt;ValueResult&lt;SimdVec&lt;V&gt;&gt;&gt;()<span class="question-mark">?</span>,
-                ctrl_ty,
-            )<span class="question-mark">?</span>)
-        }
+        Opcode::Fneg =&gt; unary(Value::neg, arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
+        Opcode::Fabs =&gt; unary(Value::abs, arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
+        Opcode::Fcopysign =&gt; binary(Value::copysign, arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::Fmin =&gt; assign(<span class="kw">match </span>(arg(<span class="number">0</span>)<span class="question-mark">?</span>, arg(<span class="number">1</span>)<span class="question-mark">?</span>) {
             (a, <span class="kw">_</span>) <span class="kw">if </span>a.is_nan()<span class="question-mark">? </span>=&gt; a,
             (<span class="kw">_</span>, b) <span class="kw">if </span>b.is_nan()<span class="question-mark">? </span>=&gt; b,
@@ -2577,10 +2586,10 @@
             (a, b) <span class="kw">if </span>a.is_zero()<span class="question-mark">? </span>&amp;&amp; b.is_zero()<span class="question-mark">? </span>=&gt; a,
             (a, b) =&gt; a.max(b)<span class="question-mark">?</span>,
         }),
-        Opcode::Ceil =&gt; assign(Value::ceil(arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>),
-        Opcode::Floor =&gt; assign(Value::floor(arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>),
-        Opcode::Trunc =&gt; assign(Value::trunc(arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>),
-        Opcode::Nearest =&gt; assign(Value::nearest(arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>),
+        Opcode::Ceil =&gt; unary(Value::ceil, arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
+        Opcode::Floor =&gt; unary(Value::floor, arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
+        Opcode::Trunc =&gt; unary(Value::trunc, arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
+        Opcode::Nearest =&gt; unary(Value::nearest, arg(<span class="number">0</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::IsNull =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;IsNull&quot;</span>),
         Opcode::IsInvalid =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;IsInvalid&quot;</span>),
         Opcode::Bitcast | Opcode::ScalarToVector =&gt; {
@@ -3238,7 +3247,28 @@
     extractlanes(<span class="kw-2">&amp;</span>v, ty)<span class="question-mark">?</span>.into_iter().try_fold(init, op)
 }
 
-<span class="doccomment">/// Performs the supplied binary arithmetic `op` on two SIMD vectors.
+<span class="doccomment">/// Performs the supplied unary arithmetic `op` on a Value, either Vector or Scalar.
+</span><span class="kw">fn </span>unary_arith&lt;V, F&gt;(x: V, vector_type: types::Type, op: F, unsigned: bool) -&gt; ValueResult&lt;V&gt;
+<span class="kw">where
+    </span>V: Value,
+    F: Fn(V) -&gt; ValueResult&lt;V&gt;,
+{
+    <span class="kw">let </span>arg = extractlanes(<span class="kw-2">&amp;</span>x, vector_type)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>result = arg
+        .into_iter()
+        .map(|<span class="kw-2">mut </span>arg| {
+            <span class="kw">if </span>unsigned {
+                arg = arg.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
+            }
+            <span class="prelude-val">Ok</span>(op(arg)<span class="question-mark">?</span>)
+        })
+        .collect::&lt;ValueResult&lt;SimdVec&lt;V&gt;&gt;&gt;()<span class="question-mark">?</span>;
+
+    vectorizelanes(<span class="kw-2">&amp;</span>result, vector_type)
+}
+
+<span class="doccomment">/// Performs the supplied binary arithmetic `op` on two values, either vector or scalar.
 </span><span class="kw">fn </span>binary_arith&lt;V, F&gt;(x: V, y: V, vector_type: types::Type, op: F, unsigned: bool) -&gt; ValueResult&lt;V&gt;
 <span class="kw">where
     </span>V: Value,
