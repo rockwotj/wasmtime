@@ -609,6 +609,7 @@
 <a href="#609" id="609">609</a>
 <a href="#610" id="610">610</a>
 <a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module implements serialization and deserialization of `Engine`
 //! configuration data which is embedded into compiled artifacts of Wasmtime.
 //!
@@ -1100,9 +1101,10 @@
         <span class="kw">let </span>engine = Engine::default();
         <span class="kw">let </span><span class="kw-2">mut </span>metadata = Metadata::new(<span class="kw-2">&amp;</span>engine);
 
-        metadata
-            .shared_flags
-            .insert(<span class="string">&quot;avoid_div_traps&quot;</span>.to_string(), FlagValue::Bool(<span class="bool-val">false</span>));
+        metadata.shared_flags.insert(
+            <span class="string">&quot;preserve_frame_pointers&quot;</span>.to_string(),
+            FlagValue::Bool(<span class="bool-val">false</span>),
+        );
 
         <span class="kw">match </span>metadata.check_compatible(<span class="kw-2">&amp;</span>engine) {
             <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
@@ -1111,7 +1113,7 @@
 compilation settings of module incompatible with native host
 
 Caused by:
-    setting \&quot;avoid_div_traps\&quot; is configured to Bool(false) which is not supported&quot;
+    setting \&quot;preserve_frame_pointers\&quot; is configured to Bool(false) which is not supported&quot;
             </span>)),
         }
 

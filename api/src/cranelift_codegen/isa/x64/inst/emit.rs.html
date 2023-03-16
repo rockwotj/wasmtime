@@ -3824,42 +3824,6 @@
 <a href="#3824" id="3824">3824</a>
 <a href="#3825" id="3825">3825</a>
 <a href="#3826" id="3826">3826</a>
-<a href="#3827" id="3827">3827</a>
-<a href="#3828" id="3828">3828</a>
-<a href="#3829" id="3829">3829</a>
-<a href="#3830" id="3830">3830</a>
-<a href="#3831" id="3831">3831</a>
-<a href="#3832" id="3832">3832</a>
-<a href="#3833" id="3833">3833</a>
-<a href="#3834" id="3834">3834</a>
-<a href="#3835" id="3835">3835</a>
-<a href="#3836" id="3836">3836</a>
-<a href="#3837" id="3837">3837</a>
-<a href="#3838" id="3838">3838</a>
-<a href="#3839" id="3839">3839</a>
-<a href="#3840" id="3840">3840</a>
-<a href="#3841" id="3841">3841</a>
-<a href="#3842" id="3842">3842</a>
-<a href="#3843" id="3843">3843</a>
-<a href="#3844" id="3844">3844</a>
-<a href="#3845" id="3845">3845</a>
-<a href="#3846" id="3846">3846</a>
-<a href="#3847" id="3847">3847</a>
-<a href="#3848" id="3848">3848</a>
-<a href="#3849" id="3849">3849</a>
-<a href="#3850" id="3850">3850</a>
-<a href="#3851" id="3851">3851</a>
-<a href="#3852" id="3852">3852</a>
-<a href="#3853" id="3853">3853</a>
-<a href="#3854" id="3854">3854</a>
-<a href="#3855" id="3855">3855</a>
-<a href="#3856" id="3856">3856</a>
-<a href="#3857" id="3857">3857</a>
-<a href="#3858" id="3858">3858</a>
-<a href="#3859" id="3859">3859</a>
-<a href="#3860" id="3860">3860</a>
-<a href="#3861" id="3861">3861</a>
-<a href="#3862" id="3862">3862</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -4262,7 +4226,18 @@
             emit_std_enc_enc(sink, prefix, opcode, <span class="number">1</span>, subopcode, enc_src, rex_flags)
         }
 
-        Inst::Div { sign, divisor, .. } | Inst::Div8 { sign, divisor, .. } =&gt; {
+        Inst::Div {
+            sign,
+            trap,
+            divisor,
+            ..
+        }
+        | Inst::Div8 {
+            sign,
+            trap,
+            divisor,
+            ..
+        } =&gt; {
             <span class="kw">let </span>divisor = divisor.clone().to_reg_mem().with_allocs(allocs);
             <span class="kw">let </span>size = <span class="kw">match </span>inst {
                 Inst::Div {
@@ -4300,7 +4275,7 @@
                 OperandSize::Size64 =&gt; (<span class="number">0xF7</span>, LegacyPrefixes::None),
             };
 
-            sink.add_trap(TrapCode::IntegerDivisionByZero);
+            sink.add_trap(<span class="kw-2">*</span>trap);
 
             <span class="kw">let </span>subopcode = <span class="kw">match </span>sign {
                 DivSignedness::Signed =&gt; <span class="number">7</span>,
@@ -4475,6 +4450,7 @@
             <span class="kw">let </span>inst = <span class="kw">match </span>size {
                 OperandSize::Size8 =&gt; Inst::div8(
                     DivSignedness::Signed,
+                    TrapCode::IntegerDivisionByZero,
                     RegMem::reg(divisor),
                     Gpr::new(regs::rax()).unwrap(),
                     Writable::from_reg(Gpr::new(regs::rax()).unwrap()),
@@ -4482,6 +4458,7 @@
                 <span class="kw">_ </span>=&gt; Inst::div(
                     size,
                     DivSignedness::Signed,
+                    TrapCode::IntegerDivisionByZero,
                     RegMem::reg(divisor),
                     Gpr::new(regs::rax()).unwrap(),
                     Gpr::new(regs::rdx()).unwrap(),
@@ -4492,55 +4469,6 @@
             inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
             sink.bind_label(done_label);
-        }
-
-        Inst::ValidateSdivDivisor {
-            dividend, divisor, ..
-        }
-        | Inst::ValidateSdivDivisor64 {
-            dividend, divisor, ..
-        } =&gt; {
-            <span class="kw">let </span>orig_inst = <span class="kw-2">&amp;</span>inst;
-            <span class="kw">let </span>divisor = allocs.next(divisor.to_reg());
-            <span class="kw">let </span>dividend = allocs.next(dividend.to_reg());
-            <span class="kw">let </span>size = <span class="kw">match </span>inst {
-                Inst::ValidateSdivDivisor { size, .. } =&gt; <span class="kw-2">*</span>size,
-                <span class="kw">_ </span>=&gt; OperandSize::Size64,
-            };
-
-            <span class="comment">// First trap if the divisor is zero
-            </span><span class="kw">let </span>inst = Inst::cmp_rmi_r(size, RegMemImm::imm(<span class="number">0</span>), divisor);
-            inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-            <span class="kw">let </span>inst = Inst::trap_if(CC::Z, TrapCode::IntegerDivisionByZero);
-            inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-
-            <span class="comment">// Now check if the divisor is -1. If it is then additionally
-            // check if the dividend is INT_MIN. If it isn&#39;t then jump to the
-            // end. If both conditions here are true then trap.
-            </span><span class="kw">let </span>inst = Inst::cmp_rmi_r(size, RegMemImm::imm(<span class="number">0xffffffff</span>), divisor);
-            inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-            <span class="kw">let </span>done = sink.get_label();
-            one_way_jmp(sink, CC::NZ, done);
-            <span class="kw">let </span>int_min = <span class="kw">match </span>orig_inst {
-                Inst::ValidateSdivDivisor64 { tmp, .. } =&gt; {
-                    <span class="kw">let </span>tmp = allocs.next(tmp.to_reg().to_reg());
-                    <span class="kw">let </span>inst = Inst::imm(size, i64::MIN <span class="kw">as </span>u64, Writable::from_reg(tmp));
-                    inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-                    RegMemImm::reg(tmp)
-                }
-                <span class="kw">_ </span>=&gt; RegMemImm::imm(<span class="kw">match </span>size {
-                    OperandSize::Size8 =&gt; <span class="number">0x80</span>,
-                    OperandSize::Size16 =&gt; <span class="number">0x8000</span>,
-                    OperandSize::Size32 =&gt; <span class="number">0x80000000</span>,
-                    OperandSize::Size64 =&gt; <span class="macro">unreachable!</span>(),
-                }),
-            };
-            <span class="kw">let </span>inst = Inst::cmp_rmi_r(size, int_min, dividend);
-            inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-            <span class="kw">let </span>inst = Inst::trap_if(CC::Z, TrapCode::IntegerOverflow);
-            inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-
-            sink.bind_label(done);
         }
 
         Inst::Imm {

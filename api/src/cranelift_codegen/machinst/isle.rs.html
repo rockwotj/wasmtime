@@ -848,10 +848,6 @@
 <a href="#848" id="848">848</a>
 <a href="#849" id="849">849</a>
 <a href="#850" id="850">850</a>
-<a href="#851" id="851">851</a>
-<a href="#852" id="852">852</a>
-<a href="#853" id="853">853</a>
-<a href="#854" id="854">854</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::ir::{BlockCall, Value, ValueList};
 <span class="kw">use </span>alloc::boxed::Box;
 <span class="kw">use </span>alloc::vec::Vec;
@@ -1137,10 +1133,6 @@
             } <span class="kw">else </span>{
                 <span class="prelude-val">None
             </span>}
-        }
-
-        <span class="kw">fn </span>avoid_div_traps(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
-            <span class="self">self</span>.backend.flags().avoid_div_traps()
         }
 
         <span class="attr">#[inline]

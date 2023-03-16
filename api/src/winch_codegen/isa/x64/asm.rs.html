@@ -466,21 +466,6 @@
 <a href="#466" id="466">466</a>
 <a href="#467" id="467">467</a>
 <a href="#468" id="468">468</a>
-<a href="#469" id="469">469</a>
-<a href="#470" id="470">470</a>
-<a href="#471" id="471">471</a>
-<a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
-<a href="#474" id="474">474</a>
-<a href="#475" id="475">475</a>
-<a href="#476" id="476">476</a>
-<a href="#477" id="477">477</a>
-<a href="#478" id="478">478</a>
-<a href="#479" id="479">479</a>
-<a href="#480" id="480">480</a>
-<a href="#481" id="481">481</a>
-<a href="#482" id="482">482</a>
-<a href="#483" id="483">483</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Assembler library implementation for x64.
 
 </span><span class="kw">use crate</span>::{
@@ -765,34 +750,13 @@
     /// caller has correctly allocated the dividend as `(rdx:rax)` and
     /// accounted for the quotient to be stored in `rax`.
     </span><span class="kw">pub fn </span>div(<span class="kw-2">&amp;mut </span><span class="self">self</span>, divisor: Reg, dst: (Reg, Reg), kind: DivKind, size: OperandSize) {
-        <span class="kw">match </span>kind {
-            <span class="comment">// Signed division goes through a pseudo-instruction to validate
-            // the divisor followed by a sign extension to initialize `rdx`.
+        <span class="kw">let </span>trap = <span class="kw">match </span>kind {
+            <span class="comment">// Signed division has two trapping conditions, integer overflow and
+            // divide-by-zero. Check for divide-by-zero explicitly and let the
+            // hardware detect overflow.
+            //
+            // The dividend is sign extended to initialize `rdx`.
             </span>DivKind::Signed =&gt; {
-                <span class="kw">if </span>size == OperandSize::S64 {
-                    <span class="self">self</span>.emit(Inst::ValidateSdivDivisor64 {
-                        dividend: dst.<span class="number">0</span>.into(),
-                        divisor: divisor.into(),
-                        tmp: regs::scratch().into(),
-                    });
-                } <span class="kw">else </span>{
-                    <span class="self">self</span>.emit(Inst::ValidateSdivDivisor {
-                        dividend: dst.<span class="number">0</span>.into(),
-                        divisor: divisor.into(),
-                        size: size.into(),
-                    });
-                }
-                <span class="self">self</span>.emit(Inst::SignExtendData {
-                    size: size.into(),
-                    src: dst.<span class="number">0</span>.into(),
-                    dst: dst.<span class="number">1</span>.into(),
-                });
-            }
-
-            <span class="comment">// Unsigned division only needs to check for 0 and then the `rdx`
-            // divisor_hi is initialized with zero through an xor-against-itself
-            // op.
-            </span>DivKind::Unsigned =&gt; {
                 <span class="self">self</span>.emit(Inst::CmpRmiR {
                     size: size.into(),
                     src: GprMemImm::new(RegMemImm::imm(<span class="number">0</span>)).unwrap(),
@@ -803,6 +767,20 @@
                     cc: CC::Z,
                     trap_code: TrapCode::IntegerDivisionByZero,
                 });
+                <span class="self">self</span>.emit(Inst::SignExtendData {
+                    size: size.into(),
+                    src: dst.<span class="number">0</span>.into(),
+                    dst: dst.<span class="number">1</span>.into(),
+                });
+                TrapCode::IntegerOverflow
+            }
+
+            <span class="comment">// Unsigned division only traps in one case, on divide-by-zero, so
+            // defer that to the trap opcode.
+            //
+            // The divisor_hi reg is initialized with zero through an
+            // xor-against-itself op.
+            </span>DivKind::Unsigned =&gt; {
                 <span class="self">self</span>.emit(Inst::AluRmiR {
                     size: size.into(),
                     op: AluRmiROpcode::Xor,
@@ -810,11 +788,13 @@
                     src2: dst.<span class="number">1</span>.into(),
                     dst: dst.<span class="number">1</span>.into(),
                 });
+                TrapCode::IntegerDivisionByZero
             }
-        }
+        };
         <span class="self">self</span>.emit(Inst::Div {
             sign: kind.into(),
             size: size.into(),
+            trap,
             divisor: GprMem::new(RegMem::reg(divisor.into())).unwrap(),
             dividend_lo: dst.<span class="number">0</span>.into(),
             dividend_hi: dst.<span class="number">1</span>.into(),
@@ -831,17 +811,6 @@
     /// caller has correctly allocated the dividend as `(rdx:rax)` and
     /// accounted for the remainder to be stored in `rdx`.
     </span><span class="kw">pub fn </span>rem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, divisor: Reg, dst: (Reg, Reg), kind: RemKind, size: OperandSize) {
-        <span class="comment">// First check for zero and explicitly trap.
-        </span><span class="self">self</span>.emit(Inst::CmpRmiR {
-            size: size.into(),
-            src: GprMemImm::new(RegMemImm::imm(<span class="number">0</span>)).unwrap(),
-            dst: divisor.into(),
-            opcode: CmpOpcode::Cmp,
-        });
-        <span class="self">self</span>.emit(Inst::TrapIf {
-            cc: CC::Z,
-            trap_code: TrapCode::IntegerDivisionByZero,
-        });
         <span class="kw">match </span>kind {
             <span class="comment">// Signed remainder goes through a pseudo-instruction which has
             // some internal branching. The `dividend_hi`, or `rdx`, is
@@ -874,6 +843,7 @@
                 });
                 <span class="self">self</span>.emit(Inst::Div {
                     sign: DivSignedness::Unsigned,
+                    trap: TrapCode::IntegerDivisionByZero,
                     size: size.into(),
                     divisor: GprMem::new(RegMem::reg(divisor.into())).unwrap(),
                     dividend_lo: dst.<span class="number">0</span>.into(),

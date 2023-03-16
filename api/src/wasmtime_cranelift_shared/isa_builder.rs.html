@@ -98,12 +98,6 @@
 <a href="#98" id="98">98</a>
 <a href="#99" id="99">99</a>
 <a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
 </pre><pre class="rust"><code><span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>cranelift_codegen::isa::IsaBuilder <span class="kw">as </span>Builder;
 <span class="kw">use </span>cranelift_codegen::settings::{<span class="self">self</span>, Configurable, Flags, SetError};
@@ -128,12 +122,6 @@
     <span class="doccomment">/// Create a new ISA builder with the given lookup function.
     </span><span class="kw">pub fn </span>new(lookup: <span class="kw">fn</span>(Triple) -&gt; <span class="prelude-ty">Result</span>&lt;Builder&lt;T&gt;&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>flags = settings::builder();
-
-        <span class="comment">// There are two possible traps for division, and this way
-        // we get the proper one if code traps.
-        </span>flags
-            .enable(<span class="string">&quot;avoid_div_traps&quot;</span>)
-            .expect(<span class="string">&quot;should be valid flag&quot;</span>);
 
         <span class="comment">// We don&#39;t use probestack as a stack limit mechanism
         </span>flags

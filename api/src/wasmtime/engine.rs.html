@@ -695,7 +695,6 @@
 <a href="#695" id="695">695</a>
 <a href="#696" id="696">696</a>
 <a href="#697" id="697">697</a>
-<a href="#698" id="698">698</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::signatures::SignatureRegistry;
 <span class="kw">use </span><span class="kw">crate</span>::Config;
 <span class="kw">use </span>anyhow::{Context, <span class="prelude-ty">Result</span>};
@@ -1048,7 +1047,7 @@
     /// currently rely on the compiler informing us of all settings, including
     /// those disabled. Settings then fall in a few buckets:
     ///
-    /// * Some settings must be enabled, such as `avoid_div_traps`.
+    /// * Some settings must be enabled, such as `preserve_frame_pointers`.
     /// * Some settings must have a particular value, such as
     ///   `libcall_call_conv`.
     /// * Some settings do not matter as to their value, such as `opt_level`.
@@ -1062,8 +1061,7 @@
             <span class="comment">// These settings must all have be enabled, since their value
             // can affect the way the generated code performs or behaves at
             // runtime.
-            </span><span class="string">&quot;avoid_div_traps&quot; </span>=&gt; <span class="kw-2">*</span>value == FlagValue::Bool(<span class="bool-val">true</span>),
-            <span class="string">&quot;libcall_call_conv&quot; </span>=&gt; <span class="kw-2">*</span>value == FlagValue::Enum(<span class="string">&quot;isa_default&quot;</span>.into()),
+            </span><span class="string">&quot;libcall_call_conv&quot; </span>=&gt; <span class="kw-2">*</span>value == FlagValue::Enum(<span class="string">&quot;isa_default&quot;</span>.into()),
             <span class="string">&quot;preserve_frame_pointers&quot; </span>=&gt; <span class="kw-2">*</span>value == FlagValue::Bool(<span class="bool-val">true</span>),
             <span class="string">&quot;enable_probestack&quot; </span>=&gt; <span class="kw-2">*</span>value == FlagValue::Bool(<span class="kw">crate</span>::config::probestack_supported(target.architecture)),
             <span class="string">&quot;probestack_strategy&quot; </span>=&gt; <span class="kw-2">*</span>value == FlagValue::Enum(<span class="string">&quot;inline&quot;</span>.into()),

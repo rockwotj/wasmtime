@@ -2660,42 +2660,6 @@
 <a href="#2660" id="2660">2660</a>
 <a href="#2661" id="2661">2661</a>
 <a href="#2662" id="2662">2662</a>
-<a href="#2663" id="2663">2663</a>
-<a href="#2664" id="2664">2664</a>
-<a href="#2665" id="2665">2665</a>
-<a href="#2666" id="2666">2666</a>
-<a href="#2667" id="2667">2667</a>
-<a href="#2668" id="2668">2668</a>
-<a href="#2669" id="2669">2669</a>
-<a href="#2670" id="2670">2670</a>
-<a href="#2671" id="2671">2671</a>
-<a href="#2672" id="2672">2672</a>
-<a href="#2673" id="2673">2673</a>
-<a href="#2674" id="2674">2674</a>
-<a href="#2675" id="2675">2675</a>
-<a href="#2676" id="2676">2676</a>
-<a href="#2677" id="2677">2677</a>
-<a href="#2678" id="2678">2678</a>
-<a href="#2679" id="2679">2679</a>
-<a href="#2680" id="2680">2680</a>
-<a href="#2681" id="2681">2681</a>
-<a href="#2682" id="2682">2682</a>
-<a href="#2683" id="2683">2683</a>
-<a href="#2684" id="2684">2684</a>
-<a href="#2685" id="2685">2685</a>
-<a href="#2686" id="2686">2686</a>
-<a href="#2687" id="2687">2687</a>
-<a href="#2688" id="2688">2688</a>
-<a href="#2689" id="2689">2689</a>
-<a href="#2690" id="2690">2690</a>
-<a href="#2691" id="2691">2691</a>
-<a href="#2692" id="2692">2692</a>
-<a href="#2693" id="2693">2693</a>
-<a href="#2694" id="2694">2694</a>
-<a href="#2695" id="2695">2695</a>
-<a href="#2696" id="2696">2696</a>
-<a href="#2697" id="2697">2697</a>
-<a href="#2698" id="2698">2698</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines x86_64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc, StackMap};
@@ -2771,8 +2735,6 @@
             | Inst::CallUnknown { .. }
             | Inst::CheckedSRemSeq { .. }
             | Inst::CheckedSRemSeq8 { .. }
-            | Inst::ValidateSdivDivisor { .. }
-            | Inst::ValidateSdivDivisor64 { .. }
             | Inst::Cmove { .. }
             | Inst::CmpRmiR { .. }
             | Inst::CvtFloatToSintSeq { .. }
@@ -2923,6 +2885,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>div(
         size: OperandSize,
         sign: DivSignedness,
+        trap: TrapCode,
         divisor: RegMem,
         dividend_lo: Gpr,
         dividend_hi: Gpr,
@@ -2933,6 +2896,7 @@
         Inst::Div {
             size,
             sign,
+            trap,
             divisor: GprMem::new(divisor).unwrap(),
             dividend_lo,
             dividend_hi,
@@ -2943,6 +2907,7 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>div8(
         sign: DivSignedness,
+        trap: TrapCode,
         divisor: RegMem,
         dividend: Gpr,
         dst: WritableGpr,
@@ -2950,6 +2915,7 @@
         divisor.assert_regclass_is(RegClass::Int);
         Inst::Div8 {
             sign,
+            trap,
             divisor: GprMem::new(divisor).unwrap(),
             dividend,
             dst,
@@ -3246,10 +3212,6 @@
         Inst::JmpUnknown { target }
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>trap_if(cc: CC, trap_code: TrapCode) -&gt; Inst {
-        Inst::TrapIf { cc, trap_code }
-    }
-
     <span class="doccomment">/// Choose which instruction to use for loading a register value from memory. For loads smaller
     /// than 64 bits, this method expects a way to extend the value (i.e. [ExtKind::SignExtend],
     /// [ExtKind::ZeroExtend]); loads with no extension necessary will ignore this.
@@ -3469,6 +3431,7 @@
             Inst::Div {
                 size,
                 sign,
+                trap,
                 divisor,
                 dividend_lo,
                 dividend_hi,
@@ -3483,7 +3446,7 @@
                 <span class="kw">let </span>dst_remainder =
                     pretty_print_reg(dst_remainder.to_reg().to_reg(), size.to_bytes(), allocs);
                 <span class="macro">format!</span>(
-                    <span class="string">&quot;{} {}, {}, {}, {}, {}&quot;</span>,
+                    <span class="string">&quot;{} {}, {}, {}, {}, {} ; trap={trap}&quot;</span>,
                     ljustify(<span class="kw">match </span>sign {
                         DivSignedness::Signed =&gt; <span class="string">&quot;idiv&quot;</span>.to_string(),
                         DivSignedness::Unsigned =&gt; <span class="string">&quot;div&quot;</span>.to_string(),
@@ -3498,6 +3461,7 @@
 
             Inst::Div8 {
                 sign,
+                trap,
                 divisor,
                 dividend,
                 dst,
@@ -3506,7 +3470,7 @@
                 <span class="kw">let </span>dividend = pretty_print_reg(dividend.to_reg(), <span class="number">1</span>, allocs);
                 <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), <span class="number">1</span>, allocs);
                 <span class="macro">format!</span>(
-                    <span class="string">&quot;{} {dividend}, {divisor}, {dst}&quot;</span>,
+                    <span class="string">&quot;{} {dividend}, {divisor}, {dst} ; trap={trap}&quot;</span>,
                     ljustify(<span class="kw">match </span>sign {
                         DivSignedness::Signed =&gt; <span class="string">&quot;idiv&quot;</span>.to_string(),
                         DivSignedness::Unsigned =&gt; <span class="string">&quot;div&quot;</span>.to_string(),
@@ -3570,27 +3534,6 @@
                 <span class="kw">let </span>dividend = pretty_print_reg(dividend.to_reg(), <span class="number">1</span>, allocs);
                 <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), <span class="number">1</span>, allocs);
                 <span class="macro">format!</span>(<span class="string">&quot;checked_srem_seq {dividend}, {divisor}, {dst}&quot;</span>)
-            }
-
-            Inst::ValidateSdivDivisor {
-                dividend,
-                divisor,
-                size,
-            } =&gt; {
-                <span class="kw">let </span>dividend = pretty_print_reg(dividend.to_reg(), size.to_bytes(), allocs);
-                <span class="kw">let </span>divisor = pretty_print_reg(divisor.to_reg(), size.to_bytes(), allocs);
-                <span class="macro">format!</span>(<span class="string">&quot;validate_sdiv_divisor {dividend}, {divisor}&quot;</span>)
-            }
-
-            Inst::ValidateSdivDivisor64 {
-                dividend,
-                divisor,
-                tmp,
-            } =&gt; {
-                <span class="kw">let </span>dividend = pretty_print_reg(dividend.to_reg(), <span class="number">8</span>, allocs);
-                <span class="kw">let </span>divisor = pretty_print_reg(divisor.to_reg(), <span class="number">8</span>, allocs);
-                <span class="kw">let </span>tmp = pretty_print_reg(tmp.to_reg().to_reg(), <span class="number">8</span>, allocs);
-                <span class="macro">format!</span>(<span class="string">&quot;validate_sdiv_divisor {dividend}, {divisor} {tmp}&quot;</span>)
             }
 
             Inst::SignExtendData { size, src, dst } =&gt; {
@@ -4614,21 +4557,6 @@
             collector.reg_fixed_def(dst_lo.to_writable_reg(), regs::rax());
             collector.reg_fixed_def(dst_hi.to_writable_reg(), regs::rdx());
             src2.get_operands(collector);
-        }
-        Inst::ValidateSdivDivisor {
-            dividend, divisor, ..
-        } =&gt; {
-            collector.reg_use(divisor.to_reg());
-            collector.reg_use(dividend.to_reg());
-        }
-        Inst::ValidateSdivDivisor64 {
-            dividend,
-            divisor,
-            tmp,
-        } =&gt; {
-            collector.reg_use(divisor.to_reg());
-            collector.reg_use(dividend.to_reg());
-            collector.reg_early_def(tmp.to_writable_reg());
         }
         Inst::SignExtendData { size, src, dst } =&gt; {
             <span class="kw">match </span>size {
