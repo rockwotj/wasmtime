@@ -1849,9 +1849,6 @@
 <a href="#1849" id="1849">1849</a>
 <a href="#1850" id="1850">1850</a>
 <a href="#1851" id="1851">1851</a>
-<a href="#1852" id="1852">1852</a>
-<a href="#1853" id="1853">1853</a>
-<a href="#1854" id="1854">1854</a>
 </pre><pre class="rust"><code><span class="doccomment">//! A frontend for building Cranelift IR from other languages.
 </span><span class="kw">use </span><span class="kw">crate</span>::ssa::{SSABuilder, SideEffects};
 <span class="kw">use </span><span class="kw">crate</span>::variable::Variable;
@@ -2949,9 +2946,6 @@
     }
 
     <span class="kw">fn </span>handle_ssa_side_effects(<span class="kw-2">&amp;mut </span><span class="self">self</span>, side_effects: SideEffects) {
-        <span class="kw">for </span>split_block <span class="kw">in </span>side_effects.split_blocks_created {
-            <span class="self">self</span>.func_ctx.status[split_block] = BlockStatus::Filled;
-        }
         <span class="kw">for </span>modified_block <span class="kw">in </span>side_effects.instructions_added_to_blocks {
             <span class="kw">if </span><span class="self">self</span>.is_pristine(modified_block) {
                 <span class="self">self</span>.func_ctx.status[modified_block] = BlockStatus::Partial;
