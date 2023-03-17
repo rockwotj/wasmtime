@@ -1767,6 +1767,21 @@
 <a href="#1767" id="1767">1767</a>
 <a href="#1768" id="1768">1768</a>
 <a href="#1769" id="1769">1769</a>
+<a href="#1770" id="1770">1770</a>
+<a href="#1771" id="1771">1771</a>
+<a href="#1772" id="1772">1772</a>
+<a href="#1773" id="1773">1773</a>
+<a href="#1774" id="1774">1774</a>
+<a href="#1775" id="1775">1775</a>
+<a href="#1776" id="1776">1776</a>
+<a href="#1777" id="1777">1777</a>
+<a href="#1778" id="1778">1778</a>
+<a href="#1779" id="1779">1779</a>
+<a href="#1780" id="1780">1780</a>
+<a href="#1781" id="1781">1781</a>
+<a href="#1782" id="1782">1782</a>
+<a href="#1783" id="1783">1783</a>
+<a href="#1784" id="1784">1784</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Generate instruction data (including opcodes, formats, builders, etc.).
 </span><span class="kw">use </span>std::fmt;
 
@@ -2371,7 +2386,22 @@
             <span class="string">&quot;side_effects_idempotent&quot;</span>,
             <span class="string">&quot;Despite having side effects, is this instruction okay to GVN?&quot;</span>,
             fmt,
-        )
+        );
+
+        <span class="comment">// Generate an opcode list, for iterating over all known opcodes.
+        </span>fmt.doc_comment(<span class="string">&quot;All cranelift opcodes.&quot;</span>);
+        fmt.line(<span class="string">&quot;pub fn all() -&gt; &amp;&#39;static [Opcode] {&quot;</span>);
+        fmt.indent(|fmt| {
+            fmt.line(<span class="string">&quot;return &amp;[&quot;</span>);
+            <span class="kw">for </span>inst <span class="kw">in </span>all_inst {
+                fmt.indent(|fmt| {
+                    <span class="macro">fmtln!</span>(fmt, <span class="string">&quot;Opcode::{},&quot;</span>, inst.camel_name);
+                });
+            }
+            fmt.line(<span class="string">&quot;];&quot;</span>);
+        });
+        fmt.line(<span class="string">&quot;}&quot;</span>);
+        fmt.empty_line();
     });
     fmt.line(<span class="string">&quot;}&quot;</span>);
     fmt.empty_line();
