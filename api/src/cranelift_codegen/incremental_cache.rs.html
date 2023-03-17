@@ -252,6 +252,14 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module provides a set of primitives that allow implementing an incremental cache on top of
 //! Cranelift, making it possible to reuse previous compiled artifacts for functions that have been
 //! compiled previously.
@@ -418,7 +426,15 @@
         <span class="comment">// Make sure the blocks and instructions are sequenced the same way as we might
         // have serialized them earlier. This is the symmetric of what&#39;s done in
         // `try_load`.
-        </span>f.stencil.layout.full_renumber();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>block = f.stencil.layout.entry_block().expect(<span class="string">&quot;Missing entry block&quot;</span>);
+        <span class="kw">loop </span>{
+            f.stencil.layout.full_block_renumber(block);
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(next_block) = f.stencil.layout.next_block(block) {
+                block = next_block;
+            } <span class="kw">else </span>{
+                <span class="kw">break</span>;
+            }
+        }
         CacheKey {
             stencil: <span class="kw-2">&amp;</span>f.stencil,
             parameters: CompileParameters::from_isa(isa),

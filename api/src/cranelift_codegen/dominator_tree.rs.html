@@ -910,7 +910,7 @@
         <span class="kw">let </span>a = a.into();
         <span class="kw">let </span>b = b.into();
         <span class="self">self</span>.rpo_cmp_block(layout.pp_block(a), layout.pp_block(b))
-            .then(layout.pp_cmp(a, b))
+            .then_with(|| layout.pp_cmp(a, b))
     }
 
     <span class="doccomment">/// Returns `true` if `a` dominates `b`.
@@ -1382,7 +1382,7 @@
         <span class="kw">let </span>a = a.into();
         <span class="kw">let </span>b = b.into();
         <span class="self">self</span>.pre_cmp_block(layout.pp_block(a), layout.pp_block(b))
-            .then(layout.pp_cmp(a, b))
+            .then_with(|| layout.pp_cmp(a, b))
     }
 }
 
