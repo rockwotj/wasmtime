@@ -2264,6 +2264,89 @@
 <a href="#2264" id="2264">2264</a>
 <a href="#2265" id="2265">2265</a>
 <a href="#2266" id="2266">2266</a>
+<a href="#2267" id="2267">2267</a>
+<a href="#2268" id="2268">2268</a>
+<a href="#2269" id="2269">2269</a>
+<a href="#2270" id="2270">2270</a>
+<a href="#2271" id="2271">2271</a>
+<a href="#2272" id="2272">2272</a>
+<a href="#2273" id="2273">2273</a>
+<a href="#2274" id="2274">2274</a>
+<a href="#2275" id="2275">2275</a>
+<a href="#2276" id="2276">2276</a>
+<a href="#2277" id="2277">2277</a>
+<a href="#2278" id="2278">2278</a>
+<a href="#2279" id="2279">2279</a>
+<a href="#2280" id="2280">2280</a>
+<a href="#2281" id="2281">2281</a>
+<a href="#2282" id="2282">2282</a>
+<a href="#2283" id="2283">2283</a>
+<a href="#2284" id="2284">2284</a>
+<a href="#2285" id="2285">2285</a>
+<a href="#2286" id="2286">2286</a>
+<a href="#2287" id="2287">2287</a>
+<a href="#2288" id="2288">2288</a>
+<a href="#2289" id="2289">2289</a>
+<a href="#2290" id="2290">2290</a>
+<a href="#2291" id="2291">2291</a>
+<a href="#2292" id="2292">2292</a>
+<a href="#2293" id="2293">2293</a>
+<a href="#2294" id="2294">2294</a>
+<a href="#2295" id="2295">2295</a>
+<a href="#2296" id="2296">2296</a>
+<a href="#2297" id="2297">2297</a>
+<a href="#2298" id="2298">2298</a>
+<a href="#2299" id="2299">2299</a>
+<a href="#2300" id="2300">2300</a>
+<a href="#2301" id="2301">2301</a>
+<a href="#2302" id="2302">2302</a>
+<a href="#2303" id="2303">2303</a>
+<a href="#2304" id="2304">2304</a>
+<a href="#2305" id="2305">2305</a>
+<a href="#2306" id="2306">2306</a>
+<a href="#2307" id="2307">2307</a>
+<a href="#2308" id="2308">2308</a>
+<a href="#2309" id="2309">2309</a>
+<a href="#2310" id="2310">2310</a>
+<a href="#2311" id="2311">2311</a>
+<a href="#2312" id="2312">2312</a>
+<a href="#2313" id="2313">2313</a>
+<a href="#2314" id="2314">2314</a>
+<a href="#2315" id="2315">2315</a>
+<a href="#2316" id="2316">2316</a>
+<a href="#2317" id="2317">2317</a>
+<a href="#2318" id="2318">2318</a>
+<a href="#2319" id="2319">2319</a>
+<a href="#2320" id="2320">2320</a>
+<a href="#2321" id="2321">2321</a>
+<a href="#2322" id="2322">2322</a>
+<a href="#2323" id="2323">2323</a>
+<a href="#2324" id="2324">2324</a>
+<a href="#2325" id="2325">2325</a>
+<a href="#2326" id="2326">2326</a>
+<a href="#2327" id="2327">2327</a>
+<a href="#2328" id="2328">2328</a>
+<a href="#2329" id="2329">2329</a>
+<a href="#2330" id="2330">2330</a>
+<a href="#2331" id="2331">2331</a>
+<a href="#2332" id="2332">2332</a>
+<a href="#2333" id="2333">2333</a>
+<a href="#2334" id="2334">2334</a>
+<a href="#2335" id="2335">2335</a>
+<a href="#2336" id="2336">2336</a>
+<a href="#2337" id="2337">2337</a>
+<a href="#2338" id="2338">2338</a>
+<a href="#2339" id="2339">2339</a>
+<a href="#2340" id="2340">2340</a>
+<a href="#2341" id="2341">2341</a>
+<a href="#2342" id="2342">2342</a>
+<a href="#2343" id="2343">2343</a>
+<a href="#2344" id="2344">2344</a>
+<a href="#2345" id="2345">2345</a>
+<a href="#2346" id="2346">2346</a>
+<a href="#2347" id="2347">2347</a>
+<a href="#2348" id="2348">2348</a>
+<a href="#2349" id="2349">2349</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::config::Config;
 <span class="kw">use </span><span class="kw">crate</span>::cranelift_arbitrary::CraneliftArbitrary;
 <span class="kw">use </span>anyhow::Result;
@@ -2681,6 +2764,7 @@
         Architecture::X86_64 =&gt; {
             <span class="macro">exceptions!</span>(
                 (Opcode::IaddCout, <span class="kw-2">&amp;</span>([I8, I8] | [I16, I16] | [I128, I128])),
+                (Opcode::Imul, <span class="kw-2">&amp;</span>[I8X16, I8X16]),
                 <span class="comment">// https://github.com/bytecodealliance/wasmtime/issues/5468
                 </span>(Opcode::Smulhi | Opcode::Umulhi, <span class="kw-2">&amp;</span>[I8, I8]),
                 <span class="comment">// https://github.com/bytecodealliance/wasmtime/issues/4756
@@ -2946,6 +3030,10 @@
     (Opcode::Iadd, <span class="kw-2">&amp;</span>[I32, I32], <span class="kw-2">&amp;</span>[I32]),
     (Opcode::Iadd, <span class="kw-2">&amp;</span>[I64, I64], <span class="kw-2">&amp;</span>[I64]),
     (Opcode::Iadd, <span class="kw-2">&amp;</span>[I128, I128], <span class="kw-2">&amp;</span>[I128]),
+    (Opcode::Iadd, <span class="kw-2">&amp;</span>[I8X16, I8X16], <span class="kw-2">&amp;</span>[I8X16]),
+    (Opcode::Iadd, <span class="kw-2">&amp;</span>[I16X8, I16X8], <span class="kw-2">&amp;</span>[I16X8]),
+    (Opcode::Iadd, <span class="kw-2">&amp;</span>[I32X4, I32X4], <span class="kw-2">&amp;</span>[I32X4]),
+    (Opcode::Iadd, <span class="kw-2">&amp;</span>[I64X2, I64X2], <span class="kw-2">&amp;</span>[I64X2]),
     <span class="comment">// IaddCout
     </span>(Opcode::IaddCout, <span class="kw-2">&amp;</span>[I8, I8], <span class="kw-2">&amp;</span>[I8, I8]),
     (Opcode::IaddCout, <span class="kw-2">&amp;</span>[I16, I16], <span class="kw-2">&amp;</span>[I16, I8]),
@@ -2968,6 +3056,10 @@
     (Opcode::Isub, <span class="kw-2">&amp;</span>[I32, I32], <span class="kw-2">&amp;</span>[I32]),
     (Opcode::Isub, <span class="kw-2">&amp;</span>[I64, I64], <span class="kw-2">&amp;</span>[I64]),
     (Opcode::Isub, <span class="kw-2">&amp;</span>[I128, I128], <span class="kw-2">&amp;</span>[I128]),
+    (Opcode::Isub, <span class="kw-2">&amp;</span>[I8X16, I8X16], <span class="kw-2">&amp;</span>[I8X16]),
+    (Opcode::Isub, <span class="kw-2">&amp;</span>[I16X8, I16X8], <span class="kw-2">&amp;</span>[I16X8]),
+    (Opcode::Isub, <span class="kw-2">&amp;</span>[I32X4, I32X4], <span class="kw-2">&amp;</span>[I32X4]),
+    (Opcode::Isub, <span class="kw-2">&amp;</span>[I64X2, I64X2], <span class="kw-2">&amp;</span>[I64X2]),
     <span class="comment">// UsubSat
     </span>(Opcode::UsubSat, <span class="kw-2">&amp;</span>[I8X16, I8X16], <span class="kw-2">&amp;</span>[I8X16]),
     (Opcode::UsubSat, <span class="kw-2">&amp;</span>[I16X8, I16X8], <span class="kw-2">&amp;</span>[I16X8]),
@@ -2984,6 +3076,10 @@
     (Opcode::Imul, <span class="kw-2">&amp;</span>[I32, I32], <span class="kw-2">&amp;</span>[I32]),
     (Opcode::Imul, <span class="kw-2">&amp;</span>[I64, I64], <span class="kw-2">&amp;</span>[I64]),
     (Opcode::Imul, <span class="kw-2">&amp;</span>[I128, I128], <span class="kw-2">&amp;</span>[I128]),
+    (Opcode::Imul, <span class="kw-2">&amp;</span>[I8X16, I8X16], <span class="kw-2">&amp;</span>[I8X16]),
+    (Opcode::Imul, <span class="kw-2">&amp;</span>[I16X8, I16X8], <span class="kw-2">&amp;</span>[I16X8]),
+    (Opcode::Imul, <span class="kw-2">&amp;</span>[I32X4, I32X4], <span class="kw-2">&amp;</span>[I32X4]),
+    (Opcode::Imul, <span class="kw-2">&amp;</span>[I64X2, I64X2], <span class="kw-2">&amp;</span>[I64X2]),
     <span class="comment">// Smulhi
     </span>(Opcode::Smulhi, <span class="kw-2">&amp;</span>[I8, I8], <span class="kw-2">&amp;</span>[I8]),
     (Opcode::Smulhi, <span class="kw-2">&amp;</span>[I16, I16], <span class="kw-2">&amp;</span>[I16]),
@@ -3257,6 +3353,12 @@
     (Opcode::Band, <span class="kw-2">&amp;</span>[I128, I128], <span class="kw-2">&amp;</span>[I128]),
     (Opcode::Band, <span class="kw-2">&amp;</span>[F32, F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Band, <span class="kw-2">&amp;</span>[F64, F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Band, <span class="kw-2">&amp;</span>[I8X16, I8X16], <span class="kw-2">&amp;</span>[I8X16]),
+    (Opcode::Band, <span class="kw-2">&amp;</span>[I16X8, I16X8], <span class="kw-2">&amp;</span>[I16X8]),
+    (Opcode::Band, <span class="kw-2">&amp;</span>[I32X4, I32X4], <span class="kw-2">&amp;</span>[I32X4]),
+    (Opcode::Band, <span class="kw-2">&amp;</span>[I64X2, I64X2], <span class="kw-2">&amp;</span>[I64X2]),
+    (Opcode::Band, <span class="kw-2">&amp;</span>[F32X4, F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Band, <span class="kw-2">&amp;</span>[F64X2, F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Bor
     </span>(Opcode::Bor, <span class="kw-2">&amp;</span>[I8, I8], <span class="kw-2">&amp;</span>[I8]),
     (Opcode::Bor, <span class="kw-2">&amp;</span>[I16, I16], <span class="kw-2">&amp;</span>[I16]),
@@ -3265,6 +3367,12 @@
     (Opcode::Bor, <span class="kw-2">&amp;</span>[I128, I128], <span class="kw-2">&amp;</span>[I128]),
     (Opcode::Bor, <span class="kw-2">&amp;</span>[F32, F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Bor, <span class="kw-2">&amp;</span>[F64, F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Bor, <span class="kw-2">&amp;</span>[I8X16, I8X16], <span class="kw-2">&amp;</span>[I8X16]),
+    (Opcode::Bor, <span class="kw-2">&amp;</span>[I16X8, I16X8], <span class="kw-2">&amp;</span>[I16X8]),
+    (Opcode::Bor, <span class="kw-2">&amp;</span>[I32X4, I32X4], <span class="kw-2">&amp;</span>[I32X4]),
+    (Opcode::Bor, <span class="kw-2">&amp;</span>[I64X2, I64X2], <span class="kw-2">&amp;</span>[I64X2]),
+    (Opcode::Bor, <span class="kw-2">&amp;</span>[F32X4, F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Bor, <span class="kw-2">&amp;</span>[F64X2, F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Bxor
     </span>(Opcode::Bxor, <span class="kw-2">&amp;</span>[I8, I8], <span class="kw-2">&amp;</span>[I8]),
     (Opcode::Bxor, <span class="kw-2">&amp;</span>[I16, I16], <span class="kw-2">&amp;</span>[I16]),
@@ -3273,14 +3381,26 @@
     (Opcode::Bxor, <span class="kw-2">&amp;</span>[I128, I128], <span class="kw-2">&amp;</span>[I128]),
     (Opcode::Bxor, <span class="kw-2">&amp;</span>[F32, F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Bxor, <span class="kw-2">&amp;</span>[F64, F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Bxor, <span class="kw-2">&amp;</span>[I8X16, I8X16], <span class="kw-2">&amp;</span>[I8X16]),
+    (Opcode::Bxor, <span class="kw-2">&amp;</span>[I16X8, I16X8], <span class="kw-2">&amp;</span>[I16X8]),
+    (Opcode::Bxor, <span class="kw-2">&amp;</span>[I32X4, I32X4], <span class="kw-2">&amp;</span>[I32X4]),
+    (Opcode::Bxor, <span class="kw-2">&amp;</span>[I64X2, I64X2], <span class="kw-2">&amp;</span>[I64X2]),
+    (Opcode::Bxor, <span class="kw-2">&amp;</span>[F32X4, F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Bxor, <span class="kw-2">&amp;</span>[F64X2, F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Bnot
-    </span>(Opcode::Bnot, <span class="kw-2">&amp;</span>[I8, I8], <span class="kw-2">&amp;</span>[I8]),
-    (Opcode::Bnot, <span class="kw-2">&amp;</span>[I16, I16], <span class="kw-2">&amp;</span>[I16]),
-    (Opcode::Bnot, <span class="kw-2">&amp;</span>[I32, I32], <span class="kw-2">&amp;</span>[I32]),
-    (Opcode::Bnot, <span class="kw-2">&amp;</span>[I64, I64], <span class="kw-2">&amp;</span>[I64]),
-    (Opcode::Bnot, <span class="kw-2">&amp;</span>[I128, I128], <span class="kw-2">&amp;</span>[I128]),
-    (Opcode::Bnot, <span class="kw-2">&amp;</span>[F32, F32], <span class="kw-2">&amp;</span>[F32]),
-    (Opcode::Bnot, <span class="kw-2">&amp;</span>[F64, F64], <span class="kw-2">&amp;</span>[F64]),
+    </span>(Opcode::Bnot, <span class="kw-2">&amp;</span>[I8], <span class="kw-2">&amp;</span>[I8]),
+    (Opcode::Bnot, <span class="kw-2">&amp;</span>[I16], <span class="kw-2">&amp;</span>[I16]),
+    (Opcode::Bnot, <span class="kw-2">&amp;</span>[I32], <span class="kw-2">&amp;</span>[I32]),
+    (Opcode::Bnot, <span class="kw-2">&amp;</span>[I64], <span class="kw-2">&amp;</span>[I64]),
+    (Opcode::Bnot, <span class="kw-2">&amp;</span>[I128], <span class="kw-2">&amp;</span>[I128]),
+    (Opcode::Bnot, <span class="kw-2">&amp;</span>[F32], <span class="kw-2">&amp;</span>[F32]),
+    (Opcode::Bnot, <span class="kw-2">&amp;</span>[F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Bnot, <span class="kw-2">&amp;</span>[I8X16], <span class="kw-2">&amp;</span>[I8X16]),
+    (Opcode::Bnot, <span class="kw-2">&amp;</span>[I16X8], <span class="kw-2">&amp;</span>[I16X8]),
+    (Opcode::Bnot, <span class="kw-2">&amp;</span>[I32X4], <span class="kw-2">&amp;</span>[I32X4]),
+    (Opcode::Bnot, <span class="kw-2">&amp;</span>[I64X2], <span class="kw-2">&amp;</span>[I64X2]),
+    (Opcode::Bnot, <span class="kw-2">&amp;</span>[F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Bnot, <span class="kw-2">&amp;</span>[F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// BandNot
     </span>(Opcode::BandNot, <span class="kw-2">&amp;</span>[I8, I8], <span class="kw-2">&amp;</span>[I8]),
     (Opcode::BandNot, <span class="kw-2">&amp;</span>[I16, I16], <span class="kw-2">&amp;</span>[I16]),
@@ -3289,6 +3409,12 @@
     (Opcode::BandNot, <span class="kw-2">&amp;</span>[I128, I128], <span class="kw-2">&amp;</span>[I128]),
     (Opcode::BandNot, <span class="kw-2">&amp;</span>[F32, F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::BandNot, <span class="kw-2">&amp;</span>[F64, F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::BandNot, <span class="kw-2">&amp;</span>[I8X16, I8X16], <span class="kw-2">&amp;</span>[I8X16]),
+    (Opcode::BandNot, <span class="kw-2">&amp;</span>[I16X8, I16X8], <span class="kw-2">&amp;</span>[I16X8]),
+    (Opcode::BandNot, <span class="kw-2">&amp;</span>[I32X4, I32X4], <span class="kw-2">&amp;</span>[I32X4]),
+    (Opcode::BandNot, <span class="kw-2">&amp;</span>[I64X2, I64X2], <span class="kw-2">&amp;</span>[I64X2]),
+    (Opcode::BandNot, <span class="kw-2">&amp;</span>[F32X4, F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::BandNot, <span class="kw-2">&amp;</span>[F64X2, F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// BorNot
     </span>(Opcode::BorNot, <span class="kw-2">&amp;</span>[I8, I8], <span class="kw-2">&amp;</span>[I8]),
     (Opcode::BorNot, <span class="kw-2">&amp;</span>[I16, I16], <span class="kw-2">&amp;</span>[I16]),
@@ -3297,6 +3423,12 @@
     (Opcode::BorNot, <span class="kw-2">&amp;</span>[I128, I128], <span class="kw-2">&amp;</span>[I128]),
     (Opcode::BorNot, <span class="kw-2">&amp;</span>[F32, F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::BorNot, <span class="kw-2">&amp;</span>[F64, F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::BorNot, <span class="kw-2">&amp;</span>[I8X16, I8X16], <span class="kw-2">&amp;</span>[I8X16]),
+    (Opcode::BorNot, <span class="kw-2">&amp;</span>[I16X8, I16X8], <span class="kw-2">&amp;</span>[I16X8]),
+    (Opcode::BorNot, <span class="kw-2">&amp;</span>[I32X4, I32X4], <span class="kw-2">&amp;</span>[I32X4]),
+    (Opcode::BorNot, <span class="kw-2">&amp;</span>[I64X2, I64X2], <span class="kw-2">&amp;</span>[I64X2]),
+    (Opcode::BorNot, <span class="kw-2">&amp;</span>[F32X4, F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::BorNot, <span class="kw-2">&amp;</span>[F64X2, F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// BxorNot
     </span>(Opcode::BxorNot, <span class="kw-2">&amp;</span>[I8, I8], <span class="kw-2">&amp;</span>[I8]),
     (Opcode::BxorNot, <span class="kw-2">&amp;</span>[I16, I16], <span class="kw-2">&amp;</span>[I16]),
@@ -3305,6 +3437,12 @@
     (Opcode::BxorNot, <span class="kw-2">&amp;</span>[I128, I128], <span class="kw-2">&amp;</span>[I128]),
     (Opcode::BxorNot, <span class="kw-2">&amp;</span>[F32, F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::BxorNot, <span class="kw-2">&amp;</span>[F64, F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::BxorNot, <span class="kw-2">&amp;</span>[I8X16, I8X16], <span class="kw-2">&amp;</span>[I8X16]),
+    (Opcode::BxorNot, <span class="kw-2">&amp;</span>[I16X8, I16X8], <span class="kw-2">&amp;</span>[I16X8]),
+    (Opcode::BxorNot, <span class="kw-2">&amp;</span>[I32X4, I32X4], <span class="kw-2">&amp;</span>[I32X4]),
+    (Opcode::BxorNot, <span class="kw-2">&amp;</span>[I64X2, I64X2], <span class="kw-2">&amp;</span>[I64X2]),
+    (Opcode::BxorNot, <span class="kw-2">&amp;</span>[F32X4, F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::BxorNot, <span class="kw-2">&amp;</span>[F64X2, F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Bitrev
     </span>(Opcode::Bitrev, <span class="kw-2">&amp;</span>[I8], <span class="kw-2">&amp;</span>[I8]),
     (Opcode::Bitrev, <span class="kw-2">&amp;</span>[I16], <span class="kw-2">&amp;</span>[I16]),
@@ -3380,6 +3518,10 @@
     (Opcode::Bitselect, <span class="kw-2">&amp;</span>[I32, I32, I32], <span class="kw-2">&amp;</span>[I32]),
     (Opcode::Bitselect, <span class="kw-2">&amp;</span>[I64, I64, I64], <span class="kw-2">&amp;</span>[I64]),
     (Opcode::Bitselect, <span class="kw-2">&amp;</span>[I128, I128, I128], <span class="kw-2">&amp;</span>[I128]),
+    (Opcode::Bitselect, <span class="kw-2">&amp;</span>[I8X16, I8X16, I8X16], <span class="kw-2">&amp;</span>[I8X16]),
+    (Opcode::Bitselect, <span class="kw-2">&amp;</span>[I16X8, I16X8, I16X8], <span class="kw-2">&amp;</span>[I16X8]),
+    (Opcode::Bitselect, <span class="kw-2">&amp;</span>[I32X4, I32X4, I32X4], <span class="kw-2">&amp;</span>[I32X4]),
+    (Opcode::Bitselect, <span class="kw-2">&amp;</span>[I64X2, I64X2, I64X2], <span class="kw-2">&amp;</span>[I64X2]),
     <span class="comment">// Select
     </span>(Opcode::Select, <span class="kw-2">&amp;</span>[I8, I8, I8], <span class="kw-2">&amp;</span>[I8]),
     (Opcode::Select, <span class="kw-2">&amp;</span>[I8, I16, I16], <span class="kw-2">&amp;</span>[I16]),
@@ -3435,15 +3577,23 @@
     <span class="comment">// Fadd
     </span>(Opcode::Fadd, <span class="kw-2">&amp;</span>[F32, F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Fadd, <span class="kw-2">&amp;</span>[F64, F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Fadd, <span class="kw-2">&amp;</span>[F32X4, F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Fadd, <span class="kw-2">&amp;</span>[F64X2, F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Fmul
     </span>(Opcode::Fmul, <span class="kw-2">&amp;</span>[F32, F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Fmul, <span class="kw-2">&amp;</span>[F64, F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Fmul, <span class="kw-2">&amp;</span>[F32X4, F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Fmul, <span class="kw-2">&amp;</span>[F64X2, F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Fsub
     </span>(Opcode::Fsub, <span class="kw-2">&amp;</span>[F32, F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Fsub, <span class="kw-2">&amp;</span>[F64, F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Fsub, <span class="kw-2">&amp;</span>[F32X4, F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Fsub, <span class="kw-2">&amp;</span>[F64X2, F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Fdiv
     </span>(Opcode::Fdiv, <span class="kw-2">&amp;</span>[F32, F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Fdiv, <span class="kw-2">&amp;</span>[F64, F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Fdiv, <span class="kw-2">&amp;</span>[F32X4, F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Fdiv, <span class="kw-2">&amp;</span>[F64X2, F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Fmin
     </span>(Opcode::Fmin, <span class="kw-2">&amp;</span>[F32, F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Fmin, <span class="kw-2">&amp;</span>[F64, F64], <span class="kw-2">&amp;</span>[F64]),
@@ -3464,27 +3614,43 @@
     <span class="comment">// Fma
     </span>(Opcode::Fma, <span class="kw-2">&amp;</span>[F32, F32, F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Fma, <span class="kw-2">&amp;</span>[F64, F64, F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Fma, <span class="kw-2">&amp;</span>[F32X4, F32X4, F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Fma, <span class="kw-2">&amp;</span>[F64X2, F64X2, F64X4], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Fabs
     </span>(Opcode::Fabs, <span class="kw-2">&amp;</span>[F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Fabs, <span class="kw-2">&amp;</span>[F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Fabs, <span class="kw-2">&amp;</span>[F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Fabs, <span class="kw-2">&amp;</span>[F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Fneg
     </span>(Opcode::Fneg, <span class="kw-2">&amp;</span>[F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Fneg, <span class="kw-2">&amp;</span>[F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Fneg, <span class="kw-2">&amp;</span>[F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Fneg, <span class="kw-2">&amp;</span>[F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Sqrt
     </span>(Opcode::Sqrt, <span class="kw-2">&amp;</span>[F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Sqrt, <span class="kw-2">&amp;</span>[F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Sqrt, <span class="kw-2">&amp;</span>[F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Sqrt, <span class="kw-2">&amp;</span>[F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Ceil
     </span>(Opcode::Ceil, <span class="kw-2">&amp;</span>[F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Ceil, <span class="kw-2">&amp;</span>[F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Ceil, <span class="kw-2">&amp;</span>[F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Ceil, <span class="kw-2">&amp;</span>[F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Floor
     </span>(Opcode::Floor, <span class="kw-2">&amp;</span>[F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Floor, <span class="kw-2">&amp;</span>[F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Floor, <span class="kw-2">&amp;</span>[F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Floor, <span class="kw-2">&amp;</span>[F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Trunc
     </span>(Opcode::Trunc, <span class="kw-2">&amp;</span>[F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Trunc, <span class="kw-2">&amp;</span>[F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Trunc, <span class="kw-2">&amp;</span>[F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Trunc, <span class="kw-2">&amp;</span>[F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Nearest
     </span>(Opcode::Nearest, <span class="kw-2">&amp;</span>[F32], <span class="kw-2">&amp;</span>[F32]),
     (Opcode::Nearest, <span class="kw-2">&amp;</span>[F64], <span class="kw-2">&amp;</span>[F64]),
+    (Opcode::Nearest, <span class="kw-2">&amp;</span>[F32X4], <span class="kw-2">&amp;</span>[F32X4]),
+    (Opcode::Nearest, <span class="kw-2">&amp;</span>[F64X2], <span class="kw-2">&amp;</span>[F64X2]),
     <span class="comment">// Fpromote
     </span>(Opcode::Fpromote, <span class="kw-2">&amp;</span>[F32], <span class="kw-2">&amp;</span>[F64]),
     <span class="comment">// Fdemote
