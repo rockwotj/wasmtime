@@ -1027,6 +1027,17 @@
 <a href="#1027" id="1027">1027</a>
 <a href="#1028" id="1028">1028</a>
 <a href="#1029" id="1029">1029</a>
+<a href="#1030" id="1030">1030</a>
+<a href="#1031" id="1031">1031</a>
+<a href="#1032" id="1032">1032</a>
+<a href="#1033" id="1033">1033</a>
+<a href="#1034" id="1034">1034</a>
+<a href="#1035" id="1035">1035</a>
+<a href="#1036" id="1036">1036</a>
+<a href="#1037" id="1037">1037</a>
+<a href="#1038" id="1038">1038</a>
+<a href="#1039" id="1039">1039</a>
+<a href="#1040" id="1040">1040</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Copy-on-write initialization support: creation of backing images for
 //! modules, and logic to support mapping these backing images into memory.
 
@@ -1038,7 +1049,9 @@
 <span class="kw">use </span>std::fs::File;
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::{convert::TryFrom, ops::Range};
-<span class="kw">use </span>wasmtime_environ::{DefinedMemoryIndex, MemoryInitialization, MemoryStyle, Module, PrimaryMap};
+<span class="kw">use </span>wasmtime_environ::{
+    DefinedMemoryIndex, MemoryInitialization, MemoryPlan, MemoryStyle, Module, PrimaryMap,
+};
 
 <span class="doccomment">/// Backing images for memories in a module.
 ///
@@ -1513,7 +1526,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         initial_size_bytes: usize,
         maybe_image: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Arc&lt;MemoryImage&gt;&gt;,
-        style: <span class="kw-2">&amp;</span>MemoryStyle,
+        plan: <span class="kw-2">&amp;</span>MemoryPlan,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="macro">assert!</span>(!<span class="self">self</span>.dirty);
         <span class="macro">assert!</span>(initial_size_bytes &lt;= <span class="self">self</span>.static_size);
@@ -1538,22 +1551,16 @@
             <span class="self">self</span>.accessible = initial_size_bytes;
         }
 
-        <span class="comment">// Next, if the &quot;static&quot; style of memory is being used then that means
-        // that the addressable heap must be shrunk to match
-        // `initial_size_bytes`. This is because the &quot;static&quot; flavor of memory
-        // relies on page faults to indicate out-of-bounds accesses to memory.
-        //
-        // Note that &quot;dynamic&quot; memories do not shrink the heap here. A dynamic
-        // memory performs dynamic bounds checks so if the remaining heap is
-        // still addressable then that&#39;s ok since it still won&#39;t get accessed.
-        </span><span class="kw">if </span>initial_size_bytes &lt; <span class="self">self</span>.accessible {
-            <span class="kw">match </span>style {
-                MemoryStyle::Static { .. } =&gt; {
-                    <span class="self">self</span>.set_protection(initial_size_bytes..<span class="self">self</span>.accessible, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
-                    <span class="self">self</span>.accessible = initial_size_bytes;
-                }
-                MemoryStyle::Dynamic { .. } =&gt; {}
-            }
+        <span class="comment">// If (1) the accessible region is not in its initial state, and (2) the
+        // memory relies on virtual memory at all (i.e. has offset guard pages
+        // and/or is static), then we need to reset memory protections. Put
+        // another way, the only time it is safe to not reset protections is
+        // when we are using dynamic memory without any guard pages.
+        </span><span class="kw">if </span>initial_size_bytes &lt; <span class="self">self</span>.accessible
+            &amp;&amp; (plan.offset_guard_size &gt; <span class="number">0 </span>|| <span class="macro">matches!</span>(plan.style, MemoryStyle::Static { .. }))
+        {
+            <span class="self">self</span>.set_protection(initial_size_bytes..<span class="self">self</span>.accessible, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
+            <span class="self">self</span>.accessible = initial_size_bytes;
         }
 
         <span class="comment">// Now that memory is sized appropriately the final operation is to
@@ -1863,10 +1870,11 @@
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span>std::sync::Arc;
 
-    <span class="kw">use super</span>::{create_memfd, FdSource, MemoryImage, MemoryImageSlot, MemoryStyle};
+    <span class="kw">use super</span>::{create_memfd, FdSource, MemoryImage, MemoryImageSlot, MemoryPlan, MemoryStyle};
     <span class="kw">use </span><span class="kw">crate</span>::mmap::Mmap;
     <span class="kw">use </span>anyhow::Result;
     <span class="kw">use </span>std::io::Write;
+    <span class="kw">use </span>wasmtime_environ::Memory;
 
     <span class="kw">fn </span>create_memfd_with_data(offset: usize, data: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;MemoryImage&gt; {
         <span class="comment">// Offset must be page-aligned.
@@ -1887,9 +1895,23 @@
         })
     }
 
+    <span class="kw">fn </span>dummy_memory_plan(style: MemoryStyle) -&gt; MemoryPlan {
+        MemoryPlan {
+            style,
+            memory: Memory {
+                minimum: <span class="number">0</span>,
+                maximum: <span class="prelude-val">None</span>,
+                shared: <span class="bool-val">false</span>,
+                memory64: <span class="bool-val">false</span>,
+            },
+            pre_guard_size: <span class="number">0</span>,
+            offset_guard_size: <span class="number">0</span>,
+        }
+    }
+
     <span class="attr">#[test]
     </span><span class="kw">fn </span>instantiate_no_image() {
-        <span class="kw">let </span>style = MemoryStyle::Static { bound: <span class="number">4 </span>&lt;&lt; <span class="number">30 </span>};
+        <span class="kw">let </span>plan = dummy_memory_plan(MemoryStyle::Static { bound: <span class="number">4 </span>&lt;&lt; <span class="number">30 </span>});
         <span class="comment">// 4 MiB mmap&#39;d area, not accessible
         </span><span class="kw">let </span><span class="kw-2">mut </span>mmap = Mmap::accessible_reserved(<span class="number">0</span>, <span class="number">4 </span>&lt;&lt; <span class="number">20</span>).unwrap();
         <span class="comment">// Create a MemoryImageSlot on top of it
@@ -1897,7 +1919,7 @@
         memfd.no_clear_on_drop();
         <span class="macro">assert!</span>(!memfd.is_dirty());
         <span class="comment">// instantiate with 64 KiB initial size
-        </span>memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>style).unwrap();
+        </span>memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="macro">assert!</span>(memfd.is_dirty());
         <span class="comment">// We should be able to access this 64 KiB (try both ends) and
         // it should consist of zeroes.
@@ -1915,14 +1937,14 @@
         // reuse-anon-mmap-opt kicks in
         </span>memfd.clear_and_remain_ready(<span class="number">0</span>).unwrap();
         <span class="macro">assert!</span>(!memfd.is_dirty());
-        memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>style).unwrap();
+        memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="kw">let </span>slice = mmap.as_slice();
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, slice[<span class="number">1024</span>]);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>instantiate_image() {
-        <span class="kw">let </span>style = MemoryStyle::Static { bound: <span class="number">4 </span>&lt;&lt; <span class="number">30 </span>};
+        <span class="kw">let </span>plan = dummy_memory_plan(MemoryStyle::Static { bound: <span class="number">4 </span>&lt;&lt; <span class="number">30 </span>});
         <span class="comment">// 4 MiB mmap&#39;d area, not accessible
         </span><span class="kw">let </span><span class="kw-2">mut </span>mmap = Mmap::accessible_reserved(<span class="number">0</span>, <span class="number">4 </span>&lt;&lt; <span class="number">20</span>).unwrap();
         <span class="comment">// Create a MemoryImageSlot on top of it
@@ -1931,38 +1953,38 @@
         <span class="comment">// Create an image with some data.
         </span><span class="kw">let </span>image = Arc::new(create_memfd_with_data(<span class="number">4096</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]).unwrap());
         <span class="comment">// Instantiate with this image
-        </span>memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>style).unwrap();
+        </span>memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="macro">assert!</span>(memfd.has_image());
         <span class="kw">let </span>slice = mmap.as_mut_slice();
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
         slice[<span class="number">4096</span>] = <span class="number">5</span>;
         <span class="comment">// Clear and re-instantiate same image
         </span>memfd.clear_and_remain_ready(<span class="number">0</span>).unwrap();
-        memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>style).unwrap();
+        memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="kw">let </span>slice = mmap.as_slice();
         <span class="comment">// Should not see mutation from above
         </span><span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
         <span class="comment">// Clear and re-instantiate no image
         </span>memfd.clear_and_remain_ready(<span class="number">0</span>).unwrap();
-        memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>style).unwrap();
+        memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="macro">assert!</span>(!memfd.has_image());
         <span class="kw">let </span>slice = mmap.as_slice();
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
         <span class="comment">// Clear and re-instantiate image again
         </span>memfd.clear_and_remain_ready(<span class="number">0</span>).unwrap();
-        memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>style).unwrap();
+        memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="kw">let </span>slice = mmap.as_slice();
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
         <span class="comment">// Create another image with different data.
         </span><span class="kw">let </span>image2 = Arc::new(create_memfd_with_data(<span class="number">4096</span>, <span class="kw-2">&amp;</span>[<span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>]).unwrap());
         memfd.clear_and_remain_ready(<span class="number">0</span>).unwrap();
-        memfd.instantiate(<span class="number">128 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image2), <span class="kw-2">&amp;</span>style).unwrap();
+        memfd.instantiate(<span class="number">128 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image2), <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="kw">let </span>slice = mmap.as_slice();
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
         <span class="comment">// Instantiate the original image again; we should notice it&#39;s
         // a different image and not reuse the mappings.
         </span>memfd.clear_and_remain_ready(<span class="number">0</span>).unwrap();
-        memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>style).unwrap();
+        memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="kw">let </span>slice = mmap.as_slice();
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
     }
@@ -1970,7 +1992,7 @@
     <span class="attr">#[test]
     #[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
     </span><span class="kw">fn </span>memset_instead_of_madvise() {
-        <span class="kw">let </span>style = MemoryStyle::Static { bound: <span class="number">100 </span>};
+        <span class="kw">let </span>plan = dummy_memory_plan(MemoryStyle::Static { bound: <span class="number">100 </span>});
         <span class="kw">let </span><span class="kw-2">mut </span>mmap = Mmap::accessible_reserved(<span class="number">0</span>, <span class="number">4 </span>&lt;&lt; <span class="number">20</span>).unwrap();
         <span class="kw">let </span><span class="kw-2">mut </span>memfd = MemoryImageSlot::create(mmap.as_mut_ptr() <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>, <span class="number">0</span>, <span class="number">4 </span>&lt;&lt; <span class="number">20</span>);
         memfd.no_clear_on_drop();
@@ -1979,7 +2001,7 @@
         </span><span class="kw">for </span>image_off <span class="kw">in </span>[<span class="number">0</span>, <span class="number">4096</span>, <span class="number">8 </span>&lt;&lt; <span class="number">10</span>] {
             <span class="kw">let </span>image = Arc::new(create_memfd_with_data(image_off, <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]).unwrap());
             <span class="kw">for </span>amt_to_memset <span class="kw">in </span>[<span class="number">0</span>, <span class="number">4096</span>, <span class="number">10 </span>&lt;&lt; <span class="number">12</span>, <span class="number">1 </span>&lt;&lt; <span class="number">20</span>, <span class="number">10 </span>&lt;&lt; <span class="number">20</span>] {
-                memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>style).unwrap();
+                memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>plan).unwrap();
                 <span class="macro">assert!</span>(memfd.has_image());
                 <span class="kw">let </span>slice = mmap.as_mut_slice();
                 <span class="kw">if </span>image_off &gt; <span class="number">0 </span>{
@@ -1995,7 +2017,7 @@
 
         <span class="comment">// Test without an image
         </span><span class="kw">for </span>amt_to_memset <span class="kw">in </span>[<span class="number">0</span>, <span class="number">4096</span>, <span class="number">10 </span>&lt;&lt; <span class="number">12</span>, <span class="number">1 </span>&lt;&lt; <span class="number">20</span>, <span class="number">10 </span>&lt;&lt; <span class="number">20</span>] {
-            memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>style).unwrap();
+            memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>plan).unwrap();
             <span class="kw">for </span>chunk <span class="kw">in </span>mmap.as_mut_slice()[..<span class="number">64 </span>&lt;&lt; <span class="number">10</span>].chunks_mut(<span class="number">1024</span>) {
                 <span class="macro">assert_eq!</span>(chunk[<span class="number">0</span>], <span class="number">0</span>);
                 chunk[<span class="number">0</span>] = <span class="number">5</span>;
@@ -2007,7 +2029,7 @@
     <span class="attr">#[test]
     #[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
     </span><span class="kw">fn </span>dynamic() {
-        <span class="kw">let </span>style = MemoryStyle::Dynamic { reserve: <span class="number">200 </span>};
+        <span class="kw">let </span>plan = dummy_memory_plan(MemoryStyle::Dynamic { reserve: <span class="number">200 </span>});
 
         <span class="kw">let </span><span class="kw-2">mut </span>mmap = Mmap::accessible_reserved(<span class="number">0</span>, <span class="number">4 </span>&lt;&lt; <span class="number">20</span>).unwrap();
         <span class="kw">let </span><span class="kw-2">mut </span>memfd = MemoryImageSlot::create(mmap.as_mut_ptr() <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>, <span class="number">0</span>, <span class="number">4 </span>&lt;&lt; <span class="number">20</span>);
@@ -2017,7 +2039,7 @@
 
         <span class="comment">// Instantiate the image and test that memory remains accessible after
         // it&#39;s cleared.
-        </span>memfd.instantiate(initial, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>style).unwrap();
+        </span>memfd.instantiate(initial, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="macro">assert!</span>(memfd.has_image());
         <span class="kw">let </span>slice = mmap.as_mut_slice();
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
@@ -2028,7 +2050,7 @@
 
         <span class="comment">// Re-instantiate make sure it preserves memory. Grow a bit and set data
         // beyond the initial size.
-        </span>memfd.instantiate(initial, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>style).unwrap();
+        </span>memfd.instantiate(initial, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
         memfd.set_heap_limit(initial * <span class="number">2</span>).unwrap();
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>], <span class="kw-2">&amp;</span>slice[initial..initial + <span class="number">2</span>]);
@@ -2041,7 +2063,7 @@
 
         <span class="comment">// Instantiate again, and again memory beyond the initial size should
         // still be accessible. Grow into it again and make sure it works.
-        </span>memfd.instantiate(initial, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>style).unwrap();
+        </span>memfd.instantiate(initial, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>], <span class="kw-2">&amp;</span>slice[initial..initial + <span class="number">2</span>]);
         memfd.set_heap_limit(initial * <span class="number">2</span>).unwrap();
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>], <span class="kw-2">&amp;</span>slice[initial..initial + <span class="number">2</span>]);
@@ -2050,7 +2072,7 @@
         memfd.clear_and_remain_ready(<span class="number">0</span>).unwrap();
 
         <span class="comment">// Reset the image to none and double-check everything is back to zero
-        </span>memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>style).unwrap();
+        </span>memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="macro">assert!</span>(!memfd.has_image());
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>], <span class="kw-2">&amp;</span>slice[initial..initial + <span class="number">2</span>]);
