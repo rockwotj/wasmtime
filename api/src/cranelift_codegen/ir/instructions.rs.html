@@ -1682,8 +1682,8 @@
     <span class="doccomment">/// This operand is `ctrlType.lane_of()`.
     </span>LaneOf,
 
-    <span class="doccomment">/// This operand is `ctrlType.as_bool()`.
-    </span>AsBool,
+    <span class="doccomment">/// This operand is `ctrlType.as_truthy()`.
+    </span>AsTruthy,
 
     <span class="doccomment">/// This operand is `ctrlType.half_width()`.
     </span>HalfWidth,
@@ -1718,7 +1718,7 @@
             Free(vts) =&gt; ResolvedConstraint::Free(TYPE_SETS[vts <span class="kw">as </span>usize]),
             Same =&gt; Bound(ctrl_type),
             LaneOf =&gt; Bound(ctrl_type.lane_of()),
-            AsBool =&gt; Bound(ctrl_type.as_bool()),
+            AsTruthy =&gt; Bound(ctrl_type.as_truthy()),
             HalfWidth =&gt; Bound(ctrl_type.half_width().expect(<span class="string">&quot;invalid type for half_width&quot;</span>)),
             DoubleWidth =&gt; Bound(
                 ctrl_type

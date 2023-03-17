@@ -2468,7 +2468,7 @@
 /// Each operand constraint is represented as a string, one of:
 /// - `Concrete(vt)`, where `vt` is a value type name.
 /// - `Free(idx)` where `idx` is an index into `type_sets`.
-/// - `Same`, `Lane`, `AsBool` for controlling typevar-derived constraints.
+/// - `Same`, `Lane`, `AsTruthy` for controlling typevar-derived constraints.
 </span><span class="kw">fn </span>get_constraint&lt;<span class="lifetime">&#39;entries</span>, <span class="lifetime">&#39;table</span>&gt;(
     operand: <span class="kw-2">&amp;</span><span class="lifetime">&#39;entries </span>Operand,
     ctrl_typevar: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>TypeVar&gt;,
@@ -2577,7 +2577,7 @@
     // constraint is represented as a string, one of:
     // - `Concrete(vt)`, where `vt` is a value type name.
     // - `Free(idx)` where `idx` is an index into `type_sets`.
-    // - `Same`, `Lane`, `AsBool` for controlling typevar-derived constraints.
+    // - `Same`, `Lane`, `AsTruthy` for controlling typevar-derived constraints.
     </span><span class="kw">let </span><span class="kw-2">mut </span>operand_seqs = UniqueSeqTable::new();
 
     <span class="comment">// Preload table with constraints for typical binops.

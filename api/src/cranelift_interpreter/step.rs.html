@@ -2532,7 +2532,7 @@
                         V::bool(
                             fcmp(inst.fp_cond_code().unwrap(), <span class="kw-2">&amp;</span>x, <span class="kw-2">&amp;</span>y).unwrap(),
                             ctrl_ty.is_vector(),
-                            ctrl_ty.lane_type().as_bool(),
+                            ctrl_ty.lane_type().as_truthy(),
                         )
                     })
                     .collect::&lt;ValueResult&lt;SimdVec&lt;V&gt;&gt;&gt;()<span class="question-mark">?</span>),
@@ -2640,7 +2640,7 @@
         }
         Opcode::Bmask =&gt; assign({
             <span class="kw">let </span>bool = arg(<span class="number">0</span>)<span class="question-mark">?</span>;
-            <span class="kw">let </span>bool_ty = ctrl_ty.as_bool_pedantic();
+            <span class="kw">let </span>bool_ty = ctrl_ty.as_truthy_pedantic();
             <span class="kw">let </span>lanes = extractlanes(<span class="kw-2">&amp;</span>bool, bool_ty)<span class="question-mark">?
                 </span>.into_iter()
                 .map(|lane| lane.convert(ValueConversionKind::Mask(ctrl_ty.lane_type())))
@@ -3122,7 +3122,7 @@
         )<span class="question-mark">?</span>)
     };
 
-    <span class="kw">let </span>dst_ty = ctrl_ty.as_bool();
+    <span class="kw">let </span>dst_ty = ctrl_ty.as_truthy();
     <span class="kw">let </span>left = extractlanes(left, ctrl_ty)<span class="question-mark">?</span>;
     <span class="kw">let </span>right = extractlanes(right, ctrl_ty)<span class="question-mark">?</span>;
 

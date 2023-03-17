@@ -628,7 +628,6 @@
 <a href="#628" id="628">628</a>
 <a href="#629" id="629">629</a>
 <a href="#630" id="630">630</a>
-<a href="#631" id="631">631</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Common types for the Cranelift code generator.
 
 </span><span class="kw">use </span>core::default::Default;
@@ -764,28 +763,27 @@
     ///
     /// Lane types are treated as vectors with one lane, so they are converted to the multi-bit
     /// boolean types.
-    </span><span class="kw">pub fn </span>as_bool_pedantic(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>as_truthy_pedantic(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="comment">// Replace the low 4 bits with the boolean version, preserve the high 4 bits.
         </span><span class="self">self</span>.replace_lanes(<span class="kw">match </span><span class="self">self</span>.lane_type() {
             I8 =&gt; I8,
             I16 =&gt; I16,
             I32 | F32 =&gt; I32,
             I64 | F64 =&gt; I64,
-            R32 | R64 =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Reference types should not convert to bool&quot;</span>),
+            R32 | R64 =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Reference types are not truthy&quot;</span>),
             I128 =&gt; I128,
             <span class="kw">_ </span>=&gt; I8,
         })
     }
 
-    <span class="doccomment">/// Get a type with the same number of lanes as this type, but with the lanes replaced by
-    /// booleans of the same size.
-    ///
-    /// Scalar types are all converted to `b1` which is usually what you want.
-    </span><span class="kw">pub fn </span>as_bool(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// Get the type of a comparison result for the given type. For vectors this will be a vector
+    /// with the same number of lanes and integer elements, and for scalar types this will be `i8`,
+    /// which is the result type of comparisons.
+    </span><span class="kw">pub fn </span>as_truthy(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>!<span class="self">self</span>.is_vector() {
             I8
         } <span class="kw">else </span>{
-            <span class="self">self</span>.as_bool_pedantic()
+            <span class="self">self</span>.as_truthy_pedantic()
         }
     }
 
@@ -1235,11 +1233,11 @@
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>as_bool() {
-        <span class="macro">assert_eq!</span>(I32X4.as_bool(), I32X4);
-        <span class="macro">assert_eq!</span>(I32.as_bool(), I8);
-        <span class="macro">assert_eq!</span>(I32X4.as_bool_pedantic(), I32X4);
-        <span class="macro">assert_eq!</span>(I32.as_bool_pedantic(), I32);
+    </span><span class="kw">fn </span>as_truthy() {
+        <span class="macro">assert_eq!</span>(I32X4.as_truthy(), I32X4);
+        <span class="macro">assert_eq!</span>(I32.as_truthy(), I8);
+        <span class="macro">assert_eq!</span>(I32X4.as_truthy_pedantic(), I32X4);
+        <span class="macro">assert_eq!</span>(I32.as_truthy_pedantic(), I32);
     }
 
     <span class="attr">#[test]

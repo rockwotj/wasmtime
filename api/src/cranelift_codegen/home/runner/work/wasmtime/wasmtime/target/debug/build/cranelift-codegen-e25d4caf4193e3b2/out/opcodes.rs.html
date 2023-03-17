@@ -8994,7 +8994,7 @@
         constraint_offset: <span class="number">34</span>,
     },
     <span class="comment">// Icmp: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=true, fixed_values=2
-    // Constraints=[&#39;AsBool&#39;, &#39;Same&#39;, &#39;Same&#39;]
+    // Constraints=[&#39;AsTruthy&#39;, &#39;Same&#39;, &#39;Same&#39;]
     // Polymorphic over TypeSet(lanes={1, 2, 4, 8, 16, 32, 64, 128, 256}, ints={8, 16, 32, 64, 128})
     </span>OpcodeConstraints {
         flags: <span class="number">0x59</span>,
@@ -9434,7 +9434,7 @@
         constraint_offset: <span class="number">0</span>,
     },
     <span class="comment">// Fcmp: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=true, fixed_values=2
-    // Constraints=[&#39;AsBool&#39;, &#39;Same&#39;, &#39;Same&#39;]
+    // Constraints=[&#39;AsTruthy&#39;, &#39;Same&#39;, &#39;Same&#39;]
     // Polymorphic over TypeSet(lanes={1, 2, 4, 8, 16, 32, 64, 128, 256}, floats={32, 64})
     </span>OpcodeConstraints {
         flags: <span class="number">0x59</span>,
@@ -10113,7 +10113,7 @@
     OperandConstraint::Concrete(ir::types::I8),
     OperandConstraint::Same,
     OperandConstraint::Free(<span class="number">10</span>),
-    OperandConstraint::AsBool,
+    OperandConstraint::AsTruthy,
     OperandConstraint::Same,
     OperandConstraint::Same,
     OperandConstraint::Concrete(ir::types::I8),

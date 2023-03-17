@@ -968,6 +968,23 @@
 <a href="#968" id="968">968</a>
 <a href="#969" id="969">969</a>
 <a href="#970" id="970">970</a>
+<a href="#971" id="971">971</a>
+<a href="#972" id="972">972</a>
+<a href="#973" id="973">973</a>
+<a href="#974" id="974">974</a>
+<a href="#975" id="975">975</a>
+<a href="#976" id="976">976</a>
+<a href="#977" id="977">977</a>
+<a href="#978" id="978">978</a>
+<a href="#979" id="979">979</a>
+<a href="#980" id="980">980</a>
+<a href="#981" id="981">981</a>
+<a href="#982" id="982">982</a>
+<a href="#983" id="983">983</a>
+<a href="#984" id="984">984</a>
+<a href="#985" id="985">985</a>
+<a href="#986" id="986">986</a>
+<a href="#987" id="987">987</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::collections::BTreeSet;
 <span class="kw">use </span>std::fmt;
@@ -1198,7 +1215,7 @@
                     <span class="string">&quot;The `wider` constraint only applies to scalar ints or floats&quot;
                 </span>);
             }
-            DerivedFunc::LaneOf | DerivedFunc::AsBool | DerivedFunc::DynamicToVector =&gt; {
+            DerivedFunc::LaneOf | DerivedFunc::AsTruthy | DerivedFunc::DynamicToVector =&gt; {
                 <span class="comment">/* no particular assertions */
             </span>}
         }
@@ -1219,8 +1236,8 @@
     <span class="kw">pub fn </span>lane_of(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TypeVar {
         <span class="self">self</span>.derived(DerivedFunc::LaneOf)
     }
-    <span class="kw">pub fn </span>as_bool(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TypeVar {
-        <span class="self">self</span>.derived(DerivedFunc::AsBool)
+    <span class="kw">pub fn </span>as_truthy(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TypeVar {
+        <span class="self">self</span>.derived(DerivedFunc::AsTruthy)
     }
     <span class="kw">pub fn </span>half_width(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TypeVar {
         <span class="self">self</span>.derived(DerivedFunc::HalfWidth)
@@ -1302,7 +1319,7 @@
 <span class="attr">#[derive(Clone, Copy, Debug, Hash, PartialEq)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>DerivedFunc {
     LaneOf,
-    AsBool,
+    AsTruthy,
     HalfWidth,
     DoubleWidth,
     SplitLanes,
@@ -1316,7 +1333,7 @@
     <span class="kw">pub fn </span>name(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
         <span class="kw">match </span><span class="self">self </span>{
             DerivedFunc::LaneOf =&gt; <span class="string">&quot;lane_of&quot;</span>,
-            DerivedFunc::AsBool =&gt; <span class="string">&quot;as_bool&quot;</span>,
+            DerivedFunc::AsTruthy =&gt; <span class="string">&quot;as_truthy&quot;</span>,
             DerivedFunc::HalfWidth =&gt; <span class="string">&quot;half_width&quot;</span>,
             DerivedFunc::DoubleWidth =&gt; <span class="string">&quot;double_width&quot;</span>,
             DerivedFunc::SplitLanes =&gt; <span class="string">&quot;split_lanes&quot;</span>,
@@ -1395,7 +1412,7 @@
     </span><span class="kw">fn </span>image(<span class="kw-2">&amp;</span><span class="self">self</span>, derived_func: DerivedFunc) -&gt; TypeSet {
         <span class="kw">match </span>derived_func {
             DerivedFunc::LaneOf =&gt; <span class="self">self</span>.lane_of(),
-            DerivedFunc::AsBool =&gt; <span class="self">self</span>.as_bool(),
+            DerivedFunc::AsTruthy =&gt; <span class="self">self</span>.as_truthy(),
             DerivedFunc::HalfWidth =&gt; <span class="self">self</span>.half_width(),
             DerivedFunc::DoubleWidth =&gt; <span class="self">self</span>.double_width(),
             DerivedFunc::SplitLanes =&gt; <span class="self">self</span>.half_width().double_vector(),
@@ -1413,10 +1430,19 @@
         copy
     }
 
-    <span class="doccomment">/// Return a TypeSet describing the image of self across as_bool.
-    </span><span class="kw">fn </span>as_bool(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TypeSet {
+    <span class="doccomment">/// Return a TypeSet describing the image of self across as_truthy.
+    </span><span class="kw">fn </span>as_truthy(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TypeSet {
         <span class="kw">let </span><span class="kw-2">mut </span>copy = <span class="self">self</span>.clone();
-        copy.ints = NumSet::new();
+
+        <span class="comment">// If this type set represents a scalar, `as_truthy` produces an I8, otherwise it returns a
+        // vector of the same number of lanes, whose elements are integers of the same width. For
+        // example, F32X4 gets turned into I32X4, while I32 gets turned into I8.
+        </span><span class="kw">if </span><span class="self">self</span>.lanes.len() == <span class="number">1 </span>&amp;&amp; <span class="self">self</span>.lanes.contains(<span class="kw-2">&amp;</span><span class="number">1</span>) {
+            copy.ints = NumSet::from([<span class="number">8</span>]);
+        } <span class="kw">else </span>{
+            copy.ints.extend(<span class="kw-2">&amp;</span><span class="self">self</span>.floats)
+        }
+
         copy.floats = NumSet::new();
         copy.refs = NumSet::new();
         copy
@@ -1784,7 +1810,7 @@
 }
 
 <span class="attr">#[test]
-</span><span class="kw">fn </span>test_as_bool() {
+</span><span class="kw">fn </span>test_as_truthy() {
     <span class="kw">let </span>a = TypeSetBuilder::new()
         .simd_lanes(<span class="number">2</span>..<span class="number">8</span>)
         .ints(<span class="number">8</span>..<span class="number">8</span>)
@@ -1794,6 +1820,14 @@
         a.lane_of(),
         TypeSetBuilder::new().ints(<span class="number">8</span>..<span class="number">8</span>).floats(<span class="number">32</span>..<span class="number">32</span>).build()
     );
+
+    <span class="kw">let </span><span class="kw-2">mut </span>a_as_truthy = TypeSetBuilder::new().simd_lanes(<span class="number">2</span>..<span class="number">8</span>).build();
+    a_as_truthy.ints = <span class="macro">num_set!</span>[<span class="number">8</span>, <span class="number">32</span>];
+    <span class="macro">assert_eq!</span>(a.as_truthy(), a_as_truthy);
+
+    <span class="kw">let </span>a = TypeSetBuilder::new().ints(<span class="number">8</span>..<span class="number">32</span>).floats(<span class="number">32</span>..<span class="number">64</span>).build();
+    <span class="kw">let </span>a_as_truthy = TypeSetBuilder::new().ints(<span class="number">8</span>..<span class="number">8</span>).build();
+    <span class="macro">assert_eq!</span>(a.as_truthy(), a_as_truthy);
 }
 
 <span class="attr">#[test]
