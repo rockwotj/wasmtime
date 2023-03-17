@@ -802,20 +802,11 @@
 <a href="#802" id="802">802</a>
 <a href="#803" id="803">803</a>
 <a href="#804" id="804">804</a>
-<a href="#805" id="805">805</a>
-<a href="#806" id="806">806</a>
-<a href="#807" id="807">807</a>
-<a href="#808" id="808">808</a>
-<a href="#809" id="809">809</a>
-<a href="#810" id="810">810</a>
-<a href="#811" id="811">811</a>
-<a href="#812" id="812">812</a>
-<a href="#813" id="813">813</a>
 </pre><pre class="rust"><code><span class="doccomment">//! A Dominator Tree represented as mappings of Blocks to their immediate dominator.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::entity::SecondaryMap;
 <span class="kw">use </span><span class="kw">crate</span>::flowgraph::{BlockPredecessor, ControlFlowGraph};
-<span class="kw">use </span><span class="kw">crate</span>::ir::{Block, ExpandedProgramPoint, Function, Inst, Layout, ProgramOrder, Value};
+<span class="kw">use </span><span class="kw">crate</span>::ir::{Block, Function, Inst, Layout, ProgramPoint};
 <span class="kw">use </span><span class="kw">crate</span>::packed_option::PackedOption;
 <span class="kw">use </span><span class="kw">crate</span>::timing;
 <span class="kw">use </span>alloc::vec::Vec;
@@ -901,7 +892,7 @@
     }
 
     <span class="doccomment">/// Compare two blocks relative to the reverse post-order.
-    </span><span class="kw">fn </span>rpo_cmp_block(<span class="kw-2">&amp;</span><span class="self">self</span>, a: Block, b: Block) -&gt; Ordering {
+    </span><span class="kw">pub fn </span>rpo_cmp_block(<span class="kw-2">&amp;</span><span class="self">self</span>, a: Block, b: Block) -&gt; Ordering {
         <span class="self">self</span>.nodes[a].rpo_number.cmp(<span class="kw-2">&amp;</span><span class="self">self</span>.nodes[b].rpo_number)
     }
 
@@ -913,13 +904,13 @@
     /// If `a` and `b` belong to the same block, compare their relative position in the block.
     </span><span class="kw">pub fn </span>rpo_cmp&lt;A, B&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, a: A, b: B, layout: <span class="kw-2">&amp;</span>Layout) -&gt; Ordering
     <span class="kw">where
-        </span>A: Into&lt;ExpandedProgramPoint&gt;,
-        B: Into&lt;ExpandedProgramPoint&gt;,
+        </span>A: Into&lt;ProgramPoint&gt;,
+        B: Into&lt;ProgramPoint&gt;,
     {
         <span class="kw">let </span>a = a.into();
         <span class="kw">let </span>b = b.into();
         <span class="self">self</span>.rpo_cmp_block(layout.pp_block(a), layout.pp_block(b))
-            .then(layout.cmp(a, b))
+            .then(layout.pp_cmp(a, b))
     }
 
     <span class="doccomment">/// Returns `true` if `a` dominates `b`.
@@ -933,21 +924,21 @@
     /// An instruction is considered to dominate itself.
     </span><span class="kw">pub fn </span>dominates&lt;A, B&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, a: A, b: B, layout: <span class="kw-2">&amp;</span>Layout) -&gt; bool
     <span class="kw">where
-        </span>A: Into&lt;ExpandedProgramPoint&gt;,
-        B: Into&lt;ExpandedProgramPoint&gt;,
+        </span>A: Into&lt;ProgramPoint&gt;,
+        B: Into&lt;ProgramPoint&gt;,
     {
         <span class="kw">let </span>a = a.into();
         <span class="kw">let </span>b = b.into();
         <span class="kw">match </span>a {
-            ExpandedProgramPoint::Block(block_a) =&gt; {
+            ProgramPoint::Block(block_a) =&gt; {
                 a == b || <span class="self">self</span>.last_dominator(block_a, b, layout).is_some()
             }
-            ExpandedProgramPoint::Inst(inst_a) =&gt; {
+            ProgramPoint::Inst(inst_a) =&gt; {
                 <span class="kw">let </span>block_a = layout
                     .inst_block(inst_a)
                     .expect(<span class="string">&quot;Instruction not in layout.&quot;</span>);
                 <span class="kw">match </span><span class="self">self</span>.last_dominator(block_a, b, layout) {
-                    <span class="prelude-val">Some</span>(last) =&gt; layout.cmp(inst_a, last) != Ordering::Greater,
+                    <span class="prelude-val">Some</span>(last) =&gt; layout.pp_cmp(inst_a, last) != Ordering::Greater,
                     <span class="prelude-val">None </span>=&gt; <span class="bool-val">false</span>,
                 }
             }
@@ -958,11 +949,11 @@
     /// If no instructions in `a` dominate `b`, return `None`.
     </span><span class="kw">pub fn </span>last_dominator&lt;B&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, a: Block, b: B, layout: <span class="kw-2">&amp;</span>Layout) -&gt; <span class="prelude-ty">Option</span>&lt;Inst&gt;
     <span class="kw">where
-        </span>B: Into&lt;ExpandedProgramPoint&gt;,
+        </span>B: Into&lt;ProgramPoint&gt;,
     {
         <span class="kw">let </span>(<span class="kw-2">mut </span>block_b, <span class="kw-2">mut </span>inst_b) = <span class="kw">match </span>b.into() {
-            ExpandedProgramPoint::Block(block) =&gt; (block, <span class="prelude-val">None</span>),
-            ExpandedProgramPoint::Inst(inst) =&gt; (
+            ProgramPoint::Block(block) =&gt; (block, <span class="prelude-val">None</span>),
+            ProgramPoint::Inst(inst) =&gt; (
                 layout.inst_block(inst).expect(<span class="string">&quot;Instruction not in layout.&quot;</span>),
                 <span class="prelude-val">Some</span>(inst),
             ),
@@ -1023,7 +1014,7 @@
         </span>);
 
         <span class="comment">// We&#39;re in the same block. The common dominator is the earlier instruction.
-        </span><span class="kw">if </span>layout.cmp(a.inst, b.inst) == Ordering::Less {
+        </span><span class="kw">if </span>layout.pp_cmp(a.inst, b.inst) == Ordering::Less {
             a
         } <span class="kw">else </span>{
             b
@@ -1288,7 +1279,9 @@
         // sibling lists are ordered according to the CFG reverse post-order.
         </span><span class="kw">for </span><span class="kw-2">&amp;</span>block <span class="kw">in </span>domtree.cfg_postorder() {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(idom_inst) = domtree.idom(block) {
-                <span class="kw">let </span>idom = layout.pp_block(idom_inst);
+                <span class="kw">let </span>idom = layout
+                    .inst_block(idom_inst)
+                    .expect(<span class="string">&quot;Instruction not in layout.&quot;</span>);
                 <span class="kw">let </span>sib = mem::replace(<span class="kw-2">&amp;mut </span><span class="self">self</span>.nodes[idom].child, block.into());
                 <span class="self">self</span>.nodes[block].sibling = sib;
             } <span class="kw">else </span>{
@@ -1318,7 +1311,9 @@
         // its dominator tree children.
         </span><span class="kw">for </span><span class="kw-2">&amp;</span>block <span class="kw">in </span>domtree.cfg_postorder() {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(idom_inst) = domtree.idom(block) {
-                <span class="kw">let </span>idom = layout.pp_block(idom_inst);
+                <span class="kw">let </span>idom = layout
+                    .inst_block(idom_inst)
+                    .expect(<span class="string">&quot;Instruction not in layout.&quot;</span>);
                 <span class="kw">let </span>pre_max = cmp::max(<span class="self">self</span>.nodes[block].pre_max, <span class="self">self</span>.nodes[idom].pre_max);
                 <span class="self">self</span>.nodes[idom].pre_max = pre_max;
             }
@@ -1381,26 +1376,13 @@
     /// program points dominated by pp follow immediately and contiguously after pp in the order.
     </span><span class="kw">pub fn </span>pre_cmp&lt;A, B&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, a: A, b: B, layout: <span class="kw-2">&amp;</span>Layout) -&gt; Ordering
     <span class="kw">where
-        </span>A: Into&lt;ExpandedProgramPoint&gt;,
-        B: Into&lt;ExpandedProgramPoint&gt;,
+        </span>A: Into&lt;ProgramPoint&gt;,
+        B: Into&lt;ProgramPoint&gt;,
     {
         <span class="kw">let </span>a = a.into();
         <span class="kw">let </span>b = b.into();
         <span class="self">self</span>.pre_cmp_block(layout.pp_block(a), layout.pp_block(b))
-            .then(layout.cmp(a, b))
-    }
-
-    <span class="doccomment">/// Compare two value defs according to the dominator tree pre-order.
-    ///
-    /// Two values defined at the same program point are compared according to their parameter or
-    /// result order.
-    ///
-    /// This is a total ordering of the values in the function.
-    </span><span class="kw">pub fn </span>pre_cmp_def(<span class="kw-2">&amp;</span><span class="self">self</span>, a: Value, b: Value, func: <span class="kw-2">&amp;</span>Function) -&gt; Ordering {
-        <span class="kw">let </span>da = func.dfg.value_def(a);
-        <span class="kw">let </span>db = func.dfg.value_def(b);
-        <span class="self">self</span>.pre_cmp(da, db, <span class="kw-2">&amp;</span>func.layout)
-            .then_with(|| da.num().cmp(<span class="kw-2">&amp;</span>db.num()))
+            .then(layout.pp_cmp(a, b))
     }
 }
 

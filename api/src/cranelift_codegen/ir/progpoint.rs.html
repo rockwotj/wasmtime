@@ -74,103 +74,10 @@
 <a href="#74" id="74">74</a>
 <a href="#75" id="75">75</a>
 <a href="#76" id="76">76</a>
-<a href="#77" id="77">77</a>
-<a href="#78" id="78">78</a>
-<a href="#79" id="79">79</a>
-<a href="#80" id="80">80</a>
-<a href="#81" id="81">81</a>
-<a href="#82" id="82">82</a>
-<a href="#83" id="83">83</a>
-<a href="#84" id="84">84</a>
-<a href="#85" id="85">85</a>
-<a href="#86" id="86">86</a>
-<a href="#87" id="87">87</a>
-<a href="#88" id="88">88</a>
-<a href="#89" id="89">89</a>
-<a href="#90" id="90">90</a>
-<a href="#91" id="91">91</a>
-<a href="#92" id="92">92</a>
-<a href="#93" id="93">93</a>
-<a href="#94" id="94">94</a>
-<a href="#95" id="95">95</a>
-<a href="#96" id="96">96</a>
-<a href="#97" id="97">97</a>
-<a href="#98" id="98">98</a>
-<a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
-<a href="#110" id="110">110</a>
-<a href="#111" id="111">111</a>
-<a href="#112" id="112">112</a>
-<a href="#113" id="113">113</a>
-<a href="#114" id="114">114</a>
-<a href="#115" id="115">115</a>
-<a href="#116" id="116">116</a>
-<a href="#117" id="117">117</a>
-<a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
-<a href="#125" id="125">125</a>
-<a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
-<a href="#136" id="136">136</a>
-<a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
-<a href="#141" id="141">141</a>
-<a href="#142" id="142">142</a>
-<a href="#143" id="143">143</a>
-<a href="#144" id="144">144</a>
-<a href="#145" id="145">145</a>
-<a href="#146" id="146">146</a>
-<a href="#147" id="147">147</a>
-<a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
-<a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
-<a href="#161" id="161">161</a>
-<a href="#162" id="162">162</a>
-<a href="#163" id="163">163</a>
-<a href="#164" id="164">164</a>
-<a href="#165" id="165">165</a>
-<a href="#166" id="166">166</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Program points.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::entity::EntityRef;
-<span class="kw">use </span><span class="kw">crate</span>::ir::{Block, Inst, ValueDef};
-<span class="kw">use </span>core::cmp;
+</span><span class="kw">use </span><span class="kw">crate</span>::ir::{Block, Inst};
 <span class="kw">use </span>core::fmt;
-<span class="kw">use </span>core::u32;
 
 <span class="doccomment">/// A `ProgramPoint` represents a position in a function where the live range of an SSA value can
 /// begin or end. It can be either:
@@ -180,45 +87,14 @@
 ///
 /// This corresponds more or less to the lines in the textual form of Cranelift IR.
 </span><span class="attr">#[derive(PartialEq, Eq, Clone, Copy)]
-</span><span class="kw">pub struct </span>ProgramPoint(u32);
-
-<span class="kw">impl </span>From&lt;Inst&gt; <span class="kw">for </span>ProgramPoint {
-    <span class="kw">fn </span>from(inst: Inst) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>idx = inst.index();
-        <span class="macro">debug_assert!</span>(idx &lt; (u32::MAX / <span class="number">2</span>) <span class="kw">as </span>usize);
-        <span class="self">Self</span>((idx * <span class="number">2</span>) <span class="kw">as </span>u32)
-    }
-}
-
-<span class="kw">impl </span>From&lt;Block&gt; <span class="kw">for </span>ProgramPoint {
-    <span class="kw">fn </span>from(block: Block) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>idx = block.index();
-        <span class="macro">debug_assert!</span>(idx &lt; (u32::MAX / <span class="number">2</span>) <span class="kw">as </span>usize);
-        <span class="self">Self</span>((idx * <span class="number">2 </span>+ <span class="number">1</span>) <span class="kw">as </span>u32)
-    }
-}
-
-<span class="kw">impl </span>From&lt;ValueDef&gt; <span class="kw">for </span>ProgramPoint {
-    <span class="kw">fn </span>from(def: ValueDef) -&gt; <span class="self">Self </span>{
-        <span class="kw">match </span>def {
-            ValueDef::Result(inst, <span class="kw">_</span>) =&gt; inst.into(),
-            ValueDef::Param(block, <span class="kw">_</span>) =&gt; block.into(),
-            ValueDef::Union(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Union does not have a single program point&quot;</span>),
-        }
-    }
-}
-
-<span class="doccomment">/// An expanded program point directly exposes the variants, but takes twice the space to
-/// represent.
-</span><span class="attr">#[derive(PartialEq, Eq, Clone, Copy)]
-</span><span class="kw">pub enum </span>ExpandedProgramPoint {
+</span><span class="kw">pub enum </span>ProgramPoint {
     <span class="doccomment">/// An instruction in the function.
     </span>Inst(Inst),
     <span class="doccomment">/// A block header.
     </span>Block(Block),
 }
 
-<span class="kw">impl </span>ExpandedProgramPoint {
+<span class="kw">impl </span>ProgramPoint {
     <span class="doccomment">/// Get the instruction we know is inside.
     </span><span class="kw">pub fn </span>unwrap_inst(<span class="self">self</span>) -&gt; Inst {
         <span class="kw">match </span><span class="self">self </span>{
@@ -228,39 +104,19 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;Inst&gt; <span class="kw">for </span>ExpandedProgramPoint {
+<span class="kw">impl </span>From&lt;Inst&gt; <span class="kw">for </span>ProgramPoint {
     <span class="kw">fn </span>from(inst: Inst) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::Inst(inst)
     }
 }
 
-<span class="kw">impl </span>From&lt;Block&gt; <span class="kw">for </span>ExpandedProgramPoint {
+<span class="kw">impl </span>From&lt;Block&gt; <span class="kw">for </span>ProgramPoint {
     <span class="kw">fn </span>from(block: Block) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::Block(block)
     }
 }
 
-<span class="kw">impl </span>From&lt;ValueDef&gt; <span class="kw">for </span>ExpandedProgramPoint {
-    <span class="kw">fn </span>from(def: ValueDef) -&gt; <span class="self">Self </span>{
-        <span class="kw">match </span>def {
-            ValueDef::Result(inst, <span class="kw">_</span>) =&gt; inst.into(),
-            ValueDef::Param(block, <span class="kw">_</span>) =&gt; block.into(),
-            ValueDef::Union(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Union does not have a single program point&quot;</span>),
-        }
-    }
-}
-
-<span class="kw">impl </span>From&lt;ProgramPoint&gt; <span class="kw">for </span>ExpandedProgramPoint {
-    <span class="kw">fn </span>from(pp: ProgramPoint) -&gt; <span class="self">Self </span>{
-        <span class="kw">if </span>pp.<span class="number">0 </span>&amp; <span class="number">1 </span>== <span class="number">0 </span>{
-            <span class="self">Self</span>::Inst(Inst::from_u32(pp.<span class="number">0 </span>/ <span class="number">2</span>))
-        } <span class="kw">else </span>{
-            <span class="self">Self</span>::Block(Block::from_u32(pp.<span class="number">0 </span>/ <span class="number">2</span>))
-        }
-    }
-}
-
-<span class="kw">impl </span>fmt::Display <span class="kw">for </span>ExpandedProgramPoint {
+<span class="kw">impl </span>fmt::Display <span class="kw">for </span>ProgramPoint {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
             <span class="self">Self</span>::Inst(x) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, x),
@@ -269,46 +125,10 @@
     }
 }
 
-<span class="kw">impl </span>fmt::Display <span class="kw">for </span>ProgramPoint {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="kw">let </span>epp: ExpandedProgramPoint = (<span class="kw-2">*</span><span class="self">self</span>).into();
-        epp.fmt(f)
-    }
-}
-
-<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ExpandedProgramPoint {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;ExpandedProgramPoint({})&quot;</span>, <span class="self">self</span>)
-    }
-}
-
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ProgramPoint {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="macro">write!</span>(f, <span class="string">&quot;ProgramPoint({})&quot;</span>, <span class="self">self</span>)
     }
-}
-
-<span class="doccomment">/// Context for ordering program points.
-///
-/// `ProgramPoint` objects don&#39;t carry enough information to be ordered independently, they need a
-/// context providing the program order.
-</span><span class="kw">pub trait </span>ProgramOrder {
-    <span class="doccomment">/// Compare the program points `a` and `b` relative to this program order.
-    ///
-    /// Return `Less` if `a` appears in the program before `b`.
-    ///
-    /// This is declared as a generic such that it can be called with `Inst` and `Block` arguments
-    /// directly. Depending on the implementation, there is a good chance performance will be
-    /// improved for those cases where the type of either argument is known statically.
-    </span><span class="kw">fn </span>cmp&lt;A, B&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, a: A, b: B) -&gt; cmp::Ordering
-    <span class="kw">where
-        </span>A: Into&lt;ExpandedProgramPoint&gt;,
-        B: Into&lt;ExpandedProgramPoint&gt;;
-
-    <span class="doccomment">/// Is the range from `inst` to `block` just the gap between consecutive blocks?
-    ///
-    /// This returns true if `inst` is the terminator in the block immediately before `block`.
-    </span><span class="kw">fn </span>is_block_gap(<span class="kw-2">&amp;</span><span class="self">self</span>, inst: Inst, block: Block) -&gt; bool;
 }
 
 <span class="attr">#[cfg(test)]

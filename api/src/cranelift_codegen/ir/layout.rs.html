@@ -1289,23 +1289,13 @@
 <a href="#1289" id="1289">1289</a>
 <a href="#1290" id="1290">1290</a>
 <a href="#1291" id="1291">1291</a>
-<a href="#1292" id="1292">1292</a>
-<a href="#1293" id="1293">1293</a>
-<a href="#1294" id="1294">1294</a>
-<a href="#1295" id="1295">1295</a>
-<a href="#1296" id="1296">1296</a>
-<a href="#1297" id="1297">1297</a>
-<a href="#1298" id="1298">1298</a>
-<a href="#1299" id="1299">1299</a>
-<a href="#1300" id="1300">1300</a>
-<a href="#1301" id="1301">1301</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Function layout.
 //!
 //! The order of basic blocks in a function and the order of instructions in a block is
 //! determined by the `Layout` data structure defined in this module.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::entity::SecondaryMap;
-<span class="kw">use </span><span class="kw">crate</span>::ir::progpoint::{ExpandedProgramPoint, ProgramOrder};
+<span class="kw">use </span><span class="kw">crate</span>::ir::progpoint::ProgramPoint;
 <span class="kw">use </span><span class="kw">crate</span>::ir::{Block, Inst};
 <span class="kw">use </span><span class="kw">crate</span>::packed_option::PackedOption;
 <span class="kw">use crate</span>::{timing, trace};
@@ -1415,33 +1405,33 @@
     <span class="macro">assert_eq!</span>(midpoint(<span class="number">3</span>, <span class="number">4</span>), <span class="prelude-val">None</span>);
 }
 
-<span class="kw">impl </span>ProgramOrder <span class="kw">for </span>Layout {
-    <span class="kw">fn </span>cmp&lt;A, B&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, a: A, b: B) -&gt; cmp::Ordering
+<span class="kw">impl </span>Layout {
+    <span class="doccomment">/// Compare the program points `a` and `b` relative to this program order.
+    ///
+    /// Return `Less` if `a` appears in the program before `b`.
+    ///
+    /// This is declared as a generic such that it can be called with `Inst` and `Block` arguments
+    /// directly. Depending on the implementation, there is a good chance performance will be
+    /// improved for those cases where the type of either argument is known statically.
+    </span><span class="kw">pub fn </span>pp_cmp&lt;A, B&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, a: A, b: B) -&gt; cmp::Ordering
     <span class="kw">where
-        </span>A: Into&lt;ExpandedProgramPoint&gt;,
-        B: Into&lt;ExpandedProgramPoint&gt;,
+        </span>A: Into&lt;ProgramPoint&gt;,
+        B: Into&lt;ProgramPoint&gt;,
     {
         <span class="kw">let </span>a_seq = <span class="self">self</span>.seq(a);
         <span class="kw">let </span>b_seq = <span class="self">self</span>.seq(b);
         a_seq.cmp(<span class="kw-2">&amp;</span>b_seq)
-    }
-
-    <span class="kw">fn </span>is_block_gap(<span class="kw-2">&amp;</span><span class="self">self</span>, inst: Inst, block: Block) -&gt; bool {
-        <span class="kw">let </span>i = <span class="kw-2">&amp;</span><span class="self">self</span>.insts[inst];
-        <span class="kw">let </span>e = <span class="kw-2">&amp;</span><span class="self">self</span>.blocks[block];
-
-        i.next.is_none() &amp;&amp; i.block == e.prev
     }
 }
 
 <span class="comment">// Private methods for dealing with sequence numbers.
 </span><span class="kw">impl </span>Layout {
     <span class="doccomment">/// Get the sequence number of a program point that must correspond to an entity in the layout.
-    </span><span class="kw">fn </span>seq&lt;PP: Into&lt;ExpandedProgramPoint&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, pp: PP) -&gt; SequenceNumber {
+    </span><span class="kw">fn </span>seq&lt;PP: Into&lt;ProgramPoint&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, pp: PP) -&gt; SequenceNumber {
         <span class="comment">// When `PP = Inst` or `PP = Block`, we expect this dynamic type check to be optimized out.
         </span><span class="kw">match </span>pp.into() {
-            ExpandedProgramPoint::Block(block) =&gt; <span class="self">self</span>.blocks[block].seq,
-            ExpandedProgramPoint::Inst(inst) =&gt; <span class="self">self</span>.insts[inst].seq,
+            ProgramPoint::Block(block) =&gt; <span class="self">self</span>.blocks[block].seq,
+            ProgramPoint::Inst(inst) =&gt; <span class="self">self</span>.insts[inst].seq,
         }
     }
 
@@ -1837,15 +1827,10 @@
     }
 
     <span class="doccomment">/// Get the block containing the program point `pp`. Panic if `pp` is not in the layout.
-    </span><span class="kw">pub fn </span>pp_block&lt;PP&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, pp: PP) -&gt; Block
-    <span class="kw">where
-        </span>PP: Into&lt;ExpandedProgramPoint&gt;,
-    {
-        <span class="kw">match </span>pp.into() {
-            ExpandedProgramPoint::Block(block) =&gt; block,
-            ExpandedProgramPoint::Inst(inst) =&gt; {
-                <span class="self">self</span>.inst_block(inst).expect(<span class="string">&quot;Program point not in layout&quot;</span>)
-            }
+    </span><span class="kw">pub fn </span>pp_block(<span class="kw-2">&amp;</span><span class="self">self</span>, pp: ProgramPoint) -&gt; Block {
+        <span class="kw">match </span>pp {
+            ProgramPoint::Block(block) =&gt; block,
+            ProgramPoint::Inst(inst) =&gt; <span class="self">self</span>.inst_block(inst).expect(<span class="string">&quot;Program point not in layout&quot;</span>),
         }
     }
 
@@ -2168,7 +2153,7 @@
     <span class="kw">use </span><span class="kw">super</span>::Layout;
     <span class="kw">use </span><span class="kw">crate</span>::cursor::{Cursor, CursorPosition};
     <span class="kw">use </span><span class="kw">crate</span>::entity::EntityRef;
-    <span class="kw">use </span><span class="kw">crate</span>::ir::{Block, Inst, ProgramOrder, SourceLoc};
+    <span class="kw">use </span><span class="kw">crate</span>::ir::{Block, Inst, SourceLoc};
     <span class="kw">use </span>alloc::vec::Vec;
     <span class="kw">use </span>core::cmp::Ordering;
 
@@ -2590,14 +2575,9 @@
         }
 
         <span class="comment">// Check `ProgramOrder`.
-        </span><span class="macro">assert_eq!</span>(layout.cmp(e2, e2), Ordering::Equal);
-        <span class="macro">assert_eq!</span>(layout.cmp(e2, i2), Ordering::Less);
-        <span class="macro">assert_eq!</span>(layout.cmp(i3, i2), Ordering::Greater);
-
-        <span class="macro">assert_eq!</span>(layout.is_block_gap(i1, e2), <span class="bool-val">true</span>);
-        <span class="macro">assert_eq!</span>(layout.is_block_gap(i3, e1), <span class="bool-val">true</span>);
-        <span class="macro">assert_eq!</span>(layout.is_block_gap(i1, e1), <span class="bool-val">false</span>);
-        <span class="macro">assert_eq!</span>(layout.is_block_gap(i2, e1), <span class="bool-val">false</span>);
+        </span><span class="macro">assert_eq!</span>(layout.pp_cmp(e2, e2), Ordering::Equal);
+        <span class="macro">assert_eq!</span>(layout.pp_cmp(e2, i2), Ordering::Less);
+        <span class="macro">assert_eq!</span>(layout.pp_cmp(i3, i2), Ordering::Greater)
     }
 }
 </code></pre></div>

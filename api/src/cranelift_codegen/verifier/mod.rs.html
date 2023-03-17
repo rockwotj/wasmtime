@@ -2765,7 +2765,11 @@
         <span class="self">self</span>.verify_value(loc_inst, v, errors)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>dfg = <span class="kw-2">&amp;</span><span class="self">self</span>.func.dfg;
-        <span class="kw">let </span>loc_block = <span class="self">self</span>.func.layout.pp_block(loc_inst);
+        <span class="kw">let </span>loc_block = <span class="self">self
+            </span>.func
+            .layout
+            .inst_block(loc_inst)
+            .expect(<span class="string">&quot;Instruction not in layout.&quot;</span>);
         <span class="kw">let </span>is_reachable = <span class="self">self</span>.expected_domtree.is_reachable(loc_block);
 
         <span class="comment">// SSA form
@@ -2982,17 +2986,13 @@
                 ));
             }
         }
-        <span class="comment">// We verify rpo_cmp on pairs of adjacent blocks in the postorder
+        <span class="comment">// We verify rpo_cmp_block on pairs of adjacent blocks in the postorder
         </span><span class="kw">for </span>(<span class="kw-2">&amp;</span>prev_block, <span class="kw-2">&amp;</span>next_block) <span class="kw">in </span>domtree.cfg_postorder().iter().adjacent_pairs() {
-            <span class="kw">if </span><span class="self">self
-                </span>.expected_domtree
-                .rpo_cmp(prev_block, next_block, <span class="kw-2">&amp;</span><span class="self">self</span>.func.layout)
-                != Ordering::Greater
-            {
+            <span class="kw">if </span><span class="self">self</span>.expected_domtree.rpo_cmp_block(prev_block, next_block) != Ordering::Greater {
                 <span class="kw">return </span>errors.fatal((
                     next_block,
                     <span class="macro">format!</span>(
-                        <span class="string">&quot;invalid domtree, rpo_cmp does not says {} is greater than {}&quot;</span>,
+                        <span class="string">&quot;invalid domtree, rpo_cmp_block does not says {} is greater than {}&quot;</span>,
                         prev_block, next_block
                     ),
                 ));
