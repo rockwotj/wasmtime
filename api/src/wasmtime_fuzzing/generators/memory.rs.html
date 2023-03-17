@@ -108,10 +108,18 @@
 <a href="#108" id="108">108</a>
 <a href="#109" id="109">109</a>
 <a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Generate various kinds of Wasm memory.
 
 </span><span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>arbitrary::{Arbitrary, Unstructured};
+<span class="kw">use </span>std::ops::Range;
 <span class="kw">use </span>wasmtime::{LinearMemory, MemoryCreator, MemoryType};
 
 <span class="doccomment">/// Configuration for linear memories in Wasmtime.
@@ -196,6 +204,12 @@
         // of memory is always unaligned.
         </span><span class="self">self</span>.src[<span class="number">1</span>..].as_ptr() <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_
     </span>}
+
+    <span class="kw">fn </span>wasm_accessible(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Range&lt;usize&gt; {
+        <span class="kw">let </span>base = <span class="self">self</span>.as_ptr() <span class="kw">as </span>usize;
+        <span class="kw">let </span>len = <span class="self">self</span>.byte_size();
+        base..base + len
+    }
 }
 
 <span class="doccomment">/// A mechanism to generate [`UnalignedMemory`] at runtime.

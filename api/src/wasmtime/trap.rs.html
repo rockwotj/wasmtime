@@ -616,6 +616,15 @@
 <a href="#616" id="616">616</a>
 <a href="#617" id="617">617</a>
 <a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
+<a href="#626" id="626">626</a>
+<a href="#627" id="627">627</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::store::StoreOpaque;
 <span class="kw">use crate</span>::{AsContext, Module};
 <span class="kw">use </span>anyhow::Error;
@@ -721,12 +730,21 @@
             );
             (error, <span class="prelude-val">None</span>)
         }
-        wasmtime_runtime::TrapReason::Jit(pc) =&gt; {
+        wasmtime_runtime::TrapReason::Jit { pc, faulting_addr } =&gt; {
             <span class="kw">let </span>code = store
                 .modules()
                 .lookup_trap_code(pc)
                 .unwrap_or(Trap::StackOverflow);
-            (code.into(), <span class="prelude-val">Some</span>(pc))
+            <span class="kw">let </span><span class="kw-2">mut </span>err: Error = code.into();
+
+            <span class="comment">// If a fault address was present, for example with segfaults,
+            // then simultaneously assert that it&#39;s within a known linear memory
+            // and additionally translate it to a wasm-local address to be added
+            // as context to the error.
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(fault) = faulting_addr.and_then(|addr| store.wasm_fault(pc, addr)) {
+                err = err.context(fault);
+            }
+            (err, <span class="prelude-val">Some</span>(pc))
         }
         wasmtime_runtime::TrapReason::Wasm(trap_code) =&gt; (trap_code.into(), <span class="prelude-val">None</span>),
     };

@@ -1332,6 +1332,10 @@
 <a href="#1332" id="1332">1332</a>
 <a href="#1333" id="1333">1333</a>
 <a href="#1334" id="1334">1334</a>
+<a href="#1335" id="1335">1335</a>
+<a href="#1336" id="1336">1336</a>
+<a href="#1337" id="1337">1337</a>
+<a href="#1338" id="1338">1338</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements the pooling instance allocator.
 //!
 //! The pooling instance allocator maps memory in advance
@@ -2151,9 +2155,13 @@
             // else to come in and map something.
             </span>slot.instantiate(initial_size <span class="kw">as </span>usize, image, <span class="kw-2">&amp;</span>plan.style)<span class="question-mark">?</span>;
 
-            memories.push(Memory::new_static(plan, memory, slot, <span class="kw">unsafe </span>{
-                <span class="kw-2">&amp;mut *</span>req.store.get().unwrap()
-            })<span class="question-mark">?</span>);
+            memories.push(Memory::new_static(
+                plan,
+                memory,
+                slot,
+                <span class="self">self</span>.memories.memory_and_guard_size,
+                <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>req.store.get().unwrap() },
+            )<span class="question-mark">?</span>);
         }
 
         <span class="prelude-val">Ok</span>(())

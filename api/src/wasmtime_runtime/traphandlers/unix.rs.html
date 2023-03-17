@@ -374,6 +374,10 @@
 <a href="#374" id="374">374</a>
 <a href="#375" id="375">375</a>
 <a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traphandlers::{tls, wasmtime_longjmp};
 <span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::io;
@@ -477,7 +481,11 @@
         <span class="kw">if </span>jmp_buf <span class="kw">as </span>usize == <span class="number">1 </span>{
             <span class="kw">return </span><span class="bool-val">true</span>;
         }
-        info.set_jit_trap(pc, fp);
+        <span class="kw">let </span>faulting_addr = <span class="kw">match </span>signum {
+            libc::SIGSEGV | libc::SIGBUS =&gt; <span class="prelude-val">Some</span>((<span class="kw-2">*</span>siginfo).si_addr() <span class="kw">as </span>usize),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
+        };
+        info.set_jit_trap(pc, fp, faulting_addr);
         <span class="comment">// On macOS this is a bit special, unfortunately. If we were to
         // `siglongjmp` out of the signal handler that notably does
         // *not* reset the sigaltstack state of our signal handler. This

@@ -237,6 +237,26 @@
 <a href="#237" id="237">237</a>
 <a href="#238" id="238">238</a>
 <a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Runtime library support for Wasmtime.
 
 </span><span class="attr">#![deny(missing_docs, trivial_numeric_casts, unused_extern_crates)]
@@ -260,6 +280,7 @@
 )]
 
 </span><span class="kw">use </span>anyhow::Error;
+<span class="kw">use </span>std::fmt;
 <span class="kw">use </span>std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>wasmtime_environ::{DefinedFuncIndex, DefinedMemoryIndex, HostPtr, VMOffsets};
@@ -475,6 +496,25 @@
     <span class="doccomment">/// Indicates that `wait` completed with a timeout, meaning that the
     /// original value matched as expected but nothing ever called `notify`.
     </span>TimedOut = <span class="number">2</span>,
+}
+
+<span class="doccomment">/// Description about a fault that occurred in WebAssembly.
+</span><span class="attr">#[derive(Debug)]
+</span><span class="kw">pub struct </span>WasmFault {
+    <span class="doccomment">/// The size of memory, in bytes, at the time of the fault.
+    </span><span class="kw">pub </span>memory_size: usize,
+    <span class="doccomment">/// The WebAssembly address at which the fault occurred.
+    </span><span class="kw">pub </span>wasm_address: u64,
+}
+
+<span class="kw">impl </span>fmt::Display <span class="kw">for </span>WasmFault {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        <span class="macro">write!</span>(
+            f,
+            <span class="string">&quot;memory fault at wasm address 0x{:x} in linear memory of size 0x{:x}&quot;</span>,
+            <span class="self">self</span>.wasm_address, <span class="self">self</span>.memory_size,
+        )
+    }
 }
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="wasmtime_runtime" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0-nightly (b70baa4f9 2022-12-14)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>

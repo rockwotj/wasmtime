@@ -941,6 +941,11 @@
 <a href="#941" id="941">941</a>
 <a href="#942" id="942">942</a>
 <a href="#943" id="943">943</a>
+<a href="#944" id="944">944</a>
+<a href="#945" id="945">945</a>
+<a href="#946" id="946">946</a>
+<a href="#947" id="947">947</a>
+<a href="#948" id="948">948</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::store::{StoreData, StoreOpaque, Stored};
 <span class="kw">use </span><span class="kw">crate</span>::trampoline::generate_memory_export;
 <span class="kw">use </span><span class="kw">crate</span>::Trap;
@@ -948,6 +953,7 @@
 <span class="kw">use </span>anyhow::{bail, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>std::cell::UnsafeCell;
 <span class="kw">use </span>std::convert::TryFrom;
+<span class="kw">use </span>std::ops::Range;
 <span class="kw">use </span>std::slice;
 <span class="kw">use </span>std::time::Instant;
 <span class="kw">use </span>wasmtime_environ::MemoryPlan;
@@ -1554,6 +1560,10 @@
 
     <span class="doccomment">/// Return the allocated memory as a mutable pointer to u8.
     </span><span class="kw">fn </span>as_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>u8;
+
+    <span class="doccomment">/// Returns the range of native addresses that WebAssembly can natively
+    /// access from this linear memory, including guard pages.
+    </span><span class="kw">fn </span>wasm_accessible(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Range&lt;usize&gt;;
 }
 
 <span class="doccomment">/// A memory creator. Can be used to provide a memory creator

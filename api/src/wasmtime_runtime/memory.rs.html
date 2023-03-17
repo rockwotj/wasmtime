@@ -898,6 +898,44 @@
 <a href="#898" id="898">898</a>
 <a href="#899" id="899">899</a>
 <a href="#900" id="900">900</a>
+<a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
+<a href="#914" id="914">914</a>
+<a href="#915" id="915">915</a>
+<a href="#916" id="916">916</a>
+<a href="#917" id="917">917</a>
+<a href="#918" id="918">918</a>
+<a href="#919" id="919">919</a>
+<a href="#920" id="920">920</a>
+<a href="#921" id="921">921</a>
+<a href="#922" id="922">922</a>
+<a href="#923" id="923">923</a>
+<a href="#924" id="924">924</a>
+<a href="#925" id="925">925</a>
+<a href="#926" id="926">926</a>
+<a href="#927" id="927">927</a>
+<a href="#928" id="928">928</a>
+<a href="#929" id="929">929</a>
+<a href="#930" id="930">930</a>
+<a href="#931" id="931">931</a>
+<a href="#932" id="932">932</a>
+<a href="#933" id="933">933</a>
+<a href="#934" id="934">934</a>
+<a href="#935" id="935">935</a>
+<a href="#936" id="936">936</a>
+<a href="#937" id="937">937</a>
+<a href="#938" id="938">938</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Memory management for linear memories.
 //!
 //! `RuntimeLinearMemory` is to WebAssembly linear memories what `Table` is to WebAssembly tables.
@@ -909,6 +947,7 @@
 <span class="kw">use </span>anyhow::Error;
 <span class="kw">use </span>anyhow::{bail, format_err, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>std::convert::TryFrom;
+<span class="kw">use </span>std::ops::Range;
 <span class="kw">use </span>std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 <span class="kw">use </span>std::sync::{Arc, RwLock};
 <span class="kw">use </span>std::time::Instant;
@@ -1052,6 +1091,12 @@
 
     <span class="doccomment">/// Used for optional dynamic downcasting.
     </span><span class="kw">fn </span>as_any_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>std::any::Any;
+
+    <span class="doccomment">/// Returns the range of addresses that may be reached by WebAssembly.
+    ///
+    /// This starts at the base of linear memory and ends at the end of the
+    /// guard pages, if any.
+    </span><span class="kw">fn </span>wasm_accessible(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Range&lt;usize&gt;;
 }
 
 <span class="doccomment">/// A linear memory instance.
@@ -1238,6 +1283,12 @@
     <span class="kw">fn </span>as_any_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>std::any::Any {
         <span class="self">self
     </span>}
+
+    <span class="kw">fn </span>wasm_accessible(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Range&lt;usize&gt; {
+        <span class="kw">let </span>base = <span class="self">self</span>.mmap.as_mut_ptr() <span class="kw">as </span>usize + <span class="self">self</span>.pre_guard_size;
+        <span class="kw">let </span>end = base + (<span class="self">self</span>.mmap.len() - <span class="self">self</span>.pre_guard_size);
+        base..end
+    }
 }
 
 <span class="doccomment">/// A &quot;static&quot; memory where the lifetime of the backing memory is managed
@@ -1250,6 +1301,10 @@
     <span class="doccomment">/// The current size, in bytes, of this memory.
     </span>size: usize,
 
+    <span class="doccomment">/// The size, in bytes, of the virtual address allocation starting at `base`
+    /// and going to the end of the guard pages at the end of the linear memory.
+    </span>memory_and_guard_size: usize,
+
     <span class="doccomment">/// The image management, if any, for this memory. Owned here and
     /// returned to the pooling allocator when termination occurs.
     </span>memory_image: MemoryImageSlot,
@@ -1261,6 +1316,7 @@
         initial_size: usize,
         maximum_size: <span class="prelude-ty">Option</span>&lt;usize&gt;,
         memory_image: MemoryImageSlot,
+        memory_and_guard_size: usize,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">if </span>base.len() &lt; initial_size {
             <span class="macro">bail!</span>(
@@ -1281,6 +1337,7 @@
             base,
             size: initial_size,
             memory_image,
+            memory_and_guard_size,
         })
     }
 }
@@ -1320,6 +1377,12 @@
     <span class="kw">fn </span>as_any_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>std::any::Any {
         <span class="self">self
     </span>}
+
+    <span class="kw">fn </span>wasm_accessible(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Range&lt;usize&gt; {
+        <span class="kw">let </span>base = <span class="self">self</span>.base.as_ptr() <span class="kw">as </span>usize;
+        <span class="kw">let </span>end = base + <span class="self">self</span>.memory_and_guard_size;
+        base..end
+    }
 }
 
 <span class="doccomment">/// For shared memory (and only for shared memory), this lock-version restricts
@@ -1520,6 +1583,10 @@
     <span class="kw">fn </span>as_any_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>std::any::Any {
         <span class="self">self
     </span>}
+
+    <span class="kw">fn </span>wasm_accessible(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Range&lt;usize&gt; {
+        <span class="self">self</span>.<span class="number">0</span>.memory.read().unwrap().wasm_accessible()
+    }
 }
 
 <span class="doccomment">/// Representation of a runtime wasm linear memory.
@@ -1548,10 +1615,12 @@
         plan: <span class="kw-2">&amp;</span>MemoryPlan,
         base: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>[u8],
         memory_image: MemoryImageSlot,
+        memory_and_guard_size: usize,
         store: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Store,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>(minimum, maximum) = <span class="self">Self</span>::limit_new(plan, <span class="prelude-val">Some</span>(store))<span class="question-mark">?</span>;
-        <span class="kw">let </span>pooled_memory = StaticMemory::new(base, minimum, maximum, memory_image)<span class="question-mark">?</span>;
+        <span class="kw">let </span>pooled_memory =
+            StaticMemory::new(base, minimum, maximum, memory_image, memory_and_guard_size)<span class="question-mark">?</span>;
         <span class="kw">let </span>allocation = Box::new(pooled_memory);
         <span class="kw">let </span>allocation: Box&lt;<span class="kw">dyn </span>RuntimeLinearMemory&gt; = <span class="kw">if </span>plan.memory.shared {
             <span class="comment">// FIXME: since the pooling allocator owns the memory allocation
@@ -1773,6 +1842,13 @@
                 <span class="prelude-val">Err</span>(Trap::AtomicWaitNonSharedMemory)
             }
         }
+    }
+
+    <span class="doccomment">/// Returns the range of bytes that WebAssembly should be able to address in
+    /// this linear memory. Note that this includes guard pages which wasm can
+    /// hit.
+    </span><span class="kw">pub fn </span>wasm_accessible(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Range&lt;usize&gt; {
+        <span class="self">self</span>.<span class="number">0</span>.wasm_accessible()
     }
 }
 

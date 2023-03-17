@@ -195,12 +195,18 @@
 <a href="#195" id="195">195</a>
 <a href="#196" id="196">196</a>
 <a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::memory::{LinearMemory, MemoryCreator};
 <span class="kw">use </span><span class="kw">crate</span>::module::BareModuleInfo;
 <span class="kw">use </span><span class="kw">crate</span>::store::{InstanceId, StoreOpaque};
 <span class="kw">use </span><span class="kw">crate</span>::MemoryType;
 <span class="kw">use </span>anyhow::{anyhow, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>std::convert::TryFrom;
+<span class="kw">use </span>std::ops::Range;
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>wasmtime_environ::{
     DefinedMemoryIndex, DefinedTableIndex, EntityIndex, MemoryPlan, MemoryStyle, Module,
@@ -296,6 +302,10 @@
     <span class="kw">fn </span>as_any_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>std::any::Any {
         <span class="self">self
     </span>}
+
+    <span class="kw">fn </span>wasm_accessible(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Range&lt;usize&gt; {
+        <span class="self">self</span>.mem.wasm_accessible()
+    }
 }
 
 <span class="attr">#[derive(Clone)]
