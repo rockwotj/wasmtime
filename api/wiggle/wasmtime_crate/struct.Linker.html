@@ -405,11 +405,6 @@ which can also be instantiated multiple times if desired.</p>
 <h5 id="errors-7"><a href="#errors-7">Errors</a></h5>
 <p>Returns an error which may be downcast to an <a href="struct.UnknownImportError.html" title="UnknownImportError"><code>UnknownImportError</code></a> if
 the module has any unresolvable imports.</p>
-<h5 id="panics-3"><a href="#panics-3">Panics</a></h5>
-<p>This method will panic if any item defined in this linker used by
-<code>module</code> is not owned by <code>store</code>. Additionally this will panic if the
-<a href="struct.Engine.html" title="Engine"><code>Engine</code></a> that the <code>store</code> belongs to is different than this
-<a href="struct.Linker.html" title="Linker"><code>Linker</code></a>.</p>
 <h5 id="examples-8"><a href="#examples-8">Examples</a></h5>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span><span class="kw-2">mut </span>linker = Linker::new(<span class="kw-2">&amp;</span>engine);
 linker.func_wrap(<span class="string">&quot;host&quot;</span>, <span class="string">&quot;double&quot;</span>, |x: i32| x * <span class="number">2</span>)<span class="question-mark">?</span>;
@@ -442,26 +437,26 @@ are the module name and item name for the external item, and the third
 item is the item itself that is defined.</p>
 <p>Note that multiple <code>Extern</code> items may be defined for the same
 module/name pair.</p>
-<h5 id="panics-4"><a href="#panics-4">Panics</a></h5>
+<h5 id="panics-3"><a href="#panics-3">Panics</a></h5>
 <p>This function will panic if the <code>store</code> provided does not come from the
 same <a href="struct.Engine.html" title="Engine"><code>Engine</code></a> that this linker was created with.</p>
 </div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.get" class="method has-srclink"><h4 class="code-header">pub fn <a href="#method.get" class="fn">get</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;self,<br>&nbsp;&nbsp;&nbsp;&nbsp;store: impl <a class="trait" href="trait.AsContextMut.html" title="trait wiggle::wasmtime_crate::AsContextMut">AsContextMut</a>&lt;Data = T&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;module: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;name: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="enum" href="enum.Extern.html" title="enum wiggle::wasmtime_crate::Extern">Extern</a>&gt;</h4></section></summary><div class="docblock"><p>Looks up a previously defined value in this <a href="struct.Linker.html" title="Linker"><code>Linker</code></a>, identified by
 the names provided.</p>
 <p>Returns <code>None</code> if this name was not previously defined in this
 <a href="struct.Linker.html" title="Linker"><code>Linker</code></a>.</p>
-<h5 id="panics-5"><a href="#panics-5">Panics</a></h5>
+<h5 id="panics-4"><a href="#panics-4">Panics</a></h5>
 <p>This function will panic if the <code>store</code> provided does not come from the
 same <a href="struct.Engine.html" title="Engine"><code>Engine</code></a> that this linker was created with.</p>
 </div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.get_by_import" class="method has-srclink"><h4 class="code-header">pub fn <a href="#method.get_by_import" class="fn">get_by_import</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;self,<br>&nbsp;&nbsp;&nbsp;&nbsp;store: impl <a class="trait" href="trait.AsContextMut.html" title="trait wiggle::wasmtime_crate::AsContextMut">AsContextMut</a>&lt;Data = T&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;import: &amp;<a class="struct" href="struct.ImportType.html" title="struct wiggle::wasmtime_crate::ImportType">ImportType</a>&lt;'_&gt;<br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="enum" href="enum.Extern.html" title="enum wiggle::wasmtime_crate::Extern">Extern</a>&gt;</h4></section></summary><div class="docblock"><p>Looks up a value in this <code>Linker</code> which matches the <code>import</code> type
 provided.</p>
 <p>Returns <code>None</code> if no match was found.</p>
-<h5 id="panics-6"><a href="#panics-6">Panics</a></h5>
+<h5 id="panics-5"><a href="#panics-5">Panics</a></h5>
 <p>This function will panic if the <code>store</code> provided does not come from the
 same <a href="struct.Engine.html" title="Engine"><code>Engine</code></a> that this linker was created with.</p>
 </div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.get_default" class="method has-srclink"><h4 class="code-header">pub fn <a href="#method.get_default" class="fn">get_default</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;self,<br>&nbsp;&nbsp;&nbsp;&nbsp;store: impl <a class="trait" href="trait.AsContextMut.html" title="trait wiggle::wasmtime_crate::AsContextMut">AsContextMut</a>&lt;Data = T&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;module: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="struct.Func.html" title="struct wiggle::wasmtime_crate::Func">Func</a>, <a class="struct" href="struct.Error.html" title="struct wiggle::wasmtime_crate::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>Returns the “default export” of a module.</p>
 <p>An export with an empty string is considered to be a “default export”.
 “_start” is also recognized for compatibility.</p>
-<h5 id="panics-7"><a href="#panics-7">Panics</a></h5>
+<h5 id="panics-6"><a href="#panics-6">Panics</a></h5>
 <p>Panics if the default function found is not owned by <code>store</code>. This
 function will also panic if the <code>store</code> provided does not come from the
 same <a href="struct.Engine.html" title="Engine"><code>Engine</code></a> that this linker was created with.</p>
