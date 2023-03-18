@@ -440,6 +440,9 @@
 <a href="#440" id="440">440</a>
 <a href="#441" id="441">441</a>
 <a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::cdsl::isa::TargetIsa;
 <span class="kw">use </span><span class="kw">crate</span>::cdsl::settings::{PredicateNode, SettingGroup, SettingGroupBuilder};
 
@@ -580,7 +583,10 @@
     );
 
     settings.add_predicate(<span class="string">&quot;use_avx_simd&quot;</span>, <span class="macro">predicate!</span>(shared_enable_simd &amp;&amp; has_avx));
-    settings.add_predicate(<span class="string">&quot;use_avx2_simd&quot;</span>, <span class="macro">predicate!</span>(shared_enable_simd &amp;&amp; has_avx2));
+    settings.add_predicate(
+        <span class="string">&quot;use_avx2_simd&quot;</span>,
+        <span class="macro">predicate!</span>(shared_enable_simd &amp;&amp; has_avx &amp;&amp; has_avx2),
+    );
     settings.add_predicate(
         <span class="string">&quot;use_avx512bitalg_simd&quot;</span>,
         <span class="macro">predicate!</span>(shared_enable_simd &amp;&amp; has_avx512bitalg),

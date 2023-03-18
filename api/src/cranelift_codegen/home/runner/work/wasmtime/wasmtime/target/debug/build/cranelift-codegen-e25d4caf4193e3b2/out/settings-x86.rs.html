@@ -1122,7 +1122,7 @@
         <span class="macro">debug_assert_eq!</span>(bvec.len(), <span class="number">2</span>);
         x86.bytes[<span class="number">0</span>..<span class="number">2</span>].copy_from_slice(<span class="kw-2">&amp;</span>bvec);
         <span class="comment">// Precompute #16.
-        </span><span class="kw">if </span>shared.enable_simd() &amp;&amp; x86.has_avx2() {
+        </span><span class="kw">if </span>shared.enable_simd() &amp;&amp; x86.has_avx() &amp;&amp; x86.has_avx2() {
             x86.bytes[<span class="number">2</span>] |= <span class="number">1 </span>&lt;&lt; <span class="number">0</span>;
         }
         <span class="comment">// Precompute #17.
@@ -1298,7 +1298,7 @@
     </span><span class="kw">pub fn </span>has_lzcnt(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.numbered_predicate(<span class="number">15</span>)
     }
-    <span class="doccomment">/// Computed predicate `shared.enable_simd() &amp;&amp; x86.has_avx2()`.
+    <span class="doccomment">/// Computed predicate `shared.enable_simd() &amp;&amp; x86.has_avx() &amp;&amp; x86.has_avx2()`.
     </span><span class="kw">pub fn </span>use_avx2_simd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.numbered_predicate(<span class="number">16</span>)
     }

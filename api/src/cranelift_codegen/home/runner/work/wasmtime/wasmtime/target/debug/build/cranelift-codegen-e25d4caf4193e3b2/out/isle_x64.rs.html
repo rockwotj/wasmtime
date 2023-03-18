@@ -18820,8 +18820,8 @@
     <span class="kw">fn </span>use_popcnt(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg0: Type) -&gt; bool;
     <span class="kw">fn </span>use_fma(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ) -&gt; bool;
     <span class="kw">fn </span>use_sse41(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg0: Type) -&gt; bool;
-    <span class="kw">fn </span>has_avx(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ) -&gt; bool;
-    <span class="kw">fn </span>has_avx2(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ) -&gt; bool;
+    <span class="kw">fn </span>use_avx_simd(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ) -&gt; bool;
+    <span class="kw">fn </span>use_avx2_simd(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ) -&gt; bool;
     <span class="kw">fn </span>imm8_from_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg0: Value) -&gt; <span class="prelude-ty">Option</span>&lt;Imm8Reg&gt;;
     <span class="kw">fn </span>const_to_type_masked_imm8(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg0: u64, arg1: Type) -&gt; Imm8Gpr;
     <span class="kw">fn </span>shift_mask(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg0: Type) -&gt; u32;
@@ -21189,7 +21189,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>SyntheticAmode,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v2 = <span class="kw-2">&amp;</span>constructor_synthetic_amode_to_xmm_mem(ctx, arg0);
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmovss, v2);
@@ -21208,7 +21208,7 @@
     arg0: <span class="kw-2">&amp;</span>SyntheticAmode,
     arg1: Xmm,
 ) -&gt; SideEffectNoResult {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>constructor_xmm_movrm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmovss, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 1898.
@@ -21224,7 +21224,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>SyntheticAmode,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v2 = <span class="kw-2">&amp;</span>constructor_synthetic_amode_to_xmm_mem(ctx, arg0);
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmovsd, v2);
@@ -21243,7 +21243,7 @@
     arg0: <span class="kw-2">&amp;</span>SyntheticAmode,
     arg1: Xmm,
 ) -&gt; SideEffectNoResult {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>constructor_xmm_movrm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmovsd, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 1912.
@@ -21259,7 +21259,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>SyntheticAmode,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v2 = <span class="kw-2">&amp;</span>constructor_synthetic_amode_to_xmm_mem(ctx, arg0);
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmovups, v2);
@@ -21278,7 +21278,7 @@
     arg0: <span class="kw-2">&amp;</span>SyntheticAmode,
     arg1: Xmm,
 ) -&gt; SideEffectNoResult {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>constructor_xmm_movrm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmovups, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 1926.
@@ -21294,7 +21294,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>SyntheticAmode,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v2 = <span class="kw-2">&amp;</span>constructor_synthetic_amode_to_xmm_mem(ctx, arg0);
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmovupd, v2);
@@ -21313,7 +21313,7 @@
     arg0: <span class="kw-2">&amp;</span>SyntheticAmode,
     arg1: Xmm,
 ) -&gt; SideEffectNoResult {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>constructor_xmm_movrm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmovupd, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 1940.
@@ -21339,7 +21339,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v3 = C::has_avx(ctx);
+    <span class="kw">let </span>v3 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v3 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v5 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmovdqu, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 1951.
@@ -21356,7 +21356,7 @@
     arg0: <span class="kw-2">&amp;</span>SyntheticAmode,
     arg1: Xmm,
 ) -&gt; SideEffectNoResult {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>constructor_xmm_movrm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmovdqu, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 1958.
@@ -21372,7 +21372,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v3 = C::has_avx(ctx);
+    <span class="kw">let </span>v3 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v3 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v5 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmovsxbw, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 1965.
@@ -21388,7 +21388,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v3 = C::has_avx(ctx);
+    <span class="kw">let </span>v3 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v3 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v5 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmovzxbw, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 1972.
@@ -21404,7 +21404,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v3 = C::has_avx(ctx);
+    <span class="kw">let </span>v3 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v3 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v5 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmovsxwd, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 1979.
@@ -21420,7 +21420,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v3 = C::has_avx(ctx);
+    <span class="kw">let </span>v3 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v3 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v5 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmovzxwd, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 1986.
@@ -21436,7 +21436,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v3 = C::has_avx(ctx);
+    <span class="kw">let </span>v3 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v3 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v5 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmovsxdq, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 1993.
@@ -21452,7 +21452,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v3 = C::has_avx(ctx);
+    <span class="kw">let </span>v3 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v3 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v5 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmovzxdq, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 2000.
@@ -22571,7 +22571,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpaddb, arg0, v7);
@@ -22590,7 +22590,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpaddw, arg0, v7);
@@ -22609,7 +22609,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpaddd, arg0, v7);
@@ -22628,7 +22628,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpaddq, arg0, v7);
@@ -22647,7 +22647,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpaddsb, arg0, v7);
@@ -22666,7 +22666,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpaddsw, arg0, v7);
@@ -22685,7 +22685,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vphaddw, arg0, v7);
@@ -22704,7 +22704,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vphaddd, arg0, v7);
@@ -22723,7 +22723,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpaddusb, arg0, v7);
@@ -22742,7 +22742,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpaddusw, arg0, v7);
@@ -22761,7 +22761,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsubb, arg0, v7);
@@ -22780,7 +22780,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsubw, arg0, v7);
@@ -22799,7 +22799,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsubd, arg0, v7);
@@ -22818,7 +22818,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsubq, arg0, v7);
@@ -22837,7 +22837,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsubsb, arg0, v7);
@@ -22856,7 +22856,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsubsw, arg0, v7);
@@ -22875,7 +22875,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsubusb, arg0, v7);
@@ -22894,7 +22894,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsubusw, arg0, v7);
@@ -22913,7 +22913,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpavgb, arg0, v7);
@@ -22932,7 +22932,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpavgw, arg0, v7);
@@ -22951,7 +22951,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpand, arg0, v7);
@@ -22970,7 +22970,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vandps, arg0, v7);
@@ -22989,7 +22989,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vandpd, arg0, v7);
@@ -23008,7 +23008,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpor, arg0, v7);
@@ -23027,7 +23027,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vorps, arg0, v7);
@@ -23046,7 +23046,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vorpd, arg0, v7);
@@ -23065,7 +23065,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpxor, arg0, v7);
@@ -23084,7 +23084,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vxorps, arg0, v7);
@@ -23103,7 +23103,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vxorpd, arg0, v7);
@@ -23122,7 +23122,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmullw, arg0, v7);
@@ -23141,7 +23141,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmulld, arg0, v7);
@@ -23160,7 +23160,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmulhw, arg0, v7);
@@ -23179,7 +23179,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmulhrsw, arg0, v7);
@@ -23198,7 +23198,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmulhuw, arg0, v7);
@@ -23217,7 +23217,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmuldq, arg0, v7);
@@ -23236,7 +23236,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmuludq, arg0, v7);
@@ -23255,7 +23255,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpunpckhwd, arg0, v7);
@@ -23274,7 +23274,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpunpcklwd, arg0, v7);
@@ -23293,7 +23293,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpunpckldq, arg0, v7);
@@ -23312,7 +23312,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpunpckhdq, arg0, v7);
@@ -23331,7 +23331,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpunpcklqdq, arg0, v7);
@@ -23350,7 +23350,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpunpckhqdq, arg0, v7);
@@ -23369,7 +23369,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vunpcklps, arg0, v7);
@@ -23388,7 +23388,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vandnps, arg0, v7);
@@ -23407,7 +23407,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vandnpd, arg0, v7);
@@ -23426,7 +23426,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpandn, arg0, v7);
@@ -23445,7 +23445,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vaddss, arg0, v6);
@@ -23463,7 +23463,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vaddsd, arg0, v6);
@@ -23481,7 +23481,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vaddps, arg0, v7);
@@ -23500,7 +23500,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vaddpd, arg0, v7);
@@ -23519,7 +23519,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vsubss, arg0, v6);
@@ -23537,7 +23537,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vsubsd, arg0, v6);
@@ -23555,7 +23555,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vsubps, arg0, v7);
@@ -23574,7 +23574,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vsubpd, arg0, v7);
@@ -23593,7 +23593,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmulss, arg0, v6);
@@ -23611,7 +23611,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmulsd, arg0, v6);
@@ -23629,7 +23629,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmulps, arg0, v7);
@@ -23648,7 +23648,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmulpd, arg0, v7);
@@ -23667,7 +23667,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vdivss, arg0, v6);
@@ -23685,7 +23685,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vdivsd, arg0, v6);
@@ -23703,7 +23703,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vdivps, arg0, v7);
@@ -23722,7 +23722,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vdivpd, arg0, v7);
@@ -23854,7 +23854,7 @@
     arg1: <span class="kw-2">&amp;</span>XmmMem,
     arg2: Xmm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v6 = C::has_avx(ctx);
+    <span class="kw">let </span>v6 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v6 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v8 = constructor_xmm_rmr_blend_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vblendvpd, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 2991.
@@ -23873,7 +23873,7 @@
     arg1: <span class="kw-2">&amp;</span>XmmMem,
     arg2: Xmm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v6 = C::has_avx(ctx);
+    <span class="kw">let </span>v6 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v6 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v8 = constructor_xmm_rmr_blend_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vblendvps, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 2999.
@@ -23892,7 +23892,7 @@
     arg1: <span class="kw-2">&amp;</span>XmmMem,
     arg2: Xmm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v6 = C::has_avx(ctx);
+    <span class="kw">let </span>v6 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v6 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v8 = constructor_xmm_rmr_blend_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpblendvb, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3007.
@@ -23911,7 +23911,7 @@
     arg1: <span class="kw-2">&amp;</span>XmmMem,
     arg2: u8,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v8 = C::has_avx(ctx);
+    <span class="kw">let </span>v8 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v8 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v10 = constructor_xmm_rmr_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpblendw, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3015.
@@ -23930,7 +23930,7 @@
     arg0: Xmm,
     arg1: Xmm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmovsd, arg0, v7);
@@ -23949,7 +23949,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmovlhps, arg0, v7);
@@ -23996,7 +23996,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmaxsb, arg0, v7);
@@ -24015,7 +24015,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmaxsw, arg0, v7);
@@ -24034,7 +24034,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmaxsd, arg0, v7);
@@ -24081,7 +24081,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpminsb, arg0, v7);
@@ -24100,7 +24100,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpminsw, arg0, v7);
@@ -24119,7 +24119,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpminsd, arg0, v7);
@@ -24166,7 +24166,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmaxub, arg0, v7);
@@ -24185,7 +24185,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmaxuw, arg0, v7);
@@ -24204,7 +24204,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmaxud, arg0, v7);
@@ -24251,7 +24251,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpminub, arg0, v7);
@@ -24270,7 +24270,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpminuw, arg0, v7);
@@ -24289,7 +24289,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpminud, arg0, v7);
@@ -24308,7 +24308,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpunpcklbw, arg0, v7);
@@ -24327,7 +24327,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpunpckhbw, arg0, v7);
@@ -24346,7 +24346,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpacksswb, arg0, v7);
@@ -24365,7 +24365,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpackssdw, arg0, v7);
@@ -24384,7 +24384,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpackuswb, arg0, v7);
@@ -24403,7 +24403,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpackusdw, arg0, v7);
@@ -24448,7 +24448,7 @@
     arg1: <span class="kw-2">&amp;</span>XmmMem,
     arg2: u8,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v8 = C::has_avx(ctx);
+    <span class="kw">let </span>v8 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v8 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v10 = constructor_xmm_rmr_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpalignr, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3198.
@@ -24492,7 +24492,7 @@
     arg1: <span class="kw-2">&amp;</span>XmmMem,
     arg2: <span class="kw-2">&amp;</span>FcmpImm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v9 = C::has_avx(ctx);
+    <span class="kw">let </span>v9 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v9 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v11 = C::encode_fcmp_imm(ctx, arg2);
         <span class="kw">let </span>v12 = constructor_xmm_rmr_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vcmpps, arg0, arg1, v11);
@@ -24514,7 +24514,7 @@
     arg1: <span class="kw-2">&amp;</span>XmmMem,
     arg2: <span class="kw-2">&amp;</span>FcmpImm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v9 = C::has_avx(ctx);
+    <span class="kw">let </span>v9 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v9 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v11 = C::encode_fcmp_imm(ctx, arg2);
         <span class="kw">let </span>v12 = constructor_xmm_rmr_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vcmppd, arg0, arg1, v11);
@@ -24536,7 +24536,7 @@
     arg1: <span class="kw-2">&amp;</span>GprMem,
     arg2: u8,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v8 = C::has_avx(ctx);
+    <span class="kw">let </span>v8 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v8 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v10 = constructor_xmm_vex_pinsr(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpinsrb, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3246.
@@ -24556,7 +24556,7 @@
     arg1: <span class="kw-2">&amp;</span>GprMem,
     arg2: u8,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v8 = C::has_avx(ctx);
+    <span class="kw">let </span>v8 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v8 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v10 = constructor_xmm_vex_pinsr(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpinsrw, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3258.
@@ -24576,7 +24576,7 @@
     arg1: <span class="kw-2">&amp;</span>GprMem,
     arg2: u8,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v8 = C::has_avx(ctx);
+    <span class="kw">let </span>v8 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v8 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v10 = constructor_xmm_vex_pinsr(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpinsrd, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3270.
@@ -24596,7 +24596,7 @@
     arg1: <span class="kw-2">&amp;</span>GprMem,
     arg2: u8,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v8 = C::has_avx(ctx);
+    <span class="kw">let </span>v8 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v8 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v10 = constructor_xmm_vex_pinsr(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpinsrq, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3282.
@@ -24683,7 +24683,7 @@
     arg0: <span class="kw-2">&amp;</span>XmmMem,
     arg1: <span class="kw-2">&amp;</span>RoundImm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v6 = C::has_avx(ctx);
+    <span class="kw">let </span>v6 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v6 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v8 = C::encode_round_imm(ctx, arg1);
         <span class="kw">let </span>v9 = constructor_xmm_unary_rm_r_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vroundps, arg0, v8);
@@ -24703,7 +24703,7 @@
     arg0: <span class="kw-2">&amp;</span>XmmMem,
     arg1: <span class="kw-2">&amp;</span>RoundImm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v6 = C::has_avx(ctx);
+    <span class="kw">let </span>v6 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v6 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v8 = C::encode_round_imm(ctx, arg1);
         <span class="kw">let </span>v9 = constructor_xmm_unary_rm_r_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vroundpd, arg0, v8);
@@ -24723,7 +24723,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmaddwd, arg0, v7);
@@ -24742,7 +24742,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpmaddubsw, arg0, v7);
@@ -24762,7 +24762,7 @@
     arg1: <span class="kw-2">&amp;</span>XmmMem,
     arg2: u8,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v8 = C::has_avx(ctx);
+    <span class="kw">let </span>v8 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v8 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v10 = constructor_xmm_rmr_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vinsertps, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3349.
@@ -24781,7 +24781,7 @@
     arg0: <span class="kw-2">&amp;</span>XmmMem,
     arg1: u8,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = constructor_xmm_unary_rm_r_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpshufd, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3357.
@@ -24799,7 +24799,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpshufb, arg0, v7);
@@ -24818,7 +24818,7 @@
     arg0: <span class="kw-2">&amp;</span>XmmMem,
     arg1: u8,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = constructor_xmm_unary_rm_r_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpshuflw, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3373.
@@ -24836,7 +24836,7 @@
     arg0: <span class="kw-2">&amp;</span>XmmMem,
     arg1: u8,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = constructor_xmm_unary_rm_r_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpshufhw, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3381.
@@ -24855,7 +24855,7 @@
     arg1: <span class="kw-2">&amp;</span>XmmMem,
     arg2: u8,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v8 = C::has_avx(ctx);
+    <span class="kw">let </span>v8 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v8 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v10 = constructor_xmm_rmr_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vshufps, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3393.
@@ -24909,7 +24909,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpabsb, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3415.
@@ -24926,7 +24926,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpabsw, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3423.
@@ -24943,7 +24943,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpabsd, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3431.
@@ -25121,7 +25121,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMemImm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsllw, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3525.
@@ -25139,7 +25139,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMemImm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpslld, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3533.
@@ -25157,7 +25157,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMemImm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsllq, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3541.
@@ -25175,7 +25175,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMemImm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsrlw, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3549.
@@ -25193,7 +25193,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMemImm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsrld, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3557.
@@ -25211,7 +25211,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMemImm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsrlq, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3565.
@@ -25229,7 +25229,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMemImm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsraw, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3573.
@@ -25247,7 +25247,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMemImm,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpsrad, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3581.
@@ -25265,7 +25265,7 @@
     arg0: Xmm,
     arg1: u8,
 ) -&gt; Gpr {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_to_gpr_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpextrb, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3589.
@@ -25283,7 +25283,7 @@
     arg1: Xmm,
     arg2: u8,
 ) -&gt; SideEffectNoResult {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>constructor_xmm_movrm_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpextrb, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3596.
@@ -25300,7 +25300,7 @@
     arg0: Xmm,
     arg1: u8,
 ) -&gt; Gpr {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_to_gpr_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpextrw, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3604.
@@ -25318,7 +25318,7 @@
     arg1: Xmm,
     arg2: u8,
 ) -&gt; SideEffectNoResult {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>constructor_xmm_movrm_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpextrw, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3611.
@@ -25335,7 +25335,7 @@
     arg0: Xmm,
     arg1: u8,
 ) -&gt; Gpr {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_to_gpr_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpextrd, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3619.
@@ -25353,7 +25353,7 @@
     arg1: Xmm,
     arg2: u8,
 ) -&gt; SideEffectNoResult {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>constructor_xmm_movrm_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpextrd, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3626.
@@ -25370,7 +25370,7 @@
     arg0: Xmm,
     arg1: u8,
 ) -&gt; Gpr {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_to_gpr_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpextrq, arg0, arg1);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3634.
@@ -25388,7 +25388,7 @@
     arg1: Xmm,
     arg2: u8,
 ) -&gt; SideEffectNoResult {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>constructor_xmm_movrm_imm_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpextrq, arg0, arg1, arg2);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3641.
@@ -25795,7 +25795,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vminss, arg0, v6);
@@ -25813,7 +25813,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vminsd, arg0, v6);
@@ -25831,7 +25831,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vminps, arg0, v7);
@@ -25850,7 +25850,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vminpd, arg0, v7);
@@ -25869,7 +25869,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmaxss, arg0, v6);
@@ -25887,7 +25887,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v7 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmaxsd, arg0, v6);
@@ -25905,7 +25905,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmaxps, arg0, v7);
@@ -25924,7 +25924,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmaxpd, arg0, v7);
@@ -26162,7 +26162,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vsqrtps, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3925.
@@ -26179,7 +26179,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vsqrtpd, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3932.
@@ -26218,7 +26218,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vcvtdq2ps, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3947.
@@ -26235,7 +26235,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vcvtps2pd, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3954.
@@ -26252,7 +26252,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vcvtpd2ps, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3961.
@@ -26269,7 +26269,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vcvtdq2pd, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3968.
@@ -26310,7 +26310,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vcvttps2dq, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3986.
@@ -26327,7 +26327,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v4 = C::has_avx(ctx);
+    <span class="kw">let </span>v4 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v4 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v6 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vcvttpd2dq, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 3994.
@@ -26461,7 +26461,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpcmpeqb, arg0, v7);
@@ -26480,7 +26480,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpcmpeqw, arg0, v7);
@@ -26499,7 +26499,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpcmpeqd, arg0, v7);
@@ -26518,7 +26518,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpcmpeqq, arg0, v7);
@@ -26570,7 +26570,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpcmpgtb, arg0, v7);
@@ -26589,7 +26589,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpcmpgtw, arg0, v7);
@@ -26608,7 +26608,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpcmpgtd, arg0, v7);
@@ -26627,7 +26627,7 @@
     arg0: Xmm,
     arg1: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v5 = C::has_avx(ctx);
+    <span class="kw">let </span>v5 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v5 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>C::xmm_mem_to_xmm_mem_imm(ctx, arg1);
         <span class="kw">let </span>v8 = constructor_xmm_rmir_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vpcmpgtq, arg0, v7);
@@ -26842,7 +26842,7 @@
     ctx: <span class="kw-2">&amp;mut </span>C,
     arg0: <span class="kw-2">&amp;</span>XmmMem,
 ) -&gt; Xmm {
-    <span class="kw">let </span>v3 = C::has_avx(ctx);
+    <span class="kw">let </span>v3 = C::use_avx_simd(ctx);
     <span class="kw">if </span>v3 == <span class="bool-val">true </span>{
         <span class="kw">let </span>v5 = constructor_xmm_unary_rm_r_vex(ctx, <span class="kw-2">&amp;</span>AvxOpcode::Vmovddup, arg0);
         <span class="comment">// Rule at src/isa/x64/inst.isle line 4149.
@@ -33791,7 +33791,7 @@
                                     <span class="kw">if </span>v65.<span class="number">1 </span>== <span class="number">0x4 </span>{
                                         <span class="kw">let </span>v2150 = <span class="kw-2">&amp;</span>C::sinkable_load(ctx, v301);
                                         <span class="kw">if let </span><span class="prelude-val">Some</span>(v2151) = v2150 {
-                                            <span class="kw">let </span>v2208 = C::has_avx(ctx);
+                                            <span class="kw">let </span>v2208 = C::use_avx_simd(ctx);
                                             <span class="kw">if </span>v2208 == <span class="bool-val">true </span>{
                                                 <span class="kw">let </span>v2209 = <span class="kw-2">&amp;</span>constructor_sink_load_to_xmm_mem(ctx, v2151);
                                                 <span class="kw">let </span>v2210 = constructor_x64_vbroadcastss(ctx, v2209);
@@ -33828,7 +33828,7 @@
                             I8X16 =&gt; {
                                 <span class="kw">let </span>v2170 = <span class="kw-2">&amp;</span>C::sinkable_load_exact(ctx, v301);
                                 <span class="kw">if let </span><span class="prelude-val">Some</span>(v2171) = v2170 {
-                                    <span class="kw">let </span>v2166 = C::has_avx2(ctx);
+                                    <span class="kw">let </span>v2166 = C::use_avx2_simd(ctx);
                                     <span class="kw">if </span>v2166 == <span class="bool-val">true </span>{
                                         <span class="kw">let </span>v2179 = <span class="kw-2">&amp;</span>constructor_sink_load_to_xmm_mem(ctx, v2171);
                                         <span class="kw">let </span>v2180 = constructor_x64_vpbroadcastb(ctx, v2179);
@@ -33846,7 +33846,7 @@
                                     <span class="comment">// Rule at src/isa/x64/lower.isle line 3858.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2178);
                                 }
-                                <span class="kw">let </span>v2166 = C::has_avx2(ctx);
+                                <span class="kw">let </span>v2166 = C::use_avx2_simd(ctx);
                                 <span class="kw">if </span>v2166 == <span class="bool-val">true </span>{
                                     <span class="kw">let </span>v302 = constructor_put_in_gpr(ctx, v301);
                                     <span class="kw">let </span>v2161 = constructor_bitcast_gpr_to_xmm(ctx, I32, v302);
@@ -33868,7 +33868,7 @@
                             I16X8 =&gt; {
                                 <span class="kw">let </span>v2170 = <span class="kw-2">&amp;</span>C::sinkable_load_exact(ctx, v301);
                                 <span class="kw">if let </span><span class="prelude-val">Some</span>(v2171) = v2170 {
-                                    <span class="kw">let </span>v2166 = C::has_avx2(ctx);
+                                    <span class="kw">let </span>v2166 = C::use_avx2_simd(ctx);
                                     <span class="kw">if </span>v2166 == <span class="bool-val">true </span>{
                                         <span class="kw">let </span>v2179 = <span class="kw-2">&amp;</span>constructor_sink_load_to_xmm_mem(ctx, v2171);
                                         <span class="kw">let </span>v2194 = constructor_x64_vpbroadcastw(ctx, v2179);
@@ -33887,7 +33887,7 @@
                                     <span class="comment">// Rule at src/isa/x64/lower.isle line 3874.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2193);
                                 }
-                                <span class="kw">let </span>v2166 = C::has_avx2(ctx);
+                                <span class="kw">let </span>v2166 = C::use_avx2_simd(ctx);
                                 <span class="kw">if </span>v2166 == <span class="bool-val">true </span>{
                                     <span class="kw">let </span>v302 = constructor_put_in_gpr(ctx, v301);
                                     <span class="kw">let </span>v2161 = constructor_bitcast_gpr_to_xmm(ctx, I32, v302);
@@ -33908,7 +33908,7 @@
                                 </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2185);
                             }
                             I32X4 =&gt; {
-                                <span class="kw">let </span>v2166 = C::has_avx2(ctx);
+                                <span class="kw">let </span>v2166 = C::use_avx2_simd(ctx);
                                 <span class="kw">if </span>v2166 == <span class="bool-val">true </span>{
                                     <span class="kw">let </span>v302 = constructor_put_in_gpr(ctx, v301);
                                     <span class="kw">let </span>v2161 = constructor_bitcast_gpr_to_xmm(ctx, I32, v302);
@@ -33936,7 +33936,7 @@
                                 </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2215);
                             }
                             F32X4 =&gt; {
-                                <span class="kw">let </span>v2166 = C::has_avx2(ctx);
+                                <span class="kw">let </span>v2166 = C::use_avx2_simd(ctx);
                                 <span class="kw">if </span>v2166 == <span class="bool-val">true </span>{
                                     <span class="kw">let </span>v460 = <span class="kw-2">&amp;</span>C::put_in_xmm_mem(ctx, v301);
                                     <span class="kw">let </span>v2203 = constructor_x64_vbroadcastss(ctx, v460);
