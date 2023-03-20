@@ -1720,6 +1720,10 @@
 <a href="#1720" id="1720">1720</a>
 <a href="#1721" id="1721">1721</a>
 <a href="#1722" id="1722">1722</a>
+<a href="#1723" id="1723">1723</a>
+<a href="#1724" id="1724">1724</a>
+<a href="#1725" id="1725">1725</a>
+<a href="#1726" id="1726">1726</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines riscv64-specific machine instruction types.
 
 </span><span class="comment">// Some variants are not constructed, but we still want them as options in the future.
@@ -2363,6 +2367,10 @@
 <span class="kw">impl </span>MachInst <span class="kw">for </span>Inst {
     <span class="kw">type </span>LabelUse = LabelUse;
     <span class="kw">type </span>ABIMachineSpec = Riscv64MachineDeps;
+
+    <span class="comment">// https://github.com/riscv/riscv-isa-manual/issues/850
+    // all zero will cause invalid opcode.
+    </span><span class="kw">const </span>TRAP_OPCODE: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8] = <span class="kw-2">&amp;</span>[<span class="number">0</span>; <span class="number">4</span>];
 
     <span class="kw">fn </span>gen_dummy_use(reg: Reg) -&gt; <span class="self">Self </span>{
         Inst::DummyUse { reg }

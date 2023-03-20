@@ -3548,15 +3548,6 @@
 <a href="#3548" id="3548">3548</a>
 <a href="#3549" id="3549">3549</a>
 <a href="#3550" id="3550">3550</a>
-<a href="#3551" id="3551">3551</a>
-<a href="#3552" id="3552">3552</a>
-<a href="#3553" id="3553">3553</a>
-<a href="#3554" id="3554">3554</a>
-<a href="#3555" id="3555">3555</a>
-<a href="#3556" id="3556">3556</a>
-<a href="#3557" id="3557">3557</a>
-<a href="#3558" id="3558">3558</a>
-<a href="#3559" id="3559">3559</a>
 </pre><pre class="rust"><code><span class="doccomment">//! AArch64 ISA: binary code emission.
 
 </span><span class="kw">use </span>regalloc2::Allocation;
@@ -6674,20 +6665,15 @@
                 sink.put4(enc_jump26(<span class="number">0b000101</span>, not_taken.as_offset26_or_zero()));
             }
             <span class="kw-2">&amp;</span>Inst::TrapIf { kind, trap_code } =&gt; {
+                <span class="kw">let </span>label = sink.defer_trap(trap_code, state.take_stack_map());
                 <span class="comment">// condbr KIND, LABEL
                 </span><span class="kw">let </span>off = sink.cur_offset();
-                <span class="kw">let </span>label = sink.get_label();
                 sink.put4(enc_conditional_br(
                     BranchTarget::Label(label),
-                    kind.invert(),
+                    kind,
                     <span class="kw-2">&amp;mut </span>allocs,
                 ));
                 sink.use_label_at_offset(off, label, LabelUse::Branch19);
-                <span class="comment">// udf
-                </span><span class="kw">let </span>trap = Inst::Udf { trap_code };
-                trap.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                <span class="comment">// LABEL:
-                </span>sink.bind_label(label);
             }
             <span class="kw-2">&amp;</span>Inst::IndirectBr { rn, .. } =&gt; {
                 <span class="kw">let </span>rn = allocs.next(rn);
@@ -6701,15 +6687,11 @@
                 sink.put4(<span class="number">0xd4200000</span>);
             }
             <span class="kw-2">&amp;</span>Inst::Udf { trap_code } =&gt; {
-                <span class="comment">// &quot;CLIF&quot; in hex, to make the trap recognizable during
-                // debugging.
-                </span><span class="kw">let </span>encoding = <span class="number">0xc11f</span>;
-
                 sink.add_trap(trap_code);
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(s) = state.take_stack_map() {
                     sink.add_stack_map(StackMapExtent::UpcomingBytes(<span class="number">4</span>), s);
                 }
-                sink.put4(encoding);
+                sink.put_data(Inst::TRAP_OPCODE);
             }
             <span class="kw-2">&amp;</span>Inst::Adr { rd, off } =&gt; {
                 <span class="kw">let </span>rd = allocs.next_writable(rd);

@@ -509,6 +509,10 @@
 <a href="#509" id="509">509</a>
 <a href="#510" id="510">510</a>
 <a href="#511" id="511">511</a>
+<a href="#512" id="512">512</a>
+<a href="#513" id="513">513</a>
+<a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module exposes the machine-specific backend definition pieces.
 //!
 //! The MachInst infrastructure is the compiler backend, from CLIF
@@ -688,6 +692,10 @@
     <span class="doccomment">/// A label-use kind: a type that describes the types of label references that
     /// can occur in an instruction.
     </span><span class="kw">type </span>LabelUse: MachInstLabelUse;
+
+    <span class="doccomment">/// Byte representation of a trap opcode which is inserted by `MachBuffer`
+    /// during its `defer_trap` method.
+    </span><span class="kw">const </span>TRAP_OPCODE: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8];
 }
 
 <span class="doccomment">/// A descriptor of a label reference (use) in an instruction set.

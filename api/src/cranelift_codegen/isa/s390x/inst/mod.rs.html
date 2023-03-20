@@ -3396,6 +3396,7 @@
 <a href="#3396" id="3396">3396</a>
 <a href="#3397" id="3397">3397</a>
 <a href="#3398" id="3398">3398</a>
+<a href="#3399" id="3399">3399</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines s390x-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc};
@@ -4396,6 +4397,7 @@
 </span><span class="kw">impl </span>MachInst <span class="kw">for </span>Inst {
     <span class="kw">type </span>ABIMachineSpec = S390xMachineDeps;
     <span class="kw">type </span>LabelUse = LabelUse;
+    <span class="kw">const </span>TRAP_OPCODE: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8] = <span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>];
 
     <span class="kw">fn </span>get_operands&lt;F: Fn(VReg) -&gt; VReg&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, collector: <span class="kw-2">&amp;mut </span>OperandCollector&lt;<span class="lifetime">&#39;_</span>, F&gt;) {
         s390x_get_operands(<span class="self">self</span>, collector);

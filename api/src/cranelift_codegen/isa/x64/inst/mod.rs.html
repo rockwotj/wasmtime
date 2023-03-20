@@ -2660,6 +2660,12 @@
 <a href="#2660" id="2660">2660</a>
 <a href="#2661" id="2661">2661</a>
 <a href="#2662" id="2662">2662</a>
+<a href="#2663" id="2663">2663</a>
+<a href="#2664" id="2664">2664</a>
+<a href="#2665" id="2665">2665</a>
+<a href="#2666" id="2666">2666</a>
+<a href="#2667" id="2667">2667</a>
+<a href="#2668" id="2668">2668</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines x86_64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc, StackMap};
@@ -3132,6 +3138,10 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>trap(trap_code: TrapCode) -&gt; Inst {
         Inst::Ud2 { trap_code }
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>trap_if(cc: CC, trap_code: TrapCode) -&gt; Inst {
+        Inst::TrapIf { cc, trap_code }
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>cmove(size: OperandSize, cc: CC, src: RegMem, dst: Writable&lt;Reg&gt;) -&gt; Inst {
@@ -4337,7 +4347,7 @@
             }
 
             Inst::TrapIf { cc, trap_code, .. } =&gt; {
-                <span class="macro">format!</span>(<span class="string">&quot;j{} ; ud2 {} ;&quot;</span>, cc.invert().to_string(), trap_code)
+                <span class="macro">format!</span>(<span class="string">&quot;j{cc} #trap={trap_code}&quot;</span>)
             }
 
             Inst::TrapIfAnd {
@@ -5164,6 +5174,8 @@
     }
 
     <span class="kw">type </span>LabelUse = LabelUse;
+
+    <span class="kw">const </span>TRAP_OPCODE: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8] = <span class="kw-2">&amp;</span>[<span class="number">0x0f</span>, <span class="number">0x0b</span>];
 }
 
 <span class="doccomment">/// State carried between emissions of a sequence of instructions.

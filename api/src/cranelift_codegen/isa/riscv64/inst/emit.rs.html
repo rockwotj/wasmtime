@@ -2808,8 +2808,6 @@
 <a href="#2808" id="2808">2808</a>
 <a href="#2809" id="2809">2809</a>
 <a href="#2810" id="2810">2810</a>
-<a href="#2811" id="2811">2811</a>
-<a href="#2812" id="2812">2812</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::StackMap;
@@ -4720,9 +4718,7 @@
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(s) = state.take_stack_map() {
                     sink.add_stack_map(StackMapExtent::UpcomingBytes(<span class="number">4</span>), s);
                 }
-                <span class="comment">// https://github.com/riscv/riscv-isa-manual/issues/850
-                // all zero will cause invalid opcode.
-                </span>sink.put4(<span class="number">0</span>);
+                sink.put_data(Inst::TRAP_OPCODE);
             }
             <span class="kw-2">&amp;</span>Inst::SelectIf {
                 if_spectre_guard: _if_spectre_guard, <span class="comment">// _if_spectre_guard not use because it is used to not be removed by optimization pass and some other staff.

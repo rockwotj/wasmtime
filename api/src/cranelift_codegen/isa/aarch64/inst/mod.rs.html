@@ -2884,6 +2884,13 @@
 <a href="#2884" id="2884">2884</a>
 <a href="#2885" id="2885">2885</a>
 <a href="#2886" id="2886">2886</a>
+<a href="#2887" id="2887">2887</a>
+<a href="#2888" id="2888">2888</a>
+<a href="#2889" id="2889">2889</a>
+<a href="#2890" id="2890">2890</a>
+<a href="#2891" id="2891">2891</a>
+<a href="#2892" id="2892">2892</a>
+<a href="#2893" id="2893">2893</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines aarch64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc};
@@ -3811,6 +3818,10 @@
 </span><span class="kw">impl </span>MachInst <span class="kw">for </span>Inst {
     <span class="kw">type </span>ABIMachineSpec = AArch64MachineDeps;
     <span class="kw">type </span>LabelUse = LabelUse;
+
+    <span class="comment">// &quot;CLIF&quot; in hex, to make the trap recognizable during
+    // debugging.
+    </span><span class="kw">const </span>TRAP_OPCODE: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8] = <span class="kw-2">&amp;</span><span class="number">0xc11f_u32</span>.to_le_bytes();
 
     <span class="kw">fn </span>get_operands&lt;F: Fn(VReg) -&gt; VReg&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, collector: <span class="kw-2">&amp;mut </span>OperandCollector&lt;<span class="lifetime">&#39;_</span>, F&gt;) {
         aarch64_get_operands(<span class="self">self</span>, collector);
@@ -5405,18 +5416,21 @@
             }
             <span class="kw-2">&amp;</span>Inst::Brk =&gt; <span class="string">&quot;brk #0&quot;</span>.to_string(),
             <span class="kw-2">&amp;</span>Inst::Udf { .. } =&gt; <span class="string">&quot;udf #0xc11f&quot;</span>.to_string(),
-            <span class="kw-2">&amp;</span>Inst::TrapIf { <span class="kw-2">ref </span>kind, .. } =&gt; <span class="kw">match </span>kind {
+            <span class="kw-2">&amp;</span>Inst::TrapIf {
+                <span class="kw-2">ref </span>kind,
+                trap_code,
+            } =&gt; <span class="kw">match </span>kind {
                 <span class="kw-2">&amp;</span>CondBrKind::Zero(reg) =&gt; {
                     <span class="kw">let </span>reg = pretty_print_reg(reg, allocs);
-                    <span class="macro">format!</span>(<span class="string">&quot;cbnz {}, 8 ; udf&quot;</span>, reg)
+                    <span class="macro">format!</span>(<span class="string">&quot;cbz {reg}, #trap={trap_code}&quot;</span>)
                 }
                 <span class="kw-2">&amp;</span>CondBrKind::NotZero(reg) =&gt; {
                     <span class="kw">let </span>reg = pretty_print_reg(reg, allocs);
-                    <span class="macro">format!</span>(<span class="string">&quot;cbz {}, 8 ; udf&quot;</span>, reg)
+                    <span class="macro">format!</span>(<span class="string">&quot;cbnz {reg}, #trap={trap_code}&quot;</span>)
                 }
                 <span class="kw-2">&amp;</span>CondBrKind::Cond(c) =&gt; {
-                    <span class="kw">let </span>c = c.invert().pretty_print(<span class="number">0</span>, allocs);
-                    <span class="macro">format!</span>(<span class="string">&quot;b.{} 8 ; udf&quot;</span>, c)
+                    <span class="kw">let </span>c = c.pretty_print(<span class="number">0</span>, allocs);
+                    <span class="macro">format!</span>(<span class="string">&quot;b.{c} #trap={trap_code}&quot;</span>)
                 }
             },
             <span class="kw-2">&amp;</span>Inst::Adr { rd, off } =&gt; {

@@ -3793,37 +3793,6 @@
 <a href="#3793" id="3793">3793</a>
 <a href="#3794" id="3794">3794</a>
 <a href="#3795" id="3795">3795</a>
-<a href="#3796" id="3796">3796</a>
-<a href="#3797" id="3797">3797</a>
-<a href="#3798" id="3798">3798</a>
-<a href="#3799" id="3799">3799</a>
-<a href="#3800" id="3800">3800</a>
-<a href="#3801" id="3801">3801</a>
-<a href="#3802" id="3802">3802</a>
-<a href="#3803" id="3803">3803</a>
-<a href="#3804" id="3804">3804</a>
-<a href="#3805" id="3805">3805</a>
-<a href="#3806" id="3806">3806</a>
-<a href="#3807" id="3807">3807</a>
-<a href="#3808" id="3808">3808</a>
-<a href="#3809" id="3809">3809</a>
-<a href="#3810" id="3810">3810</a>
-<a href="#3811" id="3811">3811</a>
-<a href="#3812" id="3812">3812</a>
-<a href="#3813" id="3813">3813</a>
-<a href="#3814" id="3814">3814</a>
-<a href="#3815" id="3815">3815</a>
-<a href="#3816" id="3816">3816</a>
-<a href="#3817" id="3817">3817</a>
-<a href="#3818" id="3818">3818</a>
-<a href="#3819" id="3819">3819</a>
-<a href="#3820" id="3820">3820</a>
-<a href="#3821" id="3821">3821</a>
-<a href="#3822" id="3822">3822</a>
-<a href="#3823" id="3823">3823</a>
-<a href="#3824" id="3824">3824</a>
-<a href="#3825" id="3825">3825</a>
-<a href="#3826" id="3826">3826</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -5507,16 +5476,8 @@
         }
 
         Inst::TrapIf { cc, trap_code } =&gt; {
-            <span class="kw">let </span>else_label = sink.get_label();
-
-            <span class="comment">// Jump over if the invert of CC is set (i.e. CC is not set).
-            </span>one_way_jmp(sink, cc.invert(), else_label);
-
-            <span class="comment">// Trap!
-            </span><span class="kw">let </span>inst = Inst::trap(<span class="kw-2">*</span>trap_code);
-            inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-
-            sink.bind_label(else_label);
+            <span class="kw">let </span>trap_label = sink.defer_trap(<span class="kw-2">*</span>trap_code, state.take_stack_map());
+            one_way_jmp(sink, <span class="kw-2">*</span>cc, trap_label);
         }
 
         Inst::TrapIfAnd {
@@ -5524,15 +5485,13 @@
             cc2,
             trap_code,
         } =&gt; {
+            <span class="kw">let </span>trap_label = sink.defer_trap(<span class="kw-2">*</span>trap_code, state.take_stack_map());
             <span class="kw">let </span>else_label = sink.get_label();
 
-            <span class="comment">// Jump over if either condition code is not set.
+            <span class="comment">// Jump to the end if the first condition isn&#39;t true, and then if
+            // the second condition is true go to the trap.
             </span>one_way_jmp(sink, cc1.invert(), else_label);
-            one_way_jmp(sink, cc2.invert(), else_label);
-
-            <span class="comment">// Trap!
-            </span><span class="kw">let </span>inst = Inst::trap(<span class="kw-2">*</span>trap_code);
-            inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
+            one_way_jmp(sink, <span class="kw-2">*</span>cc2, trap_label);
 
             sink.bind_label(else_label);
         }
@@ -5542,19 +5501,11 @@
             cc2,
             trap_code,
         } =&gt; {
-            <span class="kw">let </span>trap_label = sink.get_label();
-            <span class="kw">let </span>else_label = sink.get_label();
+            <span class="kw">let </span>trap_label = sink.defer_trap(<span class="kw-2">*</span>trap_code, state.take_stack_map());
 
-            <span class="comment">// trap immediately if cc1 is set, otherwise jump over the trap if cc2 is not.
+            <span class="comment">// Emit two jumps to the same trap if either condition code is true.
             </span>one_way_jmp(sink, <span class="kw-2">*</span>cc1, trap_label);
-            one_way_jmp(sink, cc2.invert(), else_label);
-
-            <span class="comment">// Trap!
-            </span>sink.bind_label(trap_label);
-            <span class="kw">let </span>inst = Inst::trap(<span class="kw-2">*</span>trap_code);
-            inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-
-            sink.bind_label(else_label);
+            one_way_jmp(sink, <span class="kw-2">*</span>cc2, trap_label);
         }
 
         Inst::XmmUnaryRmR { op, src, dst } =&gt; {
@@ -6882,7 +6833,6 @@
             };
 
             <span class="kw">let </span>done = sink.get_label();
-            <span class="kw">let </span>not_nan = sink.get_label();
 
             <span class="comment">// The truncation.
             </span><span class="kw">let </span>inst = Inst::xmm_to_gpr(trunc_op, src, Writable::from_reg(dst), <span class="kw-2">*</span>dst_size);
@@ -6899,10 +6849,11 @@
             </span><span class="kw">let </span>inst = Inst::xmm_cmp_rm_r(cmp_op, RegMem::reg(src), src);
             inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
-            one_way_jmp(sink, CC::NP, not_nan); <span class="comment">// go to not_nan if not a NaN
+            <span class="kw">if </span><span class="kw-2">*</span>is_saturating {
+                <span class="kw">let </span>not_nan = sink.get_label();
+                one_way_jmp(sink, CC::NP, not_nan); <span class="comment">// go to not_nan if not a NaN
 
-            </span><span class="kw">if </span><span class="kw-2">*</span>is_saturating {
-                <span class="comment">// For NaN, emit 0.
+                // For NaN, emit 0.
                 </span><span class="kw">let </span>inst = Inst::alu_rmi_r(
                     <span class="kw-2">*</span>dst_size,
                     AluRmiROpcode::Xor,
@@ -6945,9 +6896,7 @@
                     inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
                 }
             } <span class="kw">else </span>{
-                <span class="kw">let </span>check_positive = sink.get_label();
-
-                <span class="kw">let </span>inst = Inst::trap(TrapCode::BadConversionToInteger);
+                <span class="kw">let </span>inst = Inst::trap_if(CC::P, TrapCode::BadConversionToInteger);
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
                 <span class="comment">// Check if INT_MIN was the correct result: determine the smallest floating point
@@ -6956,9 +6905,7 @@
                 // If the src register is less (or in some cases, less-or-equal) than the threshold,
                 // trap!
 
-                </span>sink.bind_label(not_nan);
-
-                <span class="kw">let </span><span class="kw-2">mut </span>no_overflow_cc = CC::NB; <span class="comment">// &gt;=
+                </span><span class="kw">let </span><span class="kw-2">mut </span>no_overflow_cc = CC::NB; <span class="comment">// &gt;=
                 </span><span class="kw">let </span>output_bits = dst_size.to_bits();
                 <span class="kw">match </span><span class="kw-2">*</span>src_size {
                     OperandSize::Size32 =&gt; {
@@ -6994,17 +6941,13 @@
                 <span class="kw">let </span>inst = Inst::xmm_cmp_rm_r(cmp_op, RegMem::reg(tmp_xmm), src);
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
-                <span class="comment">// jump over trap if src &gt;= or &gt; threshold
-                </span>one_way_jmp(sink, no_overflow_cc, check_positive);
-
-                <span class="kw">let </span>inst = Inst::trap(TrapCode::IntegerOverflow);
+                <span class="comment">// no trap if src &gt;= or &gt; threshold
+                </span><span class="kw">let </span>inst = Inst::trap_if(no_overflow_cc.invert(), TrapCode::IntegerOverflow);
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
                 <span class="comment">// If positive, it was a real overflow.
 
-                </span>sink.bind_label(check_positive);
-
-                <span class="comment">// Zero out the tmp_xmm register.
+                // Zero out the tmp_xmm register.
                 </span><span class="kw">let </span>inst = Inst::xmm_rm_r(
                     SseOpcode::Xorpd,
                     RegMem::reg(tmp_xmm),
@@ -7015,9 +6958,8 @@
                 <span class="kw">let </span>inst = Inst::xmm_cmp_rm_r(cmp_op, RegMem::reg(src), tmp_xmm);
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
-                one_way_jmp(sink, CC::NB, done); <span class="comment">// jump over trap if 0 &gt;= src
-
-                </span><span class="kw">let </span>inst = Inst::trap(TrapCode::IntegerOverflow);
+                <span class="comment">// no trap if 0 &gt;= src
+                </span><span class="kw">let </span>inst = Inst::trap_if(CC::B, TrapCode::IntegerOverflow);
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
             }
 
@@ -7117,12 +7059,11 @@
             <span class="kw">let </span>handle_large = sink.get_label();
             one_way_jmp(sink, CC::NB, handle_large); <span class="comment">// jump to handle_large if src &gt;= large_threshold
 
-            </span><span class="kw">let </span>not_nan = sink.get_label();
-            one_way_jmp(sink, CC::NP, not_nan); <span class="comment">// jump over trap if not NaN
-
             </span><span class="kw">if </span><span class="kw-2">*</span>is_saturating {
-                <span class="comment">// Emit 0.
-                </span><span class="kw">let </span>inst = Inst::alu_rmi_r(
+                <span class="comment">// If not NaN jump over this 0-return, otherwise return 0
+                </span><span class="kw">let </span>not_nan = sink.get_label();
+                one_way_jmp(sink, CC::NP, not_nan);
+                <span class="kw">let </span>inst = Inst::alu_rmi_r(
                     <span class="kw-2">*</span>dst_size,
                     AluRmiROpcode::Xor,
                     RegMemImm::reg(dst),
@@ -7132,13 +7073,12 @@
 
                 <span class="kw">let </span>inst = Inst::jmp_known(done);
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
+                sink.bind_label(not_nan);
             } <span class="kw">else </span>{
                 <span class="comment">// Trap.
-                </span><span class="kw">let </span>inst = Inst::trap(TrapCode::BadConversionToInteger);
+                </span><span class="kw">let </span>inst = Inst::trap_if(CC::P, TrapCode::BadConversionToInteger);
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
             }
-
-            sink.bind_label(not_nan);
 
             <span class="comment">// Actual truncation for small inputs: if the result is not positive, then we had an
             // overflow.
@@ -7186,11 +7126,11 @@
             <span class="kw">let </span>inst = Inst::cmp_rmi_r(<span class="kw-2">*</span>dst_size, RegMemImm::imm(<span class="number">0</span>), dst);
             inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
-            <span class="kw">let </span>next_is_large = sink.get_label();
-            one_way_jmp(sink, CC::NL, next_is_large); <span class="comment">// if dst &gt;= 0, jump to next_is_large
+            <span class="kw">if </span><span class="kw-2">*</span>is_saturating {
+                <span class="kw">let </span>next_is_large = sink.get_label();
+                one_way_jmp(sink, CC::NL, next_is_large); <span class="comment">// if dst &gt;= 0, jump to next_is_large
 
-            </span><span class="kw">if </span><span class="kw-2">*</span>is_saturating {
-                <span class="comment">// The input was &quot;large&quot; (&gt;= 2**(width -1)), so the only way to get an integer
+                // The input was &quot;large&quot; (&gt;= 2**(width -1)), so the only way to get an integer
                 // overflow is because the input was too large: saturate to the max value.
                 </span><span class="kw">let </span>inst = Inst::imm(
                     OperandSize::Size64,
@@ -7205,12 +7145,11 @@
 
                 <span class="kw">let </span>inst = Inst::jmp_known(done);
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
+                sink.bind_label(next_is_large);
             } <span class="kw">else </span>{
-                <span class="kw">let </span>inst = Inst::trap(TrapCode::IntegerOverflow);
+                <span class="kw">let </span>inst = Inst::trap_if(CC::L, TrapCode::IntegerOverflow);
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
             }
-
-            sink.bind_label(next_is_large);
 
             <span class="kw">if </span><span class="kw-2">*</span>dst_size == OperandSize::Size64 {
                 <span class="kw">let </span>inst = Inst::imm(OperandSize::Size64, <span class="number">1 </span>&lt;&lt; <span class="number">63</span>, Writable::from_reg(tmp_gpr));
@@ -7441,8 +7380,7 @@
             <span class="kw">if let </span><span class="prelude-val">Some</span>(s) = state.take_stack_map() {
                 sink.add_stack_map(StackMapExtent::UpcomingBytes(<span class="number">2</span>), s);
             }
-            sink.put1(<span class="number">0x0f</span>);
-            sink.put1(<span class="number">0x0b</span>);
+            sink.put_data(Inst::TRAP_OPCODE);
         }
 
         Inst::VirtualSPOffsetAdj { offset } =&gt; {
