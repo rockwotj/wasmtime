@@ -126,6 +126,7 @@ Enumerations</h2></td></tr>
 <tr class="memitem:a6d7f92ddb0b002ad140d3316d03d6abf"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abf">wasmtime_profiling_strategy_enum</a> { <a class="el" href="config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abfa63474be5d261cf99032bde040889756b">WASMTIME_PROFILING_STRATEGY_NONE</a>
 , <a class="el" href="config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abfa7ce45a38469a1d58a578ccad7c309717">WASMTIME_PROFILING_STRATEGY_JITDUMP</a>
 , <a class="el" href="config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abfa58bb488d219fd6737c2f639e61f20ada">WASMTIME_PROFILING_STRATEGY_VTUNE</a>
+, <a class="el" href="config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abfa5df28ebb09b7dc87ad4ed3f300682094">WASMTIME_PROFILING_STRATEGY_PERFMAP</a>
  }</td></tr>
 <tr class="memdesc:a6d7f92ddb0b002ad140d3316d03d6abf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Different ways to profile JIT code.  <a href="config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abf">More...</a><br /></td></tr>
 <tr class="separator:a6d7f92ddb0b002ad140d3316d03d6abf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -280,6 +281,8 @@ Functions</h2></td></tr>
 </td></tr>
 <tr><td class="fieldname"><a id="a6d7f92ddb0b002ad140d3316d03d6abfa58bb488d219fd6737c2f639e61f20ada" name="a6d7f92ddb0b002ad140d3316d03d6abfa58bb488d219fd6737c2f639e61f20ada"></a>WASMTIME_PROFILING_STRATEGY_VTUNE&#160;</td><td class="fielddoc"><p >Support for VTune will be enabled and the VTune runtime will be informed, at runtime, about JIT code.</p>
 <p >Note that this isn't always enabled at build time. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6d7f92ddb0b002ad140d3316d03d6abfa5df28ebb09b7dc87ad4ed3f300682094" name="a6d7f92ddb0b002ad140d3316d03d6abfa5df28ebb09b7dc87ad4ed3f300682094"></a>WASMTIME_PROFILING_STRATEGY_PERFMAP&#160;</td><td class="fielddoc"><p >Linux's simple "perfmap" support in <code>perf</code> is enabled and when Wasmtime is run under <code>perf</code> necessary calls will be made to profile generated JIT code. </p>
 </td></tr>
 </table>
 

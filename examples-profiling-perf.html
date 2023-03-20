@@ -148,6 +148,48 @@ profiler</a> for Linux. This is
 an extremely powerful profiler with lots of documentation on the web, but for
 the rest of this section we'll assume you're running on Linux and already have
 <code>perf</code> installed.</p>
+<p>There are two profiling agents for <code>perf</code>:</p>
+<ul>
+<li>a very simple one that will map code regions to symbol names: <code>perfmap</code>.</li>
+<li>a more detailed one that can provide additional information and mappings between the source
+language statements and generated JIT code: <code>jitdump</code>.</li>
+</ul>
+<h2 id="profiling-with-perfmap"><a class="header" href="#profiling-with-perfmap">Profiling with <code>perfmap</code></a></h2>
+<p>Simple profiling support with <code>perf</code> generates a &quot;perf map&quot; file that the <code>perf</code> CLI will
+automatically look for, when running into unresolved symbols. This requires runtime support from
+Wasmtime itself, so you will need to manually change a few things to enable profiling support in
+your application. Enabling runtime support depends on how you're using Wasmtime:</p>
+<ul>
+<li>
+<p><strong>Rust API</strong> - you'll want to call the [<code>Config::profiler</code>] method with
+<code>ProfilingStrategy::PerfMap</code> to enable profiling of your wasm modules.</p>
+</li>
+<li>
+<p><strong>C API</strong> - you'll want to call the <code>wasmtime_config_profiler_set</code> API with a
+<code>WASMTIME_PROFILING_STRATEGY_PERFMAP</code> value.</p>
+</li>
+<li>
+<p><strong>Command Line</strong> - you'll want to pass the <code>--profile=perfmap</code> flag on the command
+line.</p>
+</li>
+</ul>
+<p>Once perfmap support is enabled, you'll use <code>perf record</code> like usual to record
+your application's performance.</p>
+<p>For example if you're using the CLI, you'll execute:</p>
+<pre><code class="language-sh">$ perf record -k mono wasmtime --profile=perfmap foo.wasm
+</code></pre>
+<p>This will create a <code>perf.data</code> file as per usual, but it will <em>also</em> create a
+<code>/tmp/perf-XXXX.map</code> file. This extra <code>.map</code> file is the perf map file which is
+specified by <code>perf</code> and Wasmtime generates at runtime.</p>
+<p>After that you can explore the <code>perf.data</code> profile as you usually would, for example with:</p>
+<pre><code class="language-sh">$ perf report --input perf.data
+</code></pre>
+<p>You should be able to see time spent in wasm functions, generate flamegraphs based on that, etc..
+You should also see entries for wasm functions show up as one function and the name of each
+function matches the debug name section in the wasm file.</p>
+<p>Note that support for perfmap is still relatively new in Wasmtime, so if you
+have any problems, please don't hesitate to <a href="https://github.com/bytecodealliance/wasmtime/issues/new">file an issue</a>!</p>
+<h2 id="profiling-with-jitdump"><a class="header" href="#profiling-with-jitdump">Profiling with <code>jitdump</code></a></h2>
 <p>Profiling support with <code>perf</code> uses the &quot;jitdump&quot; support in the <code>perf</code> CLI. This
 requires runtime support from Wasmtime itself, so you will need to manually
 change a few things to enable profiling support in your application. First
@@ -164,7 +206,7 @@ depends on how you're using Wasmtime:</p>
 <code>WASMTIME_PROFILING_STRATEGY_JITDUMP</code> value.</p>
 </li>
 <li>
-<p><strong>Command Line</strong> - you'll want to pass the <code>--jitdump</code> flag on the command
+<p><strong>Command Line</strong> - you'll want to pass the <code>--profile=jitdump</code> flag on the command
 line.</p>
 </li>
 </ul>
@@ -172,7 +214,7 @@ line.</p>
 your application's performance. You'll need to also be sure to pass the
 <code>--clockid mono</code> or <code>-k mono</code> flag to <code>perf record</code>.</p>
 <p>For example if you're using the CLI, you'll execute:</p>
-<pre><code class="language-sh">$ perf record -k mono wasmtime --jitdump foo.wasm
+<pre><code class="language-sh">$ perf record -k mono wasmtime --profile=jitdump foo.wasm
 </code></pre>
 <p>This will create a <code>perf.data</code> file as per usual, but it will <em>also</em> create a
 <code>jit-XXXX.dump</code> file. This extra <code>*.dump</code> file is the jitdump file which is
@@ -235,7 +277,7 @@ fn fib(n: u32) -&gt; u32 {
 </code></pre></pre>
 <p>To collect perf information for this wasm module we'll execute:</p>
 <pre><code class="language-sh">$ rustc --target wasm32-wasi fib.rs -O
-$ perf record -k mono wasmtime --jitdump fib.wasm
+$ perf record -k mono wasmtime --profile=jitdump fib.wasm
 fib(42) = 267914296
 [ perf record: Woken up 1 times to write data ]
 [ perf record: Captured and wrote 0.147 MB perf.data (3435 samples) ]

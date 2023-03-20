@@ -45,7 +45,7 @@ var sourcesIndex = JSON.parse('{\
 "wasmtime_explorer":["",[],["lib.rs"]],\
 "wasmtime_fiber":["",[["unix",[],["x86_64.rs"]]],["lib.rs","unix.rs"]],\
 "wasmtime_fuzzing":["",[["generators",[],["api.rs","codegen_settings.rs","component_types.rs","config.rs","instance_allocation_strategy.rs","memory.rs","module.rs","pooling_config.rs","single_inst_module.rs","spec_test.rs","stacks.rs","table_ops.rs","value.rs"]],["oracles",[],["diff_spec.rs","diff_v8.rs","diff_wasmi.rs","diff_wasmtime.rs","dummy.rs","engine.rs","stacks.rs"]]],["generators.rs","lib.rs","mutators.rs","oracles.rs"]],\
-"wasmtime_jit":["",[["profiling",[],["jitdump_linux.rs","vtune.rs"]],["unwind",[],["systemv.rs"]]],["code_memory.rs","debug.rs","demangling.rs","instantiate.rs","lib.rs","profiling.rs","unwind.rs"]],\
+"wasmtime_jit":["",[["profiling",[],["jitdump_linux.rs","perfmap_linux.rs","vtune.rs"]],["unwind",[],["systemv.rs"]]],["code_memory.rs","debug.rs","demangling.rs","instantiate.rs","lib.rs","profiling.rs","unwind.rs"]],\
 "wasmtime_jit_debug":["",[],["gdb_jit_int.rs","lib.rs","perf_jitdump.rs"]],\
 "wasmtime_jit_icache_coherence":["",[],["lib.rs","libc.rs"]],\
 "wasmtime_runtime":["",[["component",[],["transcode.rs"]],["instance",[["allocator",[["pooling",[],["index_allocator.rs","unix.rs"]]],["pooling.rs"]]],["allocator.rs"]],["trampolines",[],["x86_64.rs"]],["traphandlers",[["backtrace",[],["x86_64.rs"]]],["backtrace.rs","unix.rs"]],["vmcontext",[],["vm_host_func_context.rs"]]],["component.rs","cow.rs","debug_builtins.rs","export.rs","externref.rs","imports.rs","instance.rs","lib.rs","libcalls.rs","memory.rs","mmap.rs","mmap_vec.rs","module_id.rs","parking_spot.rs","table.rs","trampolines.rs","traphandlers.rs","vmcontext.rs"]],\

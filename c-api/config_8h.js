@@ -11,7 +11,8 @@ var config_8h =
     [ "wasmtime_profiling_strategy_enum", "config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abf", [
       [ "WASMTIME_PROFILING_STRATEGY_NONE", "config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abfa63474be5d261cf99032bde040889756b", null ],
       [ "WASMTIME_PROFILING_STRATEGY_JITDUMP", "config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abfa7ce45a38469a1d58a578ccad7c309717", null ],
-      [ "WASMTIME_PROFILING_STRATEGY_VTUNE", "config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abfa58bb488d219fd6737c2f639e61f20ada", null ]
+      [ "WASMTIME_PROFILING_STRATEGY_VTUNE", "config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abfa58bb488d219fd6737c2f639e61f20ada", null ],
+      [ "WASMTIME_PROFILING_STRATEGY_PERFMAP", "config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abfa5df28ebb09b7dc87ad4ed3f300682094", null ]
     ] ],
     [ "wasmtime_strategy_enum", "config_8h.html#a79514ef16b93472745e41a8c7068a092", [
       [ "WASMTIME_STRATEGY_AUTO", "config_8h.html#a79514ef16b93472745e41a8c7068a092abc3d89b052396bc6cca334ae95e10e59", null ],

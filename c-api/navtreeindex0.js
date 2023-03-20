@@ -15,6 +15,7 @@ var NAVTREEINDEX0 =
 "config_8h.html#a698100a569555e0ff93574ca458dd340":[2,0,0,0,0,10],
 "config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abf":[2,0,0,0,0,4],
 "config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abfa58bb488d219fd6737c2f639e61f20ada":[2,0,0,0,0,4,2],
+"config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abfa5df28ebb09b7dc87ad4ed3f300682094":[2,0,0,0,0,4,3],
 "config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abfa63474be5d261cf99032bde040889756b":[2,0,0,0,0,4,0],
 "config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abfa7ce45a38469a1d58a578ccad7c309717":[2,0,0,0,0,4,1],
 "config_8h.html#a74aa7562ca8ae04b94449378dbf25c92":[2,0,0,0,0,20],
@@ -248,6 +249,5 @@ var NAVTREEINDEX0 =
 "structwasmtime__instance.html":[1,0,46],
 "structwasmtime__instance.html#a31a02c8ba14a6bafb412c36a397cc0d3":[1,0,46,0],
 "structwasmtime__instance.html#aed8c1fb3e363e462df1ed6401f188a17":[1,0,46,1],
-"structwasmtime__linker.html":[1,0,47],
-"structwasmtime__memory.html":[1,0,48]
+"structwasmtime__linker.html":[1,0,47]
 };

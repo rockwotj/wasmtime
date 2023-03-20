@@ -175,7 +175,7 @@ runtime--enable runtime support based on how you use Wasmtime:</p>
 <code>WASMTIME_PROFILING_STRATEGY_VTUNE</code> value.</p>
 </li>
 <li>
-<p><strong>Command Line</strong> - pass the <code>--vtune</code> flag on the command line.</p>
+<p><strong>Command Line</strong> - pass the <code>--profile=vtune</code> flag on the command line.</p>
 </li>
 </ul>
 <h3 id="profiling-wasmtime-itself"><a class="header" href="#profiling-wasmtime-itself">Profiling Wasmtime itself</a></h3>
@@ -188,10 +188,10 @@ future.</p>
 <h3 id="example-getting-started"><a class="header" href="#example-getting-started">Example: Getting Started</a></h3>
 <p>With VTune <a href="https://software.intel.com/en-us/vtune/choose-download#standalone">properly installed</a>, if you are using the CLI execute:</p>
 <pre><code class="language-sh">$ cargo build
-$ vtune -run-pass-thru=--no-altstack -collect hotspots target/debug/wasmtime --vtune foo.wasm
+$ vtune -run-pass-thru=--no-altstack -collect hotspots target/debug/wasmtime --profile=vtune foo.wasm
 </code></pre>
 <p>This command tells the VTune collector (<code>vtune</code>) to collect hot spot
-profiling data as Wasmtime is executing <code>foo.wasm</code>. The <code>--vtune</code> flag enables
+profiling data as Wasmtime is executing <code>foo.wasm</code>. The <code>--profile=vtune</code> flag enables
 VTune support in Wasmtime so that the collector is also alerted to JIT events
 that take place during runtime. The first time this is run, the result of the
 command is a results diretory <code>r000hs/</code> which contains profiling data for
@@ -216,11 +216,11 @@ fn fib(n: u32) -&gt; u32 {
 <pre><code class="language-sh">$ rustc --target wasm32-wasi fib.rs -C opt-level=z -C lto=yes
 </code></pre>
 <p>Then we execute the Wasmtime runtime (built with the <code>vtune</code> feature and
-executed with the <code>--vtune</code> flag to enable reporting) inside the VTune CLI
+executed with the <code>--profile=vtune</code> flag to enable reporting) inside the VTune CLI
 application, <code>vtune</code>, which must already be installed and available on the
 path. To collect hot spot profiling information, we execute:</p>
 <pre><code class="language-sh">$ rustc --target wasm32-wasi fib.rs -C opt-level=z -C lto=yes
-$ vtune -run-pass-thru=--no-altstack -v -collect hotspots target/debug/wasmtime --vtune fib.wasm
+$ vtune -run-pass-thru=--no-altstack -v -collect hotspots target/debug/wasmtime --profile=vtune fib.wasm
 fib(45) = 1134903170
 amplxe: Collection stopped.
 amplxe: Using result path /home/jlb6740/wasmtime/r000hs
@@ -253,7 +253,7 @@ like:</p>
 <li>&quot;Configure Analysis&quot; with
 <ul>
 <li>&quot;Application&quot; set to <code>/path/to/wasmtime</code> (e.g., <code>target/debug/wasmtime</code>)</li>
-<li>&quot;Application parameters&quot; set to <code>--vtune /path/to/module.wasm</code></li>
+<li>&quot;Application parameters&quot; set to <code>--profile=vtune /path/to/module.wasm</code></li>
 <li>&quot;Working directory&quot; set as appropriate</li>
 <li>Enable &quot;Hardware Event-Based Sampling,&quot; which may require some system
 configuration, e.g. <code>sysctl -w kernel.perf_event_paranoid=0</code></li>

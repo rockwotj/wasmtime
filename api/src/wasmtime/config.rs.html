@@ -2028,6 +2028,24 @@
 <a href="#2028" id="2028">2028</a>
 <a href="#2029" id="2029">2029</a>
 <a href="#2030" id="2030">2030</a>
+<a href="#2031" id="2031">2031</a>
+<a href="#2032" id="2032">2032</a>
+<a href="#2033" id="2033">2033</a>
+<a href="#2034" id="2034">2034</a>
+<a href="#2035" id="2035">2035</a>
+<a href="#2036" id="2036">2036</a>
+<a href="#2037" id="2037">2037</a>
+<a href="#2038" id="2038">2038</a>
+<a href="#2039" id="2039">2039</a>
+<a href="#2040" id="2040">2040</a>
+<a href="#2041" id="2041">2041</a>
+<a href="#2042" id="2042">2042</a>
+<a href="#2043" id="2043">2043</a>
+<a href="#2044" id="2044">2044</a>
+<a href="#2045" id="2045">2045</a>
+<a href="#2046" id="2046">2046</a>
+<a href="#2047" id="2047">2047</a>
+<a href="#2048" id="2048">2048</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::memory::MemoryCreator;
 <span class="kw">use </span><span class="kw">crate</span>::trampoline::MemoryCreatorProxy;
 <span class="kw">use </span>anyhow::{bail, <span class="prelude-ty">Result</span>};
@@ -2036,13 +2054,14 @@
 <span class="kw">use </span>std::fmt;
 <span class="attr">#[cfg(feature = <span class="string">&quot;cache&quot;</span>)]
 </span><span class="kw">use </span>std::path::Path;
+<span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>target_lexicon::Architecture;
 <span class="kw">use </span>wasmparser::WasmFeatures;
 <span class="attr">#[cfg(feature = <span class="string">&quot;cache&quot;</span>)]
 </span><span class="kw">use </span>wasmtime_cache::CacheConfig;
 <span class="kw">use </span>wasmtime_environ::Tunables;
-<span class="kw">use </span>wasmtime_jit::{JitDumpAgent, NullProfilerAgent, ProfilingAgent, VTuneAgent};
+<span class="kw">use </span>wasmtime_jit::{JitDumpAgent, NullProfilerAgent, PerfMapAgent, ProfilingAgent, VTuneAgent};
 <span class="kw">use </span>wasmtime_runtime::{InstanceAllocator, OnDemandInstanceAllocator, RuntimeMemoryCreator};
 
 <span class="kw">pub use </span>wasmtime_environ::CacheStore;
@@ -2251,7 +2270,6 @@
     </span><span class="attr">#[cfg(compiler)]
     #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
     </span><span class="kw">pub fn </span>target(<span class="kw-2">&amp;mut </span><span class="self">self</span>, target: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt; {
-        <span class="kw">use </span>std::str::FromStr;
         <span class="self">self</span>.compiler_config.target =
             <span class="prelude-val">Some</span>(target_lexicon::Triple::from_str(target).map_err(|e| <span class="macro">anyhow::anyhow!</span>(e))<span class="question-mark">?</span>);
 
@@ -3566,6 +3584,7 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>build_profiler(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>ProfilingAgent&gt;&gt; {
         <span class="prelude-val">Ok</span>(<span class="kw">match </span><span class="self">self</span>.profiling_strategy {
+            ProfilingStrategy::PerfMap =&gt; Box::new(PerfMapAgent::new()<span class="question-mark">?</span>) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>ProfilingAgent&gt;,
             ProfilingStrategy::JitDump =&gt; Box::new(JitDumpAgent::new()<span class="question-mark">?</span>) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>ProfilingAgent&gt;,
             ProfilingStrategy::VTune =&gt; Box::new(VTuneAgent::new()<span class="question-mark">?</span>) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>ProfilingAgent&gt;,
             ProfilingStrategy::None =&gt; Box::new(NullProfilerAgent),
@@ -3757,10 +3776,13 @@
 }
 
 <span class="doccomment">/// Select which profiling technique to support.
-</span><span class="attr">#[derive(Debug, Clone, Copy)]
+</span><span class="attr">#[derive(Debug, Clone, Copy, PartialEq)]
 </span><span class="kw">pub enum </span>ProfilingStrategy {
     <span class="doccomment">/// No profiler support.
     </span><span class="prelude-val">None</span>,
+
+    <span class="doccomment">/// Collect function name information as the &quot;perf map&quot; file format, used with `perf` on Linux.
+    </span>PerfMap,
 
     <span class="doccomment">/// Collect profiling info for &quot;jitdump&quot; file format, used with `perf` on
     /// Linux.
@@ -3768,6 +3790,20 @@
 
     <span class="doccomment">/// Collect profiling info using the &quot;ittapi&quot;, used with `VTune` on Linux.
     </span>VTune,
+}
+
+<span class="kw">impl </span>FromStr <span class="kw">for </span>ProfilingStrategy {
+    <span class="kw">type </span><span class="prelude-val">Err </span>= anyhow::Error;
+
+    <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; std::result::Result&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
+        <span class="kw">match </span>s {
+            <span class="string">&quot;none&quot; </span>=&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::None),
+            <span class="string">&quot;perfmap&quot; </span>=&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::PerfMap),
+            <span class="string">&quot;jitdump&quot; </span>=&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::JitDump),
+            <span class="string">&quot;vtune&quot; </span>=&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::VTune),
+            <span class="kw">_ </span>=&gt; <span class="macro">anyhow::bail!</span>(<span class="string">&quot;unknown value for profiling strategy&quot;</span>),
+        }
+    }
 }
 
 <span class="doccomment">/// Select how wasm backtrace detailed information is handled.
