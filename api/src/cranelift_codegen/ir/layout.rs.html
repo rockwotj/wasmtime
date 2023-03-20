@@ -1175,6 +1175,24 @@
 <a href="#1175" id="1175">1175</a>
 <a href="#1176" id="1176">1176</a>
 <a href="#1177" id="1177">1177</a>
+<a href="#1178" id="1178">1178</a>
+<a href="#1179" id="1179">1179</a>
+<a href="#1180" id="1180">1180</a>
+<a href="#1181" id="1181">1181</a>
+<a href="#1182" id="1182">1182</a>
+<a href="#1183" id="1183">1183</a>
+<a href="#1184" id="1184">1184</a>
+<a href="#1185" id="1185">1185</a>
+<a href="#1186" id="1186">1186</a>
+<a href="#1187" id="1187">1187</a>
+<a href="#1188" id="1188">1188</a>
+<a href="#1189" id="1189">1189</a>
+<a href="#1190" id="1190">1190</a>
+<a href="#1191" id="1191">1191</a>
+<a href="#1192" id="1192">1192</a>
+<a href="#1193" id="1193">1193</a>
+<a href="#1194" id="1194">1194</a>
+<a href="#1195" id="1195">1195</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Function layout.
 //!
 //! The order of basic blocks in a function and the order of instructions in a block is
@@ -1386,7 +1404,7 @@
     ///
     /// This doesn&#39;t affect the position of anything, but it gives more room in the internal
     /// sequence numbers for inserting instructions later.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>full_block_renumber(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: Block) {
+    </span><span class="kw">fn </span>full_block_renumber(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: Block) {
         <span class="kw">let </span>_tt = timing::layout_renumber();
         <span class="comment">// Avoid 0 as this is reserved for the program point indicating the block itself
         </span><span class="kw">let </span><span class="kw-2">mut </span>seq = MAJOR_STRIDE;
@@ -1776,13 +1794,31 @@
     }
 }
 
-<span class="attr">#[derive(Clone, Debug, Default, PartialEq, Hash)]
+<span class="attr">#[derive(Clone, Debug, Default)]
 </span><span class="kw">struct </span>InstNode {
     <span class="doccomment">/// The Block containing this instruction, or `None` if the instruction is not yet inserted.
     </span>block: PackedOption&lt;Block&gt;,
     prev: PackedOption&lt;Inst&gt;,
     next: PackedOption&lt;Inst&gt;,
     seq: SequenceNumber,
+}
+
+<span class="kw">impl </span>PartialEq <span class="kw">for </span>InstNode {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        <span class="comment">// Ignore the sequence number as it is an optimization used by pp_cmp and may be different
+        // even for equivalent layouts.
+        </span><span class="self">self</span>.block == other.block &amp;&amp; <span class="self">self</span>.prev == other.prev &amp;&amp; <span class="self">self</span>.next == other.next
+    }
+}
+
+<span class="kw">impl </span>core::hash::Hash <span class="kw">for </span>InstNode {
+    <span class="kw">fn </span>hash&lt;H: core::hash::Hasher&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>H) {
+        <span class="comment">// Ignore the sequence number as it is an optimization used by pp_cmp and may be different
+        // even for equivalent layouts.
+        </span><span class="self">self</span>.block.hash(state);
+        <span class="self">self</span>.prev.hash(state);
+        <span class="self">self</span>.next.hash(state);
+    }
 }
 
 <span class="doccomment">/// Iterate over instructions in a block in layout order. See `Layout::block_insts()`.
