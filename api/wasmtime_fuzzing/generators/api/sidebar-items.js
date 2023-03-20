@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["ApiCall","A call to one of Wasmtime’s public APIs."]],"struct":[["ApiCalls","A sequence of API calls."]]};
+window.SIDEBAR_ITEMS = {"enum":["ApiCall"],"struct":["ApiCalls"]};

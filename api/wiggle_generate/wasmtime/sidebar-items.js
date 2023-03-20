@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["link_module",""]]};
+window.SIDEBAR_ITEMS = {"fn":["link_module"]};

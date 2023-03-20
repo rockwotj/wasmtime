@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["RelocationTarget","Destination function. Can be either user function or some special one, like `memory.grow`."]],"fn":[["clif_flags_to_wasmtime","Converts cranelift_codegen settings to the wasmtime_environ equivalent."]],"mod":[["isa_builder",""],["obj","Object file builder."]],"struct":[["Relocation","A record of a relocation to perform."]]};
+window.SIDEBAR_ITEMS = {"enum":["RelocationTarget"],"fn":["clif_flags_to_wasmtime"],"mod":["isa_builder","obj"],"struct":["Relocation"]};

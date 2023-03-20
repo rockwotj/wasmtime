@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["DirCaps",""],["DirFdStat",""],["ReaddirCursor",""],["ReaddirEntity",""]],"trait":[["DirEntryExt",""],["WasiDir",""]]};
+window.SIDEBAR_ITEMS = {"struct":["DirCaps","DirFdStat","ReaddirCursor","ReaddirEntity"],"trait":["DirEntryExt","WasiDir"]};

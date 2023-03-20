@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["compile",""],["run",""]],"struct":[["Options",""]]};
+window.SIDEBAR_ITEMS = {"fn":["compile","run"],"struct":["Options"]};

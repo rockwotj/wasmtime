@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["cat_one",""],["run",""]],"struct":[["Options","Outputs .clif file"]]};
+window.SIDEBAR_ITEMS = {"fn":["cat_one","run"],"struct":["Options"]};

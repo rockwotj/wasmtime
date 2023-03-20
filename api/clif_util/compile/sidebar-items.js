@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["handle_module",""],["run",""]],"struct":[["Options","Compiles Cranelift IR into target language"]]};
+window.SIDEBAR_ITEMS = {"fn":["handle_module","run"],"struct":["Options"]};

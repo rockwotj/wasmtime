@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["add_to_linker","Manually add the WASI `thread_spawn` function to the linker."]],"struct":[["WasiThreadsCtx",""]]};
+window.SIDEBAR_ITEMS = {"fn":["add_to_linker"],"struct":["WasiThreadsCtx"]};

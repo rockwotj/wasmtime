@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["Subscription",""],["SubscriptionResult",""]],"struct":[["MonotonicClockSubscription",""],["RwEventFlags",""],["RwSubscription",""]]};
+window.SIDEBAR_ITEMS = {"enum":["Subscription","SubscriptionResult"],"struct":["MonotonicClockSubscription","RwEventFlags","RwSubscription"]};

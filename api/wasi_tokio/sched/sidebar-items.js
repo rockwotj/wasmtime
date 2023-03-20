@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["poll_oneoff",""],["sched_ctx",""]]};
+window.SIDEBAR_ITEMS = {"fn":["poll_oneoff","sched_ctx"]};

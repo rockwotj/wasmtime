@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":[["impl_errno",""]],"struct":[["HostMemory",""],["MemArea",""],["MemAreas",""],["WasiCtx",""]]};
+window.SIDEBAR_ITEMS = {"macro":["impl_errno"],"struct":["HostMemory","MemArea","MemAreas","WasiCtx"]};

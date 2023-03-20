@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["add_wasi_unstable_to_linker","Adds all instance items to the specified `Linker`."]]};
+window.SIDEBAR_ITEMS = {"fn":["add_wasi_unstable_to_linker"]};

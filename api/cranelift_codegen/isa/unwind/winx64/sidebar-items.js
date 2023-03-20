@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["UnwindInfo","Represents Windows x64 unwind information."]]};
+window.SIDEBAR_ITEMS = {"struct":["UnwindInfo"]};

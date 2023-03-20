@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["GdbJitImageRegistration","Registeration for JIT image"]]};
+window.SIDEBAR_ITEMS = {"struct":["GdbJitImageRegistration"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["camel_case","Convert the string `s` to CamelCase."]],"mod":[["formats",""],["instructions",""],["isa",""],["operands",""],["settings",""],["types","Cranelift ValueType hierarchy"],["typevar",""]]};
+window.SIDEBAR_ITEMS = {"fn":["camel_case"],"mod":["formats","instructions","isa","operands","settings","types","typevar"]};

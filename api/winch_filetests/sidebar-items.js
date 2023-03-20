@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["disasm","Disassembly utilities."]]};
+window.SIDEBAR_ITEMS = {"mod":["disasm"]};

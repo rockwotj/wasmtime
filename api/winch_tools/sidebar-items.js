@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["Commands","Winch compilation and testing tool."]],"fn":[["main",""]],"mod":[["compile",""],["filetests",""]]};
+window.SIDEBAR_ITEMS = {"enum":["Commands"],"fn":["main"],"mod":["compile","filetests"]};

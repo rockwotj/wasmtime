@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["disasm","Disassemble and print a machine code buffer."]]};
+window.SIDEBAR_ITEMS = {"fn":["disasm"]};

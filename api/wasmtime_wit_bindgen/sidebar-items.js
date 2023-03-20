@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Opts",""],["TrappableError",""]]};
+window.SIDEBAR_ITEMS = {"struct":["Opts","TrappableError"]};

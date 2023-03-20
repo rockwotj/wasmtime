@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Formats",""]]};
+window.SIDEBAR_ITEMS = {"struct":["Formats"]};

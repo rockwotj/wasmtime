@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["lookup","Look for an ISA builder for the given target triple."]],"trait":[["TargetIsa","A trait representing commonalities between the supported instruction set architectures."]],"type":[["Builder",""]]};
+window.SIDEBAR_ITEMS = {"fn":["lookup"],"trait":["TargetIsa"],"type":["Builder"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["CFGPrinter","A utility for pretty-printing the CFG of a `Function`."]]};
+window.SIDEBAR_ITEMS = {"struct":["CFGPrinter"]};

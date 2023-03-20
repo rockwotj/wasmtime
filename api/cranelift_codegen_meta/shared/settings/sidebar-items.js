@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["define",""]]};
+window.SIDEBAR_ITEMS = {"fn":["define"]};

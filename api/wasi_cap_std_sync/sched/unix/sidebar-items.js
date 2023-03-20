@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["poll_oneoff",""]]};
+window.SIDEBAR_ITEMS = {"fn":["poll_oneoff"]};

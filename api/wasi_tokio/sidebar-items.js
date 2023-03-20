@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["clocks_ctx",""],["random_ctx",""]],"mod":[["net",""],["sched",""],["stdio",""]],"struct":[["Dir",""],["File",""],["WasiCtxBuilder",""]]};
+window.SIDEBAR_ITEMS = {"fn":["clocks_ctx","random_ctx"],"mod":["net","sched","stdio"],"struct":["Dir","File","WasiCtxBuilder"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["poll_oneoff",""],["sched_ctx",""]],"mod":[["unix",""]],"struct":[["SyncSched",""]]};
+window.SIDEBAR_ITEMS = {"fn":["poll_oneoff","sched_ctx"],"mod":["unix"],"struct":["SyncSched"]};

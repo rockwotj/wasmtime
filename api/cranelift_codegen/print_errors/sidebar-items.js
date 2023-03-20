@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["pretty_error","Pretty-print a Cranelift error."],["pretty_verifier_error","Pretty-print a verifier error."]]};
+window.SIDEBAR_ITEMS = {"fn":["pretty_error","pretty_verifier_error"]};

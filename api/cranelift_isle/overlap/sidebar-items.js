@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["check","Check for overlap."]]};
+window.SIDEBAR_ITEMS = {"fn":["check"]};

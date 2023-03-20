@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["builder",""]]};
+window.SIDEBAR_ITEMS = {"fn":["builder"]};

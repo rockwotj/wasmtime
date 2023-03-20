@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":[["foreach",""]]};
+window.SIDEBAR_ITEMS = {"macro":["foreach"]};

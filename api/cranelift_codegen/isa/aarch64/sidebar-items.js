@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["isa_builder","Create a new `isa::Builder`."]],"mod":[["inst","This module defines aarch64-specific machine instruction types."],["settings","AArch64 Settings."]],"struct":[["AArch64Backend","An AArch64 backend."]]};
+window.SIDEBAR_ITEMS = {"fn":["isa_builder"],"mod":["inst","settings"],"struct":["AArch64Backend"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["BorrowChecker",""]]};
+window.SIDEBAR_ITEMS = {"struct":["BorrowChecker"]};

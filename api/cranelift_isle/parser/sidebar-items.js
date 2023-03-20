@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["parse","Parse the top-level ISLE definitions and return their AST."]]};
+window.SIDEBAR_ITEMS = {"fn":["parse"]};

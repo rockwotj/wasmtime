@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["ValueConversionKind",""],["ValueError",""],["ValueTypeClass",""]],"trait":[["Value",""]],"type":[["ValueResult",""]]};
+window.SIDEBAR_ITEMS = {"enum":["ValueConversionKind","ValueError","ValueTypeClass"],"trait":["Value"],"type":["ValueResult"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["TcpListener",""],["TcpStream",""],["UnixListener",""],["UnixStream",""]]};
+window.SIDEBAR_ITEMS = {"struct":["TcpListener","TcpStream","UnixListener","UnixStream"]};

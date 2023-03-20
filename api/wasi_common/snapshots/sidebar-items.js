@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["preview_0",""],["preview_1",""]]};
+window.SIDEBAR_ITEMS = {"mod":["preview_0","preview_1"]};

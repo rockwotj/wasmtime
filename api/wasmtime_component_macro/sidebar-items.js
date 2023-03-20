@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"derive":[["ComponentType",""],["Lift",""],["Lower",""]],"macro":[["bindgen",""],["flags",""]]};
+window.SIDEBAR_ITEMS = {"derive":["ComponentType","Lift","Lower"],"macro":["bindgen","flags"]};

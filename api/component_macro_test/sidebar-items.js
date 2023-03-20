@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"attr":[["add_variants",""]],"macro":[["flags_test",""]]};
+window.SIDEBAR_ITEMS = {"attr":["add_variants"],"macro":["flags_test"]};

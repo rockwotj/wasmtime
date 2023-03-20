@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":[["ErrorExt",""]]};
+window.SIDEBAR_ITEMS = {"trait":["ErrorExt"]};

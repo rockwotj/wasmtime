@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["WasmtimeGuestMemory","Lightweight `wasmtime::Memory` wrapper so we can implement the `wiggle::GuestMemory` trait on it."]]};
+window.SIDEBAR_ITEMS = {"struct":["WasmtimeGuestMemory"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["FuzzGen",""],["PrintableTestCase","Provides a way to format a `TestCase` in the .clif format."]],"type":[["TestCaseInput",""]]};
+window.SIDEBAR_ITEMS = {"struct":["FuzzGen","PrintableTestCase"],"type":["TestCaseInput"]};
