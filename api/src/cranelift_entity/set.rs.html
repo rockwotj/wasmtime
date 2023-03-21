@@ -255,6 +255,39 @@
 <a href="#255" id="255">255</a>
 <a href="#256" id="256">256</a>
 <a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Densely numbered entity references as set keys.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::keys::Keys;
@@ -326,20 +359,14 @@
         }
     }
 
-    <span class="doccomment">/// Returns the cardinality of the set.  More precisely, it returns the number of calls to
+    <span class="doccomment">/// Returns the cardinality of the set. More precisely, it returns the number of calls to
     /// `insert` with different key values, that have happened since the the set was most recently
     /// `clear`ed or created with `new`.
     </span><span class="kw">pub fn </span>cardinality(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="kw">let </span><span class="kw-2">mut </span>n: usize = <span class="number">0</span>;
-        <span class="kw">for </span>idx <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.len / BITS {
-            n += <span class="self">self</span>.elems[idx].count_ones() <span class="kw">as </span>usize;
-        }
-        <span class="kw">for </span>bit_ix <span class="kw">in </span>(<span class="self">self</span>.len / BITS) * BITS..<span class="self">self</span>.len {
-            <span class="kw">if </span>(<span class="self">self</span>.elems[bit_ix / BITS] &amp; (<span class="number">1 </span>&lt;&lt; (bit_ix % BITS))) != <span class="number">0 </span>{
-                n += <span class="number">1</span>;
-            }
-        }
-        n
+        <span class="self">self</span>.elems[..(<span class="self">self</span>.len + (BITS - <span class="number">1</span>)) / BITS]
+            .iter()
+            .map(|x| x.count_ones() <span class="kw">as </span>usize)
+            .sum()
     }
 
     <span class="doccomment">/// Remove all entries from this set.
@@ -510,6 +537,45 @@
         }
 
         <span class="macro">assert!</span>(m.is_empty());
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>cardinality() {
+        <span class="kw">let </span><span class="kw-2">mut </span>m = EntitySet::new();
+
+        m.insert(E(<span class="number">1</span>));
+        <span class="macro">assert!</span>(m.cardinality() == <span class="number">1</span>);
+
+        m.insert(E(<span class="number">0</span>));
+        <span class="macro">assert!</span>(m.cardinality() == <span class="number">2</span>);
+
+        m.insert(E(<span class="number">1</span>));
+        <span class="macro">assert!</span>(m.cardinality() == <span class="number">2</span>);
+
+        m.insert(E(BITS <span class="kw">as </span>u32 - <span class="number">1</span>));
+        <span class="macro">assert!</span>(m.cardinality() == <span class="number">3</span>);
+
+        m.insert(E(BITS <span class="kw">as </span>u32));
+        <span class="macro">assert!</span>(m.cardinality() == <span class="number">4</span>);
+
+        m.insert(E(BITS <span class="kw">as </span>u32 - <span class="number">1</span>));
+        <span class="macro">assert!</span>(m.cardinality() == <span class="number">4</span>);
+
+        <span class="macro">assert!</span>(m.pop() == <span class="prelude-val">Some</span>(E(BITS <span class="kw">as </span>u32)));
+        <span class="macro">assert!</span>(m.cardinality() == <span class="number">3</span>);
+        <span class="macro">assert!</span>(m.pop() == <span class="prelude-val">Some</span>(E(BITS <span class="kw">as </span>u32 - <span class="number">1</span>)));
+        <span class="macro">assert!</span>(m.cardinality() == <span class="number">2</span>);
+
+        m.insert(E(<span class="number">100</span>));
+        <span class="macro">assert!</span>(m.cardinality() == <span class="number">3</span>);
+
+        <span class="macro">assert!</span>(m.pop() == <span class="prelude-val">Some</span>(E(<span class="number">100</span>)));
+        <span class="macro">assert!</span>(m.cardinality() == <span class="number">2</span>);
+
+        m.insert(E(<span class="number">100</span>));
+        m.insert(E(<span class="number">101</span>));
+        m.insert(E(<span class="number">102</span>));
+        <span class="macro">assert!</span>(m.cardinality() == <span class="number">5</span>);
     }
 }
 </code></pre></div>
