@@ -112,6 +112,9 @@
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::codegen::ir::{ArgumentExtension, ArgumentPurpose};
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>cranelift::codegen::data_value::DataValue;
@@ -137,23 +140,26 @@
     <span class="kw">fn </span>datavalue(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type) -&gt; <span class="prelude-ty">Result</span>&lt;DataValue&gt;;
 }
 
+<span class="doccomment">/// Returns the set of types that are valid for value generation, dependent on architecture.
+</span><span class="kw">pub fn </span>types_for_architecture(architecture: Architecture) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[Type] {
+    <span class="comment">// TODO: It would be nice if we could get these directly from cranelift
+    // TODO: RISCV does not support SIMD yet
+    </span><span class="kw">let </span>supports_simd = !<span class="macro">matches!</span>(architecture, Architecture::Riscv64(<span class="kw">_</span>));
+    <span class="kw">if </span>supports_simd {
+        <span class="kw-2">&amp;</span>[
+            I8, I16, I32, I64, I128, <span class="comment">// Scalar Integers
+            </span>F32, F64, <span class="comment">// Scalar Floats
+            </span>I8X16, I16X8, I32X4, I64X2, <span class="comment">// SIMD Integers
+            </span>F32X4, F64X2, <span class="comment">// SIMD Floats
+        </span>]
+    } <span class="kw">else </span>{
+        <span class="kw-2">&amp;</span>[I8, I16, I32, I64, I128, F32, F64]
+    }
+}
+
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CraneliftArbitrary <span class="kw">for </span><span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">fn </span>_type(<span class="kw-2">&amp;mut </span><span class="self">self</span>, architecture: Architecture) -&gt; <span class="prelude-ty">Result</span>&lt;Type&gt; {
-        <span class="comment">// TODO: It would be nice if we could get these directly from cranelift
-        // TODO: RISCV does not support SIMD yet
-        </span><span class="kw">let </span>supports_simd = !<span class="macro">matches!</span>(architecture, Architecture::Riscv64(<span class="kw">_</span>));
-        <span class="kw">let </span>choices = <span class="kw">if </span>supports_simd {
-            <span class="kw-2">&amp;</span>[
-                I8, I16, I32, I64, I128, <span class="comment">// Scalar Integers
-                </span>F32, F64, <span class="comment">// Scalar Floats
-                </span>I8X16, I16X8, I32X4, I64X2, <span class="comment">// SIMD Integers
-                </span>F32X4, F64X2, <span class="comment">// SIMD Floats
-            </span>][..]
-        } <span class="kw">else </span>{
-            <span class="kw-2">&amp;</span>[I8, I16, I32, I64, I128, F32, F64][..]
-        };
-
-        <span class="prelude-val">Ok</span>(<span class="kw-2">*</span><span class="self">self</span>.choose(choices)<span class="question-mark">?</span>)
+        <span class="prelude-val">Ok</span>(<span class="kw-2">*</span><span class="self">self</span>.choose(types_for_architecture(architecture))<span class="question-mark">?</span>)
     }
 
     <span class="kw">fn </span>callconv(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CallConv&gt; {
