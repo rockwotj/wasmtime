@@ -5062,22 +5062,6 @@
 <a href="#5062" id="5062">5062</a>
 <a href="#5063" id="5063">5063</a>
 <a href="#5064" id="5064">5064</a>
-<a href="#5065" id="5065">5065</a>
-<a href="#5066" id="5066">5066</a>
-<a href="#5067" id="5067">5067</a>
-<a href="#5068" id="5068">5068</a>
-<a href="#5069" id="5069">5069</a>
-<a href="#5070" id="5070">5070</a>
-<a href="#5071" id="5071">5071</a>
-<a href="#5072" id="5072">5072</a>
-<a href="#5073" id="5073">5073</a>
-<a href="#5074" id="5074">5074</a>
-<a href="#5075" id="5075">5075</a>
-<a href="#5076" id="5076">5076</a>
-<a href="#5077" id="5077">5077</a>
-<a href="#5078" id="5078">5078</a>
-<a href="#5079" id="5079">5079</a>
-<a href="#5080" id="5080">5080</a>
 </pre><pre class="rust"><code><span class="doccomment">/// An instruction format
 ///
 /// Every opcode has a corresponding instruction format
@@ -8887,7 +8871,7 @@
     },
     <span class="comment">// Iconst: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=0
     // Constraints=[&#39;Same&#39;]
-    // Polymorphic over TypeSet(lanes={1, 2, 4, 8, 16, 32, 64, 128, 256}, ints={8, 16, 32, 64})
+    // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64})
     </span>OpcodeConstraints {
         flags: <span class="number">0x01</span>,
         typeset_offset: <span class="number">9</span>,
@@ -9808,15 +9792,15 @@
     },
     <span class="comment">// Isplit: fixed_results=2, use_typevar_operand=true, requires_typevar_operand=true, fixed_values=1
     // Constraints=[&#39;HalfWidth&#39;, &#39;HalfWidth&#39;, &#39;Same&#39;]
-    // Polymorphic over TypeSet(lanes={1, 2, 4, 8, 16, 32, 64, 128, 256}, ints={16, 32, 64, 128})
+    // Polymorphic over TypeSet(lanes={1}, ints={16, 32, 64, 128})
     </span>OpcodeConstraints {
         flags: <span class="number">0x3a</span>,
-        typeset_offset: <span class="number">22</span>,
+        typeset_offset: <span class="number">16</span>,
         constraint_offset: <span class="number">69</span>,
     },
     <span class="comment">// Iconcat: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=true, fixed_values=2
     // Constraints=[&#39;DoubleWidth&#39;, &#39;Same&#39;, &#39;Same&#39;]
-    // Polymorphic over TypeSet(lanes={1, 2, 4, 8, 16, 32, 64, 128, 256}, ints={8, 16, 32, 64})
+    // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64})
     </span>OpcodeConstraints {
         flags: <span class="number">0x59</span>,
         typeset_offset: <span class="number">9</span>,
@@ -9827,7 +9811,7 @@
     // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64})
     </span>OpcodeConstraints {
         flags: <span class="number">0x41</span>,
-        typeset_offset: <span class="number">23</span>,
+        typeset_offset: <span class="number">9</span>,
         constraint_offset: <span class="number">74</span>,
     },
     <span class="comment">// AtomicCas: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=3
@@ -9835,7 +9819,7 @@
     // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64})
     </span>OpcodeConstraints {
         flags: <span class="number">0x69</span>,
-        typeset_offset: <span class="number">23</span>,
+        typeset_offset: <span class="number">9</span>,
         constraint_offset: <span class="number">74</span>,
     },
     <span class="comment">// AtomicLoad: fixed_results=1, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=1
@@ -9843,7 +9827,7 @@
     // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64})
     </span>OpcodeConstraints {
         flags: <span class="number">0x21</span>,
-        typeset_offset: <span class="number">23</span>,
+        typeset_offset: <span class="number">9</span>,
         constraint_offset: <span class="number">12</span>,
     },
     <span class="comment">// AtomicStore: fixed_results=0, use_typevar_operand=true, requires_typevar_operand=true, fixed_values=2
@@ -9851,7 +9835,7 @@
     // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64})
     </span>OpcodeConstraints {
         flags: <span class="number">0x58</span>,
-        typeset_offset: <span class="number">23</span>,
+        typeset_offset: <span class="number">9</span>,
         constraint_offset: <span class="number">12</span>,
     },
     <span class="comment">// Fence: fixed_results=0, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=0
@@ -9866,13 +9850,13 @@
     // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64, 128}, floats={32, 64})
     </span>OpcodeConstraints {
         flags: <span class="number">0x39</span>,
-        typeset_offset: <span class="number">24</span>,
+        typeset_offset: <span class="number">22</span>,
         constraint_offset: <span class="number">78</span>,
     },
 ];
 
 <span class="comment">// Table of value type sets.
-</span><span class="kw">const </span>TYPE_SETS: [ir::instructions::ValueTypeSet; <span class="number">25</span>] = [
+</span><span class="kw">const </span>TYPE_SETS: [ir::instructions::ValueTypeSet; <span class="number">23</span>] = [
     ir::instructions::ValueTypeSet {
         <span class="comment">// TypeSet(lanes={1}, ints={8, 16, 32, 64, 128})
         </span>lanes: BitSet::&lt;u16&gt;(<span class="number">1</span>),
@@ -9946,9 +9930,9 @@
         refs: BitSet::&lt;u8&gt;(<span class="number">0</span>),
     },
     ir::instructions::ValueTypeSet {
-        <span class="comment">// TypeSet(lanes={1, 2, 4, 8, 16, 32, 64, 128, 256}, ints={8, 16, 32, 64})
-        </span>lanes: BitSet::&lt;u16&gt;(<span class="number">511</span>),
-        dynamic_lanes: BitSet::&lt;u16&gt;(<span class="number">510</span>),
+        <span class="comment">// TypeSet(lanes={1}, ints={8, 16, 32, 64})
+        </span>lanes: BitSet::&lt;u16&gt;(<span class="number">1</span>),
+        dynamic_lanes: BitSet::&lt;u16&gt;(<span class="number">0</span>),
         ints: BitSet::&lt;u8&gt;(<span class="number">120</span>),
         floats: BitSet::&lt;u8&gt;(<span class="number">0</span>),
         refs: BitSet::&lt;u8&gt;(<span class="number">0</span>),
@@ -10047,22 +10031,6 @@
         dynamic_lanes: BitSet::&lt;u16&gt;(<span class="number">0</span>),
         ints: BitSet::&lt;u8&gt;(<span class="number">0</span>),
         floats: BitSet::&lt;u8&gt;(<span class="number">96</span>),
-        refs: BitSet::&lt;u8&gt;(<span class="number">0</span>),
-    },
-    ir::instructions::ValueTypeSet {
-        <span class="comment">// TypeSet(lanes={1, 2, 4, 8, 16, 32, 64, 128, 256}, ints={16, 32, 64, 128})
-        </span>lanes: BitSet::&lt;u16&gt;(<span class="number">511</span>),
-        dynamic_lanes: BitSet::&lt;u16&gt;(<span class="number">0</span>),
-        ints: BitSet::&lt;u8&gt;(<span class="number">240</span>),
-        floats: BitSet::&lt;u8&gt;(<span class="number">0</span>),
-        refs: BitSet::&lt;u8&gt;(<span class="number">0</span>),
-    },
-    ir::instructions::ValueTypeSet {
-        <span class="comment">// TypeSet(lanes={1}, ints={8, 16, 32, 64})
-        </span>lanes: BitSet::&lt;u16&gt;(<span class="number">1</span>),
-        dynamic_lanes: BitSet::&lt;u16&gt;(<span class="number">0</span>),
-        ints: BitSet::&lt;u8&gt;(<span class="number">120</span>),
-        floats: BitSet::&lt;u8&gt;(<span class="number">0</span>),
         refs: BitSet::&lt;u8&gt;(<span class="number">0</span>),
     },
     ir::instructions::ValueTypeSet {

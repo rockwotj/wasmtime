@@ -1446,7 +1446,7 @@ base address.</li>
 an integer vector where all the lanes have the same value.</p>
 <p>Inputs:</p>
 <ul>
-<li>NarrowInt (controlling type variable): An integer type with lanes type to <code>i64</code></li>
+<li>NarrowInt (controlling type variable): An integer type of width up to <code>i64</code></li>
 <li>N: A 64-bit immediate integer.</li>
 </ul>
 <p>Outputs:</p>
@@ -2974,7 +2974,7 @@ number of lanes as the input, but the lanes are half the size.</p>
 values.</p>
 <p>Inputs:</p>
 <ul>
-<li>x: An integer type with lanes from <code>i16</code> upwards</li>
+<li>x: An integer type of width <code>i16</code> upwards</li>
 </ul>
 <p>Outputs:</p>
 <ul>
@@ -2987,8 +2987,8 @@ the same number of lanes as the inputs, but the lanes are twice the
 size.</p>
 <p>Inputs:</p>
 <ul>
-<li>lo: An integer type with lanes type to <code>i64</code></li>
-<li>hi: An integer type with lanes type to <code>i64</code></li>
+<li>lo: An integer type of width up to <code>i64</code></li>
+<li>hi: An integer type of width up to <code>i64</code></li>
 </ul>
 <p>Outputs:</p>
 <ul>

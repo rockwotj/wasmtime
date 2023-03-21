@@ -3780,13 +3780,6 @@
 <a href="#3780" id="3780">3780</a>
 <a href="#3781" id="3781">3781</a>
 <a href="#3782" id="3782">3782</a>
-<a href="#3783" id="3783">3783</a>
-<a href="#3784" id="3784">3784</a>
-<a href="#3785" id="3785">3785</a>
-<a href="#3786" id="3786">3786</a>
-<a href="#3787" id="3787">3787</a>
-<a href="#3788" id="3788">3788</a>
-<a href="#3789" id="3789">3789</a>
 </pre><pre class="rust"><code><span class="attr">#![allow(non_snake_case)]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::cdsl::instructions::{
@@ -4436,12 +4429,8 @@
 
     <span class="kw">let </span>NarrowInt = <span class="kw-2">&amp;</span>TypeVar::new(
         <span class="string">&quot;NarrowInt&quot;</span>,
-        <span class="string">&quot;An integer type with lanes type to `i64`&quot;</span>,
-        TypeSetBuilder::new()
-            .ints(<span class="number">8</span>..<span class="number">64</span>)
-            .simd_lanes(Interval::All)
-            .dynamic_simd_lanes(Interval::All)
-            .build(),
+        <span class="string">&quot;An integer type of width up to `i64`&quot;</span>,
+        TypeSetBuilder::new().ints(<span class="number">8</span>..<span class="number">64</span>).build(),
     );
 
     <span class="kw">let </span>ScalarTruthy = <span class="kw-2">&amp;</span>TypeVar::new(
@@ -7380,11 +7369,8 @@
 
     <span class="kw">let </span>WideInt = <span class="kw-2">&amp;</span>TypeVar::new(
         <span class="string">&quot;WideInt&quot;</span>,
-        <span class="string">&quot;An integer type with lanes from `i16` upwards&quot;</span>,
-        TypeSetBuilder::new()
-            .ints(<span class="number">16</span>..<span class="number">128</span>)
-            .simd_lanes(Interval::All)
-            .build(),
+        <span class="string">&quot;An integer type of width `i16` upwards&quot;</span>,
+        TypeSetBuilder::new().ints(<span class="number">16</span>..<span class="number">128</span>).build(),
     );
 
     ig.push(
