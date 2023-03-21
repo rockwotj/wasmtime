@@ -803,6 +803,11 @@
 <a href="#803" id="803">803</a>
 <a href="#804" id="804">804</a>
 <a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Shared ISLE prelude implementation for optimization (mid-end) and
 //! lowering (backend) ISLE environments.
 
@@ -841,6 +846,11 @@
         <span class="attr">#[inline]
         </span><span class="kw">fn </span>i64_as_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, x: i64) -&gt; u64 {
             x <span class="kw">as </span>u64
+        }
+
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>u64_as_i32(<span class="kw-2">&amp;mut </span><span class="self">self</span>, x: u64) -&gt; i32 {
+            x <span class="kw">as </span>i32
         }
 
         <span class="attr">#[inline]
