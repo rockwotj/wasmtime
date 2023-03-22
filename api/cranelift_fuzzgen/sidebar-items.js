@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["FuzzGen","PrintableTestCase"],"type":["TestCaseInput"]};
+window.SIDEBAR_ITEMS = {"enum":["IsaFlagGen"],"struct":["FuzzGen","PrintableTestCase"],"type":["TestCaseInput"]};
