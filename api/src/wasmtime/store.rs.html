@@ -2114,6 +2114,15 @@
 <a href="#2114" id="2114">2114</a>
 <a href="#2115" id="2115">2115</a>
 <a href="#2116" id="2116">2116</a>
+<a href="#2117" id="2117">2117</a>
+<a href="#2118" id="2118">2118</a>
+<a href="#2119" id="2119">2119</a>
+<a href="#2120" id="2120">2120</a>
+<a href="#2121" id="2121">2121</a>
+<a href="#2122" id="2122">2122</a>
+<a href="#2123" id="2123">2123</a>
+<a href="#2124" id="2124">2124</a>
+<a href="#2125" id="2125">2125</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Wasmtime&#39;s &quot;store&quot; type
 //!
 //! This module, and its submodules, contain the `Store` type and various types
@@ -2541,11 +2550,13 @@
 
 <span class="doccomment">/// What to do when the engine epoch reaches the deadline for a Store
 /// during execution of a function using that store.
+</span><span class="attr">#[derive(Default)]
 </span><span class="kw">enum </span>EpochDeadline&lt;T&gt; {
     <span class="doccomment">/// Return early with a trap.
+    </span><span class="attr">#[default]
     </span>Trap,
     <span class="doccomment">/// Call a custom deadline handler.
-    </span>Callback(Box&lt;<span class="kw">dyn </span>FnMut(<span class="kw-2">&amp;mut </span>T) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; + Send + Sync&gt;),
+    </span>Callback(Box&lt;<span class="kw">dyn </span>FnMut(StoreContextMut&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; + Send + Sync&gt;),
     <span class="doccomment">/// Extend the deadline by the specified number of ticks after
     /// yielding to the async executor loop.
     </span><span class="attr">#[cfg(feature = <span class="string">&quot;async&quot;</span>)]
@@ -3048,7 +3059,7 @@
     /// for an introduction to epoch-based interruption.
     </span><span class="kw">pub fn </span>epoch_deadline_callback(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        callback: <span class="kw">impl </span>FnMut(<span class="kw-2">&amp;mut </span>T) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; + Send + Sync + <span class="lifetime">&#39;static</span>,
+        callback: <span class="kw">impl </span>FnMut(StoreContextMut&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; + Send + Sync + <span class="lifetime">&#39;static</span>,
     ) {
         <span class="self">self</span>.inner.epoch_deadline_callback(Box::new(callback));
     }
@@ -4091,10 +4102,13 @@ at https://bytecodealliance.org/security.
     }
 
     <span class="kw">fn </span>new_epoch(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;u64, anyhow::Error&gt; {
-        <span class="kw">return match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.epoch_deadline_behavior {
+        <span class="comment">// Temporarily take the configured behavior to avoid mutably borrowing
+        // multiple times.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>behavior = std::mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.epoch_deadline_behavior);
+        <span class="kw">let </span>delta_result = <span class="kw">match </span><span class="kw-2">&amp;mut </span>behavior {
             EpochDeadline::Trap =&gt; <span class="prelude-val">Err</span>(Trap::Interrupt.into()),
             EpochDeadline::Callback(callback) =&gt; {
-                <span class="kw">let </span>delta = callback(<span class="kw-2">&amp;mut </span><span class="self">self</span>.data)<span class="question-mark">?</span>;
+                <span class="kw">let </span>delta = callback((<span class="kw-2">&amp;mut *</span><span class="self">self</span>).as_context_mut())<span class="question-mark">?</span>;
                 <span class="comment">// Set a new deadline and return the new epoch deadline so
                 // the Wasm code doesn&#39;t have to reload it.
                 </span><span class="self">self</span>.set_epoch_deadline(delta);
@@ -4114,6 +4128,10 @@ at https://bytecodealliance.org/security.
                 </span><span class="prelude-val">Ok</span>(<span class="self">self</span>.get_epoch_deadline())
             }
         };
+
+        <span class="comment">// Put back the original behavior which was replaced by `take`.
+        </span><span class="self">self</span>.epoch_deadline_behavior = behavior;
+        delta_result
     }
 }
 
@@ -4138,7 +4156,7 @@ at https://bytecodealliance.org/security.
 
     <span class="kw">fn </span>epoch_deadline_callback(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        callback: Box&lt;<span class="kw">dyn </span>FnMut(<span class="kw-2">&amp;mut </span>T) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; + Send + Sync&gt;,
+        callback: Box&lt;<span class="kw">dyn </span>FnMut(StoreContextMut&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; + Send + Sync&gt;,
     ) {
         <span class="self">self</span>.epoch_deadline_behavior = EpochDeadline::Callback(callback);
     }
