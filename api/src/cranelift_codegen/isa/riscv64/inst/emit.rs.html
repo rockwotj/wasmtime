@@ -2746,68 +2746,6 @@
 <a href="#2746" id="2746">2746</a>
 <a href="#2747" id="2747">2747</a>
 <a href="#2748" id="2748">2748</a>
-<a href="#2749" id="2749">2749</a>
-<a href="#2750" id="2750">2750</a>
-<a href="#2751" id="2751">2751</a>
-<a href="#2752" id="2752">2752</a>
-<a href="#2753" id="2753">2753</a>
-<a href="#2754" id="2754">2754</a>
-<a href="#2755" id="2755">2755</a>
-<a href="#2756" id="2756">2756</a>
-<a href="#2757" id="2757">2757</a>
-<a href="#2758" id="2758">2758</a>
-<a href="#2759" id="2759">2759</a>
-<a href="#2760" id="2760">2760</a>
-<a href="#2761" id="2761">2761</a>
-<a href="#2762" id="2762">2762</a>
-<a href="#2763" id="2763">2763</a>
-<a href="#2764" id="2764">2764</a>
-<a href="#2765" id="2765">2765</a>
-<a href="#2766" id="2766">2766</a>
-<a href="#2767" id="2767">2767</a>
-<a href="#2768" id="2768">2768</a>
-<a href="#2769" id="2769">2769</a>
-<a href="#2770" id="2770">2770</a>
-<a href="#2771" id="2771">2771</a>
-<a href="#2772" id="2772">2772</a>
-<a href="#2773" id="2773">2773</a>
-<a href="#2774" id="2774">2774</a>
-<a href="#2775" id="2775">2775</a>
-<a href="#2776" id="2776">2776</a>
-<a href="#2777" id="2777">2777</a>
-<a href="#2778" id="2778">2778</a>
-<a href="#2779" id="2779">2779</a>
-<a href="#2780" id="2780">2780</a>
-<a href="#2781" id="2781">2781</a>
-<a href="#2782" id="2782">2782</a>
-<a href="#2783" id="2783">2783</a>
-<a href="#2784" id="2784">2784</a>
-<a href="#2785" id="2785">2785</a>
-<a href="#2786" id="2786">2786</a>
-<a href="#2787" id="2787">2787</a>
-<a href="#2788" id="2788">2788</a>
-<a href="#2789" id="2789">2789</a>
-<a href="#2790" id="2790">2790</a>
-<a href="#2791" id="2791">2791</a>
-<a href="#2792" id="2792">2792</a>
-<a href="#2793" id="2793">2793</a>
-<a href="#2794" id="2794">2794</a>
-<a href="#2795" id="2795">2795</a>
-<a href="#2796" id="2796">2796</a>
-<a href="#2797" id="2797">2797</a>
-<a href="#2798" id="2798">2798</a>
-<a href="#2799" id="2799">2799</a>
-<a href="#2800" id="2800">2800</a>
-<a href="#2801" id="2801">2801</a>
-<a href="#2802" id="2802">2802</a>
-<a href="#2803" id="2803">2803</a>
-<a href="#2804" id="2804">2804</a>
-<a href="#2805" id="2805">2805</a>
-<a href="#2806" id="2806">2806</a>
-<a href="#2807" id="2807">2807</a>
-<a href="#2808" id="2808">2808</a>
-<a href="#2809" id="2809">2809</a>
-<a href="#2810" id="2810">2810</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::StackMap;
@@ -3178,68 +3116,6 @@
                 });
             }
         }
-        insts
-    }
-
-    <span class="doccomment">/// check if float is unordered.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>lower_float_unordered(
-        tmp: Writable&lt;Reg&gt;,
-        ty: Type,
-        x: Reg,
-        y: Reg,
-        taken: BranchTarget,
-        not_taken: BranchTarget,
-    ) -&gt; SmallInstVec&lt;Inst&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>insts = SmallInstVec::new();
-        <span class="kw">let </span>class_op = <span class="kw">if </span>ty == F32 {
-            FpuOPRR::FclassS
-        } <span class="kw">else </span>{
-            FpuOPRR::FclassD
-        };
-        <span class="comment">// if x is nan
-        </span>insts.push(Inst::FpuRR {
-            frm: <span class="prelude-val">None</span>,
-            alu_op: class_op,
-            rd: tmp,
-            rs: x,
-        });
-        insts.push(Inst::AluRRImm12 {
-            alu_op: AluOPRRI::Andi,
-            rd: tmp,
-            rs: tmp.to_reg(),
-            imm12: Imm12::from_bits(FClassResult::is_nan_bits() <span class="kw">as </span>i16),
-        });
-        insts.push(Inst::CondBr {
-            taken,
-            not_taken: BranchTarget::zero(),
-            kind: IntegerCompare {
-                kind: IntCC::NotEqual,
-                rs1: tmp.to_reg(),
-                rs2: zero_reg(),
-            },
-        });
-        <span class="comment">// if y is nan.
-        </span>insts.push(Inst::FpuRR {
-            frm: <span class="prelude-val">None</span>,
-            alu_op: class_op,
-            rd: tmp,
-            rs: y,
-        });
-        insts.push(Inst::AluRRImm12 {
-            alu_op: AluOPRRI::Andi,
-            rd: tmp,
-            rs: tmp.to_reg(),
-            imm12: Imm12::from_bits(FClassResult::is_nan_bits() <span class="kw">as </span>i16),
-        });
-        insts.push(Inst::CondBr {
-            taken,
-            not_taken,
-            kind: IntegerCompare {
-                kind: IntCC::NotEqual,
-                rs1: tmp.to_reg(),
-                rs2: zero_reg(),
-            },
-        });
         insts
     }
 }
