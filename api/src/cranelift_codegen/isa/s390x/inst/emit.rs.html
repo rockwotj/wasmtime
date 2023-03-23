@@ -3675,6 +3675,13 @@
 <a href="#3675" id="3675">3675</a>
 <a href="#3676" id="3676">3676</a>
 <a href="#3677" id="3677">3677</a>
+<a href="#3678" id="3678">3678</a>
+<a href="#3679" id="3679">3679</a>
+<a href="#3680" id="3680">3680</a>
+<a href="#3681" id="3681">3681</a>
+<a href="#3682" id="3682">3682</a>
+<a href="#3683" id="3683">3683</a>
+<a href="#3684" id="3684">3684</a>
 </pre><pre class="rust"><code><span class="doccomment">//! S390x ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Reloc, StackMap};
@@ -4359,6 +4366,7 @@
     <span class="kw">let </span>opcode1 = ((opcode &gt;&gt; <span class="number">4</span>) &amp; <span class="number">0xff</span>) <span class="kw">as </span>u8;
     <span class="kw">let </span>opcode2 = (opcode &amp; <span class="number">0xf</span>) <span class="kw">as </span>u8;
     <span class="kw">let </span>r1 = machreg_to_gpr(r1) &amp; <span class="number">0x0f</span>;
+    <span class="kw">let </span>ri2 = ri2 &gt;&gt; <span class="number">1</span>;
 
     enc[<span class="number">0</span>] = opcode1;
     enc[<span class="number">1</span>] = r1 &lt;&lt; <span class="number">4 </span>| opcode2;
@@ -4377,6 +4385,7 @@
     <span class="kw">let </span>opcode1 = ((opcode &gt;&gt; <span class="number">4</span>) &amp; <span class="number">0xff</span>) <span class="kw">as </span>u8;
     <span class="kw">let </span>opcode2 = (opcode &amp; <span class="number">0xf</span>) <span class="kw">as </span>u8;
     <span class="kw">let </span>m1 = m1 &amp; <span class="number">0x0f</span>;
+    <span class="kw">let </span>ri2 = ri2 &gt;&gt; <span class="number">1</span>;
 
     enc[<span class="number">0</span>] = opcode1;
     enc[<span class="number">1</span>] = m1 &lt;&lt; <span class="number">4 </span>| opcode2;
@@ -7267,14 +7276,19 @@
                 put_with_trap(sink, <span class="kw-2">&amp;</span>enc_e(<span class="number">0x0000</span>), trap_code);
             }
             <span class="kw-2">&amp;</span>Inst::TrapIf { cond, trap_code } =&gt; {
-                <span class="comment">// Branch over trap if condition is false.
-                </span><span class="kw">let </span>opcode = <span class="number">0xa74</span>; <span class="comment">// BCR
-                </span>put(sink, <span class="kw-2">&amp;</span>enc_ri_c(opcode, cond.invert().bits(), <span class="number">4 </span>+ <span class="number">2</span>));
-                <span class="comment">// Now emit the actual trap.
-                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(s) = state.take_stack_map() {
-                    sink.add_stack_map(StackMapExtent::UpcomingBytes(<span class="number">2</span>), s);
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(s) = state.take_stack_map() {
+                    sink.add_stack_map(StackMapExtent::UpcomingBytes(<span class="number">6</span>), s);
                 }
-                put_with_trap(sink, <span class="kw-2">&amp;</span>enc_e(<span class="number">0x0000</span>), trap_code);
+                <span class="comment">// We implement a TrapIf as a conditional branch into the middle
+                // of the branch (BRCL) instruction itself - those middle two bytes
+                // are zero, which matches the trap instruction itself.
+                </span><span class="kw">let </span>opcode = <span class="number">0xc04</span>; <span class="comment">// BCRL
+                </span><span class="kw">let </span>enc = <span class="kw-2">&amp;</span>enc_ril_c(opcode, cond.bits(), <span class="number">2</span>);
+                <span class="macro">debug_assert!</span>(enc.len() == <span class="number">6 </span>&amp;&amp; enc[<span class="number">2</span>] == <span class="number">0 </span>&amp;&amp; enc[<span class="number">3</span>] == <span class="number">0</span>);
+                <span class="comment">// The trap must be placed on the last byte of the embedded trap
+                // instruction, so we need to emit the encoding in two parts.
+                </span>put_with_trap(sink, <span class="kw-2">&amp;</span>enc[<span class="number">0</span>..<span class="number">4</span>], trap_code);
+                put(sink, <span class="kw-2">&amp;</span>enc[<span class="number">4</span>..<span class="number">6</span>]);
             }
             <span class="kw-2">&amp;</span>Inst::JTSequence { ridx, <span class="kw-2">ref </span>targets } =&gt; {
                 <span class="kw">let </span>ridx = allocs.next(ridx);

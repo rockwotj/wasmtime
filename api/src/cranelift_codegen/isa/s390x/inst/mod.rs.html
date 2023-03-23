@@ -3397,6 +3397,8 @@
 <a href="#3397" id="3397">3397</a>
 <a href="#3398" id="3398">3398</a>
 <a href="#3399" id="3399">3399</a>
+<a href="#3400" id="3400">3400</a>
+<a href="#3401" id="3401">3401</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines s390x-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc};
@@ -6584,11 +6586,13 @@
                 <span class="kw">let </span>cond = cond.pretty_print_default();
                 <span class="macro">format!</span>(<span class="string">&quot;jg{} {}&quot;</span>, cond, target)
             }
-            <span class="kw-2">&amp;</span>Inst::Debugtrap =&gt; <span class="string">&quot;debugtrap&quot;</span>.to_string(),
-            <span class="kw-2">&amp;</span>Inst::Trap { .. } =&gt; <span class="string">&quot;trap&quot;</span>.to_string(),
-            <span class="kw-2">&amp;</span>Inst::TrapIf { cond, .. } =&gt; {
-                <span class="kw">let </span>cond = cond.invert().pretty_print_default();
-                <span class="macro">format!</span>(<span class="string">&quot;j{} 6 ; trap&quot;</span>, cond)
+            <span class="kw-2">&amp;</span>Inst::Debugtrap =&gt; <span class="string">&quot;.word 0x0001 # debugtrap&quot;</span>.to_string(),
+            <span class="kw-2">&amp;</span>Inst::Trap { trap_code } =&gt; {
+                <span class="macro">format!</span>(<span class="string">&quot;.word 0x0000 # trap={}&quot;</span>, trap_code)
+            }
+            <span class="kw-2">&amp;</span>Inst::TrapIf { cond, trap_code } =&gt; {
+                <span class="kw">let </span>cond = cond.pretty_print_default();
+                <span class="macro">format!</span>(<span class="string">&quot;jg{} .+2 # trap={}&quot;</span>, cond, trap_code)
             }
             <span class="kw-2">&amp;</span>Inst::JTSequence { ridx, <span class="kw-2">ref </span>targets } =&gt; {
                 <span class="kw">let </span>ridx = pretty_print_reg(ridx, allocs);
