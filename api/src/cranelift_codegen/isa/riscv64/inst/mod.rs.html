@@ -1724,6 +1724,13 @@
 <a href="#1724" id="1724">1724</a>
 <a href="#1725" id="1725">1725</a>
 <a href="#1726" id="1726">1726</a>
+<a href="#1727" id="1727">1727</a>
+<a href="#1728" id="1728">1728</a>
+<a href="#1729" id="1729">1729</a>
+<a href="#1730" id="1730">1730</a>
+<a href="#1731" id="1731">1731</a>
+<a href="#1732" id="1732">1732</a>
+<a href="#1733" id="1733">1733</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines riscv64-specific machine instruction types.
 
 </span><span class="comment">// Some variants are not constructed, but we still want them as options in the future.
@@ -2946,10 +2953,17 @@
                 rs1,
                 rs2,
             } =&gt; {
-                <span class="kw">let </span>rs1 = format_reg(rs1, allocs);
-                <span class="kw">let </span>rs2 = format_reg(rs2, allocs);
-                <span class="kw">let </span>rd = format_reg(rd.to_reg(), allocs);
-                <span class="macro">format!</span>(<span class="string">&quot;{} {},{},{}&quot;</span>, alu_op.op_name(), rd, rs1, rs2,)
+                <span class="kw">let </span>rs1_s = format_reg(rs1, allocs);
+                <span class="kw">let </span>rs2_s = format_reg(rs2, allocs);
+                <span class="kw">let </span>rd_s = format_reg(rd.to_reg(), allocs);
+                <span class="kw">match </span>alu_op {
+                    AluOPRRR::Adduw <span class="kw">if </span>rs2 == zero_reg() =&gt; {
+                        <span class="macro">format!</span>(<span class="string">&quot;zext.w {},{}&quot;</span>, rd_s, rs1_s)
+                    }
+                    <span class="kw">_ </span>=&gt; {
+                        <span class="macro">format!</span>(<span class="string">&quot;{} {},{},{}&quot;</span>, alu_op.op_name(), rd_s, rs1_s, rs2_s)
+                    }
+                }
             }
             <span class="kw-2">&amp;</span>Inst::FpuRR {
                 frm,
