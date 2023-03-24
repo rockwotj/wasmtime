@@ -2891,6 +2891,17 @@
 <a href="#2891" id="2891">2891</a>
 <a href="#2892" id="2892">2892</a>
 <a href="#2893" id="2893">2893</a>
+<a href="#2894" id="2894">2894</a>
+<a href="#2895" id="2895">2895</a>
+<a href="#2896" id="2896">2896</a>
+<a href="#2897" id="2897">2897</a>
+<a href="#2898" id="2898">2898</a>
+<a href="#2899" id="2899">2899</a>
+<a href="#2900" id="2900">2900</a>
+<a href="#2901" id="2901">2901</a>
+<a href="#2902" id="2902">2902</a>
+<a href="#2903" id="2903">2903</a>
+<a href="#2904" id="2904">2904</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines aarch64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc};
@@ -3797,6 +3808,13 @@
         <span class="kw-2">&amp;</span>Inst::ElfTlsGetAddr { rd, .. } =&gt; {
             collector.reg_fixed_def(rd, regs::xreg(<span class="number">0</span>));
             <span class="kw">let </span><span class="kw-2">mut </span>clobbers = AArch64MachineDeps::get_regs_clobbered_by_call(CallConv::SystemV);
+            clobbers.remove(regs::xreg_preg(<span class="number">0</span>));
+            collector.reg_clobbers(clobbers);
+        }
+        <span class="kw-2">&amp;</span>Inst::MachOTlsGetAddr { rd, .. } =&gt; {
+            collector.reg_fixed_def(rd, regs::xreg(<span class="number">0</span>));
+            <span class="kw">let </span><span class="kw-2">mut </span>clobbers =
+                AArch64MachineDeps::get_regs_clobbered_by_call(CallConv::AppleAarch64);
             clobbers.remove(regs::xreg_preg(<span class="number">0</span>));
             collector.reg_clobbers(clobbers);
         }
@@ -5593,6 +5611,10 @@
             <span class="kw-2">&amp;</span>Inst::ElfTlsGetAddr { <span class="kw-2">ref </span>symbol, rd } =&gt; {
                 <span class="kw">let </span>rd = pretty_print_reg(rd.to_reg(), allocs);
                 <span class="macro">format!</span>(<span class="string">&quot;elf_tls_get_addr {}, {}&quot;</span>, rd, symbol.display(<span class="prelude-val">None</span>))
+            }
+            <span class="kw-2">&amp;</span>Inst::MachOTlsGetAddr { <span class="kw-2">ref </span>symbol, rd } =&gt; {
+                <span class="kw">let </span>rd = pretty_print_reg(rd.to_reg(), allocs);
+                <span class="macro">format!</span>(<span class="string">&quot;macho_tls_get_addr {}, {}&quot;</span>, rd, symbol.display(<span class="prelude-val">None</span>))
             }
             <span class="kw-2">&amp;</span>Inst::Unwind { <span class="kw-2">ref </span>inst } =&gt; {
                 <span class="macro">format!</span>(<span class="string">&quot;unwind {:?}&quot;</span>, inst)

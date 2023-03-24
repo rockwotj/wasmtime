@@ -828,6 +828,36 @@
 <a href="#828" id="828">828</a>
 <a href="#829" id="829">829</a>
 <a href="#830" id="830">830</a>
+<a href="#831" id="831">831</a>
+<a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
+<a href="#835" id="835">835</a>
+<a href="#836" id="836">836</a>
+<a href="#837" id="837">837</a>
+<a href="#838" id="838">838</a>
+<a href="#839" id="839">839</a>
+<a href="#840" id="840">840</a>
+<a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
+<a href="#853" id="853">853</a>
+<a href="#854" id="854">854</a>
+<a href="#855" id="855">855</a>
+<a href="#856" id="856">856</a>
+<a href="#857" id="857">857</a>
+<a href="#858" id="858">858</a>
+<a href="#859" id="859">859</a>
+<a href="#860" id="860">860</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines `ObjectModule`.
 
 </span><span class="kw">use </span>anyhow::anyhow;
@@ -1482,6 +1512,36 @@
                     },
                     RelocationEncoding::Generic,
                     <span class="number">32</span>,
+                )
+            }
+            Reloc::MachOAarch64TlsAdrPage21 =&gt; {
+                <span class="macro">assert_eq!</span>(
+                    <span class="self">self</span>.object.format(),
+                    object::BinaryFormat::MachO,
+                    <span class="string">&quot;MachOAarch64TlsAdrPage21 is not supported for this file format&quot;
+                </span>);
+                (
+                    RelocationKind::MachO {
+                        value: object::macho::ARM64_RELOC_TLVP_LOAD_PAGE21,
+                        relative: <span class="bool-val">true</span>,
+                    },
+                    RelocationEncoding::Generic,
+                    <span class="number">21</span>,
+                )
+            }
+            Reloc::MachOAarch64TlsAdrPageOff12 =&gt; {
+                <span class="macro">assert_eq!</span>(
+                    <span class="self">self</span>.object.format(),
+                    object::BinaryFormat::MachO,
+                    <span class="string">&quot;MachOAarch64TlsAdrPageOff12 is not supported for this file format&quot;
+                </span>);
+                (
+                    RelocationKind::MachO {
+                        value: object::macho::ARM64_RELOC_TLVP_LOAD_PAGEOFF12,
+                        relative: <span class="bool-val">false</span>,
+                    },
+                    RelocationEncoding::Generic,
+                    <span class="number">12</span>,
                 )
             }
             Reloc::Aarch64TlsGdAdrPage21 =&gt; {

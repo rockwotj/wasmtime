@@ -129,6 +129,16 @@
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
 <a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Binary machine code emission.
 //!
 //! The `binemit` module contains code for translating Cranelift&#39;s intermediate representation into
@@ -187,12 +197,20 @@
     <span class="doccomment">/// Mach-O x86_64 32 bit signed PC relative offset to a `__thread_vars` entry.
     </span>MachOX86_64Tlv,
 
-    <span class="doccomment">/// AArch64 TLS GD
+    <span class="doccomment">/// Mach-O Aarch64 TLS
+    /// PC-relative distance to the page of the TLVP slot.
+    </span>MachOAarch64TlsAdrPage21,
+
+    <span class="doccomment">/// Mach-O Aarch64 TLS
+    /// Offset within page of TLVP slot.
+    </span>MachOAarch64TlsAdrPageOff12,
+
+    <span class="doccomment">/// Aarch64 TLS GD
     /// Set an ADRP immediate field to the top 21 bits of the final address. Checks for overflow.
     /// This is equivalent to `R_AARCH64_TLSGD_ADR_PAGE21` in the [aaelf64](https://github.com/ARM-software/abi-aa/blob/2bcab1e3b22d55170c563c3c7940134089176746/aaelf64/aaelf64.rst#relocations-for-thread-local-storage)
     </span>Aarch64TlsGdAdrPage21,
 
-    <span class="doccomment">/// AArch64 TLS GD
+    <span class="doccomment">/// Aarch64 TLS GD
     /// Set the add immediate field to the low 12 bits of the final address. Does not check for overflow.
     /// This is equivalent to `R_AARCH64_TLSGD_ADD_LO12_NC` in the [aaelf64](https://github.com/ARM-software/abi-aa/blob/2bcab1e3b22d55170c563c3c7940134089176746/aaelf64/aaelf64.rst#relocations-for-thread-local-storage)
     </span>Aarch64TlsGdAddLo12Nc,
@@ -240,6 +258,8 @@
 
             <span class="self">Self</span>::ElfX86_64TlsGd =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;ElfX86_64TlsGd&quot;</span>),
             <span class="self">Self</span>::MachOX86_64Tlv =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;MachOX86_64Tlv&quot;</span>),
+            <span class="self">Self</span>::MachOAarch64TlsAdrPage21 =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;MachOAarch64TlsAdrPage21&quot;</span>),
+            <span class="self">Self</span>::MachOAarch64TlsAdrPageOff12 =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;MachOAarch64TlsAdrPageOff12&quot;</span>),
             <span class="self">Self</span>::Aarch64TlsGdAdrPage21 =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Aarch64TlsGdAdrPage21&quot;</span>),
             <span class="self">Self</span>::Aarch64TlsGdAddLo12Nc =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Aarch64TlsGdAddLo12Nc&quot;</span>),
             <span class="self">Self</span>::Aarch64AdrGotPage21 =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Aarch64AdrGotPage21&quot;</span>),
