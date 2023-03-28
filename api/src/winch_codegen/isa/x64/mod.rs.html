@@ -112,6 +112,8 @@
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::abi::ABI;
 <span class="kw">use </span><span class="kw">crate</span>::codegen::{CodeGen, CodeGenContext};
 <span class="kw">use </span><span class="kw">crate</span>::frame::Frame;
@@ -119,6 +121,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::masm::MacroAssembler;
 <span class="kw">use </span><span class="kw">crate</span>::regalloc::RegAlloc;
 <span class="kw">use </span><span class="kw">crate</span>::stack::Stack;
+<span class="kw">use </span><span class="kw">crate</span>::FuncEnv;
 <span class="kw">use crate</span>::{
     isa::{Builder, TargetIsa},
     regset::RegSet,
@@ -199,6 +202,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         sig: <span class="kw-2">&amp;</span>FuncType,
         body: <span class="kw-2">&amp;</span>FunctionBody,
+        env: <span class="kw-2">&amp;</span><span class="kw">dyn </span>FuncEnv,
         <span class="kw-2">mut </span>validator: FuncValidator&lt;ValidatorResources&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>body = body.get_binary_reader();
@@ -210,7 +214,7 @@
         <span class="comment">// TODO Add in floating point bitmask
         </span><span class="kw">let </span>regalloc = RegAlloc::new(RegSet::new(ALL_GPR, <span class="number">0</span>), regs::scratch());
         <span class="kw">let </span>codegen_context = CodeGenContext::new(regalloc, stack, <span class="kw-2">&amp;</span>frame);
-        <span class="kw">let </span><span class="kw-2">mut </span>codegen = CodeGen::new::&lt;abi::X64ABI&gt;(<span class="kw-2">&amp;mut </span>masm, codegen_context, abi_sig);
+        <span class="kw">let </span><span class="kw-2">mut </span>codegen = CodeGen::new(<span class="kw-2">&amp;mut </span>masm, <span class="kw-2">&amp;</span>abi, codegen_context, env, abi_sig);
 
         codegen.emit(<span class="kw-2">&amp;mut </span>body, validator)<span class="question-mark">?</span>;
 

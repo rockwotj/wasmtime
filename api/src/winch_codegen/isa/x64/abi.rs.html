@@ -234,6 +234,10 @@
 <a href="#234" id="234">234</a>
 <a href="#235" id="235">235</a>
 <a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::regs;
 <span class="kw">use crate</span>::{
     abi::{ABIArg, ABIResult, ABISig, ABI},
@@ -275,6 +279,10 @@
         <span class="number">8
     </span>}
 
+    <span class="kw">fn </span>call_stack_align(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+        <span class="number">16
+    </span>}
+
     <span class="kw">fn </span>arg_base_offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
         <span class="comment">// Two 8-byte slots, one for the return address and another
         // one for the frame pointer.
@@ -311,7 +319,7 @@
         </span><span class="kw">let </span>reg = regs::rax();
         <span class="kw">let </span>result = ABIResult::reg(ty, reg);
 
-        ABISig { params, result }
+        ABISig::new(params, result, stack_offset)
     }
 
     <span class="kw">fn </span>scratch_reg() -&gt; Reg {

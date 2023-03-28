@@ -208,6 +208,10 @@
 <a href="#208" id="208">208</a>
 <a href="#209" id="209">209</a>
 <a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::regs;
 <span class="kw">use </span><span class="kw">crate</span>::abi::{ABIArg, ABIResult, ABISig, ABI};
 <span class="kw">use </span><span class="kw">crate</span>::isa::reg::Reg;
@@ -257,6 +261,10 @@
         <span class="number">8
     </span>}
 
+    <span class="kw">fn </span>call_stack_align(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+        <span class="number">16
+    </span>}
+
     <span class="kw">fn </span>arg_base_offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
         <span class="number">16
     </span>}
@@ -284,7 +292,7 @@
         </span><span class="kw">let </span>reg = regs::xreg(<span class="number">0</span>);
         <span class="kw">let </span>result = ABIResult::reg(ty, reg);
 
-        ABISig { params, result }
+        ABISig::new(params, result, stack_offset)
     }
 
     <span class="kw">fn </span>scratch_reg() -&gt; Reg {

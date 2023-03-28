@@ -147,7 +147,114 @@
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::isa::reg::Reg;
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+</pre><pre class="rust"><code><span class="doccomment">//! This module provides all the necessary building blocks for
+//! implementing ISA specific ABIs.
+//!
+//! # Default ABI
+//!
+//! Winch uses a default internal ABI, for all internal functions.
+//! This allows us to push the complexity of system ABI compliance to
+//! the trampolines (not yet implemented).  The default ABI treats all
+//! allocatable registers as caller saved, which means that (i) all
+//! register values in the Wasm value stack (which are normally
+//! referred to as &quot;live&quot;), must be saved onto the machine stack (ii)
+//! function prologues and epilogues don&#39;t store/restore other
+//! registers more than the non-allocatable ones (e.g. rsp/rbp in
+//! x86_64).
+//!
+//! The calling convention in the default ABI, uses registers to a
+//! certain fixed count for arguments and return values, and then the
+//! stack is used for all additional arguments.
+//!
+//! Generally the stack layout looks like:
+//! +-------------------------------+
+//! |                               |
+//! |                               |
+//! |         Stack Args            |
+//! |                               |
+//! |                               |
+//! +-------------------------------+----&gt; SP @ function entry
+//! |         Ret addr              |
+//! +-------------------------------+
+//! |            SP                 |
+//! +-------------------------------+----&gt; SP @ Function prologue
+//! |                               |
+//! |                               |
+//! |                               |
+//! |        Stack slots            |
+//! |        + dynamic space        |
+//! |                               |
+//! |                               |
+//! |                               |
+//! +-------------------------------+----&gt; SP @ callsite (after)
+//! |        alignment              |
+//! |        + arguments            |
+//! |                               | ----&gt; Space allocated for calls
+//! |                               |
+</span><span class="kw">use </span><span class="kw">crate</span>::isa::reg::Reg;
 <span class="kw">use </span>smallvec::SmallVec;
 <span class="kw">use </span>std::ops::{Add, BitAnd, Not, Sub};
 <span class="kw">use </span>wasmparser::{FuncType, ValType};
@@ -161,6 +268,9 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait </span>ABI {
     <span class="doccomment">/// The required stack alignment.
     </span><span class="kw">fn </span>stack_align(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8;
+
+    <span class="doccomment">/// The required stack alignment for calls.
+    </span><span class="kw">fn </span>call_stack_align(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8;
 
     <span class="doccomment">/// The offset to the argument base, relative to the frame pointer.
     </span><span class="kw">fn </span>arg_base_offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8;
@@ -266,11 +376,27 @@
     }
 }
 
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type </span>ABIParams = SmallVec&lt;[ABIArg; <span class="number">6</span>]&gt;;
+
 <span class="doccomment">/// An ABI-specific representation of a function signature.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ABISig {
     <span class="doccomment">/// Function parameters.
-    </span><span class="kw">pub </span>params: SmallVec&lt;[ABIArg; <span class="number">6</span>]&gt;,
-    <span class="kw">pub </span>result: ABIResult,
+    </span><span class="kw">pub </span>params: ABIParams,
+    <span class="doccomment">/// Function result.
+    </span><span class="kw">pub </span>result: ABIResult,
+    <span class="doccomment">/// Stack space needed for stack arguments.
+    </span><span class="kw">pub </span>stack_bytes: u32,
+}
+
+<span class="kw">impl </span>ABISig {
+    <span class="doccomment">/// Create a new ABI signature.
+    </span><span class="kw">pub fn </span>new(params: ABIParams, result: ABIResult, stack_bytes: u32) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            params,
+            result,
+            stack_bytes,
+        }
+    }
 }
 
 <span class="doccomment">/// Returns the size in bytes of a given WebAssembly type.

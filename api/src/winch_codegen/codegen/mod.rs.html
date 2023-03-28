@@ -153,26 +153,53 @@
 <a href="#153" id="153">153</a>
 <a href="#154" id="154">154</a>
 <a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     abi::{ABISig, ABI},
     masm::{MacroAssembler, OperandSize},
 };
 <span class="kw">use </span>anyhow::Result;
+<span class="kw">use </span>call::FnCall;
 <span class="kw">use </span>wasmparser::{BinaryReader, FuncValidator, ValType, ValidatorResources, VisitOperator};
 
 <span class="kw">mod </span>context;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>context::<span class="kw-2">*</span>;
 <span class="kw">mod </span>env;
 <span class="kw">pub use </span>env::<span class="kw-2">*</span>;
+<span class="kw">mod </span>call;
 
 <span class="doccomment">/// The code generation abstraction.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>CodeGen&lt;<span class="lifetime">&#39;a</span>, M&gt;
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>CodeGen&lt;<span class="lifetime">&#39;a</span>, A, M&gt;
 <span class="kw">where
     </span>M: MacroAssembler,
+    A: ABI,
 {
-    <span class="doccomment">/// The word size in bytes, extracted from the current ABI.
-    </span>word_size: u32,
-
     <span class="doccomment">/// The ABI-specific representation of the function signature, excluding results.
     </span>sig: ABISig,
 
@@ -181,18 +208,32 @@
 
     <span class="doccomment">/// The MacroAssembler.
     </span><span class="kw">pub </span>masm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>M,
+
+    <span class="doccomment">/// A reference to the function compilation environment.
+    </span><span class="kw">pub </span>env: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw">dyn </span>env::FuncEnv,
+
+    <span class="doccomment">/// A reference to the current ABI.
+    </span><span class="kw">pub </span>abi: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>A,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, M&gt; CodeGen&lt;<span class="lifetime">&#39;a</span>, M&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, A, M&gt; CodeGen&lt;<span class="lifetime">&#39;a</span>, A, M&gt;
 <span class="kw">where
     </span>M: MacroAssembler,
+    A: ABI,
 {
-    <span class="kw">pub fn </span>new&lt;A: ABI&gt;(masm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>M, context: CodeGenContext&lt;<span class="lifetime">&#39;a</span>&gt;, sig: ABISig) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(
+        masm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>M,
+        abi: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>A,
+        context: CodeGenContext&lt;<span class="lifetime">&#39;a</span>&gt;,
+        env: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw">dyn </span>FuncEnv,
+        sig: ABISig,
+    ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            word_size: &lt;A <span class="kw">as </span>ABI&gt;::word_bytes(),
             sig,
             context,
             masm,
+            abi,
+            env,
         }
     }
 
@@ -225,7 +266,7 @@
         <span class="kw">let </span>defined_locals_range = <span class="kw-2">&amp;</span><span class="self">self</span>.context.frame.defined_locals_range;
         <span class="self">self</span>.masm.zero_mem_range(
             defined_locals_range.as_range(),
-            <span class="self">self</span>.word_size,
+            &lt;A <span class="kw">as </span>ABI&gt;::word_bytes(),
             <span class="kw-2">&amp;mut </span><span class="self">self</span>.context.regalloc,
         );
 
@@ -260,8 +301,21 @@
         }
     }
 
-    <span class="comment">// Emit the usual function end instruction sequence.
-    </span><span class="kw">pub fn </span>emit_end(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="doccomment">/// Emit a direct function call.
+    </span><span class="kw">pub fn </span>emit_call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: u32) {
+        <span class="kw">let </span>callee = <span class="self">self</span>.env.callee_from_index(index);
+        <span class="kw">if </span>callee.import {
+            <span class="comment">// TODO: Only locally defined functions for now.
+            </span><span class="macro">unreachable!</span>()
+        }
+
+        <span class="kw">let </span>sig = <span class="self">self</span>.abi.sig(<span class="kw-2">&amp;</span>callee.ty);
+        <span class="kw">let </span>fncall = FnCall::new(<span class="self">self</span>.abi, <span class="kw-2">&amp;</span>sig, <span class="kw-2">&amp;mut </span><span class="self">self</span>.context, <span class="self">self</span>.masm);
+        fncall.emit::&lt;M, A&gt;(<span class="self">self</span>.masm, <span class="kw-2">&amp;mut </span><span class="self">self</span>.context, index);
+    }
+
+    <span class="doccomment">/// Emit the usual function end instruction sequence.
+    </span><span class="kw">fn </span>emit_end(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.handle_abi_result();
         <span class="self">self</span>.masm.epilogue(<span class="self">self</span>.context.frame.locals_size);
         <span class="prelude-val">Ok</span>(())
@@ -304,7 +358,7 @@
         <span class="kw">let </span>named_reg = <span class="self">self</span>.sig.result.result_reg();
         <span class="kw">let </span>reg = <span class="self">self
             </span>.context
-            .pop_to_named_reg(<span class="self">self</span>.masm, named_reg, OperandSize::S64);
+            .pop_to_reg(<span class="self">self</span>.masm, <span class="prelude-val">Some</span>(named_reg), OperandSize::S64);
         <span class="self">self</span>.context.regalloc.free_gpr(reg);
     }
 }
