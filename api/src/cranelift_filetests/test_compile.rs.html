@@ -79,103 +79,16 @@
 <a href="#79" id="79">79</a>
 <a href="#80" id="80">80</a>
 <a href="#81" id="81">81</a>
-<a href="#82" id="82">82</a>
-<a href="#83" id="83">83</a>
-<a href="#84" id="84">84</a>
-<a href="#85" id="85">85</a>
-<a href="#86" id="86">86</a>
-<a href="#87" id="87">87</a>
-<a href="#88" id="88">88</a>
-<a href="#89" id="89">89</a>
-<a href="#90" id="90">90</a>
-<a href="#91" id="91">91</a>
-<a href="#92" id="92">92</a>
-<a href="#93" id="93">93</a>
-<a href="#94" id="94">94</a>
-<a href="#95" id="95">95</a>
-<a href="#96" id="96">96</a>
-<a href="#97" id="97">97</a>
-<a href="#98" id="98">98</a>
-<a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
-<a href="#110" id="110">110</a>
-<a href="#111" id="111">111</a>
-<a href="#112" id="112">112</a>
-<a href="#113" id="113">113</a>
-<a href="#114" id="114">114</a>
-<a href="#115" id="115">115</a>
-<a href="#116" id="116">116</a>
-<a href="#117" id="117">117</a>
-<a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
-<a href="#125" id="125">125</a>
-<a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
-<a href="#136" id="136">136</a>
-<a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
-<a href="#141" id="141">141</a>
-<a href="#142" id="142">142</a>
-<a href="#143" id="143">143</a>
-<a href="#144" id="144">144</a>
-<a href="#145" id="145">145</a>
-<a href="#146" id="146">146</a>
-<a href="#147" id="147">147</a>
-<a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
-<a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
-<a href="#161" id="161">161</a>
-<a href="#162" id="162">162</a>
-<a href="#163" id="163">163</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Test command for testing the code generator pipeline
 //!
 //! The `compile` test command runs each function through the full code generator pipeline
 
-</span><span class="kw">use </span><span class="kw">crate</span>::subtest::{run_filecheck, Context, SubTest};
-<span class="kw">use </span>anyhow::{bail, <span class="prelude-ty">Result</span>};
+</span><span class="kw">use </span><span class="kw">crate</span>::subtest::{check_precise_output, run_filecheck, Context, SubTest};
+<span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>cranelift_codegen::ir;
-<span class="kw">use </span>cranelift_codegen::ir::function::FunctionParameters;
-<span class="kw">use </span>cranelift_codegen::isa;
-<span class="kw">use </span>cranelift_codegen::CompiledCode;
 <span class="kw">use </span>cranelift_reader::{TestCommand, TestOption};
 <span class="kw">use </span>log::info;
-<span class="kw">use </span>similar::TextDiff;
 <span class="kw">use </span>std::borrow::Cow;
-<span class="kw">use </span>std::env;
 
 <span class="kw">struct </span>TestCompile {
     <span class="doccomment">/// Flag indicating that the text expectation, comments after the function,
@@ -230,99 +143,22 @@
         <span class="macro">info!</span>(<span class="string">&quot;Generated {} bytes of code:\n{}&quot;</span>, total_size, vcode);
 
         <span class="kw">if </span><span class="self">self</span>.precise_output {
-            check_precise_output(isa, <span class="kw-2">&amp;</span>params, <span class="kw-2">&amp;</span>compiled_code, context)
+            <span class="kw">let </span>cs = isa
+                .to_capstone()
+                .map_err(|e| <span class="macro">anyhow::format_err!</span>(<span class="string">&quot;{}&quot;</span>, e))<span class="question-mark">?</span>;
+            <span class="kw">let </span>dis = compiled_code.disassemble(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>params), <span class="kw-2">&amp;</span>cs)<span class="question-mark">?</span>;
+
+            <span class="kw">let </span>actual = Vec::from_iter(
+                std::iter::once(<span class="string">&quot;VCode:&quot;</span>)
+                    .chain(compiled_code.vcode.as_ref().unwrap().lines())
+                    .chain([<span class="string">&quot;&quot;</span>, <span class="string">&quot;Disassembled:&quot;</span>])
+                    .chain(dis.lines()),
+            );
+            check_precise_output(<span class="kw-2">&amp;</span>actual, context)
         } <span class="kw">else </span>{
             run_filecheck(<span class="kw-2">&amp;</span>vcode, context)
         }
     }
-}
-
-<span class="kw">fn </span>check_precise_output(
-    isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>isa::TargetIsa,
-    params: <span class="kw-2">&amp;</span>FunctionParameters,
-    compiled_code: <span class="kw-2">&amp;</span>CompiledCode,
-    context: <span class="kw-2">&amp;</span>Context,
-) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-    <span class="kw">let </span>cs = isa
-        .to_capstone()
-        .map_err(|e| <span class="macro">anyhow::format_err!</span>(<span class="string">&quot;{}&quot;</span>, e))<span class="question-mark">?</span>;
-    <span class="kw">let </span>dis = compiled_code.disassemble(<span class="prelude-val">Some</span>(params), <span class="kw-2">&amp;</span>cs)<span class="question-mark">?</span>;
-
-    <span class="kw">let </span>actual = Vec::from_iter(
-        std::iter::once(<span class="string">&quot;VCode:&quot;</span>)
-            .chain(compiled_code.vcode.as_ref().unwrap().lines())
-            .chain([<span class="string">&quot;&quot;</span>, <span class="string">&quot;Disassembled:&quot;</span>])
-            .chain(dis.lines()),
-    );
-
-    <span class="comment">// Use the comments after the function to build the test expectation.
-    </span><span class="kw">let </span>expected = context
-        .details
-        .comments
-        .iter()
-        .filter(|c| !c.text.starts_with(<span class="string">&quot;;;&quot;</span>))
-        .map(|c| c.text.strip_prefix(<span class="string">&quot;; &quot;</span>).unwrap_or(c.text))
-        .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-
-    <span class="comment">// If the expectation matches what we got, then there&#39;s nothing to do.
-    </span><span class="kw">if </span>actual == expected {
-        <span class="kw">return </span><span class="prelude-val">Ok</span>(());
-    }
-
-    <span class="comment">// If we&#39;re supposed to automatically update the test, then do so here.
-    </span><span class="kw">if </span>env::var(<span class="string">&quot;CRANELIFT_TEST_BLESS&quot;</span>).unwrap_or(String::new()) == <span class="string">&quot;1&quot; </span>{
-        <span class="kw">return </span>update_test(<span class="kw-2">&amp;</span>actual, context);
-    }
-
-    <span class="comment">// Otherwise this test has failed, and we can print out as such.
-    </span><span class="macro">bail!</span>(
-        <span class="string">&quot;compilation of function on line {} does not match\n\
-         the text expectation\n\
-         \n\
-         {}\n\
-         \n\
-         This test assertion can be automatically updated by setting the\n\
-         CRANELIFT_TEST_BLESS=1 environment variable when running this test.
-         &quot;</span>,
-        context.details.location.line_number,
-        TextDiff::from_slices(<span class="kw-2">&amp;</span>expected, <span class="kw-2">&amp;</span>actual)
-            .unified_diff()
-            .header(<span class="string">&quot;expected&quot;</span>, <span class="string">&quot;actual&quot;</span>)
-    )
-}
-
-<span class="kw">fn </span>update_test(output: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str], context: <span class="kw-2">&amp;</span>Context) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-    context
-        .file_update
-        .update_at(<span class="kw-2">&amp;</span>context.details.location, |new_test, old_test| {
-            <span class="comment">// blank newline after the function
-            </span>new_test.push_str(<span class="string">&quot;\n&quot;</span>);
-
-            <span class="comment">// Splice in the test output
-            </span><span class="kw">for </span>output <span class="kw">in </span>output {
-                new_test.push_str(<span class="string">&quot;; &quot;</span>);
-                new_test.push_str(output);
-                new_test.push_str(<span class="string">&quot;\n&quot;</span>);
-            }
-
-            <span class="comment">// blank newline after test assertion
-            </span>new_test.push_str(<span class="string">&quot;\n&quot;</span>);
-
-            <span class="comment">// Drop all remaining commented lines (presumably the old test expectation),
-            // but after we hit a real line then we push all remaining lines.
-            </span><span class="kw">let </span><span class="kw-2">mut </span>in_next_function = <span class="bool-val">false</span>;
-            <span class="kw">for </span>line <span class="kw">in </span>old_test {
-                <span class="kw">if </span>!in_next_function
-                    &amp;&amp; (line.trim().is_empty()
-                        || (line.starts_with(<span class="string">&quot;;&quot;</span>) &amp;&amp; !line.starts_with(<span class="string">&quot;;;&quot;</span>)))
-                {
-                    <span class="kw">continue</span>;
-                }
-                in_next_function = <span class="bool-val">true</span>;
-                new_test.push_str(line);
-                new_test.push_str(<span class="string">&quot;\n&quot;</span>);
-            }
-        })
 }
 </code></pre></div>
 </section></main></body></html>
