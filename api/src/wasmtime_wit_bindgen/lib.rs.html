@@ -2401,7 +2401,7 @@
         }
         <span class="comment">// Generate the `pub trait` which represents the host functionality for
         // this import.
-        </span><span class="macro">uwriteln!</span>(<span class="self">self</span>.src, <span class="string">&quot;pub trait Host: Sized {{&quot;</span>);
+        </span><span class="macro">uwriteln!</span>(<span class="self">self</span>.src, <span class="string">&quot;pub trait Host {{&quot;</span>);
         <span class="kw">for </span>(<span class="kw">_</span>, func) <span class="kw">in </span>iface.functions.iter() {
             <span class="self">self</span>.generate_function_trait_sig(owner, func);
         }
