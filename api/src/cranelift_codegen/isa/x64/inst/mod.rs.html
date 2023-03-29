@@ -2691,7 +2691,6 @@
 <a href="#2691" id="2691">2691</a>
 <a href="#2692" id="2692">2692</a>
 <a href="#2693" id="2693">2693</a>
-<a href="#2694" id="2694">2694</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines x86_64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc, StackMap};
@@ -4283,20 +4282,19 @@
                 <span class="kw">let </span>alternative = pretty_print_reg(alternative.to_reg(), size, allocs);
                 <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), size, allocs);
                 <span class="kw">let </span>consequent = consequent.pretty_print(size, allocs);
+                <span class="kw">let </span>suffix = <span class="kw">match </span><span class="kw-2">*</span>ty {
+                    types::F64 =&gt; <span class="string">&quot;sd&quot;</span>,
+                    types::F32 =&gt; <span class="string">&quot;ss&quot;</span>,
+                    types::F32X4 =&gt; <span class="string">&quot;aps&quot;</span>,
+                    types::F64X2 =&gt; <span class="string">&quot;apd&quot;</span>,
+                    <span class="kw">_ </span>=&gt; <span class="string">&quot;dqa&quot;</span>,
+                };
                 <span class="macro">format!</span>(
-                    <span class="string">&quot;mov {}, {}; j{} $next; mov{} {}, {}; $next: &quot;</span>,
+                    <span class="string">&quot;mov{suffix} {alternative}, {dst}; \
+                    j{} $next; \
+                    mov{suffix} {consequent}, {dst}; \
+                    $next:&quot;</span>,
                     cc.invert().to_string(),
-                    <span class="kw">match </span><span class="kw-2">*</span>ty {
-                        types::F64 =&gt; <span class="string">&quot;sd&quot;</span>,
-                        types::F32 =&gt; <span class="string">&quot;ss&quot;</span>,
-                        types::F32X4 =&gt; <span class="string">&quot;aps&quot;</span>,
-                        types::F64X2 =&gt; <span class="string">&quot;apd&quot;</span>,
-                        <span class="kw">_ </span>=&gt; <span class="string">&quot;dqa&quot;</span>,
-                    },
-                    consequent,
-                    dst,
-                    alternative,
-                    dst,
                 )
             }
 
