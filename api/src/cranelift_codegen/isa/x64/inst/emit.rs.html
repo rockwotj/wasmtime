@@ -3876,6 +3876,36 @@
 <a href="#3876" id="3876">3876</a>
 <a href="#3877" id="3877">3877</a>
 <a href="#3878" id="3878">3878</a>
+<a href="#3879" id="3879">3879</a>
+<a href="#3880" id="3880">3880</a>
+<a href="#3881" id="3881">3881</a>
+<a href="#3882" id="3882">3882</a>
+<a href="#3883" id="3883">3883</a>
+<a href="#3884" id="3884">3884</a>
+<a href="#3885" id="3885">3885</a>
+<a href="#3886" id="3886">3886</a>
+<a href="#3887" id="3887">3887</a>
+<a href="#3888" id="3888">3888</a>
+<a href="#3889" id="3889">3889</a>
+<a href="#3890" id="3890">3890</a>
+<a href="#3891" id="3891">3891</a>
+<a href="#3892" id="3892">3892</a>
+<a href="#3893" id="3893">3893</a>
+<a href="#3894" id="3894">3894</a>
+<a href="#3895" id="3895">3895</a>
+<a href="#3896" id="3896">3896</a>
+<a href="#3897" id="3897">3897</a>
+<a href="#3898" id="3898">3898</a>
+<a href="#3899" id="3899">3899</a>
+<a href="#3900" id="3900">3900</a>
+<a href="#3901" id="3901">3901</a>
+<a href="#3902" id="3902">3902</a>
+<a href="#3903" id="3903">3903</a>
+<a href="#3904" id="3904">3904</a>
+<a href="#3905" id="3905">3905</a>
+<a href="#3906" id="3906">3906</a>
+<a href="#3907" id="3907">3907</a>
+<a href="#3908" id="3908">3908</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -6283,17 +6313,36 @@
                 AvxOpcode::Vbroadcastss =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F38, <span class="number">0x18</span>),
                 AvxOpcode::Vmovddup =&gt; (LegacyPrefixes::_F2, OpcodeMap::_0F, <span class="number">0x12</span>),
 
+                AvxOpcode::Vcvtss2sd =&gt; (LegacyPrefixes::_F3, OpcodeMap::_0F, <span class="number">0x5A</span>),
+                AvxOpcode::Vcvtsd2ss =&gt; (LegacyPrefixes::_F2, OpcodeMap::_0F, <span class="number">0x5A</span>),
+                AvxOpcode::Vsqrtss =&gt; (LegacyPrefixes::_F3, OpcodeMap::_0F, <span class="number">0x51</span>),
+                AvxOpcode::Vsqrtsd =&gt; (LegacyPrefixes::_F2, OpcodeMap::_0F, <span class="number">0x51</span>),
+
                 <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected rmr_imm_vex opcode {op:?}&quot;</span>),
             };
 
-            VexInstruction::new()
+            <span class="kw">let </span>vex = VexInstruction::new()
                 .length(VexVectorLength::V128)
                 .prefix(prefix)
                 .map(map)
                 .opcode(opcode)
                 .reg(dst.to_real_reg().unwrap().hw_enc())
-                .rm(src)
-                .encode(sink);
+                .rm(src);
+
+            <span class="comment">// These opcodes take a second operand through `vvvv` which copies
+            // the upper bits into the destination register. That&#39;s not
+            // reflected in the CLIF instruction, however, since the SSE version
+            // doesn&#39;t have this functionality. Instead just copy whatever
+            // happens to already be in the destination, which at least is what
+            // LLVM seems to do.
+            </span><span class="kw">let </span>vex = <span class="kw">match </span>op {
+                AvxOpcode::Vcvtss2sd
+                | AvxOpcode::Vcvtsd2ss
+                | AvxOpcode::Vsqrtss
+                | AvxOpcode::Vsqrtsd =&gt; vex.vvvv(dst.to_real_reg().unwrap().hw_enc()),
+                <span class="kw">_ </span>=&gt; vex,
+            };
+            vex.encode(sink);
         }
 
         Inst::XmmUnaryRmRImmVex { op, src, dst, imm } =&gt; {
@@ -6311,18 +6360,29 @@
                 AvxOpcode::Vpshuflw =&gt; (LegacyPrefixes::_F2, OpcodeMap::_0F, <span class="number">0x70</span>),
                 AvxOpcode::Vpshufhw =&gt; (LegacyPrefixes::_F3, OpcodeMap::_0F, <span class="number">0x70</span>),
                 AvxOpcode::Vpshufd =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F, <span class="number">0x70</span>),
+                AvxOpcode::Vroundss =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x0A</span>),
+                AvxOpcode::Vroundsd =&gt; (LegacyPrefixes::_66, OpcodeMap::_0F3A, <span class="number">0x0B</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected rmr_imm_vex opcode {op:?}&quot;</span>),
             };
 
-            VexInstruction::new()
+            <span class="kw">let </span>vex = VexInstruction::new()
                 .length(VexVectorLength::V128)
                 .prefix(prefix)
                 .map(map)
                 .opcode(opcode)
                 .reg(dst.to_real_reg().unwrap().hw_enc())
                 .rm(src)
-                .imm(<span class="kw-2">*</span>imm)
-                .encode(sink);
+                .imm(<span class="kw-2">*</span>imm);
+
+            <span class="comment">// See comments in similar block above in `XmmUnaryRmRVex` for what
+            // this is doing.
+            </span><span class="kw">let </span>vex = <span class="kw">match </span>op {
+                AvxOpcode::Vroundss | AvxOpcode::Vroundsd =&gt; {
+                    vex.vvvv(dst.to_real_reg().unwrap().hw_enc())
+                }
+                <span class="kw">_ </span>=&gt; vex,
+            };
+            vex.encode(sink);
         }
 
         Inst::XmmMovRMVex { op, src, dst } =&gt; {
