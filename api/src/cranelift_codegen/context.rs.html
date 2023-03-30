@@ -793,7 +793,7 @@
             <span class="kw-2">&amp;mut </span>alias_analysis,
         );
         pass.run();
-        <span class="macro">log::info!</span>(<span class="string">&quot;egraph stats: {:?}&quot;</span>, pass.stats);
+        <span class="macro">log::debug!</span>(<span class="string">&quot;egraph stats: {:?}&quot;</span>, pass.stats);
         <span class="macro">trace!</span>(<span class="string">&quot;After egraph optimization:\n{}&quot;</span>, <span class="self">self</span>.func.display());
         <span class="prelude-val">Ok</span>(())
     }
