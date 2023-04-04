@@ -570,7 +570,7 @@
 <span class="comment">// Value Types
 
 </span><span class="doccomment">/// A list of all possible value types in WebAssembly.
-</span><span class="attr">#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+</span><span class="attr">#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
 </span><span class="kw">pub enum </span>ValType {
     <span class="comment">// NB: the ordering here is intended to match the ordering in
     // `wasmtime_types::WasmType` to help improve codegen when converting.
