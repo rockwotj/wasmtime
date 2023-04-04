@@ -147,10 +147,6 @@
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
 </pre><pre class="rust"><code><span class="doccomment">//! A simple GVN pass.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::cursor::{Cursor, FuncCursor};
@@ -188,14 +184,6 @@
     ty: Type,
     pos: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RefCell&lt;FuncCursor&lt;<span class="lifetime">&#39;f</span>&gt;&gt;,
 }
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;f</span>: <span class="lifetime">&#39;a</span>&gt; HashKey&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;f</span>&gt; {
-    <span class="kw">fn </span>new(<span class="kw-2">mut </span>inst: InstructionData, ty: Type, pos: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RefCell&lt;FuncCursor&lt;<span class="lifetime">&#39;f</span>&gt;&gt;) -&gt; <span class="self">Self </span>{
-        inst.normalize_in_place();
-        <span class="self">Self </span>{ inst, ty, pos }
-    }
-}
-
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;f</span>: <span class="lifetime">&#39;a</span>&gt; Hash <span class="kw">for </span>HashKey&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;f</span>&gt; {
     <span class="kw">fn </span>hash&lt;H: Hasher&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>H) {
         <span class="kw">let </span>pool = <span class="kw-2">&amp;</span><span class="self">self</span>.pos.borrow().func.dfg.value_lists;
@@ -274,7 +262,11 @@
             }
 
             <span class="kw">let </span>ctrl_typevar = func.dfg.ctrl_typevar(inst);
-            <span class="kw">let </span>key = HashKey::new(func.dfg.insts[inst], ctrl_typevar, <span class="kw-2">&amp;</span>pos);
+            <span class="kw">let </span>key = HashKey {
+                inst: func.dfg.insts[inst],
+                ty: ctrl_typevar,
+                pos: <span class="kw-2">&amp;</span>pos,
+            };
             <span class="kw">use </span><span class="kw">crate</span>::scoped_hash_map::Entry::<span class="kw-2">*</span>;
             <span class="kw">match </span>visible_values.entry(key) {
                 Occupied(entry) =&gt; {
