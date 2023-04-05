@@ -763,6 +763,20 @@
 <a href="#763" id="763">763</a>
 <a href="#764" id="764">764</a>
 <a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Contains the common Wasmtime command line interface (CLI) flags.
 
 </span><span class="attr">#![deny(trivial_numeric_casts, unused_extern_crates, unstable_features)]
@@ -830,6 +844,10 @@
     (
         <span class="string">&quot;experimental-wasi-threads&quot;</span>,
         <span class="string">&quot;enables support for the WASI threading API (experimental), see https://github.com/WebAssembly/wasi-threads&quot;</span>,
+    ),
+    (
+        <span class="string">&quot;experimental-wasi-http&quot;</span>,
+        <span class="string">&quot;enables support for the WASI HTTP APIs (experimental), see https://github.com/WebAssembly/wasi-http&quot;</span>,
     ),
 ];
 
@@ -1267,6 +1285,7 @@
                 <span class="string">&quot;experimental-wasi-crypto&quot; </span>=&gt; <span class="prelude-val">Ok</span>(wasi_modules.wasi_crypto = enable),
                 <span class="string">&quot;experimental-wasi-nn&quot; </span>=&gt; <span class="prelude-val">Ok</span>(wasi_modules.wasi_nn = enable),
                 <span class="string">&quot;experimental-wasi-threads&quot; </span>=&gt; <span class="prelude-val">Ok</span>(wasi_modules.wasi_threads = enable),
+                <span class="string">&quot;experimental-wasi-http&quot; </span>=&gt; <span class="prelude-val">Ok</span>(wasi_modules.wasi_http = enable),
                 <span class="string">&quot;default&quot; </span>=&gt; <span class="macro">bail!</span>(<span class="string">&quot;&#39;default&#39; cannot be specified with other WASI modules&quot;</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">bail!</span>(<span class="string">&quot;unsupported WASI module &#39;{}&#39;&quot;</span>, module),
             };
@@ -1301,6 +1320,9 @@
 
     <span class="doccomment">/// Enable the experimental wasi-threads implementation.
     </span><span class="kw">pub </span>wasi_threads: bool,
+
+    <span class="doccomment">/// Enable the experimental wasi-http implementation
+    </span><span class="kw">pub </span>wasi_http: bool,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>WasiModules {
@@ -1310,6 +1332,7 @@
             wasi_crypto: <span class="bool-val">false</span>,
             wasi_nn: <span class="bool-val">false</span>,
             wasi_threads: <span class="bool-val">false</span>,
+            wasi_http: <span class="bool-val">false</span>,
         }
     }
 }
@@ -1322,6 +1345,7 @@
             wasi_nn: <span class="bool-val">false</span>,
             wasi_crypto: <span class="bool-val">false</span>,
             wasi_threads: <span class="bool-val">false</span>,
+            wasi_http: <span class="bool-val">false</span>,
         }
     }
 }
@@ -1476,8 +1500,9 @@
                 wasi_common: <span class="bool-val">true</span>,
                 wasi_crypto: <span class="bool-val">false</span>,
                 wasi_nn: <span class="bool-val">false</span>,
-                wasi_threads: <span class="bool-val">false
-            </span>}
+                wasi_threads: <span class="bool-val">false</span>,
+                wasi_http: <span class="bool-val">false</span>,
+            }
         );
     }
 
@@ -1490,7 +1515,8 @@
                 wasi_common: <span class="bool-val">true</span>,
                 wasi_crypto: <span class="bool-val">false</span>,
                 wasi_nn: <span class="bool-val">false</span>,
-                wasi_threads: <span class="bool-val">false
+                wasi_threads: <span class="bool-val">false</span>,
+                wasi_http: <span class="bool-val">false
             </span>}
         );
     }
@@ -1508,8 +1534,9 @@
                 wasi_common: <span class="bool-val">false</span>,
                 wasi_crypto: <span class="bool-val">false</span>,
                 wasi_nn: <span class="bool-val">true</span>,
-                wasi_threads: <span class="bool-val">false
-            </span>}
+                wasi_threads: <span class="bool-val">false</span>,
+                wasi_http: <span class="bool-val">false</span>,
+            }
         );
     }
 
@@ -1523,8 +1550,9 @@
                 wasi_common: <span class="bool-val">false</span>,
                 wasi_crypto: <span class="bool-val">false</span>,
                 wasi_nn: <span class="bool-val">false</span>,
-                wasi_threads: <span class="bool-val">false
-            </span>}
+                wasi_threads: <span class="bool-val">false</span>,
+                wasi_http: <span class="bool-val">false</span>,
+            }
         );
     }
 }
