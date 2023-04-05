@@ -1646,30 +1646,6 @@
 <a href="#1646" id="1646">1646</a>
 <a href="#1647" id="1647">1647</a>
 <a href="#1648" id="1648">1648</a>
-<a href="#1649" id="1649">1649</a>
-<a href="#1650" id="1650">1650</a>
-<a href="#1651" id="1651">1651</a>
-<a href="#1652" id="1652">1652</a>
-<a href="#1653" id="1653">1653</a>
-<a href="#1654" id="1654">1654</a>
-<a href="#1655" id="1655">1655</a>
-<a href="#1656" id="1656">1656</a>
-<a href="#1657" id="1657">1657</a>
-<a href="#1658" id="1658">1658</a>
-<a href="#1659" id="1659">1659</a>
-<a href="#1660" id="1660">1660</a>
-<a href="#1661" id="1661">1661</a>
-<a href="#1662" id="1662">1662</a>
-<a href="#1663" id="1663">1663</a>
-<a href="#1664" id="1664">1664</a>
-<a href="#1665" id="1665">1665</a>
-<a href="#1666" id="1666">1666</a>
-<a href="#1667" id="1667">1667</a>
-<a href="#1668" id="1668">1668</a>
-<a href="#1669" id="1669">1669</a>
-<a href="#1670" id="1670">1670</a>
-<a href="#1671" id="1671">1671</a>
-<a href="#1672" id="1672">1672</a>
 </pre><pre class="rust"><code><span class="doccomment">//! The [step] function interprets a single Cranelift instruction given its [State] and
 //! [InstructionContext]; the interpretation is generic over [Value]s.
 </span><span class="kw">use </span><span class="kw">crate</span>::address::{Address, AddressSize};
@@ -3042,7 +3018,7 @@
 
 <span class="doccomment">/// Enumerate the ways in which the control flow can change based on a single step in a Cranelift
 /// interpreter.
-</span><span class="attr">#[derive(Debug)]
+</span><span class="attr">#[derive(Debug, PartialEq)]
 </span><span class="kw">pub enum </span>ControlFlow&lt;<span class="lifetime">&#39;a</span>, V&gt; {
     <span class="doccomment">/// Return one or more values from an instruction to be assigned to a left-hand side, e.g.:
     /// in `v0 = iadd v1, v2`, the sum of `v1` and `v2` is assigned to `v0`.
@@ -3064,30 +3040,6 @@
     <span class="doccomment">/// Stop with a program-generated trap; note that these are distinct from errors that may occur
     /// during interpretation.
     </span>Trap(CraneliftTrap),
-}
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, V&gt; ControlFlow&lt;<span class="lifetime">&#39;a</span>, V&gt; {
-    <span class="doccomment">/// For convenience, we can unwrap the [ControlFlow] state assuming that it is a
-    /// [ControlFlow::Return], panicking otherwise.
-    </span><span class="attr">#[cfg(test)]
-    </span><span class="kw">pub fn </span>unwrap_return(<span class="self">self</span>) -&gt; Vec&lt;V&gt; {
-        <span class="kw">if let </span>ControlFlow::Return(values) = <span class="self">self </span>{
-            values.into_vec()
-        } <span class="kw">else </span>{
-            <span class="macro">panic!</span>(<span class="string">&quot;expected the control flow to be in the return state&quot;</span>)
-        }
-    }
-
-    <span class="doccomment">/// For convenience, we can unwrap the [ControlFlow] state assuming that it is a
-    /// [ControlFlow::Trap], panicking otherwise.
-    </span><span class="attr">#[cfg(test)]
-    </span><span class="kw">pub fn </span>unwrap_trap(<span class="self">self</span>) -&gt; CraneliftTrap {
-        <span class="kw">if let </span>ControlFlow::Trap(trap) = <span class="self">self </span>{
-            trap
-        } <span class="kw">else </span>{
-            <span class="macro">panic!</span>(<span class="string">&quot;expected the control flow to be a trap&quot;</span>)
-        }
-    }
 }
 
 <span class="attr">#[derive(Error, Debug, PartialEq, Eq, Hash)]

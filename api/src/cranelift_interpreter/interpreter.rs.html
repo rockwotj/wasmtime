@@ -1083,6 +1083,11 @@
 <a href="#1083" id="1083">1083</a>
 <a href="#1084" id="1084">1084</a>
 <a href="#1085" id="1085">1085</a>
+<a href="#1086" id="1086">1086</a>
+<a href="#1087" id="1087">1087</a>
+<a href="#1088" id="1088">1088</a>
+<a href="#1089" id="1089">1089</a>
+<a href="#1090" id="1090">1090</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Cranelift IR interpreter.
 //!
 //! This module partially contains the logic for interpreting Cranelift IR.
@@ -1689,12 +1694,9 @@
         <span class="kw">let </span><span class="kw-2">mut </span>env = FunctionStore::default();
         env.add(func.name.to_string(), <span class="kw-2">&amp;</span>func);
         <span class="kw">let </span>state = InterpreterState::default().with_function_store(env);
-        <span class="kw">let </span>result = Interpreter::new(state)
-            .call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_return();
+        <span class="kw">let </span>result = Interpreter::new(state).call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[]).unwrap();
 
-        <span class="macro">assert_eq!</span>(result, <span class="macro">vec!</span>[DataValue::I8(<span class="number">1</span>)])
+        <span class="macro">assert_eq!</span>(result, ControlFlow::Return(<span class="macro">smallvec!</span>[DataValue::I8(<span class="number">1</span>)]));
     }
 
     <span class="comment">// We don&#39;t have a way to check for traps with the current filetest infrastructure
@@ -1711,12 +1713,12 @@
         <span class="kw">let </span><span class="kw-2">mut </span>env = FunctionStore::default();
         env.add(func.name.to_string(), <span class="kw-2">&amp;</span>func);
         <span class="kw">let </span>state = InterpreterState::default().with_function_store(env);
-        <span class="kw">let </span>trap = Interpreter::new(state)
-            .call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_trap();
+        <span class="kw">let </span>trap = Interpreter::new(state).call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[]).unwrap();
 
-        <span class="macro">assert_eq!</span>(trap, CraneliftTrap::User(TrapCode::IntegerDivisionByZero));
+        <span class="macro">assert_eq!</span>(
+            trap,
+            ControlFlow::Trap(CraneliftTrap::User(TrapCode::IntegerDivisionByZero))
+        );
     }
 
     <span class="attr">#[test]
@@ -1768,10 +1770,9 @@
         <span class="kw">let </span>state = InterpreterState::default().with_function_store(env);
         <span class="kw">let </span>result = Interpreter::new(state)
             .call_by_name(<span class="string">&quot;%parent&quot;</span>, <span class="kw-2">&amp;</span>[DataValue::I32(<span class="number">0</span>)])
-            .unwrap()
-            .unwrap_return();
+            .unwrap();
 
-        <span class="macro">assert_eq!</span>(result, <span class="macro">vec!</span>[DataValue::I32(<span class="number">0</span>)])
+        <span class="macro">assert_eq!</span>(result, ControlFlow::Return(<span class="macro">smallvec!</span>[DataValue::I32(<span class="number">0</span>)]));
     }
 
     <span class="attr">#[test]
@@ -1789,11 +1790,9 @@
 
         <span class="comment">// The default interpreter should not enable the fuel mechanism
         </span><span class="kw">let </span>state = InterpreterState::default().with_function_store(env.clone());
-        <span class="kw">let </span>result = Interpreter::new(state)
-            .call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_return();
-        <span class="macro">assert_eq!</span>(result, <span class="macro">vec!</span>[DataValue::I32(<span class="number">2</span>)]);
+        <span class="kw">let </span>result = Interpreter::new(state).call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[]).unwrap();
+
+        <span class="macro">assert_eq!</span>(result, ControlFlow::Return(<span class="macro">smallvec!</span>[DataValue::I32(<span class="number">2</span>)]));
 
         <span class="comment">// With 2 fuel, we should execute the iconst and iadd, but not the return thus giving a
         // fuel exhausted error
@@ -1811,9 +1810,9 @@
         <span class="kw">let </span>result = Interpreter::new(state)
             .with_fuel(<span class="prelude-val">Some</span>(<span class="number">3</span>))
             .call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_return();
-        <span class="macro">assert_eq!</span>(result, <span class="macro">vec!</span>[DataValue::I32(<span class="number">2</span>)]);
+            .unwrap();
+
+        <span class="macro">assert_eq!</span>(result, ControlFlow::Return(<span class="macro">smallvec!</span>[DataValue::I32(<span class="number">2</span>)]));
     }
 
     <span class="comment">// Verifies that writing to the stack on a called function does not overwrite the parents
@@ -1869,10 +1868,9 @@
                     DataValue::I64(<span class="number">11</span>),
                 ],
             )
-            .unwrap()
-            .unwrap_return();
+            .unwrap();
 
-        <span class="macro">assert_eq!</span>(result, <span class="macro">vec!</span>[DataValue::I64(<span class="number">26</span>)])
+        <span class="macro">assert_eq!</span>(result, ControlFlow::Return(<span class="macro">smallvec!</span>[DataValue::I64(<span class="number">26</span>)]))
     }
 
     <span class="attr">#[test]
@@ -1893,10 +1891,12 @@
         <span class="kw">let </span>state = InterpreterState::default().with_function_store(env);
         <span class="kw">let </span>trap = Interpreter::new(state)
             .call_by_name(<span class="string">&quot;%stack_write&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_trap();
+            .unwrap();
 
-        <span class="macro">assert_eq!</span>(trap, CraneliftTrap::User(TrapCode::HeapOutOfBounds));
+        <span class="macro">assert_eq!</span>(
+            trap,
+            ControlFlow::Trap(CraneliftTrap::User(TrapCode::HeapOutOfBounds))
+        );
     }
 
     <span class="attr">#[test]
@@ -1917,10 +1917,12 @@
         <span class="kw">let </span>state = InterpreterState::default().with_function_store(env);
         <span class="kw">let </span>trap = Interpreter::new(state)
             .call_by_name(<span class="string">&quot;%stack_write&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_trap();
+            .unwrap();
 
-        <span class="macro">assert_eq!</span>(trap, CraneliftTrap::User(TrapCode::HeapOutOfBounds));
+        <span class="macro">assert_eq!</span>(
+            trap,
+            ControlFlow::Trap(CraneliftTrap::User(TrapCode::HeapOutOfBounds))
+        );
     }
 
     <span class="attr">#[test]
@@ -1940,10 +1942,12 @@
         <span class="kw">let </span>state = InterpreterState::default().with_function_store(env);
         <span class="kw">let </span>trap = Interpreter::new(state)
             .call_by_name(<span class="string">&quot;%stack_load&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_trap();
+            .unwrap();
 
-        <span class="macro">assert_eq!</span>(trap, CraneliftTrap::User(TrapCode::HeapOutOfBounds));
+        <span class="macro">assert_eq!</span>(
+            trap,
+            ControlFlow::Trap(CraneliftTrap::User(TrapCode::HeapOutOfBounds))
+        );
     }
 
     <span class="attr">#[test]
@@ -1963,10 +1967,12 @@
         <span class="kw">let </span>state = InterpreterState::default().with_function_store(env);
         <span class="kw">let </span>trap = Interpreter::new(state)
             .call_by_name(<span class="string">&quot;%stack_load&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_trap();
+            .unwrap();
 
-        <span class="macro">assert_eq!</span>(trap, CraneliftTrap::User(TrapCode::HeapOutOfBounds));
+        <span class="macro">assert_eq!</span>(
+            trap,
+            ControlFlow::Trap(CraneliftTrap::User(TrapCode::HeapOutOfBounds))
+        );
     }
 
     <span class="attr">#[test]
@@ -1989,10 +1995,12 @@
         <span class="kw">let </span>state = InterpreterState::default().with_function_store(env);
         <span class="kw">let </span>trap = Interpreter::new(state)
             .call_by_name(<span class="string">&quot;%stack_load&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_trap();
+            .unwrap();
 
-        <span class="macro">assert_eq!</span>(trap, CraneliftTrap::User(TrapCode::HeapOutOfBounds));
+        <span class="macro">assert_eq!</span>(
+            trap,
+            ControlFlow::Trap(CraneliftTrap::User(TrapCode::HeapOutOfBounds))
+        );
     }
 
     <span class="attr">#[test]
@@ -2015,10 +2023,12 @@
         <span class="kw">let </span>state = InterpreterState::default().with_function_store(env);
         <span class="kw">let </span>trap = Interpreter::new(state)
             .call_by_name(<span class="string">&quot;%stack_store&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_trap();
+            .unwrap();
 
-        <span class="macro">assert_eq!</span>(trap, CraneliftTrap::User(TrapCode::HeapOutOfBounds));
+        <span class="macro">assert_eq!</span>(
+            trap,
+            ControlFlow::Trap(CraneliftTrap::User(TrapCode::HeapOutOfBounds))
+        );
     }
 
     <span class="attr">#[test]
@@ -2035,12 +2045,12 @@
         <span class="kw">let </span><span class="kw-2">mut </span>env = FunctionStore::default();
         env.add(func.name.to_string(), <span class="kw-2">&amp;</span>func);
         <span class="kw">let </span>state = InterpreterState::default().with_function_store(env);
-        <span class="kw">let </span>trap = Interpreter::new(state)
-            .call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_trap();
+        <span class="kw">let </span>trap = Interpreter::new(state).call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[]).unwrap();
 
-        <span class="macro">assert_eq!</span>(trap, CraneliftTrap::User(TrapCode::IntegerOverflow));
+        <span class="macro">assert_eq!</span>(
+            trap,
+            ControlFlow::Trap(CraneliftTrap::User(TrapCode::IntegerOverflow))
+        );
     }
 
     <span class="attr">#[test]
@@ -2065,12 +2075,12 @@
                 }])
             });
 
-        <span class="kw">let </span>result = Interpreter::new(state)
-            .call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_return();
+        <span class="kw">let </span>result = Interpreter::new(state).call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[]).unwrap();
 
-        <span class="macro">assert_eq!</span>(result, <span class="macro">vec!</span>[DataValue::F32(Ieee32::with_float(<span class="number">1.0</span>))])
+        <span class="macro">assert_eq!</span>(
+            result,
+            ControlFlow::Return(<span class="macro">smallvec!</span>[DataValue::F32(Ieee32::with_float(<span class="number">1.0</span>))])
+        )
     }
 
     <span class="attr">#[test]
@@ -2090,12 +2100,12 @@
         <span class="kw">let </span><span class="kw-2">mut </span>env = FunctionStore::default();
         env.add(func.name.to_string(), <span class="kw-2">&amp;</span>func);
         <span class="kw">let </span>state = InterpreterState::default().with_function_store(env);
-        <span class="kw">let </span>trap = Interpreter::new(state)
-            .call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_trap();
+        <span class="kw">let </span>trap = Interpreter::new(state).call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[]).unwrap();
 
-        <span class="macro">assert_eq!</span>(trap, CraneliftTrap::User(TrapCode::HeapMisaligned));
+        <span class="macro">assert_eq!</span>(
+            trap,
+            ControlFlow::Trap(CraneliftTrap::User(TrapCode::HeapMisaligned))
+        );
     }
 
     <span class="attr">#[test]
@@ -2116,12 +2126,12 @@
         <span class="kw">let </span><span class="kw-2">mut </span>env = FunctionStore::default();
         env.add(func.name.to_string(), <span class="kw-2">&amp;</span>func);
         <span class="kw">let </span>state = InterpreterState::default().with_function_store(env);
-        <span class="kw">let </span>trap = Interpreter::new(state)
-            .call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_trap();
+        <span class="kw">let </span>trap = Interpreter::new(state).call_by_name(<span class="string">&quot;%test&quot;</span>, <span class="kw-2">&amp;</span>[]).unwrap();
 
-        <span class="macro">assert_eq!</span>(trap, CraneliftTrap::User(TrapCode::HeapMisaligned));
+        <span class="macro">assert_eq!</span>(
+            trap,
+            ControlFlow::Trap(CraneliftTrap::User(TrapCode::HeapMisaligned))
+        );
     }
 
     <span class="comment">// When a trap occurs in a function called by another function, the trap was not being propagated
@@ -2159,13 +2169,13 @@
         }
 
         <span class="kw">let </span>state = InterpreterState::default().with_function_store(env);
-        <span class="kw">let </span>trap = Interpreter::new(state)
-            .call_by_name(<span class="string">&quot;%u1&quot;</span>, <span class="kw-2">&amp;</span>[])
-            .unwrap()
-            .unwrap_trap();
+        <span class="kw">let </span>trap = Interpreter::new(state).call_by_name(<span class="string">&quot;%u1&quot;</span>, <span class="kw-2">&amp;</span>[]).unwrap();
 
         <span class="comment">// Ensure that the correct trap was propagated.
-        </span><span class="macro">assert_eq!</span>(trap, CraneliftTrap::User(TrapCode::HeapMisaligned));
+        </span><span class="macro">assert_eq!</span>(
+            trap,
+            ControlFlow::Trap(CraneliftTrap::User(TrapCode::HeapMisaligned))
+        );
     }
 }
 </code></pre></div>

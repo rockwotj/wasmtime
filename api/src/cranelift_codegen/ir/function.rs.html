@@ -549,7 +549,7 @@
 
 <span class="doccomment">/// Function parameters used when creating this function, and that will become applied after
 /// compilation to materialize the final `CompiledCode`.
-</span><span class="attr">#[derive(Clone)]
+</span><span class="attr">#[derive(Clone, PartialEq)]
 #[cfg_attr(feature = <span class="string">&quot;enable-serde&quot;</span>, derive(Serialize, Deserialize))]
 </span><span class="kw">pub struct </span>FunctionParameters {
     <span class="doccomment">/// The first `SourceLoc` appearing in the function, serving as a base for every relative
@@ -836,7 +836,7 @@
 
 <span class="doccomment">/// Functions can be cloned, but it is not a very fast operation.
 /// The clone will have all the same entity numbers as the original.
-</span><span class="attr">#[derive(Clone)]
+</span><span class="attr">#[derive(Clone, PartialEq)]
 #[cfg_attr(feature = <span class="string">&quot;enable-serde&quot;</span>, derive(Serialize, Deserialize))]
 </span><span class="kw">pub struct </span>Function {
     <span class="doccomment">/// Name of this function.
