@@ -3596,6 +3596,45 @@
 <a href="#3596" id="3596">3596</a>
 <a href="#3597" id="3597">3597</a>
 <a href="#3598" id="3598">3598</a>
+<a href="#3599" id="3599">3599</a>
+<a href="#3600" id="3600">3600</a>
+<a href="#3601" id="3601">3601</a>
+<a href="#3602" id="3602">3602</a>
+<a href="#3603" id="3603">3603</a>
+<a href="#3604" id="3604">3604</a>
+<a href="#3605" id="3605">3605</a>
+<a href="#3606" id="3606">3606</a>
+<a href="#3607" id="3607">3607</a>
+<a href="#3608" id="3608">3608</a>
+<a href="#3609" id="3609">3609</a>
+<a href="#3610" id="3610">3610</a>
+<a href="#3611" id="3611">3611</a>
+<a href="#3612" id="3612">3612</a>
+<a href="#3613" id="3613">3613</a>
+<a href="#3614" id="3614">3614</a>
+<a href="#3615" id="3615">3615</a>
+<a href="#3616" id="3616">3616</a>
+<a href="#3617" id="3617">3617</a>
+<a href="#3618" id="3618">3618</a>
+<a href="#3619" id="3619">3619</a>
+<a href="#3620" id="3620">3620</a>
+<a href="#3621" id="3621">3621</a>
+<a href="#3622" id="3622">3622</a>
+<a href="#3623" id="3623">3623</a>
+<a href="#3624" id="3624">3624</a>
+<a href="#3625" id="3625">3625</a>
+<a href="#3626" id="3626">3626</a>
+<a href="#3627" id="3627">3627</a>
+<a href="#3628" id="3628">3628</a>
+<a href="#3629" id="3629">3629</a>
+<a href="#3630" id="3630">3630</a>
+<a href="#3631" id="3631">3631</a>
+<a href="#3632" id="3632">3632</a>
+<a href="#3633" id="3633">3633</a>
+<a href="#3634" id="3634">3634</a>
+<a href="#3635" id="3635">3635</a>
+<a href="#3636" id="3636">3636</a>
+<a href="#3637" id="3637">3637</a>
 </pre><pre class="rust"><code><span class="doccomment">//! AArch64 ISA: binary code emission.
 
 </span><span class="kw">use </span>regalloc2::Allocation;
@@ -6511,6 +6550,45 @@
                     }
                 };
                 sink.put4(enc_vec_rrr(top11 | q &lt;&lt; <span class="number">9</span>, rm, bit15_10, rn, rd));
+            }
+            <span class="kw-2">&amp;</span>Inst::VecFmlaElem {
+                rd,
+                ri,
+                rn,
+                rm,
+                alu_op,
+                size,
+                idx,
+            } =&gt; {
+                <span class="kw">let </span>rd = allocs.next_writable(rd);
+                <span class="kw">let </span>ri = allocs.next(ri);
+                <span class="macro">debug_assert_eq!</span>(rd.to_reg(), ri);
+                <span class="kw">let </span>rn = allocs.next(rn);
+                <span class="kw">let </span>rm = allocs.next(rm);
+                <span class="kw">let </span>idx = u32::from(idx);
+
+                <span class="kw">let </span>(q, _size) = size.enc_size();
+                <span class="kw">let </span>o2 = <span class="kw">match </span>alu_op {
+                    VecALUModOp::Fmla =&gt; <span class="number">0b0</span>,
+                    VecALUModOp::Fmls =&gt; <span class="number">0b1</span>,
+                    <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+                };
+
+                <span class="kw">let </span>(h, l) = <span class="kw">match </span>size {
+                    VectorSize::Size32x4 =&gt; {
+                        <span class="macro">assert!</span>(idx &lt; <span class="number">4</span>);
+                        (idx &gt;&gt; <span class="number">1</span>, idx &amp; <span class="number">1</span>)
+                    }
+                    VectorSize::Size64x2 =&gt; {
+                        <span class="macro">assert!</span>(idx &lt; <span class="number">2</span>);
+                        (idx, <span class="number">0</span>)
+                    }
+                    <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+                };
+
+                <span class="kw">let </span>top11 = <span class="number">0b000_011111_00 </span>| (q &lt;&lt; <span class="number">9</span>) | (size.enc_float_size() &lt;&lt; <span class="number">1</span>) | l;
+                <span class="kw">let </span>bit15_10 = <span class="number">0b000100 </span>| (o2 &lt;&lt; <span class="number">4</span>) | (h &lt;&lt; <span class="number">1</span>);
+                sink.put4(enc_vec_rrr(top11, rm, bit15_10, rn, rd));
             }
             <span class="kw-2">&amp;</span>Inst::VecLoadReplicate {
                 rd,
