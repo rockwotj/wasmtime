@@ -1668,6 +1668,8 @@
 <a href="#1668" id="1668">1668</a>
 <a href="#1669" id="1669">1669</a>
 <a href="#1670" id="1670">1670</a>
+<a href="#1671" id="1671">1671</a>
+<a href="#1672" id="1672">1672</a>
 </pre><pre class="rust"><code><span class="doccomment">//! The [step] function interprets a single Cranelift instruction given its [State] and
 //! [InstructionContext]; the interpretation is generic over [Value]s.
 </span><span class="kw">use </span><span class="kw">crate</span>::address::{Address, AddressSize};
@@ -3067,6 +3069,7 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, V&gt; ControlFlow&lt;<span class="lifetime">&#39;a</span>, V&gt; {
     <span class="doccomment">/// For convenience, we can unwrap the [ControlFlow] state assuming that it is a
     /// [ControlFlow::Return], panicking otherwise.
+    </span><span class="attr">#[cfg(test)]
     </span><span class="kw">pub fn </span>unwrap_return(<span class="self">self</span>) -&gt; Vec&lt;V&gt; {
         <span class="kw">if let </span>ControlFlow::Return(values) = <span class="self">self </span>{
             values.into_vec()
@@ -3077,6 +3080,7 @@
 
     <span class="doccomment">/// For convenience, we can unwrap the [ControlFlow] state assuming that it is a
     /// [ControlFlow::Trap], panicking otherwise.
+    </span><span class="attr">#[cfg(test)]
     </span><span class="kw">pub fn </span>unwrap_trap(<span class="self">self</span>) -&gt; CraneliftTrap {
         <span class="kw">if let </span>ControlFlow::Trap(trap) = <span class="self">self </span>{
             trap
