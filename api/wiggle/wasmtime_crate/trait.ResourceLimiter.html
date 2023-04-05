@@ -5,13 +5,13 @@
         current: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
         desired: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
         maximum: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>&gt;
-    ) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>;
+    ) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>, <a class="struct" href="struct.Error.html" title="struct wiggle::wasmtime_crate::Error">Error</a>&gt;;
 <span class="item-spacer"></span>    fn <a href="#tymethod.table_growing" class="fn">table_growing</a>(
         &amp;mut self,
         current: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>,
         desired: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>,
         maximum: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>&gt;
-    ) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>;
+    ) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>, <a class="struct" href="struct.Error.html" title="struct wiggle::wasmtime_crate::Error">Error</a>&gt;;
 
     // Provided methods
     fn <a href="#method.memory_grow_failed" class="fn">memory_grow_failed</a>(&amp;mut self, _error: &amp;<a class="struct" href="struct.Error.html" title="struct wiggle::wasmtime_crate::Error">Error</a>) { ... }
@@ -43,7 +43,7 @@ thread while a limit is determined.</p>
     current: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
     desired: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
     maximum: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>&gt;
-) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Notifies the resource limiter that an instance’s linear memory has been
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>, <a class="struct" href="struct.Error.html" title="struct wiggle::wasmtime_crate::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>Notifies the resource limiter that an instance’s linear memory has been
 requested to grow.</p>
 <ul>
 <li><code>current</code> is the current size of the linear memory in bytes.</li>
@@ -54,25 +54,32 @@ indicates that the linear memory is unbounded.</li>
 </ul>
 <p>The <code>current</code> and <code>desired</code> amounts are guaranteed to always be
 multiples of the WebAssembly page size, 64KiB.</p>
-<p>This function should return <code>true</code> to indicate that the growing
-operation is permitted or <code>false</code> if not permitted. Returning <code>true</code>
-when a maximum has been exceeded will have no effect as the linear
-memory will not grow.</p>
-<p>This function is not guaranteed to be invoked for all requests to
-<code>memory.grow</code>. Requests where the allocation requested size doesn’t fit
-in <code>usize</code> or exceeds the memory’s listed maximum size may not invoke
-this method.</p>
-<p>Returning <code>false</code> from this method will cause the <code>memory.grow</code>
+<p>This function is not invoked when the requested size doesn’t fit in
+<code>usize</code>. Additionally this function is not invoked for shared memories
+at this time. Otherwise even when <code>desired</code> exceeds <code>maximum</code> this
+function will still be called.</p>
+<h6 id="return-value"><a href="#return-value">Return Value</a></h6>
+<p>If <code>Ok(true)</code> is returned from this function then the growth operation
+is allowed. This means that the wasm <code>memory.grow</code> instruction will
+return with the <code>desired</code> size, in wasm pages. Note that even if
+<code>Ok(true)</code> is returned, though, if <code>desired</code> exceeds <code>maximum</code> then the
+growth operation will still fail.</p>
+<p>If <code>Ok(false)</code> is returned then this will cause the <code>memory.grow</code>
 instruction in a module to return -1 (failure), or in the case of an
 embedder API calling <a href="struct.Memory.html#method.new" title="associated function wiggle::wasmtime_crate::Memory::new"><code>Memory::new</code></a> or
 <a href="struct.Memory.html#method.grow" title="method wiggle::wasmtime_crate::Memory::grow"><code>Memory::grow</code></a> an error will be returned from
 those methods.</p>
+<p>If <code>Err(e)</code> is returned then the <code>memory.grow</code> function will behave
+as if a trap has been raised. Note that this is not necessarily
+compliant with the WebAssembly specification but it can be a handy and
+useful tool to get a precise backtrace at “what requested so much memory
+to cause a growth failure?”.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="tymethod.table_growing" class="method"><h4 class="code-header">fn <a href="#tymethod.table_growing" class="fn">table_growing</a>(
     &amp;mut self,
     current: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>,
     desired: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>,
     maximum: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>&gt;
-) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Notifies the resource limiter that an instance’s table has been
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>, <a class="struct" href="struct.Error.html" title="struct wiggle::wasmtime_crate::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>Notifies the resource limiter that an instance’s table has been
 requested to grow.</p>
 <ul>
 <li><code>current</code> is the current number of elements in the table.</li>
@@ -80,14 +87,10 @@ requested to grow.</p>
 <li><code>maximum</code> is either the table’s maximum or a maximum from an instance
 allocator.  A value of <code>None</code> indicates that the table is unbounded.</li>
 </ul>
-<p>This function should return <code>true</code> to indicate that the growing
-operation is permitted or <code>false</code> if not permitted. Returning <code>true</code>
-when a maximum has been exceeded will have no effect as the table will
-not grow.</p>
 <p>Currently in Wasmtime each table element requires a pointer’s worth of
 space (e.g. <code>mem::size_of::&lt;usize&gt;()</code>).</p>
-<p>Like <code>memory_growing</code> returning <code>false</code> from this function will cause
-<code>table.grow</code> to return -1 or embedder APIs will return an error.</p>
+<p>See the details on the return values for <code>memory_growing</code> for what the
+return value of this function indicates.</p>
 </div></details></div><h2 id="provided-methods" class="small-section-header">Provided Methods<a href="#provided-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="method.memory_grow_failed" class="method"><h4 class="code-header">fn <a href="#method.memory_grow_failed" class="fn">memory_grow_failed</a>(&amp;mut self, _error: &amp;<a class="struct" href="struct.Error.html" title="struct wiggle::wasmtime_crate::Error">Error</a>)</h4></section></summary><div class="docblock"><p>Notifies the resource limiter that growing a linear memory, permitted by
 the <code>memory_growing</code> method, has failed.</p>
 <p>Reasons for failure include: the growth exceeds the <code>maximum</code> passed to

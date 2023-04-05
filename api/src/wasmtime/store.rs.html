@@ -2122,7 +2122,6 @@
 <a href="#2122" id="2122">2122</a>
 <a href="#2123" id="2123">2123</a>
 <a href="#2124" id="2124">2124</a>
-<a href="#2125" id="2125">2125</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Wasmtime&#39;s &quot;store&quot; type
 //!
 //! This module, and its submodules, contain the `Store` type and various types
@@ -3999,20 +3998,19 @@ at https://bytecodealliance.org/security.
     ) -&gt; <span class="prelude-ty">Result</span>&lt;bool, anyhow::Error&gt; {
         <span class="kw">match </span><span class="self">self</span>.limiter {
             <span class="prelude-val">Some</span>(ResourceLimiterInner::Sync(<span class="kw-2">ref mut </span>limiter)) =&gt; {
-                <span class="prelude-val">Ok</span>(limiter(<span class="kw-2">&amp;mut </span><span class="self">self</span>.data).memory_growing(current, desired, maximum))
+                limiter(<span class="kw-2">&amp;mut </span><span class="self">self</span>.data).memory_growing(current, desired, maximum)
             }
             <span class="attr">#[cfg(feature = <span class="string">&quot;async&quot;</span>)]
             </span><span class="prelude-val">Some</span>(ResourceLimiterInner::Async(<span class="kw-2">ref mut </span>limiter)) =&gt; <span class="kw">unsafe </span>{
-                <span class="prelude-val">Ok</span>(<span class="self">self
-                    </span>.inner
+                <span class="self">self</span>.inner
                     .async_cx()
                     .expect(<span class="string">&quot;ResourceLimiterAsync requires async Store&quot;</span>)
                     .block_on(
                         limiter(<span class="kw-2">&amp;mut </span><span class="self">self</span>.data)
                             .memory_growing(current, desired, maximum)
                             .as_mut(),
-                    )<span class="question-mark">?</span>)
-            },
+                    )<span class="question-mark">?
+            </span>},
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>),
         }
     }
@@ -4048,18 +4046,18 @@ at https://bytecodealliance.org/security.
 
         <span class="kw">match </span><span class="self">self</span>.limiter {
             <span class="prelude-val">Some</span>(ResourceLimiterInner::Sync(<span class="kw-2">ref mut </span>limiter)) =&gt; {
-                <span class="prelude-val">Ok</span>(limiter(<span class="kw-2">&amp;mut </span><span class="self">self</span>.data).table_growing(current, desired, maximum))
+                limiter(<span class="kw-2">&amp;mut </span><span class="self">self</span>.data).table_growing(current, desired, maximum)
             }
             <span class="attr">#[cfg(feature = <span class="string">&quot;async&quot;</span>)]
             </span><span class="prelude-val">Some</span>(ResourceLimiterInner::Async(<span class="kw-2">ref mut </span>limiter)) =&gt; <span class="kw">unsafe </span>{
-                <span class="prelude-val">Ok</span>(async_cx
+                async_cx
                     .expect(<span class="string">&quot;ResourceLimiterAsync requires async Store&quot;</span>)
                     .block_on(
                         limiter(<span class="kw-2">&amp;mut </span><span class="self">self</span>.data)
                             .table_growing(current, desired, maximum)
                             .as_mut(),
-                    )<span class="question-mark">?</span>)
-            },
+                    )<span class="question-mark">?
+            </span>},
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>),
         }
     }
