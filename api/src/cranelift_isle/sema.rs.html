@@ -2493,44 +2493,6 @@
 <a href="#2493" id="2493">2493</a>
 <a href="#2494" id="2494">2494</a>
 <a href="#2495" id="2495">2495</a>
-<a href="#2496" id="2496">2496</a>
-<a href="#2497" id="2497">2497</a>
-<a href="#2498" id="2498">2498</a>
-<a href="#2499" id="2499">2499</a>
-<a href="#2500" id="2500">2500</a>
-<a href="#2501" id="2501">2501</a>
-<a href="#2502" id="2502">2502</a>
-<a href="#2503" id="2503">2503</a>
-<a href="#2504" id="2504">2504</a>
-<a href="#2505" id="2505">2505</a>
-<a href="#2506" id="2506">2506</a>
-<a href="#2507" id="2507">2507</a>
-<a href="#2508" id="2508">2508</a>
-<a href="#2509" id="2509">2509</a>
-<a href="#2510" id="2510">2510</a>
-<a href="#2511" id="2511">2511</a>
-<a href="#2512" id="2512">2512</a>
-<a href="#2513" id="2513">2513</a>
-<a href="#2514" id="2514">2514</a>
-<a href="#2515" id="2515">2515</a>
-<a href="#2516" id="2516">2516</a>
-<a href="#2517" id="2517">2517</a>
-<a href="#2518" id="2518">2518</a>
-<a href="#2519" id="2519">2519</a>
-<a href="#2520" id="2520">2520</a>
-<a href="#2521" id="2521">2521</a>
-<a href="#2522" id="2522">2522</a>
-<a href="#2523" id="2523">2523</a>
-<a href="#2524" id="2524">2524</a>
-<a href="#2525" id="2525">2525</a>
-<a href="#2526" id="2526">2526</a>
-<a href="#2527" id="2527">2527</a>
-<a href="#2528" id="2528">2528</a>
-<a href="#2529" id="2529">2529</a>
-<a href="#2530" id="2530">2530</a>
-<a href="#2531" id="2531">2531</a>
-<a href="#2532" id="2532">2532</a>
-<a href="#2533" id="2533">2533</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Semantic analysis.
 //!
 //! This module primarily contains the type environment and term environment.
@@ -4385,32 +4347,26 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         tyenv: <span class="kw-2">&amp;mut </span>TypeEnv,
         pat: <span class="kw-2">&amp;</span>ast::Pattern,
-        expected_ty: <span class="prelude-ty">Option</span>&lt;TypeId&gt;,
+        expected_ty: TypeId,
         bindings: <span class="kw-2">&amp;mut </span>Bindings,
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;(Pattern, TypeId)&gt; {
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;Pattern&gt; {
         <span class="macro">log!</span>(<span class="string">&quot;translate_pattern: {:?}&quot;</span>, pat);
         <span class="macro">log!</span>(<span class="string">&quot;translate_pattern: bindings = {:?}&quot;</span>, bindings);
         <span class="kw">match </span>pat {
             <span class="comment">// TODO: flag on primitive type decl indicating it&#39;s an integer type?
             </span><span class="kw-2">&amp;</span>ast::Pattern::ConstInt { val, pos } =&gt; {
-                <span class="kw">let </span>ty = <span class="kw">match </span>expected_ty {
-                    <span class="prelude-val">Some</span>(t) =&gt; t,
-                    <span class="prelude-val">None </span>=&gt; {
-                        tyenv.report_error(pos, <span class="string">&quot;Need an implied type for an integer constant&quot;</span>);
-                        <span class="kw">return </span><span class="prelude-val">None</span>;
-                    }
-                };
-                <span class="kw">if </span>!tyenv.types[ty.index()].is_prim() {
+                <span class="kw">let </span>ty = <span class="kw-2">&amp;</span>tyenv.types[expected_ty.index()];
+                <span class="kw">if </span>!ty.is_prim() {
                     tyenv.report_error(
                         pos,
                         <span class="macro">format!</span>(
                             <span class="string">&quot;expected non-primitive type {}, but found integer literal &#39;{}&#39;&quot;</span>,
-                            tyenv.types[ty.index()].name(tyenv),
+                            ty.name(tyenv),
                             val,
                         ),
                     );
                 }
-                <span class="prelude-val">Some</span>((Pattern::ConstInt(ty, val), ty))
+                <span class="prelude-val">Some</span>(Pattern::ConstInt(expected_ty, val))
             }
             <span class="kw-2">&amp;</span>ast::Pattern::ConstPrim { <span class="kw-2">ref </span>val, pos } =&gt; {
                 <span class="kw">let </span>val = tyenv.intern_mut(val);
@@ -4421,53 +4377,36 @@
                         <span class="kw">return </span><span class="prelude-val">None</span>;
                     }
                 };
-                <span class="kw">if </span>expected_ty.is_some() &amp;&amp; expected_ty != <span class="prelude-val">Some</span>(const_ty) {
+                <span class="kw">if </span>expected_ty != const_ty {
                     tyenv.report_error(pos, <span class="string">&quot;Type mismatch for constant&quot;</span>);
                 }
-                <span class="prelude-val">Some</span>((Pattern::ConstPrim(const_ty, val), const_ty))
+                <span class="prelude-val">Some</span>(Pattern::ConstPrim(const_ty, val))
             }
-            <span class="kw-2">&amp;</span>ast::Pattern::Wildcard { pos } =&gt; {
-                <span class="kw">let </span>ty = <span class="kw">match </span>expected_ty {
-                    <span class="prelude-val">Some</span>(t) =&gt; t,
-                    <span class="prelude-val">None </span>=&gt; {
-                        tyenv.report_error(pos, <span class="string">&quot;Need an implied type for a wildcard&quot;</span>);
-                        <span class="kw">return </span><span class="prelude-val">None</span>;
-                    }
-                };
-                <span class="prelude-val">Some</span>((Pattern::Wildcard(ty), ty))
-            }
-            <span class="kw-2">&amp;</span>ast::Pattern::And { <span class="kw-2">ref </span>subpats, pos } =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>expected_ty = expected_ty;
-                <span class="kw">let </span><span class="kw-2">mut </span>children = <span class="macro">vec!</span>[];
-                <span class="kw">for </span>subpat <span class="kw">in </span>subpats {
-                    <span class="kw">let </span>(subpat, ty) = <span class="macro">unwrap_or_continue!</span>(<span class="self">self</span>.translate_pattern(
-                        tyenv,
-                        subpat,
-                        expected_ty,
-                        bindings,
-                    ));
-                    expected_ty = expected_ty.or(<span class="prelude-val">Some</span>(ty));
-
-                    <span class="comment">// Normalize nested `And` nodes to a single vector of conjuncts.
-                    </span><span class="kw">match </span>subpat {
-                        Pattern::And(<span class="kw">_</span>, subpat_children) =&gt; children.extend(subpat_children),
-                        <span class="kw">_ </span>=&gt; children.push(subpat),
-                    }
-                }
-                <span class="kw">if </span>expected_ty.is_none() {
-                    tyenv.report_error(pos, <span class="string">&quot;No type for (and ...) form.&quot;</span>.to_string());
-                    <span class="kw">return </span><span class="prelude-val">None</span>;
-                }
-                <span class="kw">let </span>ty = expected_ty.unwrap();
-                <span class="prelude-val">Some</span>((Pattern::And(ty, children), ty))
+            <span class="kw-2">&amp;</span>ast::Pattern::Wildcard { .. } =&gt; <span class="prelude-val">Some</span>(Pattern::Wildcard(expected_ty)),
+            <span class="kw-2">&amp;</span>ast::Pattern::And { <span class="kw-2">ref </span>subpats, .. } =&gt; {
+                <span class="comment">// If any of the subpatterns fails to type-check, we&#39;ll report
+                // an error at that point. Here, just skip it and keep looking
+                // for more errors.
+                </span><span class="kw">let </span>children = subpats
+                    .iter()
+                    .filter_map(|subpat| {
+                        <span class="self">self</span>.translate_pattern(tyenv, subpat, expected_ty, bindings)
+                    })
+                    .collect();
+                <span class="prelude-val">Some</span>(Pattern::And(expected_ty, children))
             }
             <span class="kw-2">&amp;</span>ast::Pattern::BindPattern {
                 <span class="kw-2">ref </span>var,
                 <span class="kw-2">ref </span>subpat,
                 pos,
             } =&gt; {
-                <span class="comment">// Do the subpattern first so we can resolve the type for sure.
-                </span><span class="kw">let </span>(subpat, ty) = <span class="self">self</span>.translate_pattern(tyenv, subpat, expected_ty, bindings)<span class="question-mark">?</span>;
+                <span class="kw">let </span>subpat = <span class="self">self</span>.translate_pattern(tyenv, subpat, expected_ty, bindings)<span class="question-mark">?</span>;
+
+                <span class="comment">// The sub-pattern&#39;s type should be `expected_ty`. If it isn&#39;t,
+                // we&#39;ve already reported a type error about it, but continue
+                // using the type we actually found in hopes that we&#39;ll
+                // generate fewer follow-on error messages.
+                </span><span class="kw">let </span>ty = subpat.ty();
 
                 <span class="kw">let </span>name = tyenv.intern_mut(var);
                 <span class="kw">if </span>bindings.lookup(name).is_some() {
@@ -4478,7 +4417,7 @@
                     <span class="comment">// Try to keep going.
                 </span>}
                 <span class="kw">let </span>id = bindings.add_var(name, ty);
-                <span class="prelude-val">Some</span>((Pattern::BindPattern(ty, id, Box::new(subpat)), ty))
+                <span class="prelude-val">Some</span>(Pattern::BindPattern(ty, id, Box::new(subpat)))
             }
             <span class="kw-2">&amp;</span>ast::Pattern::Var { <span class="kw-2">ref </span>var, pos } =&gt; {
                 <span class="comment">// Look up the variable; if it has already been bound,
@@ -4489,38 +4428,27 @@
                 </span><span class="kw">let </span>name = tyenv.intern_mut(var);
                 <span class="kw">match </span>bindings.lookup(name) {
                     <span class="prelude-val">None </span>=&gt; {
-                        <span class="kw">let </span>ty = <span class="kw">match </span>expected_ty {
-                            <span class="prelude-val">Some</span>(ty) =&gt; ty,
-                            <span class="prelude-val">None </span>=&gt; {
-                                tyenv.report_error(
-                                pos,
-                                <span class="macro">format!</span>(<span class="string">&quot;Variable pattern &#39;{}&#39; not allowed in context without explicit type&quot;</span>, var.<span class="number">0</span>),
-                            );
-                                <span class="kw">return </span><span class="prelude-val">None</span>;
-                            }
-                        };
-                        <span class="kw">let </span>id = bindings.add_var(name, ty);
-                        <span class="prelude-val">Some</span>((
-                            Pattern::BindPattern(ty, id, Box::new(Pattern::Wildcard(ty))),
-                            ty,
+                        <span class="kw">let </span>id = bindings.add_var(name, expected_ty);
+                        <span class="prelude-val">Some</span>(Pattern::BindPattern(
+                            expected_ty,
+                            id,
+                            Box::new(Pattern::Wildcard(expected_ty)),
                         ))
                     }
                     <span class="prelude-val">Some</span>(bv) =&gt; {
-                        <span class="kw">let </span>ty = <span class="kw">match </span>expected_ty {
-                            <span class="prelude-val">None </span>=&gt; bv.ty,
-                            <span class="prelude-val">Some</span>(expected_ty) <span class="kw">if </span>expected_ty == bv.ty =&gt; bv.ty,
-                            <span class="prelude-val">Some</span>(expected_ty) =&gt; {
-                                tyenv.report_error(
-                            pos,
-                            <span class="macro">format!</span>(
-                                <span class="string">&quot;Mismatched types: pattern expects type &#39;{}&#39; but already-bound var &#39;{}&#39; has type &#39;{}&#39;&quot;</span>,
-                                tyenv.types[expected_ty.index()].name(tyenv),
-                                var.<span class="number">0</span>,
-                                tyenv.types[bv.ty.index()].name(tyenv)));
-                                bv.ty <span class="comment">// Try to keep going for more errors.
-                            </span>}
-                        };
-                        <span class="prelude-val">Some</span>((Pattern::Var(ty, bv.id), ty))
+                        <span class="kw">if </span>expected_ty != bv.ty {
+                            tyenv.report_error(
+                                pos,
+                                <span class="macro">format!</span>(
+                                    <span class="string">&quot;Mismatched types: pattern expects type &#39;{}&#39; but already-bound var &#39;{}&#39; has type &#39;{}&#39;&quot;</span>,
+                                    tyenv.types[expected_ty.index()].name(tyenv),
+                                    var.<span class="number">0</span>,
+                                    tyenv.types[bv.ty.index()].name(tyenv),
+                                ),
+                            );
+                            <span class="comment">// Try to keep going for more errors.
+                        </span>}
+                        <span class="prelude-val">Some</span>(Pattern::Var(bv.ty, bv.id))
                     }
                 }
             }
@@ -4545,35 +4473,33 @@
                 // return type of the term. Insert an implicit
                 // converter if needed.
                 </span><span class="kw">let </span>ret_ty = termdata.ret_ty;
-                <span class="kw">let </span>ty = <span class="kw">match </span>expected_ty {
-                    <span class="prelude-val">None </span>=&gt; ret_ty,
-                    <span class="prelude-val">Some</span>(expected_ty) <span class="kw">if </span>expected_ty == ret_ty =&gt; ret_ty,
-                    <span class="prelude-val">Some</span>(expected_ty) =&gt; {
-                        <span class="comment">// Can we do an implicit type conversion? Look
-                        // up the converter term, if any. If one has
-                        // been registered, and the term has an
-                        // extractor, then build an expanded AST node
-                        // right here and recurse on it.
-                        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(expanded_pattern) =
-                            <span class="self">self</span>.maybe_implicit_convert_pattern(tyenv, pat, ret_ty, expected_ty)
-                        {
-                            <span class="kw">return </span><span class="self">self</span>.translate_pattern(
-                                tyenv,
-                                <span class="kw-2">&amp;</span>expanded_pattern,
-                                <span class="prelude-val">Some</span>(expected_ty),
-                                bindings,
-                            );
-                        }
+                <span class="kw">if </span>expected_ty != ret_ty {
+                    <span class="comment">// Can we do an implicit type conversion? Look
+                    // up the converter term, if any. If one has
+                    // been registered, and the term has an
+                    // extractor, then build an expanded AST node
+                    // right here and recurse on it.
+                    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(expanded_pattern) =
+                        <span class="self">self</span>.maybe_implicit_convert_pattern(tyenv, pat, ret_ty, expected_ty)
+                    {
+                        <span class="kw">return </span><span class="self">self</span>.translate_pattern(
+                            tyenv,
+                            <span class="kw-2">&amp;</span>expanded_pattern,
+                            expected_ty,
+                            bindings,
+                        );
+                    }
 
-                        tyenv.report_error(
-                            pos,
-                            <span class="macro">format!</span>(
-                                <span class="string">&quot;Mismatched types: pattern expects type &#39;{}&#39; but term has return type &#39;{}&#39;&quot;</span>,
-                                tyenv.types[expected_ty.index()].name(tyenv),
-                                tyenv.types[ret_ty.index()].name(tyenv)));
-                        ret_ty <span class="comment">// Try to keep going for more errors.
-                    </span>}
-                };
+                    tyenv.report_error(
+                        pos,
+                        <span class="macro">format!</span>(
+                            <span class="string">&quot;Mismatched types: pattern expects type &#39;{}&#39; but term has return type &#39;{}&#39;&quot;</span>,
+                            tyenv.types[expected_ty.index()].name(tyenv),
+                            tyenv.types[ret_ty.index()].name(tyenv),
+                        ),
+                    );
+                    <span class="comment">// Try to keep going for more errors.
+                </span>}
 
                 termdata.check_args_count(args, tyenv, pos, sym);
 
@@ -4613,7 +4539,7 @@
                 }
 
                 <span class="kw">let </span>subpats = <span class="self">self</span>.translate_args(args, termdata, tyenv, bindings);
-                <span class="prelude-val">Some</span>((Pattern::Term(ty, tid, subpats), ty))
+                <span class="prelude-val">Some</span>(Pattern::Term(ret_ty, tid, subpats))
             }
             <span class="kw-2">&amp;</span>ast::Pattern::MacroArg { .. } =&gt; <span class="macro">unreachable!</span>(),
         }
@@ -4628,8 +4554,7 @@
     ) -&gt; Vec&lt;Pattern&gt; {
         args.iter()
             .zip(termdata.arg_tys.iter())
-            .filter_map(|(arg, <span class="kw-2">&amp;</span>arg_ty)| <span class="self">self</span>.translate_pattern(tyenv, arg, <span class="prelude-val">Some</span>(arg_ty), bindings))
-            .map(|(subpat, <span class="kw">_</span>)| subpat)
+            .filter_map(|(arg, <span class="kw-2">&amp;</span>arg_ty)| <span class="self">self</span>.translate_pattern(tyenv, arg, arg_ty, bindings))
             .collect()
     }
 
@@ -4946,8 +4871,7 @@
             root_flags,
             <span class="comment">/* on_lhs */ </span><span class="bool-val">true</span>,
         )<span class="question-mark">?</span>;
-        <span class="kw">let </span>ty = rhs.ty();
-        <span class="kw">let </span>(lhs, _lhs_ty) = <span class="self">self</span>.translate_pattern(tyenv, <span class="kw-2">&amp;</span>iflet.pattern, <span class="prelude-val">Some</span>(ty), bindings)<span class="question-mark">?</span>;
+        <span class="kw">let </span>lhs = <span class="self">self</span>.translate_pattern(tyenv, <span class="kw-2">&amp;</span>iflet.pattern, rhs.ty(), bindings)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Some</span>(IfLet { lhs, rhs })
     }
