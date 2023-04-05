@@ -134,7 +134,7 @@
         </span>comp_ctx.set_disasm(<span class="bool-val">true</span>);
 
         <span class="kw">let </span>compiled_code = comp_ctx
-            .compile(isa)
+            .compile(isa, <span class="kw-2">&amp;mut </span>Default::default())
             .map_err(|e| <span class="kw">crate</span>::pretty_anyhow_error(<span class="kw-2">&amp;</span>e.func, e.inner))<span class="question-mark">?</span>;
         <span class="kw">let </span>total_size = compiled_code.code_info().total_size;
 

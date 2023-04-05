@@ -568,6 +568,8 @@
 <a href="#568" id="568">568</a>
 <a href="#569" id="569">569</a>
 <a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Test command for verifying the unwind emitted for each function.
 //!
 //! The `unwind` test command runs each function through the full code generator pipeline.
@@ -609,7 +611,9 @@
         <span class="kw">let </span>isa = context.isa.expect(<span class="string">&quot;unwind needs an ISA&quot;</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>comp_ctx = cranelift_codegen::Context::for_function(func.into_owned());
 
-        <span class="kw">let </span>code = comp_ctx.compile(isa).expect(<span class="string">&quot;failed to compile function&quot;</span>);
+        <span class="kw">let </span>code = comp_ctx
+            .compile(isa, <span class="kw-2">&amp;mut </span>Default::default())
+            .expect(<span class="string">&quot;failed to compile function&quot;</span>);
 
         <span class="kw">let </span><span class="kw-2">mut </span>text = String::new();
         <span class="kw">match </span>code.create_unwind_info(isa).expect(<span class="string">&quot;unwind info&quot;</span>) {

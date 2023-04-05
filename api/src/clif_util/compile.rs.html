@@ -245,7 +245,7 @@
 
         <span class="comment">// Compile and encode the result to machine code.
         </span><span class="kw">let </span>compiled_code = context
-            .compile_and_emit(isa, <span class="kw-2">&amp;mut </span>mem)
+            .compile_and_emit(isa, <span class="kw-2">&amp;mut </span>mem, <span class="kw-2">&amp;mut </span>Default::default())
             .map_err(|err| <span class="macro">anyhow::anyhow!</span>(<span class="string">&quot;{}&quot;</span>, pretty_error(<span class="kw-2">&amp;</span>err.func, err.inner)))<span class="question-mark">?</span>;
         <span class="kw">let </span>code_info = compiled_code.code_info();
 
@@ -256,7 +256,7 @@
                 cranelift_module::Linkage::Export,
                 <span class="kw-2">&amp;</span>context.func.signature,
             )<span class="question-mark">?</span>;
-            module.define_function(fid, <span class="kw-2">&amp;mut </span>context)<span class="question-mark">?</span>;
+            module.define_function(fid, <span class="kw-2">&amp;mut </span>context, <span class="kw-2">&amp;mut </span>Default::default())<span class="question-mark">?</span>;
         }
 
         <span class="kw">if </span>options.print {

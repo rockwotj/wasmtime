@@ -858,6 +858,8 @@
 <a href="#858" id="858">858</a>
 <a href="#859" id="859">859</a>
 <a href="#860" id="860">860</a>
+<a href="#861" id="861">861</a>
+<a href="#862" id="862">862</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines `ObjectModule`.
 
 </span><span class="kw">use </span>anyhow::anyhow;
@@ -868,6 +870,7 @@
     binemit::{Addend, CodeOffset, Reloc},
     CodegenError,
 };
+<span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>cranelift_module::{
     DataContext, DataDescription, DataId, FuncId, Init, Linkage, Module, ModuleCompiledFunction,
     ModuleDeclarations, ModuleError, ModuleExtName, ModuleReloc, ModuleResult,
@@ -1179,11 +1182,12 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         func_id: FuncId,
         ctx: <span class="kw-2">&amp;mut </span>cranelift_codegen::Context,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
     ) -&gt; ModuleResult&lt;ModuleCompiledFunction&gt; {
         <span class="macro">info!</span>(<span class="string">&quot;defining function {}: {}&quot;</span>, func_id, ctx.func.display());
         <span class="kw">let </span><span class="kw-2">mut </span>code: Vec&lt;u8&gt; = Vec::new();
 
-        <span class="kw">let </span>res = ctx.compile_and_emit(<span class="self">self</span>.isa(), <span class="kw-2">&amp;mut </span>code)<span class="question-mark">?</span>;
+        <span class="kw">let </span>res = ctx.compile_and_emit(<span class="self">self</span>.isa(), <span class="kw-2">&amp;mut </span>code, ctrl_plane)<span class="question-mark">?</span>;
         <span class="kw">let </span>alignment = res.alignment <span class="kw">as </span>u64;
 
         <span class="self">self</span>.define_function_bytes(

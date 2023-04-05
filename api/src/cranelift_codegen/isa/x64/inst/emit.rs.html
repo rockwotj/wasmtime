@@ -4528,7 +4528,7 @@
 
             <span class="comment">// Here the `idiv` is executed, which is different depending on the
             // size
-            </span>sink.bind_label(do_op);
+            </span>sink.bind_label(do_op, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             <span class="kw">let </span>inst = <span class="kw">match </span>size {
                 OperandSize::Size8 =&gt; Inst::div8(
                     DivSignedness::Signed,
@@ -4550,7 +4550,7 @@
             };
             inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
-            sink.bind_label(done_label);
+            sink.bind_label(done_label, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
         }
 
         Inst::Imm {
@@ -5199,7 +5199,7 @@
             <span class="kw">let </span>inst = Inst::xmm_unary_rm_r(op, consequent, Writable::from_reg(dst));
             inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
-            sink.bind_label(next);
+            sink.bind_label(next, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
         }
 
         Inst::Push64 { src } =&gt; {
@@ -5303,7 +5303,7 @@
 
             <span class="comment">// Emit the main loop!
             </span><span class="kw">let </span>loop_start = sink.get_label();
-            sink.bind_label(loop_start);
+            sink.bind_label(loop_start, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
 
             <span class="comment">// sub  rsp, GUARD_SIZE
             </span><span class="kw">let </span>inst = Inst::alu_rmi_r(
@@ -5574,7 +5574,7 @@
             inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
             <span class="comment">// Emit jump table (table of 32-bit offsets).
-            </span>sink.bind_label(start_of_jumptable);
+            </span>sink.bind_label(start_of_jumptable, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             <span class="kw">let </span>jt_off = sink.cur_offset();
             <span class="kw">for </span><span class="kw-2">&amp;</span>target <span class="kw">in </span>targets.iter().chain(std::iter::once(default_target)) {
                 <span class="kw">let </span>word_off = sink.cur_offset();
@@ -5606,7 +5606,7 @@
             </span>one_way_jmp(sink, cc1.invert(), else_label);
             one_way_jmp(sink, <span class="kw-2">*</span>cc2, trap_label);
 
-            sink.bind_label(else_label);
+            sink.bind_label(else_label, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
         }
 
         Inst::TrapIfOr {
@@ -6658,18 +6658,18 @@
             <span class="comment">// x86&#39;s min/max are not symmetric; if either operand is a NaN, they return the
             // read-only operand: perform an addition between the two operands, which has the
             // desired NaN propagation effects.
-            </span>sink.bind_label(propagate_nan);
+            </span>sink.bind_label(propagate_nan, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             <span class="kw">let </span>inst = Inst::xmm_rm_r(add_op, RegMem::reg(lhs), Writable::from_reg(dst));
             inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
             one_way_jmp(sink, CC::P, done);
 
-            sink.bind_label(do_min_max);
+            sink.bind_label(do_min_max, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
 
             <span class="kw">let </span>inst = Inst::xmm_rm_r(min_max_op, RegMem::reg(lhs), Writable::from_reg(dst));
             inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
-            sink.bind_label(done);
+            sink.bind_label(done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
         }
 
         Inst::XmmRmRImm {
@@ -6936,7 +6936,7 @@
             <span class="kw">let </span>inst = Inst::jmp_known(done);
             inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
-            sink.bind_label(handle_negative);
+            sink.bind_label(handle_negative, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
 
             <span class="comment">// Divide x by two to get it in range for the signed conversion, keep the LSB, and
             // scale it back up on the FP side.
@@ -6989,7 +6989,7 @@
             <span class="kw">let </span>inst = Inst::xmm_rm_r(add_op, RegMem::reg(dst), Writable::from_reg(dst));
             inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
-            sink.bind_label(done);
+            sink.bind_label(done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
         }
 
         Inst::CvtFloatToSintSeq {
@@ -7091,7 +7091,7 @@
                 <span class="kw">let </span>inst = Inst::jmp_known(done);
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
-                sink.bind_label(not_nan);
+                sink.bind_label(not_nan, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
 
                 <span class="comment">// If the input was positive, saturate to INT_MAX.
 
@@ -7189,7 +7189,7 @@
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
             }
 
-            sink.bind_label(done);
+            sink.bind_label(done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
         }
 
         Inst::CvtFloatToUintSeq {
@@ -7299,7 +7299,7 @@
 
                 <span class="kw">let </span>inst = Inst::jmp_known(done);
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-                sink.bind_label(not_nan);
+                sink.bind_label(not_nan, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             } <span class="kw">else </span>{
                 <span class="comment">// Trap.
                 </span><span class="kw">let </span>inst = Inst::trap_if(CC::P, TrapCode::BadConversionToInteger);
@@ -7338,7 +7338,7 @@
 
             <span class="comment">// Now handle large inputs.
 
-            </span>sink.bind_label(handle_large);
+            </span>sink.bind_label(handle_large, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
 
             <span class="kw">let </span>inst = Inst::gen_move(Writable::from_reg(tmp_xmm2), src, types::F64);
             inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
@@ -7371,7 +7371,7 @@
 
                 <span class="kw">let </span>inst = Inst::jmp_known(done);
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
-                sink.bind_label(next_is_large);
+                sink.bind_label(next_is_large, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             } <span class="kw">else </span>{
                 <span class="kw">let </span>inst = Inst::trap_if(CC::L, TrapCode::IntegerOverflow);
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
@@ -7398,7 +7398,7 @@
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
             }
 
-            sink.bind_label(done);
+            sink.bind_label(done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
         }
 
         Inst::LoadExtName { dst, name, offset } =&gt; {
@@ -7508,7 +7508,7 @@
             i1.emit(<span class="kw-2">&amp;</span>[], sink, info, state);
 
             <span class="comment">// again:
-            </span>sink.bind_label(again_label);
+            </span>sink.bind_label(again_label, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
 
             <span class="comment">// movq %rax, %r_temp
             </span><span class="kw">let </span>i2 = Inst::mov_r_r(OperandSize::Size64, dst_old.to_reg(), temp);

@@ -1587,6 +1587,11 @@
 <a href="#1587" id="1587">1587</a>
 <a href="#1588" id="1588">1588</a>
 <a href="#1589" id="1589">1589</a>
+<a href="#1590" id="1590">1590</a>
+<a href="#1591" id="1591">1591</a>
+<a href="#1592" id="1592">1592</a>
+<a href="#1593" id="1593">1593</a>
+<a href="#1594" id="1594">1594</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This implements the VCode container: a CFG of Insts that have been lowered.
 //!
 //! VCode is virtual-register code. An instruction in VCode is almost a machine
@@ -1615,6 +1620,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::trace;
 <span class="kw">use </span><span class="kw">crate</span>::CodegenError;
 <span class="kw">use </span><span class="kw">crate</span>::ValueLocRange;
+<span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>regalloc2::{
     Edit, Function <span class="kw">as </span>RegallocFunction, InstOrEdit, InstRange, Operand, OperandKind, PRegSet,
     RegClass, VReg,
@@ -2352,6 +2358,7 @@
         regalloc: <span class="kw-2">&amp;</span>regalloc2::Output,
         want_disasm: bool,
         want_metadata: bool,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
     ) -&gt; EmitResult&lt;I&gt;
     <span class="kw">where
         </span>I: VCodeInst,
@@ -2402,7 +2409,7 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>cur_srcloc = <span class="prelude-val">None</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>last_offset = <span class="prelude-val">None</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>inst_offsets = <span class="macro">vec!</span>[];
-        <span class="kw">let </span><span class="kw-2">mut </span>state = I::State::new(<span class="kw-2">&amp;</span><span class="self">self</span>.abi);
+        <span class="kw">let </span><span class="kw-2">mut </span>state = I::State::new(<span class="kw-2">&amp;</span><span class="self">self</span>.abi, std::mem::take(ctrl_plane));
 
         <span class="kw">let </span><span class="kw-2">mut </span>disasm = String::new();
 
@@ -2463,7 +2470,7 @@
 
             <span class="comment">// Now emit the regular block body.
 
-            </span>buffer.bind_label(MachLabel::from_block(block));
+            </span>buffer.bind_label(MachLabel::from_block(block), state.ctrl_plane_mut());
 
             <span class="kw">if </span>want_disasm {
                 <span class="macro">writeln!</span>(<span class="kw-2">&amp;mut </span>disasm, <span class="string">&quot;block{}:&quot;</span>, block.index()).unwrap();
@@ -2643,10 +2650,13 @@
                 <span class="kw">let </span>worst_case_next_bb =
                     I::worst_case_size() * (next_block_size + next_block_ra_insertions);
                 <span class="kw">if </span>buffer.island_needed(worst_case_next_bb) {
-                    buffer.emit_island(worst_case_next_bb);
+                    buffer.emit_island(worst_case_next_bb, ctrl_plane);
                 }
             }
         }
+
+        <span class="comment">// emission state is not needed anymore, move control plane back out
+        </span><span class="kw-2">*</span>ctrl_plane = state.take_ctrl_plane();
 
         <span class="comment">// Emit the constants used by the function.
         </span><span class="kw">let </span><span class="kw-2">mut </span>alignment = <span class="number">1</span>;

@@ -250,6 +250,10 @@
 <a href="#250" id="250">250</a>
 <a href="#251" id="251">251</a>
 <a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module provides a set of primitives that allow implementing an incremental cache on top of
 //! Cranelift, making it possible to reuse previous compiled artifacts for functions that have been
 //! compiled previously.
@@ -284,6 +288,7 @@
 <span class="kw">use crate</span>::{trace, CompileError, Context};
 <span class="kw">use </span>alloc::borrow::{Cow, ToOwned <span class="kw">as _</span>};
 <span class="kw">use </span>alloc::string::ToString <span class="kw">as _</span>;
+<span class="kw">use </span>cranelift_control::ControlPlane;
 
 <span class="kw">impl </span>Context {
     <span class="doccomment">/// Compile the function, as in `compile`, but tries to reuse compiled artifacts from former
@@ -292,6 +297,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa,
         cache_store: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>CacheKvStore,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
     ) -&gt; CompileResult&lt;(<span class="kw-2">&amp;</span>CompiledCode, bool)&gt; {
         <span class="kw">let </span>cache_key_hash = {
             <span class="kw">let </span>_tt = timing::try_incremental_cache();
@@ -304,7 +310,7 @@
                         <span class="kw">let </span>info = compiled_code.code_info();
 
                         <span class="kw">if </span>isa.flags().enable_incremental_compilation_cache_checks() {
-                            <span class="kw">let </span>actual_result = <span class="self">self</span>.compile(isa)<span class="question-mark">?</span>;
+                            <span class="kw">let </span>actual_result = <span class="self">self</span>.compile(isa, ctrl_plane)<span class="question-mark">?</span>;
                             <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>actual_result, compiled_code);
                             <span class="macro">assert_eq!</span>(actual_result.code_info(), info);
                             <span class="comment">// no need to set `compiled_code` here, it&#39;s set by `compile()`.
@@ -323,10 +329,12 @@
             cache_key_hash
         };
 
-        <span class="kw">let </span>stencil = <span class="self">self</span>.compile_stencil(isa).map_err(|err| CompileError {
-            inner: err,
-            func: <span class="kw-2">&amp;</span><span class="self">self</span>.func,
-        })<span class="question-mark">?</span>;
+        <span class="kw">let </span>stencil = <span class="self">self
+            </span>.compile_stencil(isa, ctrl_plane)
+            .map_err(|err| CompileError {
+                inner: err,
+                func: <span class="kw-2">&amp;</span><span class="self">self</span>.func,
+            })<span class="question-mark">?</span>;
 
         <span class="kw">let </span>stencil = {
             <span class="kw">let </span>_tt = timing::store_incremental_cache();

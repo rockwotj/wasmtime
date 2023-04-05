@@ -3635,9 +3635,23 @@
 <a href="#3635" id="3635">3635</a>
 <a href="#3636" id="3636">3636</a>
 <a href="#3637" id="3637">3637</a>
+<a href="#3638" id="3638">3638</a>
+<a href="#3639" id="3639">3639</a>
+<a href="#3640" id="3640">3640</a>
+<a href="#3641" id="3641">3641</a>
+<a href="#3642" id="3642">3642</a>
+<a href="#3643" id="3643">3643</a>
+<a href="#3644" id="3644">3644</a>
+<a href="#3645" id="3645">3645</a>
+<a href="#3646" id="3646">3646</a>
+<a href="#3647" id="3647">3647</a>
+<a href="#3648" id="3648">3648</a>
+<a href="#3649" id="3649">3649</a>
+<a href="#3650" id="3650">3650</a>
 </pre><pre class="rust"><code><span class="doccomment">//! AArch64 ISA: binary code emission.
 
-</span><span class="kw">use </span>regalloc2::Allocation;
+</span><span class="kw">use </span>cranelift_control::ControlPlane;
+<span class="kw">use </span>regalloc2::Allocation;
 
 <span class="kw">use </span><span class="kw">crate</span>::binemit::{Reloc, StackMap};
 <span class="kw">use </span><span class="kw">crate</span>::ir::{types::<span class="kw-2">*</span>, RelSourceLoc};
@@ -4275,15 +4289,19 @@
     </span>stack_map: <span class="prelude-ty">Option</span>&lt;StackMap&gt;,
     <span class="doccomment">/// Current source-code location corresponding to instruction to be emitted.
     </span>cur_srcloc: RelSourceLoc,
+    <span class="doccomment">/// Only used during fuzz-testing. Otherwise, it is a zero-sized struct and
+    /// optimized away at compiletime. See [cranelift_control].
+    </span>ctrl_plane: ControlPlane,
 }
 
 <span class="kw">impl </span>MachInstEmitState&lt;Inst&gt; <span class="kw">for </span>EmitState {
-    <span class="kw">fn </span>new(abi: <span class="kw-2">&amp;</span>Callee&lt;AArch64MachineDeps&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new(abi: <span class="kw-2">&amp;</span>Callee&lt;AArch64MachineDeps&gt;, ctrl_plane: ControlPlane) -&gt; <span class="self">Self </span>{
         EmitState {
             virtual_sp_offset: <span class="number">0</span>,
             nominal_sp_to_fp: abi.frame_size() <span class="kw">as </span>i64,
             stack_map: <span class="prelude-val">None</span>,
             cur_srcloc: Default::default(),
+            ctrl_plane,
         }
     }
 
@@ -4293,6 +4311,14 @@
 
     <span class="kw">fn </span>pre_sourceloc(<span class="kw-2">&amp;mut </span><span class="self">self</span>, srcloc: RelSourceLoc) {
         <span class="self">self</span>.cur_srcloc = srcloc;
+    }
+
+    <span class="kw">fn </span>ctrl_plane_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>ControlPlane {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.ctrl_plane
+    }
+
+    <span class="kw">fn </span>take_ctrl_plane(<span class="self">self</span>) -&gt; ControlPlane {
+        <span class="self">self</span>.ctrl_plane
     }
 }
 
@@ -5148,7 +5174,7 @@
                 <span class="kw">let </span>again_label = sink.get_label();
 
                 <span class="comment">// again:
-                </span>sink.bind_label(again_label);
+                </span>sink.bind_label(again_label, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
 
                 <span class="kw">let </span>srcloc = state.cur_srcloc();
                 <span class="kw">if </span>!srcloc.is_default() &amp;&amp; !flags.notrap() {
@@ -5350,7 +5376,7 @@
                 <span class="kw">let </span>out_label = sink.get_label();
 
                 <span class="comment">// again:
-                </span>sink.bind_label(again_label);
+                </span>sink.bind_label(again_label, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
 
                 <span class="kw">let </span>srcloc = state.cur_srcloc();
                 <span class="kw">if </span>!srcloc.is_default() &amp;&amp; !flags.notrap() {
@@ -5399,7 +5425,7 @@
                 sink.use_label_at_offset(br_again_offset, again_label, LabelUse::Branch19);
 
                 <span class="comment">// out:
-                </span>sink.bind_label(out_label);
+                </span>sink.bind_label(out_label, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::LoadAcquire {
                 access_ty,
@@ -6644,13 +6670,13 @@
                 sink.put4(enc_jump26(<span class="number">0b000101</span>, <span class="number">0 </span><span class="comment">/* will be fixed up later */</span>));
 
                 <span class="comment">// else:
-                </span>sink.bind_label(else_label);
+                </span>sink.bind_label(else_label, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
 
                 <span class="comment">// mov rd, rn
                 </span>sink.put4(enc_vecmov(<span class="comment">/* 16b = */ </span><span class="bool-val">true</span>, rd, rn));
 
                 <span class="comment">// out:
-                </span>sink.bind_label(out_label);
+                </span>sink.bind_label(out_label, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::MovToNZCV { rn } =&gt; {
                 <span class="kw">let </span>rn = allocs.next(rn);
@@ -7101,8 +7127,8 @@
                         dest: BranchTarget::Label(jump_around_label),
                     };
                     jmp.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                    sink.emit_island(needed_space + <span class="number">4</span>);
-                    sink.bind_label(jump_around_label);
+                    sink.emit_island(needed_space + <span class="number">4</span>, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
+                    sink.bind_label(jump_around_label, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 }
             }
 
@@ -7216,7 +7242,7 @@
                 // out at this time.
 
                 </span><span class="kw">let </span>loop_start = sink.get_label();
-                sink.bind_label(loop_start);
+                sink.bind_label(loop_start, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
 
                 Inst::AluRRImm12 {
                     alu_op: ALUOp::Sub,
@@ -7251,7 +7277,7 @@
                     kind: CondBrKind::Cond(Cond::Gt),
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                sink.bind_label(loop_end);
+                sink.bind_label(loop_end, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
         }
 

@@ -3682,6 +3682,19 @@
 <a href="#3682" id="3682">3682</a>
 <a href="#3683" id="3683">3683</a>
 <a href="#3684" id="3684">3684</a>
+<a href="#3685" id="3685">3685</a>
+<a href="#3686" id="3686">3686</a>
+<a href="#3687" id="3687">3687</a>
+<a href="#3688" id="3688">3688</a>
+<a href="#3689" id="3689">3689</a>
+<a href="#3690" id="3690">3690</a>
+<a href="#3691" id="3691">3691</a>
+<a href="#3692" id="3692">3692</a>
+<a href="#3693" id="3693">3693</a>
+<a href="#3694" id="3694">3694</a>
+<a href="#3695" id="3695">3695</a>
+<a href="#3696" id="3696">3696</a>
+<a href="#3697" id="3697">3697</a>
 </pre><pre class="rust"><code><span class="doccomment">//! S390x ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Reloc, StackMap};
@@ -3692,6 +3705,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::machinst::{Reg, RegClass};
 <span class="kw">use </span><span class="kw">crate</span>::trace;
 <span class="kw">use </span>core::convert::TryFrom;
+<span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>regalloc2::Allocation;
 
 <span class="doccomment">/// Debug macro for testing that a regpair is valid: that the high register is even, and the low
@@ -5031,15 +5045,19 @@
     </span>stack_map: <span class="prelude-ty">Option</span>&lt;StackMap&gt;,
     <span class="doccomment">/// Current source-code location corresponding to instruction to be emitted.
     </span>cur_srcloc: RelSourceLoc,
+    <span class="doccomment">/// Only used during fuzz-testing. Otherwise, it is a zero-sized struct and
+    /// optimized away at compiletime. See [cranelift_control].
+    </span>ctrl_plane: ControlPlane,
 }
 
 <span class="kw">impl </span>MachInstEmitState&lt;Inst&gt; <span class="kw">for </span>EmitState {
-    <span class="kw">fn </span>new(abi: <span class="kw-2">&amp;</span>Callee&lt;S390xMachineDeps&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new(abi: <span class="kw-2">&amp;</span>Callee&lt;S390xMachineDeps&gt;, ctrl_plane: ControlPlane) -&gt; <span class="self">Self </span>{
         EmitState {
             virtual_sp_offset: <span class="number">0</span>,
             initial_sp_offset: abi.frame_size() <span class="kw">as </span>i64,
             stack_map: <span class="prelude-val">None</span>,
             cur_srcloc: Default::default(),
+            ctrl_plane,
         }
     }
 
@@ -5049,6 +5067,14 @@
 
     <span class="kw">fn </span>pre_sourceloc(<span class="kw-2">&amp;mut </span><span class="self">self</span>, srcloc: RelSourceLoc) {
         <span class="self">self</span>.cur_srcloc = srcloc;
+    }
+
+    <span class="kw">fn </span>ctrl_plane_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>ControlPlane {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.ctrl_plane
+    }
+
+    <span class="kw">fn </span>take_ctrl_plane(<span class="self">self</span>) -&gt; ControlPlane {
+        <span class="self">self</span>.ctrl_plane
     }
 }
 
@@ -5821,7 +5847,7 @@
                 <span class="kw">let </span>done_label = sink.get_label();
 
                 <span class="comment">// Emit label at the start of the loop.
-                </span>sink.bind_label(loop_label);
+                </span>sink.bind_label(loop_label, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
 
                 <span class="kw">for </span>inst <span class="kw">in </span>(<span class="kw-2">&amp;</span>body).into_iter() {
                     <span class="kw">match </span><span class="kw-2">&amp;</span>inst {
@@ -5844,7 +5870,7 @@
                 inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
 
                 <span class="comment">// Emit label at the end of the loop.
-                </span>sink.bind_label(done_label);
+                </span>sink.bind_label(done_label, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::CondBreak { .. } =&gt; <span class="macro">unreachable!</span>(), <span class="comment">// Only valid inside a Loop.
             </span><span class="kw-2">&amp;</span>Inst::AtomicCas32 {
@@ -7330,7 +7356,7 @@
                 // The first entry is the default target, which is not emitted
                 // into the jump table, so we skip it here.  It is only in the
                 // list so MachTerminator will see the potential target.
-                </span>sink.bind_label(table_label);
+                </span>sink.bind_label(table_label, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 <span class="kw">let </span>jt_off = sink.cur_offset();
                 <span class="kw">for </span><span class="kw-2">&amp;</span>target <span class="kw">in </span>targets.iter().skip(<span class="number">1</span>) {
                     <span class="kw">let </span>word_off = sink.cur_offset();

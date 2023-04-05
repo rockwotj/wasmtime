@@ -2691,6 +2691,19 @@
 <a href="#2691" id="2691">2691</a>
 <a href="#2692" id="2692">2692</a>
 <a href="#2693" id="2693">2693</a>
+<a href="#2694" id="2694">2694</a>
+<a href="#2695" id="2695">2695</a>
+<a href="#2696" id="2696">2696</a>
+<a href="#2697" id="2697">2697</a>
+<a href="#2698" id="2698">2698</a>
+<a href="#2699" id="2699">2699</a>
+<a href="#2700" id="2700">2700</a>
+<a href="#2701" id="2701">2701</a>
+<a href="#2702" id="2702">2702</a>
+<a href="#2703" id="2703">2703</a>
+<a href="#2704" id="2704">2704</a>
+<a href="#2705" id="2705">2705</a>
+<a href="#2706" id="2706">2706</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines x86_64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc, StackMap};
@@ -2703,6 +2716,7 @@
 <span class="kw">use crate</span>::{settings, CodegenError, CodegenResult};
 <span class="kw">use </span>alloc::boxed::Box;
 <span class="kw">use </span>alloc::vec::Vec;
+<span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>regalloc2::{Allocation, PRegSet, VReg};
 <span class="kw">use </span>smallvec::{smallvec, SmallVec};
 <span class="kw">use </span>std::fmt;
@@ -5240,6 +5254,9 @@
     </span>stack_map: <span class="prelude-ty">Option</span>&lt;StackMap&gt;,
     <span class="doccomment">/// Current source location.
     </span>cur_srcloc: RelSourceLoc,
+    <span class="doccomment">/// Only used during fuzz-testing. Otherwise, it is a zero-sized struct and
+    /// optimized away at compiletime. See [cranelift_control].
+    </span>ctrl_plane: ControlPlane,
 }
 
 <span class="doccomment">/// Constant state used during emissions of a sequence of instructions.
@@ -5276,12 +5293,13 @@
 }
 
 <span class="kw">impl </span>MachInstEmitState&lt;Inst&gt; <span class="kw">for </span>EmitState {
-    <span class="kw">fn </span>new(abi: <span class="kw-2">&amp;</span>Callee&lt;X64ABIMachineSpec&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new(abi: <span class="kw-2">&amp;</span>Callee&lt;X64ABIMachineSpec&gt;, ctrl_plane: ControlPlane) -&gt; <span class="self">Self </span>{
         EmitState {
             virtual_sp_offset: <span class="number">0</span>,
             nominal_sp_to_fp: abi.frame_size() <span class="kw">as </span>i64,
             stack_map: <span class="prelude-val">None</span>,
             cur_srcloc: Default::default(),
+            ctrl_plane,
         }
     }
 
@@ -5291,6 +5309,14 @@
 
     <span class="kw">fn </span>pre_sourceloc(<span class="kw-2">&amp;mut </span><span class="self">self</span>, srcloc: RelSourceLoc) {
         <span class="self">self</span>.cur_srcloc = srcloc;
+    }
+
+    <span class="kw">fn </span>ctrl_plane_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>ControlPlane {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.ctrl_plane
+    }
+
+    <span class="kw">fn </span>take_ctrl_plane(<span class="self">self</span>) -&gt; ControlPlane {
+        <span class="self">self</span>.ctrl_plane
     }
 }
 

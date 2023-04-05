@@ -257,6 +257,9 @@
 <a href="#257" id="257">257</a>
 <a href="#258" id="258">258</a>
 <a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
 </pre><pre class="rust"><code><span class="doccomment">//! X86_64-bit Instruction Set Architecture.
 
 </span><span class="kw">pub use </span><span class="self">self</span>::inst::{args, CallInfo, EmitInfo, EmitState, Inst};
@@ -276,6 +279,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::settings::{<span class="self">self </span><span class="kw">as </span>shared_settings, Flags};
 <span class="kw">use </span>alloc::{boxed::Box, vec::Vec};
 <span class="kw">use </span>core::fmt;
+<span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>regalloc2::MachineEnv;
 <span class="kw">use </span>target_lexicon::Triple;
 
@@ -325,6 +329,7 @@
         func: <span class="kw-2">&amp;</span>Function,
         domtree: <span class="kw-2">&amp;</span>DominatorTree,
         want_disasm: bool,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
     ) -&gt; CodegenResult&lt;CompiledCodeStencil&gt; {
         <span class="kw">let </span>(vcode, regalloc_result) = <span class="self">self</span>.compile_vcode(func, domtree)<span class="question-mark">?</span>;
 
@@ -332,10 +337,11 @@
             <span class="kw-2">&amp;</span>regalloc_result,
             want_disasm,
             <span class="self">self</span>.flags.machine_code_cfg_info(),
+            ctrl_plane,
         );
         <span class="kw">let </span>frame_size = emit_result.frame_size;
         <span class="kw">let </span>value_labels_ranges = emit_result.value_labels_ranges;
-        <span class="kw">let </span>buffer = emit_result.buffer.finish();
+        <span class="kw">let </span>buffer = emit_result.buffer.finish(ctrl_plane);
         <span class="kw">let </span>sized_stackslot_offsets = emit_result.sized_stackslot_offsets;
         <span class="kw">let </span>dynamic_stackslot_offsets = emit_result.dynamic_stackslot_offsets;
 

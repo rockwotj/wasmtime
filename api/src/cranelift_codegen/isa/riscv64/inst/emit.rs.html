@@ -2746,6 +2746,22 @@
 <a href="#2746" id="2746">2746</a>
 <a href="#2747" id="2747">2747</a>
 <a href="#2748" id="2748">2748</a>
+<a href="#2749" id="2749">2749</a>
+<a href="#2750" id="2750">2750</a>
+<a href="#2751" id="2751">2751</a>
+<a href="#2752" id="2752">2752</a>
+<a href="#2753" id="2753">2753</a>
+<a href="#2754" id="2754">2754</a>
+<a href="#2755" id="2755">2755</a>
+<a href="#2756" id="2756">2756</a>
+<a href="#2757" id="2757">2757</a>
+<a href="#2758" id="2758">2758</a>
+<a href="#2759" id="2759">2759</a>
+<a href="#2760" id="2760">2760</a>
+<a href="#2761" id="2761">2761</a>
+<a href="#2762" id="2762">2762</a>
+<a href="#2763" id="2763">2763</a>
+<a href="#2764" id="2764">2764</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::StackMap;
@@ -2754,6 +2770,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::{zero_reg, AluOPRRR};
 <span class="kw">use </span><span class="kw">crate</span>::machinst::{AllocationConsumer, Reg, Writable};
+<span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>regalloc2::Allocation;
 
 <span class="kw">pub struct </span>EmitInfo {
@@ -2858,6 +2875,9 @@
     </span>stack_map: <span class="prelude-ty">Option</span>&lt;StackMap&gt;,
     <span class="doccomment">/// Current source-code location corresponding to instruction to be emitted.
     </span>cur_srcloc: RelSourceLoc,
+    <span class="doccomment">/// Only used during fuzz-testing. Otherwise, it is a zero-sized struct and
+    /// optimized away at compiletime. See [cranelift_control].
+    </span>ctrl_plane: ControlPlane,
 }
 
 <span class="kw">impl </span>EmitState {
@@ -2875,12 +2895,16 @@
 }
 
 <span class="kw">impl </span>MachInstEmitState&lt;Inst&gt; <span class="kw">for </span>EmitState {
-    <span class="kw">fn </span>new(abi: <span class="kw-2">&amp;</span>Callee&lt;<span class="kw">crate</span>::isa::riscv64::abi::Riscv64MachineDeps&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new(
+        abi: <span class="kw-2">&amp;</span>Callee&lt;<span class="kw">crate</span>::isa::riscv64::abi::Riscv64MachineDeps&gt;,
+        ctrl_plane: ControlPlane,
+    ) -&gt; <span class="self">Self </span>{
         EmitState {
             virtual_sp_offset: <span class="number">0</span>,
             nominal_sp_to_fp: abi.frame_size() <span class="kw">as </span>i64,
             stack_map: <span class="prelude-val">None</span>,
             cur_srcloc: RelSourceLoc::default(),
+            ctrl_plane,
         }
     }
 
@@ -2890,6 +2914,14 @@
 
     <span class="kw">fn </span>pre_sourceloc(<span class="kw-2">&amp;mut </span><span class="self">self</span>, srcloc: RelSourceLoc) {
         <span class="self">self</span>.cur_srcloc = srcloc;
+    }
+
+    <span class="kw">fn </span>ctrl_plane_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>ControlPlane {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.ctrl_plane
+    }
+
+    <span class="kw">fn </span>take_ctrl_plane(<span class="self">self</span>) -&gt; ControlPlane {
+        <span class="self">self</span>.ctrl_plane
     }
 }
 
@@ -3745,7 +3777,7 @@
                 // we need to emit a jump table here to support that jump.
                 </span><span class="kw">let </span>distance = (targets.len() * <span class="number">2 </span>* Inst::INSTRUCTION_SIZE <span class="kw">as </span>usize) <span class="kw">as </span>u32;
                 <span class="kw">if </span>sink.island_needed(distance) {
-                    sink.emit_island(distance);
+                    sink.emit_island(distance, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 }
 
                 <span class="comment">// Emit the jumps back to back
@@ -3873,13 +3905,13 @@
                 </span>insts
                     .drain(..)
                     .for_each(|i: Inst| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
-                sink.bind_label(label_false);
+                sink.bind_label(label_false, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 <span class="comment">// select second value1
                 </span>insts.extend(gen_moves(<span class="kw-2">&amp;</span>dst[..], y.regs()));
                 insts
                     .into_iter()
                     .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
-                sink.bind_label(label_jump_over);
+                sink.bind_label(label_jump_over, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::Jalr { rd, base, offset } =&gt; {
                 <span class="kw">let </span>rd = allocs.next_writable(rd);
@@ -3915,13 +3947,13 @@
                 .into_iter()
                 .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
 
-                sink.bind_label(label_true);
+                sink.bind_label(label_true, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 Inst::load_imm12(rd, Imm12::TRUE).emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 Inst::Jal {
                     dest: BranchTarget::offset(Inst::INSTRUCTION_SIZE * <span class="number">2</span>),
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                sink.bind_label(label_false);
+                sink.bind_label(label_false, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 Inst::load_imm12(rd, Imm12::FALSE).emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
             }
             <span class="kw-2">&amp;</span>Inst::AtomicCas {
@@ -3952,7 +3984,7 @@
                 // fail:
                 </span><span class="kw">let </span>fail_label = sink.get_label();
                 <span class="kw">let </span>cas_lebel = sink.get_label();
-                sink.bind_label(cas_lebel);
+                sink.bind_label(cas_lebel, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 Inst::Atomic {
                     op: AtomicOP::load_op(ty),
                     rd: dst,
@@ -4022,7 +4054,7 @@
                     },
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                sink.bind_label(fail_label);
+                sink.bind_label(fail_label, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::AtomicRmwLoop {
                 offset,
@@ -4039,7 +4071,7 @@
                 <span class="kw">let </span>t0 = allocs.next_writable(t0);
                 <span class="kw">let </span>dst = allocs.next_writable(dst);
                 <span class="kw">let </span>retry = sink.get_label();
-                sink.bind_label(retry);
+                sink.bind_label(retry, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 <span class="comment">// load old value.
                 </span>Inst::Atomic {
                     op: AtomicOP::load_op(ty),
@@ -4167,9 +4199,9 @@
                             dest: BranchTarget::Label(label_select_done),
                         }
                         .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                        sink.bind_label(label_select_dst);
+                        sink.bind_label(label_select_dst, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                         Inst::gen_move(t0, dst.to_reg(), I64).emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                        sink.bind_label(label_select_done);
+                        sink.bind_label(label_select_done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                         Inst::Atomic {
                             op: AtomicOP::load_op(ty),
                             rd: writable_spilltmp_reg2(),
@@ -4282,13 +4314,13 @@
                         .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
                 };
                 <span class="comment">//here is true , use x.
-                </span>sink.bind_label(label_true);
+                </span>sink.bind_label(label_true, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 gen_move(<span class="kw-2">&amp;</span>dst, <span class="kw-2">&amp;</span>x, sink, state);
                 Inst::gen_jump(label_done).emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 <span class="comment">// here is false use y
-                </span>sink.bind_label(label_false);
+                </span>sink.bind_label(label_false, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 gen_move(<span class="kw-2">&amp;</span>dst, <span class="kw-2">&amp;</span>y, sink, state);
-                sink.bind_label(label_done);
+                sink.bind_label(label_done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::Csr {
                 csr_op,
@@ -4333,9 +4365,9 @@
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 <span class="comment">// here condition is true , use rs1
-                </span>sink.bind_label(label_true);
+                </span>sink.bind_label(label_true, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 Inst::gen_move(rd, rs1, I64).emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                sink.bind_label(label_jump_over);
+                sink.bind_label(label_jump_over, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::FcvtToInt {
                 is_sat,
@@ -4495,7 +4527,7 @@
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 <span class="comment">// here is nan , move 0 into rd register
-                </span>sink.bind_label(label_nan);
+                </span>sink.bind_label(label_nan, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 <span class="kw">if </span>is_sat {
                     Inst::load_imm12(rd, Imm12::from_bits(<span class="number">0</span>)).emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 } <span class="kw">else </span>{
@@ -4506,7 +4538,7 @@
                     .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 }
                 <span class="comment">// bind jump_over
-                </span>sink.bind_label(label_jump_over);
+                </span>sink.bind_label(label_jump_over, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
 
             <span class="kw-2">&amp;</span>Inst::LoadExtName {
@@ -4560,12 +4592,12 @@
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 <span class="comment">// trap
-                </span>sink.bind_label(label_trap);
+                </span>sink.bind_label(label_trap, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 Inst::Udf {
                     trap_code: trap_code,
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                sink.bind_label(label_jump_over);
+                sink.bind_label(label_jump_over, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::TrapIf { test, trap_code } =&gt; {
                 <span class="kw">let </span>test = allocs.next(test);
@@ -4582,12 +4614,12 @@
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 <span class="comment">// trap
-                </span>sink.bind_label(label_trap);
+                </span>sink.bind_label(label_trap, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 Inst::Udf {
                     trap_code: trap_code,
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                sink.bind_label(label_jump_over);
+                sink.bind_label(label_jump_over, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::Udf { trap_code } =&gt; {
                 sink.add_trap(trap_code);
@@ -4622,7 +4654,7 @@
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
 
                 <span class="comment">// here select x.
-                </span>sink.bind_label(label_select_x);
+                </span>sink.bind_label(label_select_x, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 gen_moves(<span class="kw-2">&amp;</span>rd[..], x.regs())
                     .into_iter()
                     .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
@@ -4632,11 +4664,11 @@
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 <span class="comment">// here select y.
-                </span>sink.bind_label(label_select_y);
+                </span>sink.bind_label(label_select_y, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 gen_moves(<span class="kw-2">&amp;</span>rd[..], y.regs())
                     .into_iter()
                     .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
-                sink.bind_label(label_jump_over);
+                sink.bind_label(label_jump_over, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::AtomicLoad { rd, ty, p } =&gt; {
                 <span class="kw">let </span>p = allocs.next(p);
@@ -4797,7 +4829,7 @@
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 <span class="comment">// here is nan.
-                </span>sink.bind_label(label_nan);
+                </span>sink.bind_label(label_nan, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 Inst::FpuRRR {
                     alu_op: <span class="kw">if </span>ty == F32 {
                         FpuOPRRR::FaddS
@@ -4815,9 +4847,9 @@
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 <span class="comment">// here select origin x.
-                </span>sink.bind_label(label_x);
+                </span>sink.bind_label(label_x, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 Inst::gen_move(rd, rs, ty).emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                sink.bind_label(label_jump_over);
+                sink.bind_label(label_jump_over, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::FloatSelectPseudo {
                 op,
@@ -4862,9 +4894,9 @@
                     dest: BranchTarget::Label(label_jump_over),
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                sink.bind_label(label_rs2);
+                sink.bind_label(label_rs2, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 Inst::gen_move(rd, rs2, ty).emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                sink.bind_label(label_jump_over);
+                sink.bind_label(label_jump_over, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
 
             <span class="kw-2">&amp;</span>Inst::FloatSelect {
@@ -4972,7 +5004,7 @@
                     }
                     .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                     <span class="comment">//
-                    </span>sink.bind_label(label_done);
+                    </span>sink.bind_label(label_done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 }
                 <span class="comment">// we have the reuslt,jump over.
                 </span>Inst::Jal {
@@ -4980,7 +5012,7 @@
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 <span class="comment">// here is nan.
-                </span>sink.bind_label(label_nan);
+                </span>sink.bind_label(label_nan, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 op.snan_bits(tmp, ty)
                     .into_iter()
                     .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
@@ -4992,7 +5024,7 @@
                     rs: tmp.to_reg(),
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                sink.bind_label(label_jump_over);
+                sink.bind_label(label_jump_over, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::Popcnt {
                 sum,
@@ -5025,7 +5057,7 @@
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 <span class="kw">let </span>label_done = sink.get_label();
                 <span class="kw">let </span>label_loop = sink.get_label();
-                sink.bind_label(label_loop);
+                sink.bind_label(label_loop, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 Inst::CondBr {
                     taken: BranchTarget::Label(label_done),
                     not_taken: BranchTarget::zero(),
@@ -5063,7 +5095,7 @@
                         imm12: Imm12::from_bits(<span class="number">1</span>),
                     }
                     .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                    sink.bind_label(label_over);
+                    sink.bind_label(label_over, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 }
                 <span class="comment">// set step and tmp.
                 </span>{
@@ -5086,7 +5118,7 @@
                     }
                     .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 }
-                sink.bind_label(label_done);
+                sink.bind_label(label_done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::Rev8 { rs, rd, tmp, step } =&gt; {
                 <span class="kw">let </span>rs = allocs.next(rs);
@@ -5100,7 +5132,7 @@
                 </span>Inst::load_imm12(step, Imm12::from_bits(<span class="number">56</span>)).emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 <span class="kw">let </span>label_done = sink.get_label();
                 <span class="kw">let </span>label_loop = sink.get_label();
-                sink.bind_label(label_loop);
+                sink.bind_label(label_loop, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 Inst::CondBr {
                     taken: BranchTarget::Label(label_done),
                     not_taken: BranchTarget::zero(),
@@ -5156,7 +5188,7 @@
                     }
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                sink.bind_label(label_done);
+                sink.bind_label(label_done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::Cltz {
                 sum,
@@ -5192,7 +5224,7 @@
                 }
                 <span class="kw">let </span>label_done = sink.get_label();
                 <span class="kw">let </span>label_loop = sink.get_label();
-                sink.bind_label(label_loop);
+                sink.bind_label(label_loop, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 Inst::CondBr {
                     taken: BranchTarget::Label(label_done),
                     not_taken: BranchTarget::zero(),
@@ -5255,7 +5287,7 @@
                     }
                     .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 }
-                sink.bind_label(label_done);
+                sink.bind_label(label_done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::Brev8 {
                 rs,
@@ -5297,7 +5329,7 @@
 
                 <span class="kw">let </span>label_done = sink.get_label();
                 <span class="kw">let </span>label_loop = sink.get_label();
-                sink.bind_label(label_loop);
+                sink.bind_label(label_loop, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 Inst::CondBr {
                     taken: BranchTarget::Label(label_done),
                     not_taken: BranchTarget::zero(),
@@ -5335,7 +5367,7 @@
                         rs2: tmp2.to_reg(),
                     }
                     .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                    sink.bind_label(label_over);
+                    sink.bind_label(label_over, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 }
                 <span class="comment">// set step and tmp.
                 </span>{
@@ -5393,7 +5425,7 @@
                             dest: BranchTarget::Label(label_over),
                         }
                         .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                        sink.bind_label(label_sll_1);
+                        sink.bind_label(label_sll_1, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                         Inst::AluRRImm12 {
                             alu_op: AluOPRRI::Slli,
                             rd: tmp2,
@@ -5401,14 +5433,14 @@
                             imm12: Imm12::from_bits(<span class="number">1</span>),
                         }
                         .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                        sink.bind_label(label_over);
+                        sink.bind_label(label_over, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                     }
                     Inst::Jal {
                         dest: BranchTarget::Label(label_loop),
                     }
                     .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                 }
-                sink.bind_label(label_done);
+                sink.bind_label(label_done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::StackProbeLoop {
                 guard_size,
@@ -5429,7 +5461,7 @@
 
                 <span class="kw">let </span>loop_start = sink.get_label();
                 <span class="kw">let </span>label_done = sink.get_label();
-                sink.bind_label(loop_start);
+                sink.bind_label(loop_start, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 Inst::CondBr {
                     taken: BranchTarget::Label(label_done),
                     not_taken: BranchTarget::zero(),
@@ -5467,7 +5499,7 @@
                     dest: BranchTarget::Label(loop_start),
                 }
                 .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                sink.bind_label(label_done);
+                sink.bind_label(label_done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
         };
         <span class="kw">let </span>end_off = sink.cur_offset();

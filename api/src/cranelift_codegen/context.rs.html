@@ -398,6 +398,18 @@
 <a href="#398" id="398">398</a>
 <a href="#399" id="399">399</a>
 <a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Cranelift compilation context and main entry point.
 //!
 //! When compiling many small functions, it is important to avoid repeatedly allocating and
@@ -433,6 +445,7 @@
 <span class="attr">#[cfg(feature = <span class="string">&quot;souper-harvest&quot;</span>)]
 </span><span class="kw">use </span>alloc::string::String;
 <span class="kw">use </span>alloc::vec::Vec;
+<span class="kw">use </span>cranelift_control::ControlPlane;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;souper-harvest&quot;</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::souper_harvest::do_souper_harvest;
@@ -524,8 +537,9 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa,
         mem: <span class="kw-2">&amp;mut </span>Vec&lt;u8&gt;,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
     ) -&gt; CompileResult&lt;<span class="kw-2">&amp;</span>CompiledCode&gt; {
-        <span class="kw">let </span>compiled_code = <span class="self">self</span>.compile(isa)<span class="question-mark">?</span>;
+        <span class="kw">let </span>compiled_code = <span class="self">self</span>.compile(isa, ctrl_plane)<span class="question-mark">?</span>;
         mem.extend_from_slice(compiled_code.code_buffer());
         <span class="prelude-val">Ok</span>(compiled_code)
     }
@@ -533,14 +547,18 @@
     <span class="doccomment">/// Internally compiles the function into a stencil.
     ///
     /// Public only for testing and fuzzing purposes.
-    </span><span class="kw">pub fn </span>compile_stencil(<span class="kw-2">&amp;mut </span><span class="self">self</span>, isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa) -&gt; CodegenResult&lt;CompiledCodeStencil&gt; {
+    </span><span class="kw">pub fn </span>compile_stencil(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
+    ) -&gt; CodegenResult&lt;CompiledCodeStencil&gt; {
         <span class="kw">let </span>_tt = timing::compile();
 
         <span class="self">self</span>.verify_if(isa)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.optimize(isa)<span class="question-mark">?</span>;
 
-        isa.compile_function(<span class="kw-2">&amp;</span><span class="self">self</span>.func, <span class="kw-2">&amp;</span><span class="self">self</span>.domtree, <span class="self">self</span>.want_disasm)
+        isa.compile_function(<span class="kw-2">&amp;</span><span class="self">self</span>.func, <span class="kw-2">&amp;</span><span class="self">self</span>.domtree, <span class="self">self</span>.want_disasm, ctrl_plane)
     }
 
     <span class="doccomment">/// Optimize the function, performing all compilation steps up to
@@ -612,11 +630,17 @@
     /// code sink.
     ///
     /// Returns information about the function&#39;s code and read-only data.
-    </span><span class="kw">pub fn </span>compile(<span class="kw-2">&amp;mut </span><span class="self">self</span>, isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa) -&gt; CompileResult&lt;<span class="kw-2">&amp;</span>CompiledCode&gt; {
-        <span class="kw">let </span>stencil = <span class="self">self</span>.compile_stencil(isa).map_err(|error| CompileError {
-            inner: error,
-            func: <span class="kw-2">&amp;</span><span class="self">self</span>.func,
-        })<span class="question-mark">?</span>;
+    </span><span class="kw">pub fn </span>compile(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
+    ) -&gt; CompileResult&lt;<span class="kw-2">&amp;</span>CompiledCode&gt; {
+        <span class="kw">let </span>stencil = <span class="self">self
+            </span>.compile_stencil(isa, ctrl_plane)
+            .map_err(|error| CompileError {
+                inner: error,
+                func: <span class="kw-2">&amp;</span><span class="self">self</span>.func,
+            })<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">self
             </span>.compiled_code
             .insert(stencil.apply_params(<span class="kw-2">&amp;</span><span class="self">self</span>.func.params)))

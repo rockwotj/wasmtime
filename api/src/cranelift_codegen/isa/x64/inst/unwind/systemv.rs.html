@@ -195,6 +195,10 @@
 <a href="#195" id="195">195</a>
 <a href="#196" id="196">196</a>
 <a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Unwind information for System V ABI (x86-64).
 
 </span><span class="kw">use </span><span class="kw">crate</span>::isa::unwind::systemv::RegisterMappingError;
@@ -315,7 +319,9 @@
             <span class="prelude-val">Some</span>(StackSlotData::new(StackSlotKind::ExplicitSlot, <span class="number">64</span>)),
         ));
 
-        <span class="kw">let </span>code = context.compile(<span class="kw-2">&amp;*</span>isa).expect(<span class="string">&quot;expected compilation&quot;</span>);
+        <span class="kw">let </span>code = context
+            .compile(<span class="kw-2">&amp;*</span>isa, <span class="kw-2">&amp;mut </span>Default::default())
+            .expect(<span class="string">&quot;expected compilation&quot;</span>);
 
         <span class="kw">let </span>fde = <span class="kw">match </span>code
             .create_unwind_info(isa.as_ref())
@@ -354,7 +360,9 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>context = Context::for_function(create_multi_return_function(CallConv::SystemV));
 
-        <span class="kw">let </span>code = context.compile(<span class="kw-2">&amp;*</span>isa).expect(<span class="string">&quot;expected compilation&quot;</span>);
+        <span class="kw">let </span>code = context
+            .compile(<span class="kw-2">&amp;*</span>isa, <span class="kw-2">&amp;mut </span>Default::default())
+            .expect(<span class="string">&quot;expected compilation&quot;</span>);
 
         <span class="kw">let </span>fde = <span class="kw">match </span>code
             .create_unwind_info(isa.as_ref())

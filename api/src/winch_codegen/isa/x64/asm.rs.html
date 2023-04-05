@@ -514,7 +514,7 @@
         },
         settings <span class="kw">as </span>x64_settings, CallInfo, EmitInfo, EmitState, Inst,
     },
-    settings, Final, MachBuffer, MachBufferFinalized, MachInstEmit, Writable,
+    settings, Final, MachBuffer, MachBufferFinalized, MachInstEmit, MachInstEmitState, Writable,
 };
 
 <span class="kw">use super</span>::{address::Address, regs};
@@ -597,8 +597,8 @@
     }
 
     <span class="doccomment">/// Return the emitted code.
-    </span><span class="kw">pub fn </span>finalize(<span class="self">self</span>) -&gt; MachBufferFinalized&lt;Final&gt; {
-        <span class="kw">let </span>stencil = <span class="self">self</span>.buffer.finish();
+    </span><span class="kw">pub fn </span>finalize(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; MachBufferFinalized&lt;Final&gt; {
+        <span class="kw">let </span>stencil = <span class="self">self</span>.buffer.finish(<span class="self">self</span>.emit_state.ctrl_plane_mut());
         stencil.apply_base_srcloc(Default::default())
     }
 

@@ -243,6 +243,9 @@
 <a href="#243" id="243">243</a>
 <a href="#244" id="244">244</a>
 <a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ARM 64-bit Instruction Set Architecture.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::dominator_tree::DominatorTree;
@@ -260,6 +263,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::settings <span class="kw">as </span>shared_settings;
 <span class="kw">use </span>alloc::{boxed::Box, vec::Vec};
 <span class="kw">use </span>core::fmt;
+<span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>regalloc2::MachineEnv;
 <span class="kw">use </span>target_lexicon::{Aarch64Architecture, Architecture, OperatingSystem, Triple};
 
@@ -317,6 +321,7 @@
         func: <span class="kw-2">&amp;</span>Function,
         domtree: <span class="kw-2">&amp;</span>DominatorTree,
         want_disasm: bool,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
     ) -&gt; CodegenResult&lt;CompiledCodeStencil&gt; {
         <span class="kw">let </span>(vcode, regalloc_result) = <span class="self">self</span>.compile_vcode(func, domtree)<span class="question-mark">?</span>;
 
@@ -324,10 +329,11 @@
             <span class="kw-2">&amp;</span>regalloc_result,
             want_disasm,
             <span class="self">self</span>.flags.machine_code_cfg_info(),
+            ctrl_plane,
         );
         <span class="kw">let </span>frame_size = emit_result.frame_size;
         <span class="kw">let </span>value_labels_ranges = emit_result.value_labels_ranges;
-        <span class="kw">let </span>buffer = emit_result.buffer.finish();
+        <span class="kw">let </span>buffer = emit_result.buffer.finish(ctrl_plane);
         <span class="kw">let </span>sized_stackslot_offsets = emit_result.sized_stackslot_offsets;
         <span class="kw">let </span>dynamic_stackslot_offsets = emit_result.dynamic_stackslot_offsets;
 

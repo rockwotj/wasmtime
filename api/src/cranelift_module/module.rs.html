@@ -779,6 +779,9 @@
 <a href="#779" id="779">779</a>
 <a href="#780" id="780">780</a>
 <a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines `Module` and related types.
 
 </span><span class="comment">// TODO: Should `ir::Function` really have a `name`?
@@ -795,6 +798,7 @@
 <span class="kw">use </span>cranelift_codegen::settings::SetError;
 <span class="kw">use </span>cranelift_codegen::{binemit, MachReloc};
 <span class="kw">use </span>cranelift_codegen::{ir, isa, CodegenError, CompileError, Context};
+<span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>std::borrow::ToOwned;
 <span class="kw">use </span>std::string::String;
 
@@ -1439,6 +1443,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         func: FuncId,
         ctx: <span class="kw-2">&amp;mut </span>Context,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
     ) -&gt; ModuleResult&lt;ModuleCompiledFunction&gt;;
 
     <span class="doccomment">/// Define a function, taking the function body from the given `bytes`.
@@ -1541,8 +1546,9 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         func: FuncId,
         ctx: <span class="kw-2">&amp;mut </span>Context,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
     ) -&gt; ModuleResult&lt;ModuleCompiledFunction&gt; {
-        (<span class="kw-2">**</span><span class="self">self</span>).define_function(func, ctx)
+        (<span class="kw-2">**</span><span class="self">self</span>).define_function(func, ctx, ctrl_plane)
     }
 
     <span class="kw">fn </span>define_function_bytes(

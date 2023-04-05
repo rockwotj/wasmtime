@@ -2193,6 +2193,30 @@
 <a href="#2193" id="2193">2193</a>
 <a href="#2194" id="2194">2194</a>
 <a href="#2195" id="2195">2195</a>
+<a href="#2196" id="2196">2196</a>
+<a href="#2197" id="2197">2197</a>
+<a href="#2198" id="2198">2198</a>
+<a href="#2199" id="2199">2199</a>
+<a href="#2200" id="2200">2200</a>
+<a href="#2201" id="2201">2201</a>
+<a href="#2202" id="2202">2202</a>
+<a href="#2203" id="2203">2203</a>
+<a href="#2204" id="2204">2204</a>
+<a href="#2205" id="2205">2205</a>
+<a href="#2206" id="2206">2206</a>
+<a href="#2207" id="2207">2207</a>
+<a href="#2208" id="2208">2208</a>
+<a href="#2209" id="2209">2209</a>
+<a href="#2210" id="2210">2210</a>
+<a href="#2211" id="2211">2211</a>
+<a href="#2212" id="2212">2212</a>
+<a href="#2213" id="2213">2213</a>
+<a href="#2214" id="2214">2214</a>
+<a href="#2215" id="2215">2215</a>
+<a href="#2216" id="2216">2216</a>
+<a href="#2217" id="2217">2217</a>
+<a href="#2218" id="2218">2218</a>
+<a href="#2219" id="2219">2219</a>
 </pre><pre class="rust"><code><span class="doccomment">//! In-memory representation of compiled machine code, with labels and fixups to
 //! refer to those labels. Handles constant-pool island insertion and also
 //! veneer insertion for out-of-range jumps.
@@ -2343,6 +2367,7 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::timing;
 <span class="kw">use </span><span class="kw">crate</span>::trace;
+<span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>cranelift_entity::{entity_impl, SecondaryMap};
 <span class="kw">use </span>smallvec::SmallVec;
 <span class="kw">use </span>std::convert::TryFrom;
@@ -2718,7 +2743,7 @@
     }
 
     <span class="doccomment">/// Bind a label to the current offset. A label can only be bound once.
-    </span><span class="kw">pub fn </span>bind_label(<span class="kw-2">&amp;mut </span><span class="self">self</span>, label: MachLabel) {
+    </span><span class="kw">pub fn </span>bind_label(<span class="kw-2">&amp;mut </span><span class="self">self</span>, label: MachLabel, ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane) {
         <span class="macro">trace!</span>(
             <span class="string">&quot;MachBuffer: bind label {:?} at offset {}&quot;</span>,
             label,
@@ -2737,7 +2762,7 @@
         // offset and added it to the list (which contains all labels at the
         // current offset).
 
-        </span><span class="self">self</span>.optimize_branches();
+        </span><span class="self">self</span>.optimize_branches(ctrl_plane);
 
         <span class="comment">// Post-invariant: by `optimize_branches()` (see argument there).
     </span>}
@@ -2968,7 +2993,11 @@
         //   fixup record referring to that last branch is removed.
     </span>}
 
-    <span class="kw">fn </span>optimize_branches(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    <span class="kw">fn </span>optimize_branches(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane) {
+        <span class="kw">if </span>ctrl_plane.get_decision() {
+            <span class="kw">return</span>;
+        }
+
         <span class="self">self</span>.lazily_clear_labels_at_tail();
         <span class="comment">// Invariants valid at this point.
 
@@ -3336,13 +3365,18 @@
     /// Should only be called if `island_needed()` returns true, i.e., if we
     /// actually reach a deadline. It&#39;s not necessarily a problem to do so
     /// otherwise but it may result in unnecessary work during emission.
-    </span><span class="kw">pub fn </span>emit_island(<span class="kw-2">&amp;mut </span><span class="self">self</span>, distance: CodeOffset) {
-        <span class="self">self</span>.emit_island_maybe_forced(<span class="bool-val">false</span>, distance);
+    </span><span class="kw">pub fn </span>emit_island(<span class="kw-2">&amp;mut </span><span class="self">self</span>, distance: CodeOffset, ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane) {
+        <span class="self">self</span>.emit_island_maybe_forced(<span class="bool-val">false</span>, distance, ctrl_plane);
     }
 
     <span class="doccomment">/// Same as `emit_island`, but an internal API with a `force_veneers`
     /// argument to force all veneers to always get emitted for debugging.
-    </span><span class="kw">fn </span>emit_island_maybe_forced(<span class="kw-2">&amp;mut </span><span class="self">self</span>, force_veneers: bool, distance: CodeOffset) {
+    </span><span class="kw">fn </span>emit_island_maybe_forced(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        force_veneers: bool,
+        distance: CodeOffset,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
+    ) {
         <span class="comment">// We&#39;re going to purge fixups, so no latest-branch editing can happen
         // anymore.
         </span><span class="self">self</span>.latest_branches.clear();
@@ -3385,7 +3419,7 @@
                 <span class="self">self</span>.start_srcloc(loc);
             }
             <span class="self">self</span>.align_to(I::LabelUse::ALIGN);
-            <span class="self">self</span>.bind_label(label);
+            <span class="self">self</span>.bind_label(label, ctrl_plane);
             <span class="self">self</span>.add_trap(code);
             <span class="kw">if let </span><span class="prelude-val">Some</span>(map) = stack_map {
                 <span class="kw">let </span>extent = StackMapExtent::UpcomingBytes(I::TRAP_OPCODE.len() <span class="kw">as </span>u32);
@@ -3399,7 +3433,7 @@
 
         <span class="kw">for </span>MachLabelConstant { label, align, data } <span class="kw">in </span>mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.pending_constants) {
             <span class="self">self</span>.align_to(align);
-            <span class="self">self</span>.bind_label(label);
+            <span class="self">self</span>.bind_label(label, ctrl_plane);
             <span class="self">self</span>.put_data(<span class="kw-2">&amp;</span>data[..]);
         }
 
@@ -3523,7 +3557,11 @@
         </span><span class="self">self</span>.use_label_at_offset(veneer_fixup_off, label, veneer_label_use);
     }
 
-    <span class="kw">fn </span>finish_emission_maybe_forcing_veneers(<span class="kw-2">&amp;mut </span><span class="self">self</span>, force_veneers: bool) {
+    <span class="kw">fn </span>finish_emission_maybe_forcing_veneers(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        force_veneers: bool,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
+    ) {
         <span class="kw">while </span>!<span class="self">self</span>.pending_constants.is_empty()
             || !<span class="self">self</span>.pending_traps.is_empty()
             || !<span class="self">self</span>.fixup_records.is_empty()
@@ -3531,7 +3569,7 @@
             <span class="comment">// `emit_island()` will emit any pending veneers and constants, and
             // as a side-effect, will also take care of any fixups with resolved
             // labels eagerly.
-            </span><span class="self">self</span>.emit_island_maybe_forced(force_veneers, u32::MAX);
+            </span><span class="self">self</span>.emit_island_maybe_forced(force_veneers, u32::MAX, ctrl_plane);
         }
 
         <span class="comment">// Ensure that all labels have been fixed up after the last island is emitted. This is a
@@ -3541,14 +3579,14 @@
     }
 
     <span class="doccomment">/// Finish any deferred emissions and/or fixups.
-    </span><span class="kw">pub fn </span>finish(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; MachBufferFinalized&lt;Stencil&gt; {
+    </span><span class="kw">pub fn </span>finish(<span class="kw-2">mut </span><span class="self">self</span>, ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane) -&gt; MachBufferFinalized&lt;Stencil&gt; {
         <span class="kw">let </span>_tt = timing::vcode_emit_finish();
 
         <span class="comment">// Do any optimizations on branches at tail of buffer, as if we
         // had bound one last label.
-        </span><span class="self">self</span>.optimize_branches();
+        </span><span class="self">self</span>.optimize_branches(ctrl_plane);
 
-        <span class="self">self</span>.finish_emission_maybe_forcing_veneers(<span class="bool-val">false</span>);
+        <span class="self">self</span>.finish_emission_maybe_forcing_veneers(<span class="bool-val">false</span>, ctrl_plane);
 
         <span class="kw">let </span><span class="kw-2">mut </span>srclocs = <span class="self">self</span>.srclocs;
         srclocs.sort_by_key(|entry| entry.start);
@@ -3908,19 +3946,28 @@
 }
 
 <span class="kw">impl</span>&lt;I: VCodeInst&gt; TextSectionBuilder <span class="kw">for </span>MachTextSectionBuilder&lt;I&gt; {
-    <span class="kw">fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, labeled: bool, func: <span class="kw-2">&amp;</span>[u8], align: u32) -&gt; u64 {
+    <span class="kw">fn </span>append(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        labeled: bool,
+        func: <span class="kw-2">&amp;</span>[u8],
+        align: u32,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
+    ) -&gt; u64 {
         <span class="comment">// Conditionally emit an island if it&#39;s necessary to resolve jumps
         // between functions which are too far away.
         </span><span class="kw">let </span>size = func.len() <span class="kw">as </span>u32;
         <span class="kw">if </span><span class="self">self</span>.force_veneers || <span class="self">self</span>.buf.island_needed(size) {
-            <span class="self">self</span>.buf.emit_island_maybe_forced(<span class="self">self</span>.force_veneers, size);
+            <span class="self">self</span>.buf
+                .emit_island_maybe_forced(<span class="self">self</span>.force_veneers, size, ctrl_plane);
         }
 
         <span class="self">self</span>.buf.align_to(align);
         <span class="kw">let </span>pos = <span class="self">self</span>.buf.cur_offset();
         <span class="kw">if </span>labeled {
-            <span class="self">self</span>.buf
-                .bind_label(MachLabel::from_block(BlockIndex::new(<span class="self">self</span>.next_func)));
+            <span class="self">self</span>.buf.bind_label(
+                MachLabel::from_block(BlockIndex::new(<span class="self">self</span>.next_func)),
+                ctrl_plane,
+            );
             <span class="self">self</span>.next_func += <span class="number">1</span>;
         }
         <span class="self">self</span>.buf.put_data(func);
@@ -3943,13 +3990,13 @@
         <span class="self">self</span>.force_veneers = <span class="bool-val">true</span>;
     }
 
-    <span class="kw">fn </span>finish(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Vec&lt;u8&gt; {
+    <span class="kw">fn </span>finish(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane) -&gt; Vec&lt;u8&gt; {
         <span class="comment">// Double-check all functions were pushed.
         </span><span class="macro">assert_eq!</span>(<span class="self">self</span>.next_func, <span class="self">self</span>.buf.label_offsets.len());
 
         <span class="comment">// Finish up any veneers, if necessary.
         </span><span class="self">self</span>.buf
-            .finish_emission_maybe_forcing_veneers(<span class="self">self</span>.force_veneers);
+            .finish_emission_maybe_forcing_veneers(<span class="self">self</span>.force_veneers, ctrl_plane);
 
         <span class="comment">// We don&#39;t need the data any more, so return it to the caller.
         </span>mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.buf.data).into_vec()
@@ -3965,7 +4012,7 @@
     <span class="kw">use </span><span class="kw">crate</span>::ir::UserExternalNameRef;
     <span class="kw">use </span><span class="kw">crate</span>::isa::aarch64::inst::xreg;
     <span class="kw">use </span><span class="kw">crate</span>::isa::aarch64::inst::{BranchTarget, CondBrKind, EmitInfo, Inst};
-    <span class="kw">use </span><span class="kw">crate</span>::machinst::MachInstEmit;
+    <span class="kw">use </span><span class="kw">crate</span>::machinst::{MachInstEmit, MachInstEmitState};
     <span class="kw">use </span><span class="kw">crate</span>::settings;
     <span class="kw">use </span>std::default::Default;
     <span class="kw">use </span>std::vec::Vec;
@@ -3981,14 +4028,14 @@
     </span><span class="kw">fn </span>test_elide_jump_to_next() {
         <span class="kw">let </span>info = EmitInfo::new(settings::Flags::new(settings::builder()));
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>state = Default::default();
+        <span class="kw">let </span><span class="kw-2">mut </span>state = &lt;Inst <span class="kw">as </span>MachInstEmit&gt;::State::default();
 
         buf.reserve_labels_for_blocks(<span class="number">2</span>);
-        buf.bind_label(label(<span class="number">0</span>));
+        buf.bind_label(label(<span class="number">0</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">1</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
-        buf.bind_label(label(<span class="number">1</span>));
-        <span class="kw">let </span>buf = buf.finish();
+        buf.bind_label(label(<span class="number">1</span>), state.ctrl_plane_mut());
+        <span class="kw">let </span>buf = buf.finish(state.ctrl_plane_mut());
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, buf.total_size());
     }
 
@@ -3996,11 +4043,11 @@
     </span><span class="kw">fn </span>test_elide_trivial_jump_blocks() {
         <span class="kw">let </span>info = EmitInfo::new(settings::Flags::new(settings::builder()));
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>state = Default::default();
+        <span class="kw">let </span><span class="kw-2">mut </span>state = &lt;Inst <span class="kw">as </span>MachInstEmit&gt;::State::default();
 
         buf.reserve_labels_for_blocks(<span class="number">4</span>);
 
-        buf.bind_label(label(<span class="number">0</span>));
+        buf.bind_label(label(<span class="number">0</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::CondBr {
             kind: CondBrKind::NotZero(xreg(<span class="number">0</span>)),
             taken: target(<span class="number">1</span>),
@@ -4008,17 +4055,17 @@
         };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">1</span>));
+        buf.bind_label(label(<span class="number">1</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">3</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">2</span>));
+        buf.bind_label(label(<span class="number">2</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">3</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">3</span>));
+        buf.bind_label(label(<span class="number">3</span>), state.ctrl_plane_mut());
 
-        <span class="kw">let </span>buf = buf.finish();
+        <span class="kw">let </span>buf = buf.finish(state.ctrl_plane_mut());
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, buf.total_size());
     }
 
@@ -4026,11 +4073,11 @@
     </span><span class="kw">fn </span>test_flip_cond() {
         <span class="kw">let </span>info = EmitInfo::new(settings::Flags::new(settings::builder()));
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>state = Default::default();
+        <span class="kw">let </span><span class="kw-2">mut </span>state = &lt;Inst <span class="kw">as </span>MachInstEmit&gt;::State::default();
 
         buf.reserve_labels_for_blocks(<span class="number">4</span>);
 
-        buf.bind_label(label(<span class="number">0</span>));
+        buf.bind_label(label(<span class="number">0</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::CondBr {
             kind: CondBrKind::Zero(xreg(<span class="number">0</span>)),
             taken: target(<span class="number">1</span>),
@@ -4038,19 +4085,19 @@
         };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">1</span>));
+        buf.bind_label(label(<span class="number">1</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Nop4;
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">2</span>));
+        buf.bind_label(label(<span class="number">2</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Udf {
             trap_code: TrapCode::Interrupt,
         };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">3</span>));
+        buf.bind_label(label(<span class="number">3</span>), state.ctrl_plane_mut());
 
-        <span class="kw">let </span>buf = buf.finish();
+        <span class="kw">let </span>buf = buf.finish(state.ctrl_plane_mut());
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf2 = MachBuffer::new();
         <span class="kw">let </span><span class="kw-2">mut </span>state = Default::default();
@@ -4062,7 +4109,7 @@
         <span class="kw">let </span>inst = Inst::Nop4;
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf2, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        <span class="kw">let </span>buf2 = buf2.finish();
+        <span class="kw">let </span>buf2 = buf2.finish(state.ctrl_plane_mut());
 
         <span class="macro">assert_eq!</span>(buf.data, buf2.data);
     }
@@ -4071,11 +4118,11 @@
     </span><span class="kw">fn </span>test_island() {
         <span class="kw">let </span>info = EmitInfo::new(settings::Flags::new(settings::builder()));
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>state = Default::default();
+        <span class="kw">let </span><span class="kw-2">mut </span>state = &lt;Inst <span class="kw">as </span>MachInstEmit&gt;::State::default();
 
         buf.reserve_labels_for_blocks(<span class="number">4</span>);
 
-        buf.bind_label(label(<span class="number">0</span>));
+        buf.bind_label(label(<span class="number">0</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::CondBr {
             kind: CondBrKind::NotZero(xreg(<span class="number">0</span>)),
             taken: target(<span class="number">2</span>),
@@ -4083,24 +4130,24 @@
         };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">1</span>));
+        buf.bind_label(label(<span class="number">1</span>), state.ctrl_plane_mut());
         <span class="kw">while </span>buf.cur_offset() &lt; <span class="number">2000000 </span>{
             <span class="kw">if </span>buf.island_needed(<span class="number">0</span>) {
-                buf.emit_island(<span class="number">0</span>);
+                buf.emit_island(<span class="number">0</span>, state.ctrl_plane_mut());
             }
             <span class="kw">let </span>inst = Inst::Nop4;
             inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
         }
 
-        buf.bind_label(label(<span class="number">2</span>));
+        buf.bind_label(label(<span class="number">2</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Nop4;
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">3</span>));
+        buf.bind_label(label(<span class="number">3</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Nop4;
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        <span class="kw">let </span>buf = buf.finish();
+        <span class="kw">let </span>buf = buf.finish(state.ctrl_plane_mut());
 
         <span class="macro">assert_eq!</span>(<span class="number">2000000 </span>+ <span class="number">8</span>, buf.total_size());
 
@@ -4129,7 +4176,7 @@
         };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf2, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        <span class="kw">let </span>buf2 = buf2.finish();
+        <span class="kw">let </span>buf2 = buf2.finish(state.ctrl_plane_mut());
 
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>buf.data[<span class="number">0</span>..<span class="number">8</span>], <span class="kw-2">&amp;</span>buf2.data[..]);
     }
@@ -4138,25 +4185,25 @@
     </span><span class="kw">fn </span>test_island_backward() {
         <span class="kw">let </span>info = EmitInfo::new(settings::Flags::new(settings::builder()));
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>state = Default::default();
+        <span class="kw">let </span><span class="kw-2">mut </span>state = &lt;Inst <span class="kw">as </span>MachInstEmit&gt;::State::default();
 
         buf.reserve_labels_for_blocks(<span class="number">4</span>);
 
-        buf.bind_label(label(<span class="number">0</span>));
+        buf.bind_label(label(<span class="number">0</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Nop4;
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">1</span>));
+        buf.bind_label(label(<span class="number">1</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Nop4;
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">2</span>));
+        buf.bind_label(label(<span class="number">2</span>), state.ctrl_plane_mut());
         <span class="kw">while </span>buf.cur_offset() &lt; <span class="number">2000000 </span>{
             <span class="kw">let </span>inst = Inst::Nop4;
             inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
         }
 
-        buf.bind_label(label(<span class="number">3</span>));
+        buf.bind_label(label(<span class="number">3</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::CondBr {
             kind: CondBrKind::NotZero(xreg(<span class="number">0</span>)),
             taken: target(<span class="number">0</span>),
@@ -4164,7 +4211,7 @@
         };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        <span class="kw">let </span>buf = buf.finish();
+        <span class="kw">let </span>buf = buf.finish(state.ctrl_plane_mut());
 
         <span class="macro">assert_eq!</span>(<span class="number">2000000 </span>+ <span class="number">12</span>, buf.total_size());
 
@@ -4181,7 +4228,7 @@
         };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf2, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        <span class="kw">let </span>buf2 = buf2.finish();
+        <span class="kw">let </span>buf2 = buf2.finish(state.ctrl_plane_mut());
 
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>buf.data[<span class="number">2000000</span>..], <span class="kw-2">&amp;</span>buf2.data[..]);
     }
@@ -4223,11 +4270,11 @@
 
         </span><span class="kw">let </span>info = EmitInfo::new(settings::Flags::new(settings::builder()));
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>state = Default::default();
+        <span class="kw">let </span><span class="kw-2">mut </span>state = &lt;Inst <span class="kw">as </span>MachInstEmit&gt;::State::default();
 
         buf.reserve_labels_for_blocks(<span class="number">8</span>);
 
-        buf.bind_label(label(<span class="number">0</span>));
+        buf.bind_label(label(<span class="number">0</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::CondBr {
             kind: CondBrKind::Zero(xreg(<span class="number">0</span>)),
             taken: target(<span class="number">1</span>),
@@ -4235,38 +4282,38 @@
         };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">1</span>));
+        buf.bind_label(label(<span class="number">1</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">3</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">2</span>));
+        buf.bind_label(label(<span class="number">2</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Nop4;
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">0</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">3</span>));
+        buf.bind_label(label(<span class="number">3</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">4</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">4</span>));
+        buf.bind_label(label(<span class="number">4</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">5</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">5</span>));
+        buf.bind_label(label(<span class="number">5</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">7</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">6</span>));
+        buf.bind_label(label(<span class="number">6</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Nop4;
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">7</span>));
+        buf.bind_label(label(<span class="number">7</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Ret { rets: <span class="macro">vec!</span>[] };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        <span class="kw">let </span>buf = buf.finish();
+        <span class="kw">let </span>buf = buf.finish(state.ctrl_plane_mut());
 
         <span class="kw">let </span>golden_data = <span class="macro">vec!</span>[
             <span class="number">0xa0</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0xb4</span>, <span class="comment">// cbz x0, 0x14
@@ -4299,31 +4346,31 @@
         //   b label0
         </span><span class="kw">let </span>info = EmitInfo::new(settings::Flags::new(settings::builder()));
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>state = Default::default();
+        <span class="kw">let </span><span class="kw-2">mut </span>state = &lt;Inst <span class="kw">as </span>MachInstEmit&gt;::State::default();
 
         buf.reserve_labels_for_blocks(<span class="number">5</span>);
 
-        buf.bind_label(label(<span class="number">0</span>));
+        buf.bind_label(label(<span class="number">0</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">1</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">1</span>));
+        buf.bind_label(label(<span class="number">1</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">2</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">2</span>));
+        buf.bind_label(label(<span class="number">2</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">3</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">3</span>));
+        buf.bind_label(label(<span class="number">3</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">4</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        buf.bind_label(label(<span class="number">4</span>));
+        buf.bind_label(label(<span class="number">4</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">1</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        <span class="kw">let </span>buf = buf.finish();
+        <span class="kw">let </span>buf = buf.finish(state.ctrl_plane_mut());
 
         <span class="kw">let </span>golden_data = <span class="macro">vec!</span>[
             <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x14</span>, <span class="comment">// b 0
@@ -4335,10 +4382,11 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>metadata_records() {
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::&lt;Inst&gt;::new();
+        <span class="kw">let </span>ctrl_plane = <span class="kw-2">&amp;mut </span>Default::default();
 
         buf.reserve_labels_for_blocks(<span class="number">1</span>);
 
-        buf.bind_label(label(<span class="number">0</span>));
+        buf.bind_label(label(<span class="number">0</span>), ctrl_plane);
         buf.put1(<span class="number">1</span>);
         buf.add_trap(TrapCode::HeapOutOfBounds);
         buf.put1(<span class="number">2</span>);
@@ -4358,7 +4406,7 @@
         );
         buf.put1(<span class="number">4</span>);
 
-        <span class="kw">let </span>buf = buf.finish();
+        <span class="kw">let </span>buf = buf.finish(ctrl_plane);
 
         <span class="macro">assert_eq!</span>(buf.data(), <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
         <span class="macro">assert_eq!</span>(

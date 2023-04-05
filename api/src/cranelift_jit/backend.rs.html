@@ -988,6 +988,8 @@
 <a href="#988" id="988">988</a>
 <a href="#989" id="989">989</a>
 <a href="#990" id="990">990</a>
+<a href="#991" id="991">991</a>
+<a href="#992" id="992">992</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines `JITModule`.
 
 </span><span class="kw">use crate</span>::{compiled_blob::CompiledBlob, memory::BranchProtection, memory::Memory};
@@ -995,6 +997,7 @@
 <span class="kw">use </span>cranelift_codegen::settings::Configurable;
 <span class="kw">use </span>cranelift_codegen::{<span class="self">self</span>, ir, settings, MachReloc};
 <span class="kw">use </span>cranelift_codegen::{binemit::Reloc, CodegenError};
+<span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>cranelift_entity::SecondaryMap;
 <span class="kw">use </span>cranelift_module::{
     DataContext, DataDescription, DataId, FuncId, Init, Linkage, Module, ModuleCompiledFunction,
@@ -1672,6 +1675,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         id: FuncId,
         ctx: <span class="kw-2">&amp;mut </span>cranelift_codegen::Context,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
     ) -&gt; ModuleResult&lt;ModuleCompiledFunction&gt; {
         <span class="macro">info!</span>(<span class="string">&quot;defining function {}: {}&quot;</span>, id, ctx.func.display());
         <span class="kw">let </span>decl = <span class="self">self</span>.declarations.get_function_decl(id);
@@ -1684,7 +1688,7 @@
         }
 
         <span class="comment">// work around borrow-checker to allow reuse of ctx below
-        </span><span class="kw">let </span>res = ctx.compile(<span class="self">self</span>.isa())<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>res = ctx.compile(<span class="self">self</span>.isa(), ctrl_plane)<span class="question-mark">?</span>;
         <span class="kw">let </span>alignment = res.alignment <span class="kw">as </span>u64;
         <span class="kw">let </span>compiled_code = ctx.compiled_code().unwrap();
 

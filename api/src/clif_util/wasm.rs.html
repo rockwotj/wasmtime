@@ -598,7 +598,7 @@
             (<span class="macro">vec!</span>[], <span class="macro">vec!</span>[], <span class="macro">vec!</span>[])
         } <span class="kw">else </span>{
             <span class="kw">let </span>compiled_code = context
-                .compile_and_emit(isa, <span class="kw-2">&amp;mut </span>mem)
+                .compile_and_emit(isa, <span class="kw-2">&amp;mut </span>mem, <span class="kw-2">&amp;mut </span>Default::default())
                 .map_err(|err| <span class="macro">anyhow::anyhow!</span>(<span class="string">&quot;{}&quot;</span>, pretty_error(<span class="kw-2">&amp;</span>err.func, err.inner)))<span class="question-mark">?</span>;
             <span class="kw">let </span>code_info = compiled_code.code_info();
 

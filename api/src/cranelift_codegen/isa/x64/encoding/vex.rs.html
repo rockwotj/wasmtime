@@ -855,7 +855,7 @@
             .imm(<span class="number">0x17</span>)
             .encode(<span class="kw-2">&amp;mut </span>sink);
 
-        <span class="kw">let </span>bytes = sink.finish().data;
+        <span class="kw">let </span>bytes = sink.finish(<span class="kw-2">&amp;mut </span>Default::default()).data;
         <span class="macro">assert_eq!</span>(bytes.as_slice(), [<span class="number">0xc5</span>, <span class="number">0xf1</span>, <span class="number">0x73</span>, <span class="number">0xfa</span>, <span class="number">0x17</span>]);
     }
 
@@ -883,7 +883,7 @@
             .imm_reg(c)
             .encode(<span class="kw-2">&amp;mut </span>sink);
 
-        <span class="kw">let </span>bytes = sink.finish().data;
+        <span class="kw">let </span>bytes = sink.finish(<span class="kw-2">&amp;mut </span>Default::default()).data;
         <span class="macro">assert_eq!</span>(bytes.as_slice(), [<span class="number">0xc4</span>, <span class="number">0xe3</span>, <span class="number">0x69</span>, <span class="number">0x4b</span>, <span class="number">0xcb</span>, <span class="number">0x40</span>]);
     }
 
@@ -908,7 +908,7 @@
             .imm(<span class="number">4</span>)
             .encode(<span class="kw-2">&amp;mut </span>sink);
 
-        <span class="kw">let </span>bytes = sink.finish().data;
+        <span class="kw">let </span>bytes = sink.finish(<span class="kw-2">&amp;mut </span>Default::default()).data;
         <span class="macro">assert_eq!</span>(bytes.as_slice(), [<span class="number">0xc4</span>, <span class="number">0x41</span>, <span class="number">0x24</span>, <span class="number">0xc2</span>, <span class="number">0xd4</span>, <span class="number">0x04</span>]);
     }
 
@@ -932,7 +932,7 @@
             .rm(src2)
             .encode(<span class="kw-2">&amp;mut </span>sink);
 
-        <span class="kw">let </span>bytes = sink.finish().data;
+        <span class="kw">let </span>bytes = sink.finish(<span class="kw-2">&amp;mut </span>Default::default()).data;
         <span class="macro">assert_eq!</span>(bytes.as_slice(), [<span class="number">0xc5</span>, <span class="number">0xf0</span>, <span class="number">0x55</span>, <span class="number">0xd0</span>]);
     }
 
@@ -960,7 +960,7 @@
             .rm(src2)
             .encode(<span class="kw-2">&amp;mut </span>sink);
 
-        <span class="kw">let </span>bytes = sink.finish().data;
+        <span class="kw">let </span>bytes = sink.finish(<span class="kw-2">&amp;mut </span>Default::default()).data;
         <span class="macro">assert_eq!</span>(bytes.as_slice(), [<span class="number">0xc4</span>, <span class="number">0xc1</span>, <span class="number">0x70</span>, <span class="number">0x55</span>, <span class="number">0x55</span>, <span class="number">0x0a</span>]);
     }
 
@@ -990,7 +990,7 @@
             .rm(src2)
             .encode(<span class="kw-2">&amp;mut </span>sink);
 
-        <span class="kw">let </span>bytes = sink.finish().data;
+        <span class="kw">let </span>bytes = sink.finish(<span class="kw-2">&amp;mut </span>Default::default()).data;
         <span class="macro">assert_eq!</span>(bytes.as_slice(), [<span class="number">0xc4</span>, <span class="number">0xa1</span>, <span class="number">0x70</span>, <span class="number">0x55</span>, <span class="number">0x54</span>, <span class="number">0xa8</span>, <span class="number">100</span>]);
     }
 }

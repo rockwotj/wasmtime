@@ -1112,6 +1112,8 @@
 <a href="#1112" id="1112">1112</a>
 <a href="#1113" id="1113">1113</a>
 <a href="#1114" id="1114">1114</a>
+<a href="#1115" id="1115">1115</a>
+<a href="#1116" id="1116">1116</a>
 </pre><pre class="rust"><code><span class="doccomment">//! CLI tool to reduce Cranelift IR files crashing during compilation.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::utils::read_to_string;
@@ -2155,9 +2157,11 @@
         std::panic::set_hook(Box::new(|<span class="kw">_</span>| {})); <span class="comment">// silence panics
 
         </span><span class="kw">let </span>res = <span class="kw">match </span>std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            <span class="kw">let _ </span>= <span class="self">self
-                </span>.context
-                .compile_and_emit(<span class="self">self</span>.isa, <span class="kw-2">&amp;mut </span><span class="self">self</span>.code_memory);
+            <span class="kw">let _ </span>= <span class="self">self</span>.context.compile_and_emit(
+                <span class="self">self</span>.isa,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.code_memory,
+                <span class="kw-2">&amp;mut </span>Default::default(),
+            );
         })) {
             <span class="prelude-val">Ok</span>(()) =&gt; CheckResult::Succeed,
             <span class="prelude-val">Err</span>(err) =&gt; CheckResult::Crash(get_panic_string(err)),
