@@ -129,13 +129,20 @@
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
 <a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Optimization driver using ISLE rewrite rules on an egraph.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::egraph::{NewOrExistingInst, OptimizeCtx};
 <span class="kw">use </span><span class="kw">crate</span>::ir::condcodes;
 <span class="kw">pub use </span><span class="kw">crate</span>::ir::condcodes::{FloatCC, IntCC};
 <span class="kw">use </span><span class="kw">crate</span>::ir::dfg::ValueDef;
-<span class="kw">pub use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64, Imm64, Offset32, Uimm32, Uimm64, Uimm8};
+<span class="kw">pub use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64, Imm64, Offset32, Uimm32, Uimm64, Uimm8, V128Imm};
 <span class="kw">pub use </span><span class="kw">crate</span>::ir::types::<span class="kw-2">*</span>;
 <span class="kw">pub use </span><span class="kw">crate</span>::ir::{
     dynamic_to_fixed, AtomicRmwOp, Block, BlockCall, Constant, DataFlowGraph, DynamicStackSlot,
@@ -258,6 +265,13 @@
         <span class="self">self</span>.ctx.subsume_values.insert(value);
         <span class="self">self</span>.ctx.stats.subsume += <span class="number">1</span>;
         value
+    }
+
+    <span class="kw">fn </span>splat64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: u64) -&gt; Constant {
+        <span class="kw">let </span>val = u128::from(val);
+        <span class="kw">let </span>val = val | (val &lt;&lt; <span class="number">64</span>);
+        <span class="kw">let </span>imm = V128Imm(val.to_le_bytes());
+        <span class="self">self</span>.ctx.func.dfg.constants.insert(imm.into())
     }
 }
 </code></pre></div>
