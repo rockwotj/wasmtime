@@ -750,6 +750,19 @@
 <a href="#750" id="750">750</a>
 <a href="#751" id="751">751</a>
 <a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Contains the common Wasmtime command line interface (CLI) flags.
 
 </span><span class="attr">#![deny(trivial_numeric_casts, unused_extern_crates, unstable_features)]
@@ -772,7 +785,7 @@
 <span class="kw">use </span>clap::Parser;
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::path::PathBuf;
-<span class="kw">use </span>wasmtime::{Config, ProfilingStrategy};
+<span class="kw">use </span>wasmtime::{Config, ProfilingStrategy, Strategy};
 
 <span class="kw">pub const </span>SUPPORTED_WASM_FEATURES: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span>str, <span class="kw-2">&amp;</span>str)] = <span class="kw-2">&amp;</span>[
     (<span class="string">&quot;all&quot;</span>, <span class="string">&quot;enables all supported WebAssembly features&quot;</span>),
@@ -992,6 +1005,12 @@
     /// performance cost.
     </span><span class="attr">#[clap(long)]
     </span><span class="kw">pub </span>relaxed_simd_deterministic: bool,
+    <span class="doccomment">/// Explicitly specify the name of the compiler to use for WebAssembly.
+    ///
+    /// Currently only `cranelift` and `winch` are supported, but not all builds
+    /// of Wasmtime have both built in.
+    </span><span class="attr">#[clap(long)]
+    </span><span class="kw">pub </span>compiler: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="kw">impl </span>CommonOptions {
@@ -1009,6 +1028,13 @@
 
     <span class="kw">pub fn </span>config(<span class="kw-2">&amp;</span><span class="self">self</span>, target: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Config&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>config = Config::new();
+
+        config.strategy(<span class="kw">match </span><span class="self">self</span>.compiler.as_deref() {
+            <span class="prelude-val">None </span>=&gt; Strategy::Auto,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;cranelift&quot;</span>) =&gt; Strategy::Cranelift,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;winch&quot;</span>) =&gt; Strategy::Winch,
+            <span class="prelude-val">Some</span>(s) =&gt; <span class="macro">bail!</span>(<span class="string">&quot;unknown compiler: {s}&quot;</span>),
+        });
 
         <span class="comment">// Set the target before setting any cranelift options, since the
         // target will reset any target-specific options.

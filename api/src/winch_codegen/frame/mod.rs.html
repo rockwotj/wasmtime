@@ -142,6 +142,28 @@
 <a href="#142" id="142">142</a>
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::abi::{align_to, ty_size, ABIArg, ABISig, LocalSlot, ABI};
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>smallvec::SmallVec;
@@ -164,6 +186,47 @@
     </span>}
 }
 
+<span class="doccomment">/// An abstraction to read the defined locals from the WASM binary for a function.
+</span><span class="attr">#[derive(Default)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>DefinedLocals {
+    <span class="doccomment">/// The defined locals for a function.
+    </span><span class="kw">pub </span>defined_locals: Locals,
+    <span class="doccomment">/// The size of the defined locals.
+    </span><span class="kw">pub </span>stack_size: u32,
+}
+
+<span class="kw">impl </span>DefinedLocals {
+    <span class="doccomment">/// Compute the local slots for a WASM function.
+    </span><span class="kw">pub fn </span>new(
+        reader: <span class="kw-2">&amp;mut </span>BinaryReader&lt;<span class="lifetime">&#39;_</span>&gt;,
+        validator: <span class="kw-2">&amp;mut </span>FuncValidator&lt;ValidatorResources&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>next_stack = <span class="number">0</span>;
+        <span class="comment">// The first 32 bits of a WASM binary function describe the number of locals
+        </span><span class="kw">let </span>local_count = reader.read_var_u32()<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>slots: Locals = Default::default();
+
+        <span class="kw">for _ in </span><span class="number">0</span>..local_count {
+            <span class="kw">let </span>position = reader.original_position();
+            <span class="kw">let </span>count = reader.read_var_u32()<span class="question-mark">?</span>;
+            <span class="kw">let </span>ty = reader.read()<span class="question-mark">?</span>;
+            validator.define_locals(position, count, ty)<span class="question-mark">?</span>;
+
+            <span class="kw">let </span>ty: ValType = ty.try_into()<span class="question-mark">?</span>;
+            <span class="kw">for _ in </span><span class="number">0</span>..count {
+                <span class="kw">let </span>ty_size = ty_size(<span class="kw-2">&amp;</span>ty);
+                next_stack = align_to(next_stack, ty_size) + ty_size;
+                slots.push(LocalSlot::new(ty, next_stack));
+            }
+        }
+
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+            defined_locals: slots,
+            stack_size: next_stack,
+        })
+    }
+}
+
 <span class="doccomment">/// Frame handler abstraction.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Frame {
     <span class="doccomment">/// The size of the entire local area; the arguments plus the function defined locals.
@@ -181,22 +244,29 @@
 
 <span class="kw">impl </span>Frame {
     <span class="doccomment">/// Allocate a new Frame.
-    </span><span class="kw">pub fn </span>new&lt;A: ABI&gt;(
-        sig: <span class="kw-2">&amp;</span>ABISig,
-        body: <span class="kw-2">&amp;mut </span>BinaryReader&lt;<span class="lifetime">&#39;_</span>&gt;,
-        validator: <span class="kw-2">&amp;mut </span>FuncValidator&lt;ValidatorResources&gt;,
-        abi: <span class="kw-2">&amp;</span>A,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>new&lt;A: ABI&gt;(sig: <span class="kw-2">&amp;</span>ABISig, defined_locals: <span class="kw-2">&amp;</span>DefinedLocals, abi: <span class="kw-2">&amp;</span>A) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>(<span class="kw-2">mut </span>locals, defined_locals_start) = <span class="self">Self</span>::compute_arg_slots(sig, abi)<span class="question-mark">?</span>;
-        <span class="kw">let </span>(defined_slots, defined_locals_end) =
-            <span class="self">Self</span>::compute_defined_slots(body, validator, defined_locals_start)<span class="question-mark">?</span>;
-        locals.extend(defined_slots);
-        <span class="kw">let </span>locals_size = align_to(defined_locals_end, abi.stack_align().into());
+
+        <span class="comment">// The defined locals have a zero-based offset by default
+        // so we need to add the defined locals start to the offset.
+        </span>locals.extend(
+            defined_locals
+                .defined_locals
+                .iter()
+                .map(|l| LocalSlot::new(l.ty, l.offset + defined_locals_start)),
+        );
+
+        <span class="kw">let </span>locals_size = align_to(
+            defined_locals_start + defined_locals.stack_size,
+            abi.stack_align().into(),
+        );
 
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             locals,
             locals_size,
-            defined_locals_range: DefinedLocalsRange(defined_locals_start..defined_locals_end),
+            defined_locals_range: DefinedLocalsRange(
+                defined_locals_start..defined_locals.stack_size,
+            ),
         })
     }
 
@@ -258,32 +328,6 @@
             // the stack; which is the frame pointer + return address.
             </span>ABIArg::Stack { ty, offset } =&gt; LocalSlot::stack_arg(<span class="kw-2">*</span>ty, offset + arg_base_offset),
         }
-    }
-
-    <span class="kw">fn </span>compute_defined_slots(
-        reader: <span class="kw-2">&amp;mut </span>BinaryReader&lt;<span class="lifetime">&#39;_</span>&gt;,
-        validator: <span class="kw-2">&amp;mut </span>FuncValidator&lt;ValidatorResources&gt;,
-        next_stack: u32,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(Locals, u32)&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>next_stack = next_stack;
-        <span class="kw">let </span>local_count = reader.read_var_u32()<span class="question-mark">?</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>slots: Locals = Default::default();
-
-        <span class="kw">for _ in </span><span class="number">0</span>..local_count {
-            <span class="kw">let </span>position = reader.original_position();
-            <span class="kw">let </span>count = reader.read_var_u32()<span class="question-mark">?</span>;
-            <span class="kw">let </span>ty = reader.read()<span class="question-mark">?</span>;
-            validator.define_locals(position, count, ty)<span class="question-mark">?</span>;
-
-            <span class="kw">let </span>ty: ValType = ty.try_into()<span class="question-mark">?</span>;
-            <span class="kw">for _ in </span><span class="number">0</span>..count {
-                <span class="kw">let </span>ty_size = ty_size(<span class="kw-2">&amp;</span>ty);
-                next_stack = align_to(next_stack, ty_size) + ty_size;
-                slots.push(LocalSlot::new(ty, next_stack));
-            }
-        }
-
-        <span class="prelude-val">Ok</span>((slots, next_stack))
     }
 }
 </code></pre></div>

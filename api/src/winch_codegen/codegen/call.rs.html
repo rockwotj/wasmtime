@@ -213,19 +213,12 @@
 <a href="#213" id="213">213</a>
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
-<a href="#220" id="220">220</a>
-<a href="#221" id="221">221</a>
-<a href="#222" id="222">222</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Function call emission.  For more details around the ABI and
 //! calling convention, see [ABI].
 </span><span class="kw">use </span><span class="kw">super</span>::CodeGenContext;
 <span class="kw">use crate</span>::{
-    abi::{align_to, ABIArg, ABIResult, ABISig, ABI},
-    masm::{MacroAssembler, OperandSize},
+    abi::{align_to, calculate_frame_adjustment, ABIArg, ABIResult, ABISig, ABI},
+    masm::{CalleeKind, MacroAssembler, OperandSize},
     reg::Reg,
     stack::Val,
 };
@@ -261,7 +254,7 @@
     /// │                                                  │
     /// │  Stack space created by any previous spills      │
     /// │  from the value stack; and which memory values   │
-    /// │  are used as function arguments.                 │        
+    /// │  are used as function arguments.                 │
     /// │                                                  │
     /// ├──────────────────────────────────────────────────┤ ---&gt; The Wasm value stack at this point in time would look like:
     /// │                                                  │      [ Reg | Reg | Mem(offset) | Mem(offset) ]
@@ -273,7 +266,7 @@
     /// ├─────────────────────────────────────────────────┬┤ ---&gt; The Wasm value stack at this point in time would look like:
     /// │                                                  │      [ Mem(offset) | Mem(offset) | Mem(offset) | Mem(offset) ]
     /// │                                                  │      Assuming that the callee takes 4 arguments, we calculate
-    /// │                                                  │      2 spilled registers + 2 memory values; all of which will be used  
+    /// │                                                  │      2 spilled registers + 2 memory values; all of which will be used
     /// │   Stack space allocated for                      │      as arguments to the call via `assign_args`, thus the memory they represent is
     /// │   the callee function arguments in the stack;    │      is considered to be consumed by the call.
     /// │   represented by `arg_stack_space`               │
@@ -281,7 +274,7 @@
     /// │                                                  │
     /// │                                                  │
     /// └──────────────────────────────────────────────────┘ ------&gt; Stack pointer when emitting the call
-    ///    
+    ///
     </span>total_stack_space: u32,
     <span class="doccomment">/// The total stack space needed for the callee arguments on the
     /// stack, including any adjustments to the function&#39;s frame and
@@ -383,7 +376,7 @@
     ) {
         masm.reserve_stack(<span class="self">self</span>.arg_stack_space);
         <span class="self">self</span>.assign_args(context, masm, &lt;A <span class="kw">as </span>ABI&gt;::scratch_reg());
-        masm.call(callee);
+        masm.call(CalleeKind::Direct(callee));
         masm.free_stack(<span class="self">self</span>.total_stack_space);
         context.drop_last(<span class="self">self</span>.abi_sig.params.len());
         <span class="comment">// The stack pointer at the end of the function call
@@ -434,13 +427,6 @@
             }
         }
     }
-}
-
-<span class="doccomment">/// Calculates the delta needed to adjust a function&#39;s frame plus some
-/// addend to a given alignment.
-</span><span class="kw">fn </span>calculate_frame_adjustment(frame_size: u32, addend: u32, alignment: u32) -&gt; u32 {
-    <span class="kw">let </span>total = frame_size + addend;
-    (alignment - (total % alignment)) % alignment
 }
 </code></pre></div>
 </section></main></body></html>

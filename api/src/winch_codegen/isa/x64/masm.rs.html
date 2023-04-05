@@ -261,14 +261,18 @@
 <a href="#261" id="261">261</a>
 <a href="#262" id="262">262</a>
 <a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     address::Address,
     asm::{Assembler, Operand},
     regs::{<span class="self">self</span>, rbp, rsp},
 };
-<span class="kw">use </span><span class="kw">crate</span>::isa::reg::Reg;
 <span class="kw">use </span><span class="kw">crate</span>::masm::{DivKind, MacroAssembler <span class="kw">as </span>Masm, OperandSize, RegImm, RemKind};
 <span class="kw">use crate</span>::{abi::LocalSlot, codegen::CodeGenContext, stack::Val};
+<span class="kw">use crate</span>::{isa::reg::Reg, masm::CalleeKind};
 <span class="kw">use </span>cranelift_codegen::{isa::x64::settings <span class="kw">as </span>x64_settings, settings, Final, MachBufferFinalized};
 
 <span class="doccomment">/// x64 MacroAssembler.
@@ -377,7 +381,7 @@
         </span><span class="self">self</span>.decrement_sp(<span class="number">8</span>);
     }
 
-    <span class="kw">fn </span>call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, callee: u32) {
+    <span class="kw">fn </span>call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, callee: CalleeKind) {
         <span class="self">self</span>.asm.call(callee);
     }
 
@@ -387,7 +391,7 @@
         <span class="self">self</span>.asm.mov(src, dst, size);
     }
 
-    <span class="kw">fn </span>sp_offset(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u32 {
+    <span class="kw">fn </span>sp_offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
         <span class="self">self</span>.sp_offset
     }
 
@@ -498,6 +502,10 @@
 
     <span class="kw">fn </span>finalize(<span class="self">self</span>) -&gt; MachBufferFinalized&lt;Final&gt; {
         <span class="self">self</span>.asm.finalize()
+    }
+
+    <span class="kw">fn </span>address_from_reg(<span class="kw-2">&amp;</span><span class="self">self</span>, reg: Reg, offset: u32) -&gt; <span class="self">Self</span>::Address {
+        Address::offset(reg, offset)
     }
 }
 

@@ -1507,7 +1507,7 @@
     /// # }
     /// ```
     </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
     </span><span class="kw">pub fn </span>new(engine: <span class="kw-2">&amp;</span>Engine, bytes: <span class="kw">impl </span>AsRef&lt;[u8]&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Module&gt; {
         <span class="kw">let </span>bytes = bytes.as_ref();
         <span class="attr">#[cfg(feature = <span class="string">&quot;wat&quot;</span>)]
@@ -1544,7 +1544,7 @@
     /// # }
     /// ```
     </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
     </span><span class="kw">pub fn </span>from_file(engine: <span class="kw-2">&amp;</span>Engine, file: <span class="kw">impl </span>AsRef&lt;Path&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Module&gt; {
         <span class="kw">match </span><span class="self">Self</span>::new(
             engine,
@@ -1597,7 +1597,7 @@
     /// # }
     /// ```
     </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
     </span><span class="kw">pub fn </span>from_binary(engine: <span class="kw-2">&amp;</span>Engine, binary: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Module&gt; {
         engine
             .check_compatible_with_native_host()
@@ -1669,7 +1669,7 @@
     /// reflect the current state of the file, not necessarily the origianl
     /// state of the file.
     </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
     </span><span class="kw">pub unsafe fn </span>from_trusted_file(engine: <span class="kw-2">&amp;</span>Engine, file: <span class="kw">impl </span>AsRef&lt;Path&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Module&gt; {
         <span class="kw">let </span>mmap = MmapVec::from_file(file.as_ref())<span class="question-mark">?</span>;
         <span class="kw">if </span><span class="kw-2">&amp;</span>mmap[<span class="number">0</span>..<span class="number">4</span>] == <span class="string">b&quot;\x7fELF&quot; </span>{
@@ -2049,7 +2049,7 @@
     /// this method can be useful to get the serialized version without
     /// compiling twice.
     </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
     </span><span class="kw">pub fn </span>serialize(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;&gt; {
         <span class="comment">// The current representation of compiled modules within a compiled
         // component means that it cannot be serialized. The mmap returned here

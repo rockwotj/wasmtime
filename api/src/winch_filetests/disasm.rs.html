@@ -78,7 +78,7 @@
 <span class="kw">use </span>winch_codegen::TargetIsa;
 
 <span class="doccomment">/// Disassemble and print a machine code buffer.
-</span><span class="kw">pub fn </span>disasm(bytes: <span class="kw-2">&amp;</span>[u8], isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;&gt; {
+</span><span class="kw">pub fn </span>disasm(bytes: <span class="kw-2">&amp;</span>[u8], isa: <span class="kw-2">&amp;</span>Box&lt;<span class="kw">dyn </span>TargetIsa&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;&gt; {
     <span class="kw">let </span>dis = disassembler_for(isa)<span class="question-mark">?</span>;
     <span class="kw">let </span>insts = dis.disasm_all(bytes, <span class="number">0x0</span>).unwrap();
 
@@ -115,7 +115,7 @@
     <span class="prelude-val">Ok</span>(disassembled_lines)
 }
 
-<span class="kw">fn </span>disassembler_for(isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa) -&gt; <span class="prelude-ty">Result</span>&lt;Capstone&gt; {
+<span class="kw">fn </span>disassembler_for(isa: <span class="kw-2">&amp;</span>Box&lt;<span class="kw">dyn </span>TargetIsa&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Capstone&gt; {
     <span class="kw">let </span>disasm = <span class="kw">match </span>isa.triple().architecture {
         Architecture::X86_64 =&gt; Capstone::new()
             .x86()

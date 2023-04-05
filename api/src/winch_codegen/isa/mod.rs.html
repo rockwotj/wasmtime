@@ -131,6 +131,10 @@
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
 <a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
 </pre><pre class="rust"><code><span class="kw">use </span>anyhow::{anyhow, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>core::fmt::Formatter;
 <span class="kw">use </span>cranelift_codegen::isa::{CallConv, IsaBuilder};
@@ -223,12 +227,13 @@
         <span class="bool-val">false
     </span>}
 
-    <span class="kw">fn </span>compile_function(
+    <span class="doccomment">/// Compile a function.
+    </span><span class="kw">fn </span>compile_function(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         sig: <span class="kw-2">&amp;</span>FuncType,
         body: <span class="kw-2">&amp;</span>FunctionBody,
         env: <span class="kw-2">&amp;</span><span class="kw">dyn </span>FuncEnv,
-        validator: FuncValidator&lt;ValidatorResources&gt;,
+        validator: <span class="kw-2">&amp;mut </span>FuncValidator&lt;ValidatorResources&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt;;
 
     <span class="doccomment">/// Get the default calling convention of the underlying target triple.
@@ -252,6 +257,9 @@
 
     <span class="doccomment">/// See `cranelift_codegen::isa::TargetIsa::function_alignment`.
     </span><span class="kw">fn </span>function_alignment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32;
+
+    <span class="doccomment">/// Generate a trampoline that can be used to call a wasm function from wasmtime.
+    </span><span class="kw">fn </span>host_to_wasm_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, ty: <span class="kw-2">&amp;</span>FuncType) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt;;
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa {

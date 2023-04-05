@@ -2046,6 +2046,21 @@
 <a href="#2046" id="2046">2046</a>
 <a href="#2047" id="2047">2047</a>
 <a href="#2048" id="2048">2048</a>
+<a href="#2049" id="2049">2049</a>
+<a href="#2050" id="2050">2050</a>
+<a href="#2051" id="2051">2051</a>
+<a href="#2052" id="2052">2052</a>
+<a href="#2053" id="2053">2053</a>
+<a href="#2054" id="2054">2054</a>
+<a href="#2055" id="2055">2055</a>
+<a href="#2056" id="2056">2056</a>
+<a href="#2057" id="2057">2057</a>
+<a href="#2058" id="2058">2058</a>
+<a href="#2059" id="2059">2059</a>
+<a href="#2060" id="2060">2060</a>
+<a href="#2061" id="2061">2061</a>
+<a href="#2062" id="2062">2062</a>
+<a href="#2063" id="2063">2063</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::memory::MemoryCreator;
 <span class="kw">use </span><span class="kw">crate</span>::trampoline::MemoryCreatorProxy;
 <span class="kw">use </span>anyhow::{bail, <span class="prelude-ty">Result</span>};
@@ -2268,7 +2283,7 @@
     ///
     /// This method will error if the given target triple is not supported.
     </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
     </span><span class="kw">pub fn </span>target(<span class="kw-2">&amp;mut </span><span class="self">self</span>, target: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt; {
         <span class="self">self</span>.compiler_config.target =
             <span class="prelude-val">Some</span>(target_lexicon::Triple::from_str(target).map_err(|e| <span class="macro">anyhow::anyhow!</span>(e))<span class="question-mark">?</span>);
@@ -2868,7 +2883,7 @@
     ///
     /// The default value for this is `Strategy::Auto`.
     </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
     </span><span class="kw">pub fn </span>strategy(<span class="kw-2">&amp;mut </span><span class="self">self</span>, strategy: Strategy) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="self">self</span>.compiler_config.strategy = strategy;
         <span class="self">self
@@ -2902,7 +2917,7 @@
     ///
     /// The default value for this is `false`
     </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
     </span><span class="kw">pub fn </span>cranelift_debug_verifier(<span class="kw-2">&amp;mut </span><span class="self">self</span>, enable: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">let </span>val = <span class="kw">if </span>enable { <span class="string">&quot;true&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;false&quot; </span>};
         <span class="self">self</span>.compiler_config
@@ -2919,7 +2934,7 @@
     ///
     /// The default value for this is `OptLevel::None`.
     </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
     </span><span class="kw">pub fn </span>cranelift_opt_level(<span class="kw-2">&amp;mut </span><span class="self">self</span>, level: OptLevel) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">let </span>val = <span class="kw">match </span>level {
             OptLevel::None =&gt; <span class="string">&quot;none&quot;</span>,
@@ -2943,7 +2958,7 @@
     ///
     /// The default value for this is `true`.
     </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
     </span><span class="attr">#[deprecated(
         since = <span class="string">&quot;5.0.0&quot;</span>,
         note = <span class="string">&quot;egraphs will be the default and this method will be removed in a future version.&quot;
@@ -2965,7 +2980,7 @@
     ///
     /// The default value for this is `false`
     </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
     </span><span class="kw">pub fn </span>cranelift_nan_canonicalization(<span class="kw-2">&amp;mut </span><span class="self">self</span>, enable: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">let </span>val = <span class="kw">if </span>enable { <span class="string">&quot;true&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;false&quot; </span>};
         <span class="self">self</span>.compiler_config
@@ -2991,7 +3006,7 @@
     /// cause `Engine::new` fail if the flag&#39;s name does not exist, or the value is not appropriate
     /// for the flag type.
     </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
     </span><span class="kw">pub unsafe fn </span>cranelift_flag_enable(<span class="kw-2">&amp;mut </span><span class="self">self</span>, flag: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="self">self</span>.compiler_config.flags.insert(flag.to_string());
         <span class="self">self
@@ -3017,7 +3032,7 @@
     /// For example, feature `wasm_backtrace` will set `unwind_info` to `true`, but if it&#39;s
     /// manually set to false then it will fail.
     </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
     </span><span class="kw">pub unsafe fn </span>cranelift_flag_set(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="self">self</span>.compiler_config
             .settings
@@ -3594,7 +3609,18 @@
     <span class="attr">#[cfg(compiler)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>build_compiler(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>wasmtime_environ::Compiler&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>compiler = <span class="kw">match </span><span class="self">self</span>.compiler_config.strategy {
-            Strategy::Auto | Strategy::Cranelift =&gt; wasmtime_cranelift::builder(),
+            <span class="attr">#[cfg(feature = <span class="string">&quot;cranelift&quot;</span>)]
+            </span>Strategy::Auto =&gt; wasmtime_cranelift::builder(),
+            <span class="attr">#[cfg(all(feature = <span class="string">&quot;winch&quot;</span>, not(feature = <span class="string">&quot;cranelift&quot;</span>)))]
+            </span>Strategy::Auto =&gt; wasmtime_winch::builder(),
+            <span class="attr">#[cfg(feature = <span class="string">&quot;cranelift&quot;</span>)]
+            </span>Strategy::Cranelift =&gt; wasmtime_cranelift::builder(),
+            <span class="attr">#[cfg(not(feature = <span class="string">&quot;cranelift&quot;</span>))]
+            </span>Strategy::Cranelift =&gt; <span class="macro">bail!</span>(<span class="string">&quot;cranelift support not compiled in&quot;</span>),
+            <span class="attr">#[cfg(feature = <span class="string">&quot;winch&quot;</span>)]
+            </span>Strategy::Winch =&gt; wasmtime_winch::builder(),
+            <span class="attr">#[cfg(not(feature = <span class="string">&quot;winch&quot;</span>))]
+            </span>Strategy::Winch =&gt; <span class="macro">bail!</span>(<span class="string">&quot;winch support not compiled in&quot;</span>),
         };
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(target) = <span class="kw-2">&amp;</span><span class="self">self</span>.compiler_config.target {
@@ -3759,6 +3785,10 @@
     <span class="doccomment">/// Currently the default backend, Cranelift aims to be a reasonably fast
     /// code generator which generates high quality machine code.
     </span>Cranelift,
+
+    <span class="doccomment">/// A baseline compiler for WebAssembly, currently under active development and not ready for
+    /// production applications.
+    </span>Winch,
 }
 
 <span class="doccomment">/// Possible optimization levels for the Cranelift codegen backend.

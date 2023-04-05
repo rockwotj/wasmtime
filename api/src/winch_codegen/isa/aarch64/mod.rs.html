@@ -114,11 +114,17 @@
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="self">self</span>::regs::{scratch, ALL_GPR};
 <span class="kw">use crate</span>::{
     abi::ABI,
     codegen::{CodeGen, CodeGenContext},
-    frame::Frame,
+    frame::{DefinedLocals, Frame},
     isa::{Builder, TargetIsa},
     masm::MacroAssembler,
     regalloc::RegAlloc,
@@ -202,14 +208,16 @@
         sig: <span class="kw-2">&amp;</span>FuncType,
         body: <span class="kw-2">&amp;</span>FunctionBody,
         env: <span class="kw-2">&amp;</span><span class="kw">dyn </span>FuncEnv,
-        <span class="kw-2">mut </span>validator: FuncValidator&lt;ValidatorResources&gt;,
+        validator: <span class="kw-2">&amp;mut </span>FuncValidator&lt;ValidatorResources&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>body = body.get_binary_reader();
         <span class="kw">let </span><span class="kw-2">mut </span>masm = Aarch64Masm::new(<span class="self">self</span>.shared_flags.clone());
         <span class="kw">let </span>stack = Stack::new();
         <span class="kw">let </span>abi = abi::Aarch64ABI::default();
         <span class="kw">let </span>abi_sig = abi.sig(sig);
-        <span class="kw">let </span>frame = Frame::new(<span class="kw-2">&amp;</span>abi_sig, <span class="kw-2">&amp;mut </span>body, <span class="kw-2">&amp;mut </span>validator, <span class="kw-2">&amp;</span>abi)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>defined_locals = DefinedLocals::new(<span class="kw-2">&amp;mut </span>body, validator)<span class="question-mark">?</span>;
+        <span class="kw">let </span>frame = Frame::new(<span class="kw-2">&amp;</span>abi_sig, <span class="kw-2">&amp;</span>defined_locals, <span class="kw-2">&amp;</span>abi)<span class="question-mark">?</span>;
         <span class="comment">// TODO: Add floating point bitmask
         </span><span class="kw">let </span>regalloc = RegAlloc::new(RegSet::new(ALL_GPR, <span class="number">0</span>), scratch());
         <span class="kw">let </span>codegen_context = CodeGenContext::new(regalloc, stack, <span class="kw-2">&amp;</span>frame);
@@ -229,6 +237,10 @@
         <span class="comment">// See `cranelift_codegen::isa::TargetIsa::function_alignment`.
         </span><span class="number">32
     </span>}
+
+    <span class="kw">fn </span>host_to_wasm_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, _ty: <span class="kw-2">&amp;</span>FuncType) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt; {
+        <span class="macro">todo!</span>()
+    }
 }
 </code></pre></div>
 </section></main></body></html>

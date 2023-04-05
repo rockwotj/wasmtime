@@ -70,6 +70,16 @@
 <a href="#70" id="70">70</a>
 <a href="#71" id="71">71</a>
 <a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
 </pre><pre class="rust"><code><span class="kw">use </span>anyhow::{Context, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>clap::Parser;
 <span class="kw">use </span>cranelift_codegen::settings;
@@ -113,7 +123,7 @@
     <span class="kw">let </span>body_inputs = std::mem::take(<span class="kw-2">&amp;mut </span>translation.function_body_inputs);
     <span class="kw">let </span>module = <span class="kw-2">&amp;</span>translation.module;
     <span class="kw">let </span>types = translation.get_types();
-    <span class="kw">let </span>env = FuncEnv::new(module, <span class="kw-2">&amp;</span>types, <span class="kw-2">&amp;*</span>isa);
+    <span class="kw">let </span>env = FuncEnv::new(module, <span class="kw-2">&amp;</span>types, <span class="kw-2">&amp;</span>isa);
 
     body_inputs
         .into_iter()
@@ -129,13 +139,23 @@
         .function_at(index.as_u32())
         .expect(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;function type at index {:?}&quot;</span>, index.as_u32()));
     <span class="kw">let </span>FunctionBodyData { body, validator } = f.<span class="number">1</span>;
-    <span class="kw">let </span>validator = validator.into_validator(Default::default());
+    <span class="kw">let </span><span class="kw-2">mut </span>validator = validator.into_validator(Default::default());
     <span class="kw">let </span>buffer = env
         .isa
-        .compile_function(<span class="kw-2">&amp;</span>sig, <span class="kw-2">&amp;</span>body, env, validator)
+        .compile_function(<span class="kw-2">&amp;</span>sig, <span class="kw-2">&amp;</span>body, env, <span class="kw-2">&amp;mut </span>validator)
         .expect(<span class="string">&quot;Couldn&#39;t compile function&quot;</span>);
 
     <span class="macro">println!</span>(<span class="string">&quot;Disassembly for function: {}&quot;</span>, index.as_u32());
+    disasm(buffer.data(), env.isa)<span class="question-mark">?
+        </span>.iter()
+        .for_each(|s| <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, s));
+
+    <span class="kw">let </span>buffer = env
+        .isa
+        .host_to_wasm_trampoline(sig)
+        .expect(<span class="string">&quot;Couldn&#39;t compile trampoline&quot;</span>);
+
+    <span class="macro">println!</span>(<span class="string">&quot;Disassembly for trampoline: {}&quot;</span>, index.as_u32());
     disasm(buffer.data(), env.isa)<span class="question-mark">?
         </span>.iter()
         .for_each(|s| <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, s));

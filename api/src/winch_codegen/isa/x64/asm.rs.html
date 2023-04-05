@@ -483,11 +483,25 @@
 <a href="#483" id="483">483</a>
 <a href="#484" id="484">484</a>
 <a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Assembler library implementation for x64.
 
 </span><span class="kw">use crate</span>::{
     isa::reg::Reg,
-    masm::{DivKind, OperandSize, RemKind},
+    masm::{CalleeKind, DivKind, OperandSize, RemKind},
 };
 <span class="kw">use </span>cranelift_codegen::{
     entity::EntityRef,
@@ -954,18 +968,32 @@
         });
     }
 
-    <span class="doccomment">/// Direct function call to a user defined function.
-    </span><span class="kw">pub fn </span>call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, callee: u32) {
-        <span class="kw">let </span>dest = ExternalName::user(UserExternalNameRef::new(callee <span class="kw">as </span>usize));
-        <span class="self">self</span>.emit(Inst::CallKnown {
-            dest,
-            info: Box::new(CallInfo {
-                uses: <span class="macro">smallvec!</span>[],
-                defs: <span class="macro">smallvec!</span>[],
-                clobbers: Default::default(),
-                opcode: Opcode::Call,
-            }),
-        });
+    <span class="kw">pub fn </span>call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, callee: CalleeKind) {
+        <span class="kw">match </span>callee {
+            CalleeKind::Indirect(reg) =&gt; {
+                <span class="self">self</span>.emit(Inst::CallUnknown {
+                    dest: RegMem::reg(reg.into()),
+                    info: Box::new(CallInfo {
+                        uses: <span class="macro">smallvec!</span>[],
+                        defs: <span class="macro">smallvec!</span>[],
+                        clobbers: Default::default(),
+                        opcode: Opcode::Call,
+                    }),
+                });
+            }
+            CalleeKind::Direct(index) =&gt; {
+                <span class="kw">let </span>dest = ExternalName::user(UserExternalNameRef::new(index <span class="kw">as </span>usize));
+                <span class="self">self</span>.emit(Inst::CallKnown {
+                    dest,
+                    info: Box::new(CallInfo {
+                        uses: <span class="macro">smallvec!</span>[],
+                        defs: <span class="macro">smallvec!</span>[],
+                        clobbers: Default::default(),
+                        opcode: Opcode::Call,
+                    }),
+                });
+            }
+        }
     }
 }
 </code></pre></div>

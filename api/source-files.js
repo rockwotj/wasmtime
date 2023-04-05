@@ -54,14 +54,14 @@ var sourcesIndex = JSON.parse('{\
 "wasmtime_wasi_crypto":["",[["wiggle_interfaces",[],["asymmetric_common.rs","common.rs","error.rs","key_exchange.rs","mod.rs","signatures.rs","symmetric.rs"]]],["lib.rs"]],\
 "wasmtime_wasi_nn":["",[],["api.rs","ctx.rs","impl.rs","lib.rs","openvino.rs","witx.rs"]],\
 "wasmtime_wasi_threads":["",[],["lib.rs"]],\
-"wasmtime_wast":["",[],["core.rs","lib.rs","spectest.rs","wast.rs"]],\
+"wasmtime_wast":["",[],["component.rs","core.rs","lib.rs","spectest.rs","wast.rs"]],\
 "wasmtime_winch":["",[],["builder.rs","compiler.rs","lib.rs"]],\
 "wasmtime_wit_bindgen":["",[],["lib.rs","rust.rs","source.rs","types.rs"]],\
 "wiggle":["",[],["borrow.rs","error.rs","guest_type.rs","lib.rs","region.rs","wasmtime.rs"]],\
 "wiggle_generate":["",[["types",[],["error.rs","flags.rs","handle.rs","mod.rs","record.rs","variant.rs"]]],["codegen_settings.rs","config.rs","funcs.rs","lib.rs","lifetimes.rs","module_trait.rs","names.rs","wasmtime.rs"]],\
 "wiggle_macro":["",[],["lib.rs"]],\
 "wiggle_test":["",[],["lib.rs"]],\
-"winch_codegen":["",[["abi",[],["local.rs","mod.rs"]],["codegen",[],["call.rs","context.rs","env.rs","mod.rs"]],["frame",[],["mod.rs"]],["isa",[["aarch64",[],["abi.rs","address.rs","asm.rs","masm.rs","mod.rs","regs.rs"]],["x64",[],["abi.rs","address.rs","asm.rs","masm.rs","mod.rs","regs.rs"]]],["mod.rs","reg.rs"]]],["lib.rs","masm.rs","regalloc.rs","regset.rs","stack.rs","visitor.rs"]],\
+"winch_codegen":["",[["abi",[],["local.rs","mod.rs"]],["codegen",[],["call.rs","context.rs","env.rs","mod.rs"]],["frame",[],["mod.rs"]],["isa",[["aarch64",[],["abi.rs","address.rs","asm.rs","masm.rs","mod.rs","regs.rs"]],["x64",[],["abi.rs","address.rs","asm.rs","masm.rs","mod.rs","regs.rs"]]],["mod.rs","reg.rs"]]],["lib.rs","masm.rs","regalloc.rs","regset.rs","stack.rs","trampoline.rs","visitor.rs"]],\
 "winch_environ":["",[],["lib.rs"]],\
 "winch_filetests":["",[],["disasm.rs","lib.rs"]],\
 "winch_test_macros":["",[],["lib.rs"]],\

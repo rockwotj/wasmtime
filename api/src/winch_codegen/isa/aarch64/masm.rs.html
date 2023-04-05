@@ -215,6 +215,10 @@
 <a href="#215" id="215">215</a>
 <a href="#216" id="216">216</a>
 <a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
     address::Address,
     asm::{Assembler, Operand},
@@ -224,7 +228,7 @@
     abi::local::LocalSlot,
     codegen::CodeGenContext,
     isa::reg::Reg,
-    masm::{DivKind, MacroAssembler <span class="kw">as </span>Masm, OperandSize, RegImm, RemKind},
+    masm::{CalleeKind, DivKind, MacroAssembler <span class="kw">as </span>Masm, OperandSize, RegImm, RemKind},
 };
 <span class="kw">use </span>cranelift_codegen::{settings, Final, MachBufferFinalized};
 
@@ -353,7 +357,7 @@
         <span class="self">self</span>.asm.str(src, dst, size);
     }
 
-    <span class="kw">fn </span>call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _callee: u32) {
+    <span class="kw">fn </span>call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _callee: CalleeKind) {
         <span class="macro">todo!</span>()
     }
 
@@ -365,7 +369,7 @@
         <span class="macro">todo!</span>()
     }
 
-    <span class="kw">fn </span>sp_offset(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u32 {
+    <span class="kw">fn </span>sp_offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
         <span class="self">self</span>.sp_offset
     }
 
@@ -410,6 +414,10 @@
         <span class="self">self</span>.asm.str(reg, address, OperandSize::S64);
 
         <span class="self">self</span>.sp_offset
+    }
+
+    <span class="kw">fn </span>address_from_reg(<span class="kw-2">&amp;</span><span class="self">self</span>, reg: Reg, offset: u32) -&gt; <span class="self">Self</span>::Address {
+        Address::offset(reg, offset <span class="kw">as </span>i64)
     }
 }
 

@@ -114,13 +114,34 @@
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::abi::ABI;
-<span class="kw">use </span><span class="kw">crate</span>::codegen::{CodeGen, CodeGenContext};
-<span class="kw">use </span><span class="kw">crate</span>::frame::Frame;
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+</pre><pre class="rust"><code><span class="kw">use crate</span>::{
+    abi::ABI,
+    codegen::{CodeGen, CodeGenContext},
+};
+
+<span class="kw">use </span><span class="kw">crate</span>::frame::{DefinedLocals, Frame};
 <span class="kw">use </span><span class="kw">crate</span>::isa::x64::masm::MacroAssembler <span class="kw">as </span>X64Masm;
 <span class="kw">use </span><span class="kw">crate</span>::masm::MacroAssembler;
 <span class="kw">use </span><span class="kw">crate</span>::regalloc::RegAlloc;
 <span class="kw">use </span><span class="kw">crate</span>::stack::Stack;
+<span class="kw">use </span><span class="kw">crate</span>::trampoline::Trampoline;
 <span class="kw">use </span><span class="kw">crate</span>::FuncEnv;
 <span class="kw">use crate</span>::{
     isa::{Builder, TargetIsa},
@@ -203,14 +224,16 @@
         sig: <span class="kw-2">&amp;</span>FuncType,
         body: <span class="kw-2">&amp;</span>FunctionBody,
         env: <span class="kw-2">&amp;</span><span class="kw">dyn </span>FuncEnv,
-        <span class="kw-2">mut </span>validator: FuncValidator&lt;ValidatorResources&gt;,
+        validator: <span class="kw-2">&amp;mut </span>FuncValidator&lt;ValidatorResources&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>body = body.get_binary_reader();
         <span class="kw">let </span><span class="kw-2">mut </span>masm = X64Masm::new(<span class="self">self</span>.shared_flags.clone(), <span class="self">self</span>.isa_flags.clone());
         <span class="kw">let </span>stack = Stack::new();
         <span class="kw">let </span>abi = abi::X64ABI::default();
         <span class="kw">let </span>abi_sig = abi.sig(sig);
-        <span class="kw">let </span>frame = Frame::new(<span class="kw-2">&amp;</span>abi_sig, <span class="kw-2">&amp;mut </span>body, <span class="kw-2">&amp;mut </span>validator, <span class="kw-2">&amp;</span>abi)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>defined_locals = DefinedLocals::new(<span class="kw-2">&amp;mut </span>body, validator)<span class="question-mark">?</span>;
+        <span class="kw">let </span>frame = Frame::new(<span class="kw-2">&amp;</span>abi_sig, <span class="kw-2">&amp;</span>defined_locals, <span class="kw-2">&amp;</span>abi)<span class="question-mark">?</span>;
         <span class="comment">// TODO Add in floating point bitmask
         </span><span class="kw">let </span>regalloc = RegAlloc::new(RegSet::new(ALL_GPR, <span class="number">0</span>), regs::scratch());
         <span class="kw">let </span>codegen_context = CodeGenContext::new(regalloc, stack, <span class="kw-2">&amp;</span>frame);
@@ -229,6 +252,17 @@
         <span class="comment">// See `cranelift_codegen`&#39;s value of this for more information.
         </span><span class="number">16
     </span>}
+
+    <span class="kw">fn </span>host_to_wasm_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, ty: <span class="kw-2">&amp;</span>FuncType) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt; {
+        <span class="kw">let </span>abi = abi::X64ABI::default();
+        <span class="kw">let </span><span class="kw-2">mut </span>masm = X64Masm::new(<span class="self">self</span>.shared_flags.clone(), <span class="self">self</span>.isa_flags.clone());
+
+        <span class="kw">let </span><span class="kw-2">mut </span>trampoline = Trampoline::new(<span class="kw-2">&amp;mut </span>masm, <span class="kw-2">&amp;</span>abi, regs::scratch(), regs::argv());
+
+        trampoline.emit_host_to_wasm(ty);
+
+        <span class="prelude-val">Ok</span>(masm.finalize())
+    }
 }
 </code></pre></div>
 </section></main></body></html>

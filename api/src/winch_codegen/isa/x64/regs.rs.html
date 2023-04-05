@@ -142,6 +142,18 @@
 <a href="#142" id="142">142</a>
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
 </pre><pre class="rust"><code><span class="doccomment">//! X64 register definition.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::isa::reg::Reg;
@@ -223,6 +235,18 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>scratch() -&gt; Reg {
     r11()
+}
+
+<span class="doccomment">/// This register is used as a scratch register, in the context of trampolines only,
+/// where we assume that callee-saved registers are given the correct handling
+/// according to the system ABI. r12 is chosen given that it&#39;s a callee-saved,
+/// non-argument register.
+///
+/// In the context of all other internal functions, this register is not excluded
+/// from register allocation, so no extra assumptions should be made regarding
+/// its availability.
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>argv() -&gt; Reg {
+    r12()
 }
 
 <span class="kw">fn </span>fpr(enc: u8) -&gt; Reg {

@@ -192,7 +192,7 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>context::<span class="kw-2">*</span>;
 <span class="kw">mod </span>env;
 <span class="kw">pub use </span>env::<span class="kw-2">*</span>;
-<span class="kw">mod </span>call;
+<span class="kw">pub mod </span>call;
 
 <span class="doccomment">/// The code generation abstraction.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>CodeGen&lt;<span class="lifetime">&#39;a</span>, A, M&gt;
@@ -241,7 +241,7 @@
     </span><span class="kw">pub fn </span>emit(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         body: <span class="kw-2">&amp;mut </span>BinaryReader&lt;<span class="lifetime">&#39;a</span>&gt;,
-        validator: FuncValidator&lt;ValidatorResources&gt;,
+        validator: <span class="kw-2">&amp;mut </span>FuncValidator&lt;ValidatorResources&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.emit_start()
             .and_then(|<span class="kw">_</span>| <span class="self">self</span>.emit_body(body, validator))
@@ -260,7 +260,7 @@
     <span class="kw">fn </span>emit_body(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         body: <span class="kw-2">&amp;mut </span>BinaryReader&lt;<span class="lifetime">&#39;a</span>&gt;,
-        <span class="kw-2">mut </span>validator: FuncValidator&lt;ValidatorResources&gt;,
+        validator: <span class="kw-2">&amp;mut </span>FuncValidator&lt;ValidatorResources&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.spill_register_arguments();
         <span class="kw">let </span>defined_locals_range = <span class="kw-2">&amp;</span><span class="self">self</span>.context.frame.defined_locals_range;
