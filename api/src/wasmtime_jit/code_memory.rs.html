@@ -317,6 +317,10 @@
 <a href="#317" id="317">317</a>
 <a href="#318" id="318">318</a>
 <a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Memory management for executable code.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::subslice_range;
@@ -618,7 +622,11 @@
                 obj::LibCall::FmaF32 =&gt; libcalls::relocs::fmaf32 <span class="kw">as </span>usize,
                 obj::LibCall::FmaF64 =&gt; libcalls::relocs::fmaf64 <span class="kw">as </span>usize,
             };
-            <span class="kw-2">*</span><span class="self">self</span>.mmap.as_mut_ptr().add(offset).cast::&lt;usize&gt;() = libcall;
+            <span class="self">self</span>.mmap
+                .as_mut_ptr()
+                .add(offset)
+                .cast::&lt;usize&gt;()
+                .write_unaligned(libcall);
         }
         <span class="prelude-val">Ok</span>(())
     }
