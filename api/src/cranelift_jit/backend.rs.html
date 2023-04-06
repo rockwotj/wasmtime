@@ -965,28 +965,6 @@
 <a href="#965" id="965">965</a>
 <a href="#966" id="966">966</a>
 <a href="#967" id="967">967</a>
-<a href="#968" id="968">968</a>
-<a href="#969" id="969">969</a>
-<a href="#970" id="970">970</a>
-<a href="#971" id="971">971</a>
-<a href="#972" id="972">972</a>
-<a href="#973" id="973">973</a>
-<a href="#974" id="974">974</a>
-<a href="#975" id="975">975</a>
-<a href="#976" id="976">976</a>
-<a href="#977" id="977">977</a>
-<a href="#978" id="978">978</a>
-<a href="#979" id="979">979</a>
-<a href="#980" id="980">980</a>
-<a href="#981" id="981">981</a>
-<a href="#982" id="982">982</a>
-<a href="#983" id="983">983</a>
-<a href="#984" id="984">984</a>
-<a href="#985" id="985">985</a>
-<a href="#986" id="986">986</a>
-<a href="#987" id="987">987</a>
-<a href="#988" id="988">988</a>
-<a href="#989" id="989">989</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines `JITModule`.
 
 </span><span class="kw">use crate</span>::{compiled_blob::CompiledBlob, memory::BranchProtection, memory::Memory};
@@ -1631,43 +1609,6 @@
         <span class="prelude-val">Ok</span>(id)
     }
 
-    <span class="doccomment">/// Use this when you&#39;re building the IR of a function to reference a function.
-    ///
-    /// TODO: Coalesce redundant decls and signatures.
-    /// TODO: Look into ways to reduce the risk of using a FuncRef in the wrong function.
-    </span><span class="kw">fn </span>declare_func_in_func(<span class="kw-2">&amp;mut </span><span class="self">self</span>, func: FuncId, in_func: <span class="kw-2">&amp;mut </span>ir::Function) -&gt; ir::FuncRef {
-        <span class="kw">let </span>decl = <span class="self">self</span>.declarations.get_function_decl(func);
-        <span class="kw">let </span>signature = in_func.import_signature(decl.signature.clone());
-        <span class="kw">let </span>colocated = !<span class="self">self</span>.hotswap_enabled &amp;&amp; decl.linkage.is_final();
-        <span class="kw">let </span>user_name_ref = in_func.declare_imported_user_function(ir::UserExternalName {
-            namespace: <span class="number">0</span>,
-            index: func.as_u32(),
-        });
-        in_func.import_function(ir::ExtFuncData {
-            name: ir::ExternalName::user(user_name_ref),
-            signature,
-            colocated,
-        })
-    }
-
-    <span class="doccomment">/// Use this when you&#39;re building the IR of a function to reference a data object.
-    ///
-    /// TODO: Same as above.
-    </span><span class="kw">fn </span>declare_data_in_func(<span class="kw-2">&amp;</span><span class="self">self</span>, data: DataId, func: <span class="kw-2">&amp;mut </span>ir::Function) -&gt; ir::GlobalValue {
-        <span class="kw">let </span>decl = <span class="self">self</span>.declarations.get_data_decl(data);
-        <span class="kw">let </span>colocated = !<span class="self">self</span>.hotswap_enabled &amp;&amp; decl.linkage.is_final();
-        <span class="kw">let </span>user_name_ref = func.declare_imported_user_function(ir::UserExternalName {
-            namespace: <span class="number">1</span>,
-            index: data.as_u32(),
-        });
-        func.create_global_value(ir::GlobalValueData::Symbol {
-            name: ir::ExternalName::user(user_name_ref),
-            offset: ir::immediates::Imm64::new(<span class="number">0</span>),
-            colocated,
-            tls: decl.tls,
-        })
-    }
-
     <span class="kw">fn </span>define_function_with_control_plane(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         id: FuncId,
@@ -1682,6 +1623,21 @@
 
         <span class="kw">if </span>!<span class="self">self</span>.compiled_functions[id].is_none() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::DuplicateDefinition(decl.name.to_owned()));
+        }
+
+        <span class="kw">if </span><span class="self">self</span>.hotswap_enabled {
+            <span class="comment">// Disable colocated if hotswapping is enabled to avoid a PLT indirection in case of
+            // calls and to allow data objects to be hotswapped in the future.
+            </span><span class="kw">for </span>func <span class="kw">in </span>ctx.func.dfg.ext_funcs.values_mut() {
+                func.colocated = <span class="bool-val">false</span>;
+            }
+
+            <span class="kw">for </span>gv <span class="kw">in </span>ctx.func.global_values.values_mut() {
+                <span class="kw">match </span>gv {
+                    ir::GlobalValueData::Symbol { colocated, .. } =&gt; <span class="kw-2">*</span>colocated = <span class="bool-val">false</span>,
+                    <span class="kw">_ </span>=&gt; {}
+                }
+            }
         }
 
         <span class="comment">// work around borrow-checker to allow reuse of ctx below
