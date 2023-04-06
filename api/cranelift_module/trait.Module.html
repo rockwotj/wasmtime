@@ -40,8 +40,8 @@
     ) -&gt; <a class="type" href="type.ModuleResult.html" title="type cranelift_module::ModuleResult">ModuleResult</a>&lt;<a class="struct" href="struct.ModuleCompiledFunction.html" title="struct cranelift_module::ModuleCompiledFunction">ModuleCompiledFunction</a>&gt;;
 <span class="item-spacer"></span>    fn <a href="#tymethod.define_data" class="fn">define_data</a>(
         &amp;mut self,
-        data: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>,
-        data_ctx: &amp;<a class="struct" href="struct.DataContext.html" title="struct cranelift_module::DataContext">DataContext</a>
+        data_id: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>,
+        data: &amp;<a class="struct" href="struct.DataDescription.html" title="struct cranelift_module::DataDescription">DataDescription</a>
     ) -&gt; <a class="type" href="type.ModuleResult.html" title="type cranelift_module::ModuleResult">ModuleResult</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;;
 
     // Provided methods
@@ -63,13 +63,13 @@
     ) -&gt; <a class="struct" href="../cranelift_codegen/ir/entities/struct.GlobalValue.html" title="struct cranelift_codegen::ir::entities::GlobalValue">GlobalValue</a> { ... }
 <span class="item-spacer"></span>    fn <a href="#method.declare_func_in_data" class="fn">declare_func_in_data</a>(
         &amp;self,
-        func: <a class="struct" href="struct.FuncId.html" title="struct cranelift_module::FuncId">FuncId</a>,
-        ctx: &amp;mut <a class="struct" href="struct.DataContext.html" title="struct cranelift_module::DataContext">DataContext</a>
+        func_id: <a class="struct" href="struct.FuncId.html" title="struct cranelift_module::FuncId">FuncId</a>,
+        data: &amp;mut <a class="struct" href="struct.DataDescription.html" title="struct cranelift_module::DataDescription">DataDescription</a>
     ) -&gt; <a class="struct" href="../cranelift_codegen/ir/entities/struct.FuncRef.html" title="struct cranelift_codegen::ir::entities::FuncRef">FuncRef</a> { ... }
 <span class="item-spacer"></span>    fn <a href="#method.declare_data_in_data" class="fn">declare_data_in_data</a>(
         &amp;self,
-        data: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>,
-        ctx: &amp;mut <a class="struct" href="struct.DataContext.html" title="struct cranelift_module::DataContext">DataContext</a>
+        data_id: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>,
+        data: &amp;mut <a class="struct" href="struct.DataDescription.html" title="struct cranelift_module::DataDescription">DataDescription</a>
     ) -&gt; <a class="struct" href="../cranelift_codegen/ir/entities/struct.GlobalValue.html" title="struct cranelift_codegen::ir::entities::GlobalValue">GlobalValue</a> { ... }
 <span class="item-spacer"></span>    fn <a href="#method.define_function" class="fn">define_function</a>(
         &amp;mut self,
@@ -123,8 +123,8 @@ the emitted instructions for some reason; otherwise, you should use
 <p>Returns the size of the function’s code.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="tymethod.define_data" class="method"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#700">source</a><h4 class="code-header">fn <a href="#tymethod.define_data" class="fn">define_data</a>(
     &amp;mut self,
-    data: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>,
-    data_ctx: &amp;<a class="struct" href="struct.DataContext.html" title="struct cranelift_module::DataContext">DataContext</a>
+    data_id: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>,
+    data: &amp;<a class="struct" href="struct.DataDescription.html" title="struct cranelift_module::DataDescription">DataDescription</a>
 ) -&gt; <a class="type" href="type.ModuleResult.html" title="type cranelift_module::ModuleResult">ModuleResult</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;</h4></section></summary><div class="docblock"><p>Define a data object, producing the data contents from the given <code>DataContext</code>.</p>
 </div></details></div><h2 id="provided-methods" class="small-section-header">Provided Methods<a href="#provided-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="method.get_name" class="method"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#539-541">source</a><h4 class="code-header">fn <a href="#method.get_name" class="fn">get_name</a>(&amp;self, name: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="enum" href="enum.FuncOrDataId.html" title="enum cranelift_module::FuncOrDataId">FuncOrDataId</a>&gt;</h4></section></summary><div class="docblock"><p>Get the module identifier for a given name, if that name
 has been declared.</p>
@@ -151,11 +151,15 @@ calling convention for the <code>TargetIsa</code>.</p>
 TODO: Look into ways to reduce the risk of using a FuncRef in the wrong function.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.declare_data_in_func" class="method"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#628-641">source</a><h4 class="code-header">fn <a href="#method.declare_data_in_func" class="fn">declare_data_in_func</a>(&amp;self, data: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>, func: &amp;mut <a class="struct" href="../cranelift_codegen/ir/function/struct.Function.html" title="struct cranelift_codegen::ir::function::Function">Function</a>) -&gt; <a class="struct" href="../cranelift_codegen/ir/entities/struct.GlobalValue.html" title="struct cranelift_codegen::ir::entities::GlobalValue">GlobalValue</a></h4></section></summary><div class="docblock"><p>Use this when you’re building the IR of a function to reference a data object.</p>
 <p>TODO: Same as above.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.declare_func_in_data" class="method"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#644-646">source</a><h4 class="code-header">fn <a href="#method.declare_func_in_data" class="fn">declare_func_in_data</a>(&amp;self, func: <a class="struct" href="struct.FuncId.html" title="struct cranelift_module::FuncId">FuncId</a>, ctx: &amp;mut <a class="struct" href="struct.DataContext.html" title="struct cranelift_module::DataContext">DataContext</a>) -&gt; <a class="struct" href="../cranelift_codegen/ir/entities/struct.FuncRef.html" title="struct cranelift_codegen::ir::entities::FuncRef">FuncRef</a></h4></section></summary><div class="docblock"><p>TODO: Same as above.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.declare_func_in_data" class="method"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#644-646">source</a><h4 class="code-header">fn <a href="#method.declare_func_in_data" class="fn">declare_func_in_data</a>(
+    &amp;self,
+    func_id: <a class="struct" href="struct.FuncId.html" title="struct cranelift_module::FuncId">FuncId</a>,
+    data: &amp;mut <a class="struct" href="struct.DataDescription.html" title="struct cranelift_module::DataDescription">DataDescription</a>
+) -&gt; <a class="struct" href="../cranelift_codegen/ir/entities/struct.FuncRef.html" title="struct cranelift_codegen::ir::entities::FuncRef">FuncRef</a></h4></section></summary><div class="docblock"><p>TODO: Same as above.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.declare_data_in_data" class="method"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#649-651">source</a><h4 class="code-header">fn <a href="#method.declare_data_in_data" class="fn">declare_data_in_data</a>(
     &amp;self,
-    data: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>,
-    ctx: &amp;mut <a class="struct" href="struct.DataContext.html" title="struct cranelift_module::DataContext">DataContext</a>
+    data_id: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>,
+    data: &amp;mut <a class="struct" href="struct.DataDescription.html" title="struct cranelift_module::DataDescription">DataDescription</a>
 ) -&gt; <a class="struct" href="../cranelift_codegen/ir/entities/struct.GlobalValue.html" title="struct cranelift_codegen::ir::entities::GlobalValue">GlobalValue</a></h4></section></summary><div class="docblock"><p>TODO: Same as above.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.define_function" class="method"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#663-669">source</a><h4 class="code-header">fn <a href="#method.define_function" class="fn">define_function</a>(
     &amp;mut self,
@@ -188,10 +192,14 @@ convenience.</p>
     &amp;mut self,
     func: <a class="struct" href="struct.FuncId.html" title="struct cranelift_module::FuncId">FuncId</a>,
     in_func: &amp;mut <a class="struct" href="../cranelift_codegen/ir/function/struct.Function.html" title="struct cranelift_codegen::ir::function::Function">Function</a>
-) -&gt; <a class="struct" href="../cranelift_codegen/ir/entities/struct.FuncRef.html" title="struct cranelift_codegen::ir::entities::FuncRef">FuncRef</a></h4></section><section id="method.declare_data_in_func-1" class="method trait-impl"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#767-769">source</a><a href="#method.declare_data_in_func-1" class="anchor">§</a><h4 class="code-header">fn <a href="#method.declare_data_in_func" class="fn">declare_data_in_func</a>(&amp;self, data: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>, func: &amp;mut <a class="struct" href="../cranelift_codegen/ir/function/struct.Function.html" title="struct cranelift_codegen::ir::function::Function">Function</a>) -&gt; <a class="struct" href="../cranelift_codegen/ir/entities/struct.GlobalValue.html" title="struct cranelift_codegen::ir::entities::GlobalValue">GlobalValue</a></h4></section><section id="method.declare_func_in_data-1" class="method trait-impl"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#771-773">source</a><a href="#method.declare_func_in_data-1" class="anchor">§</a><h4 class="code-header">fn <a href="#method.declare_func_in_data" class="fn">declare_func_in_data</a>(&amp;self, func: <a class="struct" href="struct.FuncId.html" title="struct cranelift_module::FuncId">FuncId</a>, ctx: &amp;mut <a class="struct" href="struct.DataContext.html" title="struct cranelift_module::DataContext">DataContext</a>) -&gt; <a class="struct" href="../cranelift_codegen/ir/entities/struct.FuncRef.html" title="struct cranelift_codegen::ir::entities::FuncRef">FuncRef</a></h4></section><section id="method.declare_data_in_data-1" class="method trait-impl"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#775-777">source</a><a href="#method.declare_data_in_data-1" class="anchor">§</a><h4 class="code-header">fn <a href="#method.declare_data_in_data" class="fn">declare_data_in_data</a>(
+) -&gt; <a class="struct" href="../cranelift_codegen/ir/entities/struct.FuncRef.html" title="struct cranelift_codegen::ir::entities::FuncRef">FuncRef</a></h4></section><section id="method.declare_data_in_func-1" class="method trait-impl"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#767-769">source</a><a href="#method.declare_data_in_func-1" class="anchor">§</a><h4 class="code-header">fn <a href="#method.declare_data_in_func" class="fn">declare_data_in_func</a>(&amp;self, data: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>, func: &amp;mut <a class="struct" href="../cranelift_codegen/ir/function/struct.Function.html" title="struct cranelift_codegen::ir::function::Function">Function</a>) -&gt; <a class="struct" href="../cranelift_codegen/ir/entities/struct.GlobalValue.html" title="struct cranelift_codegen::ir::entities::GlobalValue">GlobalValue</a></h4></section><section id="method.declare_func_in_data-1" class="method trait-impl"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#771-773">source</a><a href="#method.declare_func_in_data-1" class="anchor">§</a><h4 class="code-header">fn <a href="#method.declare_func_in_data" class="fn">declare_func_in_data</a>(
     &amp;self,
-    data: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>,
-    ctx: &amp;mut <a class="struct" href="struct.DataContext.html" title="struct cranelift_module::DataContext">DataContext</a>
+    func_id: <a class="struct" href="struct.FuncId.html" title="struct cranelift_module::FuncId">FuncId</a>,
+    data: &amp;mut <a class="struct" href="struct.DataDescription.html" title="struct cranelift_module::DataDescription">DataDescription</a>
+) -&gt; <a class="struct" href="../cranelift_codegen/ir/entities/struct.FuncRef.html" title="struct cranelift_codegen::ir::entities::FuncRef">FuncRef</a></h4></section><section id="method.declare_data_in_data-1" class="method trait-impl"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#775-777">source</a><a href="#method.declare_data_in_data-1" class="anchor">§</a><h4 class="code-header">fn <a href="#method.declare_data_in_data" class="fn">declare_data_in_data</a>(
+    &amp;self,
+    data_id: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>,
+    data: &amp;mut <a class="struct" href="struct.DataDescription.html" title="struct cranelift_module::DataDescription">DataDescription</a>
 ) -&gt; <a class="struct" href="../cranelift_codegen/ir/entities/struct.GlobalValue.html" title="struct cranelift_codegen::ir::entities::GlobalValue">GlobalValue</a></h4></section><section id="method.define_function-1" class="method trait-impl"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#779-785">source</a><a href="#method.define_function-1" class="anchor">§</a><h4 class="code-header">fn <a href="#method.define_function" class="fn">define_function</a>(
     &amp;mut self,
     func: <a class="struct" href="struct.FuncId.html" title="struct cranelift_module::FuncId">FuncId</a>,
@@ -210,6 +218,6 @@ convenience.</p>
     relocs: &amp;[<a class="struct" href="../cranelift_codegen/machinst/buffer/struct.MachReloc.html" title="struct cranelift_codegen::machinst::buffer::MachReloc">MachReloc</a>]
 ) -&gt; <a class="type" href="type.ModuleResult.html" title="type cranelift_module::ModuleResult">ModuleResult</a>&lt;<a class="struct" href="struct.ModuleCompiledFunction.html" title="struct cranelift_module::ModuleCompiledFunction">ModuleCompiledFunction</a>&gt;</h4></section><section id="method.define_data" class="method trait-impl"><a class="srclink rightside" href="../src/cranelift_module/module.rs.html#807-809">source</a><a href="#method.define_data" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.define_data" class="fn">define_data</a>(
     &amp;mut self,
-    data: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>,
-    data_ctx: &amp;<a class="struct" href="struct.DataContext.html" title="struct cranelift_module::DataContext">DataContext</a>
+    data_id: <a class="struct" href="struct.DataId.html" title="struct cranelift_module::DataId">DataId</a>,
+    data: &amp;<a class="struct" href="struct.DataDescription.html" title="struct cranelift_module::DataDescription">DataDescription</a>
 ) -&gt; <a class="type" href="type.ModuleResult.html" title="type cranelift_module::ModuleResult">ModuleResult</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;</h4></section></div></details><h2 id="implementors" class="small-section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"></div><script src="../implementors/cranelift_module/module/trait.Module.js" async></script></section></div></main></body></html>

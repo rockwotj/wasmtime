@@ -813,10 +813,10 @@
 </span><span class="comment">// TODO: Should `ir::Function` really have a `name`?
 
 // TODO: Factor out `ir::Function`&#39;s `ext_funcs` and `global_values` into a struct
-// shared with `DataContext`?
+// shared with `DataDescription`?
 
 </span><span class="kw">use </span><span class="kw">super</span>::HashMap;
-<span class="kw">use </span><span class="kw">crate</span>::data_context::DataContext;
+<span class="kw">use </span><span class="kw">crate</span>::data_context::DataDescription;
 <span class="kw">use </span>core::fmt::Display;
 <span class="kw">use </span>cranelift_codegen::binemit::{CodeOffset, Reloc};
 <span class="kw">use </span>cranelift_codegen::entity::{entity_impl, PrimaryMap};
@@ -1158,7 +1158,7 @@
 }
 
 <span class="doccomment">/// A translated `ExternalName` into something global we can handle.
-</span><span class="attr">#[derive(Clone)]
+</span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub enum </span>ModuleExtName {
     <span class="doccomment">/// User defined function, converted from `ExternalName::User`.
     </span>User {
@@ -1451,13 +1451,13 @@
     }
 
     <span class="doccomment">/// TODO: Same as above.
-    </span><span class="kw">fn </span>declare_func_in_data(<span class="kw-2">&amp;</span><span class="self">self</span>, func: FuncId, ctx: <span class="kw-2">&amp;mut </span>DataContext) -&gt; ir::FuncRef {
-        ctx.import_function(ModuleExtName::user(<span class="number">0</span>, func.as_u32()))
+    </span><span class="kw">fn </span>declare_func_in_data(<span class="kw-2">&amp;</span><span class="self">self</span>, func_id: FuncId, data: <span class="kw-2">&amp;mut </span>DataDescription) -&gt; ir::FuncRef {
+        data.import_function(ModuleExtName::user(<span class="number">0</span>, func_id.as_u32()))
     }
 
     <span class="doccomment">/// TODO: Same as above.
-    </span><span class="kw">fn </span>declare_data_in_data(<span class="kw-2">&amp;</span><span class="self">self</span>, data: DataId, ctx: <span class="kw-2">&amp;mut </span>DataContext) -&gt; ir::GlobalValue {
-        ctx.import_global_value(ModuleExtName::user(<span class="number">1</span>, data.as_u32()))
+    </span><span class="kw">fn </span>declare_data_in_data(<span class="kw-2">&amp;</span><span class="self">self</span>, data_id: DataId, data: <span class="kw-2">&amp;mut </span>DataDescription) -&gt; ir::GlobalValue {
+        data.import_global_value(ModuleExtName::user(<span class="number">1</span>, data_id.as_u32()))
     }
 
     <span class="doccomment">/// Define a function, producing the function body from the given `Context`.
@@ -1507,7 +1507,7 @@
     ) -&gt; ModuleResult&lt;ModuleCompiledFunction&gt;;
 
     <span class="doccomment">/// Define a data object, producing the data contents from the given `DataContext`.
-    </span><span class="kw">fn </span>define_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data: DataId, data_ctx: <span class="kw-2">&amp;</span>DataContext) -&gt; ModuleResult&lt;()&gt;;
+    </span><span class="kw">fn </span>define_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data_id: DataId, data: <span class="kw-2">&amp;</span>DataDescription) -&gt; ModuleResult&lt;()&gt;;
 }
 
 <span class="kw">impl</span>&lt;M: Module&gt; Module <span class="kw">for </span><span class="kw-2">&amp;mut </span>M {
@@ -1578,12 +1578,12 @@
         (<span class="kw-2">**</span><span class="self">self</span>).declare_data_in_func(data, func)
     }
 
-    <span class="kw">fn </span>declare_func_in_data(<span class="kw-2">&amp;</span><span class="self">self</span>, func: FuncId, ctx: <span class="kw-2">&amp;mut </span>DataContext) -&gt; ir::FuncRef {
-        (<span class="kw-2">**</span><span class="self">self</span>).declare_func_in_data(func, ctx)
+    <span class="kw">fn </span>declare_func_in_data(<span class="kw-2">&amp;</span><span class="self">self</span>, func_id: FuncId, data: <span class="kw-2">&amp;mut </span>DataDescription) -&gt; ir::FuncRef {
+        (<span class="kw-2">**</span><span class="self">self</span>).declare_func_in_data(func_id, data)
     }
 
-    <span class="kw">fn </span>declare_data_in_data(<span class="kw-2">&amp;</span><span class="self">self</span>, data: DataId, ctx: <span class="kw-2">&amp;mut </span>DataContext) -&gt; ir::GlobalValue {
-        (<span class="kw-2">**</span><span class="self">self</span>).declare_data_in_data(data, ctx)
+    <span class="kw">fn </span>declare_data_in_data(<span class="kw-2">&amp;</span><span class="self">self</span>, data_id: DataId, data: <span class="kw-2">&amp;mut </span>DataDescription) -&gt; ir::GlobalValue {
+        (<span class="kw-2">**</span><span class="self">self</span>).declare_data_in_data(data_id, data)
     }
 
     <span class="kw">fn </span>define_function(
@@ -1614,8 +1614,8 @@
         (<span class="kw-2">**</span><span class="self">self</span>).define_function_bytes(func_id, func, alignment, bytes, relocs)
     }
 
-    <span class="kw">fn </span>define_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data: DataId, data_ctx: <span class="kw-2">&amp;</span>DataContext) -&gt; ModuleResult&lt;()&gt; {
-        (<span class="kw-2">**</span><span class="self">self</span>).define_data(data, data_ctx)
+    <span class="kw">fn </span>define_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data_id: DataId, data: <span class="kw-2">&amp;</span>DataDescription) -&gt; ModuleResult&lt;()&gt; {
+        (<span class="kw-2">**</span><span class="self">self</span>).define_data(data_id, data)
     }
 }
 </code></pre></div>

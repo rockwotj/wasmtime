@@ -859,7 +859,6 @@
 <a href="#859" id="859">859</a>
 <a href="#860" id="860">860</a>
 <a href="#861" id="861">861</a>
-<a href="#862" id="862">862</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines `ObjectModule`.
 
 </span><span class="kw">use </span>anyhow::anyhow;
@@ -872,7 +871,7 @@
 };
 <span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>cranelift_module::{
-    DataContext, DataDescription, DataId, FuncId, Init, Linkage, Module, ModuleCompiledFunction,
+    DataDescription, DataId, FuncId, Init, Linkage, Module, ModuleCompiledFunction,
     ModuleDeclarations, ModuleError, ModuleExtName, ModuleReloc, ModuleResult,
 };
 <span class="kw">use </span>log::info;
@@ -1256,7 +1255,7 @@
         <span class="prelude-val">Ok</span>(ModuleCompiledFunction { size: total_size })
     }
 
-    <span class="kw">fn </span>define_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data_id: DataId, data_ctx: <span class="kw-2">&amp;</span>DataContext) -&gt; ModuleResult&lt;()&gt; {
+    <span class="kw">fn </span>define_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data_id: DataId, data: <span class="kw-2">&amp;</span>DataDescription) -&gt; ModuleResult&lt;()&gt; {
         <span class="kw">let </span>decl = <span class="self">self</span>.declarations.get_data_decl(data_id);
         <span class="kw">if </span>!decl.linkage.is_definable() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::InvalidImportDefinition(decl.name.clone()));
@@ -1276,15 +1275,14 @@
             data_relocs: <span class="kw">_</span>,
             <span class="kw-2">ref </span>custom_segment_section,
             align,
-        } = data_ctx.description();
+        } = data;
 
         <span class="kw">let </span>pointer_reloc = <span class="kw">match </span><span class="self">self</span>.isa.triple().pointer_width().unwrap() {
             PointerWidth::U16 =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;16bit pointers&quot;</span>),
             PointerWidth::U32 =&gt; Reloc::Abs4,
             PointerWidth::U64 =&gt; Reloc::Abs8,
         };
-        <span class="kw">let </span>relocs = data_ctx
-            .description()
+        <span class="kw">let </span>relocs = data
             .all_relocs(pointer_reloc)
             .map(|record| <span class="self">self</span>.process_reloc(<span class="kw-2">&amp;</span>record))
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();

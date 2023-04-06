@@ -223,34 +223,6 @@
 <a href="#223" id="223">223</a>
 <a href="#224" id="224">224</a>
 <a href="#225" id="225">225</a>
-<a href="#226" id="226">226</a>
-<a href="#227" id="227">227</a>
-<a href="#228" id="228">228</a>
-<a href="#229" id="229">229</a>
-<a href="#230" id="230">230</a>
-<a href="#231" id="231">231</a>
-<a href="#232" id="232">232</a>
-<a href="#233" id="233">233</a>
-<a href="#234" id="234">234</a>
-<a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
-<a href="#237" id="237">237</a>
-<a href="#238" id="238">238</a>
-<a href="#239" id="239">239</a>
-<a href="#240" id="240">240</a>
-<a href="#241" id="241">241</a>
-<a href="#242" id="242">242</a>
-<a href="#243" id="243">243</a>
-<a href="#244" id="244">244</a>
-<a href="#245" id="245">245</a>
-<a href="#246" id="246">246</a>
-<a href="#247" id="247">247</a>
-<a href="#248" id="248">248</a>
-<a href="#249" id="249">249</a>
-<a href="#250" id="250">250</a>
-<a href="#251" id="251">251</a>
-<a href="#252" id="252">252</a>
-<a href="#253" id="253">253</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines `DataContext`.
 
 </span><span class="kw">use </span>cranelift_codegen::binemit::{Addend, CodeOffset, Reloc};
@@ -293,7 +265,7 @@
 }
 
 <span class="doccomment">/// A description of a data object.
-</span><span class="attr">#[derive(Clone)]
+</span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>DataDescription {
     <span class="doccomment">/// How the data should be initialized.
     </span><span class="kw">pub </span>init: Init,
@@ -313,6 +285,85 @@
 }
 
 <span class="kw">impl </span>DataDescription {
+    <span class="doccomment">/// Allocate a new `DataDescription`.
+    </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            init: Init::Uninitialized,
+            function_decls: PrimaryMap::new(),
+            data_decls: PrimaryMap::new(),
+            function_relocs: <span class="macro">vec!</span>[],
+            data_relocs: <span class="macro">vec!</span>[],
+            custom_segment_section: <span class="prelude-val">None</span>,
+            align: <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="doccomment">/// Clear all data structures in this `DataDescription`.
+    </span><span class="kw">pub fn </span>clear(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.init = Init::Uninitialized;
+        <span class="self">self</span>.function_decls.clear();
+        <span class="self">self</span>.data_decls.clear();
+        <span class="self">self</span>.function_relocs.clear();
+        <span class="self">self</span>.data_relocs.clear();
+        <span class="self">self</span>.custom_segment_section = <span class="prelude-val">None</span>;
+        <span class="self">self</span>.align = <span class="prelude-val">None</span>;
+    }
+
+    <span class="doccomment">/// Define a zero-initialized object with the given size.
+    </span><span class="kw">pub fn </span>define_zeroinit(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) {
+        <span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.init, Init::Uninitialized);
+        <span class="self">self</span>.init = Init::Zeros { size };
+    }
+
+    <span class="doccomment">/// Define an object initialized with the given contents.
+    ///
+    /// TODO: Can we avoid a Box here?
+    </span><span class="kw">pub fn </span>define(<span class="kw-2">&amp;mut </span><span class="self">self</span>, contents: Box&lt;[u8]&gt;) {
+        <span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.init, Init::Uninitialized);
+        <span class="self">self</span>.init = Init::Bytes { contents };
+    }
+
+    <span class="doccomment">/// Override the segment/section for data, only supported on Object backend
+    </span><span class="kw">pub fn </span>set_segment_section(<span class="kw-2">&amp;mut </span><span class="self">self</span>, seg: <span class="kw-2">&amp;</span>str, sec: <span class="kw-2">&amp;</span>str) {
+        <span class="self">self</span>.custom_segment_section = <span class="prelude-val">Some</span>((seg.to_owned(), sec.to_owned()))
+    }
+
+    <span class="doccomment">/// Set the alignment for data. The alignment must be a power of two.
+    </span><span class="kw">pub fn </span>set_align(<span class="kw-2">&amp;mut </span><span class="self">self</span>, align: u64) {
+        <span class="macro">assert!</span>(align.is_power_of_two());
+        <span class="self">self</span>.align = <span class="prelude-val">Some</span>(align);
+    }
+
+    <span class="doccomment">/// Declare an external function import.
+    ///
+    /// Users of the `Module` API generally should call
+    /// `Module::declare_func_in_data` instead, as it takes care of generating
+    /// the appropriate `ExternalName`.
+    </span><span class="kw">pub fn </span>import_function(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: ModuleExtName) -&gt; ir::FuncRef {
+        <span class="self">self</span>.function_decls.push(name)
+    }
+
+    <span class="doccomment">/// Declares a global value import.
+    ///
+    /// TODO: Rename to import_data?
+    ///
+    /// Users of the `Module` API generally should call
+    /// `Module::declare_data_in_data` instead, as it takes care of generating
+    /// the appropriate `ExternalName`.
+    </span><span class="kw">pub fn </span>import_global_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: ModuleExtName) -&gt; ir::GlobalValue {
+        <span class="self">self</span>.data_decls.push(name)
+    }
+
+    <span class="doccomment">/// Write the address of `func` into the data at offset `offset`.
+    </span><span class="kw">pub fn </span>write_function_addr(<span class="kw-2">&amp;mut </span><span class="self">self</span>, offset: CodeOffset, func: ir::FuncRef) {
+        <span class="self">self</span>.function_relocs.push((offset, func))
+    }
+
+    <span class="doccomment">/// Write the address of `data` into the data at offset `offset`.
+    </span><span class="kw">pub fn </span>write_data_addr(<span class="kw-2">&amp;mut </span><span class="self">self</span>, offset: CodeOffset, data: ir::GlobalValue, addend: Addend) {
+        <span class="self">self</span>.data_relocs.push((offset, data, addend))
+    }
+
     <span class="doccomment">/// An iterator over all relocations of the data object.
     </span><span class="kw">pub fn </span>all_relocs&lt;<span class="lifetime">&#39;a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>,
@@ -340,168 +391,61 @@
     }
 }
 
-<span class="doccomment">/// This is to data objects what cranelift_codegen::Context is to functions.
-</span><span class="kw">pub struct </span>DataContext {
-    description: DataDescription,
-}
-
-<span class="kw">impl </span>DataContext {
-    <span class="doccomment">/// Allocate a new context.
-    </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            description: DataDescription {
-                init: Init::Uninitialized,
-                function_decls: PrimaryMap::new(),
-                data_decls: PrimaryMap::new(),
-                function_relocs: <span class="macro">vec!</span>[],
-                data_relocs: <span class="macro">vec!</span>[],
-                custom_segment_section: <span class="prelude-val">None</span>,
-                align: <span class="prelude-val">None</span>,
-            },
-        }
-    }
-
-    <span class="doccomment">/// Clear all data structures in this context.
-    </span><span class="kw">pub fn </span>clear(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.description.init = Init::Uninitialized;
-        <span class="self">self</span>.description.function_decls.clear();
-        <span class="self">self</span>.description.data_decls.clear();
-        <span class="self">self</span>.description.function_relocs.clear();
-        <span class="self">self</span>.description.data_relocs.clear();
-        <span class="self">self</span>.description.custom_segment_section = <span class="prelude-val">None</span>;
-        <span class="self">self</span>.description.align = <span class="prelude-val">None</span>;
-    }
-
-    <span class="doccomment">/// Define a zero-initialized object with the given size.
-    </span><span class="kw">pub fn </span>define_zeroinit(<span class="kw-2">&amp;mut </span><span class="self">self</span>, size: usize) {
-        <span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.description.init, Init::Uninitialized);
-        <span class="self">self</span>.description.init = Init::Zeros { size };
-    }
-
-    <span class="doccomment">/// Define an object initialized with the given contents.
-    ///
-    /// TODO: Can we avoid a Box here?
-    </span><span class="kw">pub fn </span>define(<span class="kw-2">&amp;mut </span><span class="self">self</span>, contents: Box&lt;[u8]&gt;) {
-        <span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.description.init, Init::Uninitialized);
-        <span class="self">self</span>.description.init = Init::Bytes { contents };
-    }
-
-    <span class="doccomment">/// Override the segment/section for data, only supported on Object backend
-    </span><span class="kw">pub fn </span>set_segment_section(<span class="kw-2">&amp;mut </span><span class="self">self</span>, seg: <span class="kw-2">&amp;</span>str, sec: <span class="kw-2">&amp;</span>str) {
-        <span class="self">self</span>.description.custom_segment_section = <span class="prelude-val">Some</span>((seg.to_owned(), sec.to_owned()))
-    }
-
-    <span class="doccomment">/// Set the alignment for data. The alignment must be a power of two.
-    </span><span class="kw">pub fn </span>set_align(<span class="kw-2">&amp;mut </span><span class="self">self</span>, align: u64) {
-        <span class="macro">assert!</span>(align.is_power_of_two());
-        <span class="self">self</span>.description.align = <span class="prelude-val">Some</span>(align);
-    }
-
-    <span class="doccomment">/// Declare an external function import.
-    ///
-    /// Users of the `Module` API generally should call
-    /// `Module::declare_func_in_data` instead, as it takes care of generating
-    /// the appropriate `ExternalName`.
-    </span><span class="kw">pub fn </span>import_function(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: ModuleExtName) -&gt; ir::FuncRef {
-        <span class="self">self</span>.description.function_decls.push(name)
-    }
-
-    <span class="doccomment">/// Declares a global value import.
-    ///
-    /// TODO: Rename to import_data?
-    ///
-    /// Users of the `Module` API generally should call
-    /// `Module::declare_data_in_data` instead, as it takes care of generating
-    /// the appropriate `ExternalName`.
-    </span><span class="kw">pub fn </span>import_global_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: ModuleExtName) -&gt; ir::GlobalValue {
-        <span class="self">self</span>.description.data_decls.push(name)
-    }
-
-    <span class="doccomment">/// Write the address of `func` into the data at offset `offset`.
-    </span><span class="kw">pub fn </span>write_function_addr(<span class="kw-2">&amp;mut </span><span class="self">self</span>, offset: CodeOffset, func: ir::FuncRef) {
-        <span class="self">self</span>.description.function_relocs.push((offset, func))
-    }
-
-    <span class="doccomment">/// Write the address of `data` into the data at offset `offset`.
-    </span><span class="kw">pub fn </span>write_data_addr(<span class="kw-2">&amp;mut </span><span class="self">self</span>, offset: CodeOffset, data: ir::GlobalValue, addend: Addend) {
-        <span class="self">self</span>.description.data_relocs.push((offset, data, addend))
-    }
-
-    <span class="doccomment">/// Reference the initializer data.
-    </span><span class="kw">pub fn </span>description(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>DataDescription {
-        <span class="macro">debug_assert!</span>(
-            <span class="self">self</span>.description.init != Init::Uninitialized,
-            <span class="string">&quot;data must be initialized first&quot;
-        </span>);
-        <span class="kw-2">&amp;</span><span class="self">self</span>.description
-    }
-}
-
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">crate</span>::ModuleExtName;
 
-    <span class="kw">use super</span>::{DataContext, Init};
+    <span class="kw">use super</span>::{DataDescription, Init};
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>basic_data_context() {
-        <span class="kw">let </span><span class="kw-2">mut </span>data_ctx = DataContext::new();
-        {
-            <span class="kw">let </span>description = <span class="kw-2">&amp;</span>data_ctx.description;
-            <span class="macro">assert_eq!</span>(description.init, Init::Uninitialized);
-            <span class="macro">assert!</span>(description.function_decls.is_empty());
-            <span class="macro">assert!</span>(description.data_decls.is_empty());
-            <span class="macro">assert!</span>(description.function_relocs.is_empty());
-            <span class="macro">assert!</span>(description.data_relocs.is_empty());
-        }
+        <span class="kw">let </span><span class="kw-2">mut </span>data = DataDescription::new();
+        <span class="macro">assert_eq!</span>(data.init, Init::Uninitialized);
+        <span class="macro">assert!</span>(data.function_decls.is_empty());
+        <span class="macro">assert!</span>(data.data_decls.is_empty());
+        <span class="macro">assert!</span>(data.function_relocs.is_empty());
+        <span class="macro">assert!</span>(data.data_relocs.is_empty());
 
-        data_ctx.define_zeroinit(<span class="number">256</span>);
+        data.define_zeroinit(<span class="number">256</span>);
 
-        <span class="kw">let </span>_func_a = data_ctx.import_function(ModuleExtName::user(<span class="number">0</span>, <span class="number">0</span>));
-        <span class="kw">let </span>func_b = data_ctx.import_function(ModuleExtName::user(<span class="number">0</span>, <span class="number">1</span>));
-        <span class="kw">let </span>func_c = data_ctx.import_function(ModuleExtName::user(<span class="number">0</span>, <span class="number">2</span>));
-        <span class="kw">let </span>_data_a = data_ctx.import_global_value(ModuleExtName::user(<span class="number">0</span>, <span class="number">3</span>));
-        <span class="kw">let </span>data_b = data_ctx.import_global_value(ModuleExtName::user(<span class="number">0</span>, <span class="number">4</span>));
+        <span class="kw">let </span>_func_a = data.import_function(ModuleExtName::user(<span class="number">0</span>, <span class="number">0</span>));
+        <span class="kw">let </span>func_b = data.import_function(ModuleExtName::user(<span class="number">0</span>, <span class="number">1</span>));
+        <span class="kw">let </span>func_c = data.import_function(ModuleExtName::user(<span class="number">0</span>, <span class="number">2</span>));
+        <span class="kw">let </span>_data_a = data.import_global_value(ModuleExtName::user(<span class="number">0</span>, <span class="number">3</span>));
+        <span class="kw">let </span>data_b = data.import_global_value(ModuleExtName::user(<span class="number">0</span>, <span class="number">4</span>));
 
-        data_ctx.write_function_addr(<span class="number">8</span>, func_b);
-        data_ctx.write_function_addr(<span class="number">16</span>, func_c);
-        data_ctx.write_data_addr(<span class="number">32</span>, data_b, <span class="number">27</span>);
+        data.write_function_addr(<span class="number">8</span>, func_b);
+        data.write_function_addr(<span class="number">16</span>, func_c);
+        data.write_data_addr(<span class="number">32</span>, data_b, <span class="number">27</span>);
 
-        {
-            <span class="kw">let </span>description = data_ctx.description();
-            <span class="macro">assert_eq!</span>(description.init, Init::Zeros { size: <span class="number">256 </span>});
-            <span class="macro">assert_eq!</span>(description.function_decls.len(), <span class="number">3</span>);
-            <span class="macro">assert_eq!</span>(description.data_decls.len(), <span class="number">2</span>);
-            <span class="macro">assert_eq!</span>(description.function_relocs.len(), <span class="number">2</span>);
-            <span class="macro">assert_eq!</span>(description.data_relocs.len(), <span class="number">1</span>);
-        }
+        <span class="macro">assert_eq!</span>(data.init, Init::Zeros { size: <span class="number">256 </span>});
+        <span class="macro">assert_eq!</span>(data.function_decls.len(), <span class="number">3</span>);
+        <span class="macro">assert_eq!</span>(data.data_decls.len(), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(data.function_relocs.len(), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(data.data_relocs.len(), <span class="number">1</span>);
 
-        data_ctx.clear();
-        {
-            <span class="kw">let </span>description = <span class="kw-2">&amp;</span>data_ctx.description;
-            <span class="macro">assert_eq!</span>(description.init, Init::Uninitialized);
-            <span class="macro">assert!</span>(description.function_decls.is_empty());
-            <span class="macro">assert!</span>(description.data_decls.is_empty());
-            <span class="macro">assert!</span>(description.function_relocs.is_empty());
-            <span class="macro">assert!</span>(description.data_relocs.is_empty());
-        }
+        data.clear();
+
+        <span class="macro">assert_eq!</span>(data.init, Init::Uninitialized);
+        <span class="macro">assert!</span>(data.function_decls.is_empty());
+        <span class="macro">assert!</span>(data.data_decls.is_empty());
+        <span class="macro">assert!</span>(data.function_relocs.is_empty());
+        <span class="macro">assert!</span>(data.data_relocs.is_empty());
 
         <span class="kw">let </span>contents = <span class="macro">vec!</span>[<span class="number">33</span>, <span class="number">34</span>, <span class="number">35</span>, <span class="number">36</span>];
         <span class="kw">let </span>contents_clone = contents.clone();
-        data_ctx.define(contents.into_boxed_slice());
-        {
-            <span class="kw">let </span>description = data_ctx.description();
-            <span class="macro">assert_eq!</span>(
-                description.init,
-                Init::Bytes {
-                    contents: contents_clone.into_boxed_slice()
-                }
-            );
-            <span class="macro">assert_eq!</span>(description.function_decls.len(), <span class="number">0</span>);
-            <span class="macro">assert_eq!</span>(description.data_decls.len(), <span class="number">0</span>);
-            <span class="macro">assert_eq!</span>(description.function_relocs.len(), <span class="number">0</span>);
-            <span class="macro">assert_eq!</span>(description.data_relocs.len(), <span class="number">0</span>);
-        }
+        data.define(contents.into_boxed_slice());
+
+        <span class="macro">assert_eq!</span>(
+            data.init,
+            Init::Bytes {
+                contents: contents_clone.into_boxed_slice()
+            }
+        );
+        <span class="macro">assert_eq!</span>(data.function_decls.len(), <span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(data.data_decls.len(), <span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(data.function_relocs.len(), <span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(data.data_relocs.len(), <span class="number">0</span>);
     }
 }
 </code></pre></div>
