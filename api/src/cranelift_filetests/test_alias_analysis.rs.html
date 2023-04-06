@@ -43,9 +43,6 @@
 <a href="#43" id="43">43</a>
 <a href="#44" id="44">44</a>
 <a href="#45" id="45">45</a>
-<a href="#46" id="46">46</a>
-<a href="#47" id="47">47</a>
-<a href="#48" id="48">48</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Test command for testing the alias analysis pass.
 //!
 //! The `alias-analysis` test command runs each function through GVN
@@ -83,9 +80,6 @@
         <span class="kw">let </span><span class="kw-2">mut </span>comp_ctx = cranelift_codegen::Context::for_function(func.into_owned());
 
         comp_ctx.flowgraph();
-        comp_ctx
-            .simple_gvn(context.flags_or_isa())
-            .map_err(|e| <span class="kw">crate</span>::pretty_anyhow_error(<span class="kw-2">&amp;</span>comp_ctx.func, Into::into(e)))<span class="question-mark">?</span>;
         comp_ctx
             .replace_redundant_loads()
             .map_err(|e| <span class="kw">crate</span>::pretty_anyhow_error(<span class="kw-2">&amp;</span>comp_ctx.func, Into::into(e)))<span class="question-mark">?</span>;

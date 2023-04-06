@@ -435,9 +435,6 @@
 <a href="#435" id="435">435</a>
 <a href="#436" id="436">436</a>
 <a href="#437" id="437">437</a>
-<a href="#438" id="438">438</a>
-<a href="#439" id="439">439</a>
-<a href="#440" id="440">440</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Generate a configuration for both Wasmtime and the Wasm module to execute.
 
 </span><span class="kw">use super</span>::{
@@ -581,7 +578,6 @@
     </span>}
 
     <span class="doccomment">/// Converts this to a `wasmtime::Config` object
-    </span><span class="attr">#[allow(deprecated)] </span><span class="comment">// Allow use of `cranelift_use_egraphs` below.
     </span><span class="kw">pub fn </span>to_wasmtime(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; wasmtime::Config {
         <span class="kw">crate</span>::init_fuzzing();
         <span class="macro">log::debug!</span>(<span class="string">&quot;creating wasmtime config with {:#?}&quot;</span>, <span class="self">self</span>.wasmtime);
@@ -597,7 +593,6 @@
             .native_unwind_info(<span class="self">self</span>.wasmtime.native_unwind_info)
             .cranelift_nan_canonicalization(<span class="self">self</span>.wasmtime.canonicalize_nans)
             .cranelift_opt_level(<span class="self">self</span>.wasmtime.opt_level.to_wasmtime())
-            .cranelift_use_egraphs(<span class="self">self</span>.wasmtime.use_egraphs)
             .consume_fuel(<span class="self">self</span>.wasmtime.consume_fuel)
             .epoch_interruption(<span class="self">self</span>.wasmtime.epoch_interruption)
             .memory_init_cow(<span class="self">self</span>.wasmtime.memory_init_cow)
@@ -817,7 +812,6 @@
 </span><span class="attr">#[derive(Arbitrary, Clone, Debug, Eq, Hash, PartialEq)]
 </span><span class="kw">pub struct </span>WasmtimeConfig {
     opt_level: OptLevel,
-    use_egraphs: bool,
     debug_info: bool,
     canonicalize_nans: bool,
     interruptable: bool,

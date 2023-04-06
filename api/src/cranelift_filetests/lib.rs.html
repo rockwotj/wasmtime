@@ -128,12 +128,6 @@
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
-<a href="#136" id="136">136</a>
 </pre><pre class="rust"><code><span class="doccomment">//! File tests.
 //!
 //! This crate contains the main test driver as well as implementations of the
@@ -177,13 +171,10 @@
 <span class="kw">mod </span>test_domtree;
 <span class="kw">mod </span>test_interpret;
 <span class="kw">mod </span>test_legalizer;
-<span class="kw">mod </span>test_licm;
 <span class="kw">mod </span>test_optimize;
 <span class="kw">mod </span>test_print_cfg;
 <span class="kw">mod </span>test_run;
 <span class="kw">mod </span>test_safepoint;
-<span class="kw">mod </span>test_simple_gvn;
-<span class="kw">mod </span>test_simple_preopt;
 <span class="kw">mod </span>test_unwind;
 <span class="kw">mod </span>test_verifier;
 <span class="kw">mod </span>test_wasm;
@@ -250,13 +241,10 @@
         <span class="string">&quot;domtree&quot; </span>=&gt; test_domtree::subtest(parsed),
         <span class="string">&quot;interpret&quot; </span>=&gt; test_interpret::subtest(parsed),
         <span class="string">&quot;legalizer&quot; </span>=&gt; test_legalizer::subtest(parsed),
-        <span class="string">&quot;licm&quot; </span>=&gt; test_licm::subtest(parsed),
         <span class="string">&quot;optimize&quot; </span>=&gt; test_optimize::subtest(parsed),
         <span class="string">&quot;print-cfg&quot; </span>=&gt; test_print_cfg::subtest(parsed),
         <span class="string">&quot;run&quot; </span>=&gt; test_run::subtest(parsed),
         <span class="string">&quot;safepoint&quot; </span>=&gt; test_safepoint::subtest(parsed),
-        <span class="string">&quot;simple-gvn&quot; </span>=&gt; test_simple_gvn::subtest(parsed),
-        <span class="string">&quot;simple_preopt&quot; </span>=&gt; test_simple_preopt::subtest(parsed),
         <span class="string">&quot;unwind&quot; </span>=&gt; test_unwind::subtest(parsed),
         <span class="string">&quot;verifier&quot; </span>=&gt; test_verifier::subtest(parsed),
         <span class="kw">_ </span>=&gt; <span class="macro">anyhow::bail!</span>(<span class="string">&quot;unknown test command &#39;{}&#39;&quot;</span>, parsed.command),

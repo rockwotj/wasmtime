@@ -784,22 +784,6 @@
 <a href="#784" id="784">784</a>
 <a href="#785" id="785">785</a>
 <a href="#786" id="786">786</a>
-<a href="#787" id="787">787</a>
-<a href="#788" id="788">788</a>
-<a href="#789" id="789">789</a>
-<a href="#790" id="790">790</a>
-<a href="#791" id="791">791</a>
-<a href="#792" id="792">792</a>
-<a href="#793" id="793">793</a>
-<a href="#794" id="794">794</a>
-<a href="#795" id="795">795</a>
-<a href="#796" id="796">796</a>
-<a href="#797" id="797">797</a>
-<a href="#798" id="798">798</a>
-<a href="#799" id="799">799</a>
-<a href="#800" id="800">800</a>
-<a href="#801" id="801">801</a>
-<a href="#802" id="802">802</a>
 </pre><pre class="rust"><code><span class="attr">#[derive(Clone, Hash)]
 </span><span class="doccomment">/// Flags group `shared`.
 </span><span class="kw">pub struct </span>Flags {
@@ -1158,26 +1142,16 @@
     </span><span class="kw">pub fn </span>enable_alias_analysis(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.numbered_predicate(<span class="number">2</span>)
     }
-    <span class="doccomment">/// Enable egraph-based optimization.
-    ///
-    /// This enables an optimization phase that converts CLIF to an egraph (equivalence graph)
-    /// representation, performs various rewrites, and then converts it back. This should result in
-    /// better optimization, but the traditional optimization pass structure is also still
-    /// available by setting this to `false`. The `false` setting will eventually be
-    /// deprecated and removed.
-    </span><span class="kw">pub fn </span>use_egraphs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">3</span>)
-    }
     <span class="doccomment">/// Run the Cranelift IR verifier at strategic times during compilation.
     ///
     /// This makes compilation slower but catches many bugs. The verifier is always enabled by
     /// default, which is useful during development.
     </span><span class="kw">pub fn </span>enable_verifier(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">4</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">3</span>)
     }
     <span class="doccomment">/// Enable Position-Independent Code generation.
     </span><span class="kw">pub fn </span>is_pic(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">5</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">4</span>)
     }
     <span class="doccomment">/// Use colocated libcalls.
     ///
@@ -1185,13 +1159,13 @@
     /// meaning they will be defined along with the current function, such that
     /// they can use more efficient addressing.
     </span><span class="kw">pub fn </span>use_colocated_libcalls(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">6</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">5</span>)
     }
     <span class="doccomment">/// Enable the use of floating-point instructions.
     ///
     /// Disabling use of floating-point instructions is not yet implemented.
     </span><span class="kw">pub fn </span>enable_float(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">7</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">6</span>)
     }
     <span class="doccomment">/// Enable NaN canonicalization.
     ///
@@ -1199,7 +1173,7 @@
     /// entirely deterministic WebAssembly computation. This is not required
     /// by the WebAssembly spec, so it is not enabled by default.
     </span><span class="kw">pub fn </span>enable_nan_canonicalization(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">8</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">7</span>)
     }
     <span class="doccomment">/// Enable the use of the pinned register.
     ///
@@ -1207,15 +1181,15 @@
     /// the end-user. It is possible to read it via the get_pinned_reg instruction, and to set it
     /// with the set_pinned_reg instruction.
     </span><span class="kw">pub fn </span>enable_pinned_reg(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">9</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">8</span>)
     }
     <span class="doccomment">/// Enable the use of SIMD instructions.
     </span><span class="kw">pub fn </span>enable_simd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">10</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">9</span>)
     }
     <span class="doccomment">/// Enable the use of atomic instructions
     </span><span class="kw">pub fn </span>enable_atomics(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">11</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">10</span>)
     }
     <span class="doccomment">/// Enable safepoint instruction insertions.
     ///
@@ -1223,7 +1197,7 @@
     /// instruction on top of calls and interrupt traps in order to display the
     /// live reference values at that point in the program.
     </span><span class="kw">pub fn </span>enable_safepoints(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">12</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">11</span>)
     }
     <span class="doccomment">/// Enable various ABI extensions defined by LLVM&#39;s behavior.
     ///
@@ -1238,7 +1212,7 @@
     /// `i128` arguments, and will panic if they are present and this
     /// option is not set.
     </span><span class="kw">pub fn </span>enable_llvm_abi_extensions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">13</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">12</span>)
     }
     <span class="doccomment">/// Generate unwind information.
     ///
@@ -1247,7 +1221,7 @@
     /// libunwind (such as in Wasmtime), and is unconditionally needed on
     /// certain platforms (such as Windows) that must always be able to unwind.
     </span><span class="kw">pub fn </span>unwind_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">14</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">13</span>)
     }
     <span class="doccomment">/// Preserve frame pointers
     ///
@@ -1257,7 +1231,7 @@
     /// profilers and similar tools walk frame pointers to capture stacks.
     /// Enabling this option will play nice with those tools.
     </span><span class="kw">pub fn </span>preserve_frame_pointers(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">15</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">14</span>)
     }
     <span class="doccomment">/// Generate CFG metadata for machine code.
     ///
@@ -1269,19 +1243,19 @@
     /// This is useful for, e.g., machine-code analyses that verify certain
     /// properties of the generated code.
     </span><span class="kw">pub fn </span>machine_code_cfg_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">16</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">15</span>)
     }
     <span class="doccomment">/// Enable the use of stack probes for supported calling conventions.
     </span><span class="kw">pub fn </span>enable_probestack(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">17</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">16</span>)
     }
     <span class="doccomment">/// Enable if the stack probe adjusts the stack pointer.
     </span><span class="kw">pub fn </span>probestack_func_adjusts_sp(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">18</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">17</span>)
     }
     <span class="doccomment">/// Enable the use of jump tables in generated machine code.
     </span><span class="kw">pub fn </span>enable_jump_tables(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">19</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">18</span>)
     }
     <span class="doccomment">/// Enable Spectre mitigation on heap bounds checks.
     ///
@@ -1293,7 +1267,7 @@
     /// recommended for secure sandboxing. The embedder should consider
     /// the security implications carefully before disabling this option.
     </span><span class="kw">pub fn </span>enable_heap_access_spectre_mitigation(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">20</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">19</span>)
     }
     <span class="doccomment">/// Enable Spectre mitigation on table bounds checks.
     ///
@@ -1307,7 +1281,7 @@
     /// recommended for secure sandboxing. The embedder should consider
     /// the security implications carefully before disabling this option.
     </span><span class="kw">pub fn </span>enable_table_access_spectre_mitigation(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">21</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">20</span>)
     }
     <span class="doccomment">/// Enable additional checks for debugging the incremental compilation cache.
     ///
@@ -1318,10 +1292,10 @@
     /// This option is disabled by default and requires enabling the &quot;incremental-cache&quot; Cargo
     /// feature in cranelift-codegen.
     </span><span class="kw">pub fn </span>enable_incremental_compilation_cache_checks(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.numbered_predicate(<span class="number">22</span>)
+        <span class="self">self</span>.numbered_predicate(<span class="number">21</span>)
     }
 }
-<span class="kw">static </span>DESCRIPTORS: [detail::Descriptor; <span class="number">28</span>] = [
+<span class="kw">static </span>DESCRIPTORS: [detail::Descriptor; <span class="number">27</span>] = [
     detail::Descriptor {
         name: <span class="string">&quot;opt_level&quot;</span>,
         description: <span class="string">&quot;Optimization level for generated code.&quot;</span>,
@@ -1371,124 +1345,118 @@
         detail: detail::Detail::Bool { bit: <span class="number">2 </span>},
     },
     detail::Descriptor {
-        name: <span class="string">&quot;use_egraphs&quot;</span>,
-        description: <span class="string">&quot;Enable egraph-based optimization.&quot;</span>,
-        offset: <span class="number">5</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">3 </span>},
-    },
-    detail::Descriptor {
         name: <span class="string">&quot;enable_verifier&quot;</span>,
         description: <span class="string">&quot;Run the Cranelift IR verifier at strategic times during compilation.&quot;</span>,
         offset: <span class="number">5</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">4 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">3 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;is_pic&quot;</span>,
         description: <span class="string">&quot;Enable Position-Independent Code generation.&quot;</span>,
         offset: <span class="number">5</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">5 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">4 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;use_colocated_libcalls&quot;</span>,
         description: <span class="string">&quot;Use colocated libcalls.&quot;</span>,
         offset: <span class="number">5</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">6 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">5 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_float&quot;</span>,
         description: <span class="string">&quot;Enable the use of floating-point instructions.&quot;</span>,
         offset: <span class="number">5</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">7 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">6 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_nan_canonicalization&quot;</span>,
         description: <span class="string">&quot;Enable NaN canonicalization.&quot;</span>,
-        offset: <span class="number">6</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">0 </span>},
+        offset: <span class="number">5</span>,
+        detail: detail::Detail::Bool { bit: <span class="number">7 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_pinned_reg&quot;</span>,
         description: <span class="string">&quot;Enable the use of the pinned register.&quot;</span>,
         offset: <span class="number">6</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">1 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">0 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_simd&quot;</span>,
         description: <span class="string">&quot;Enable the use of SIMD instructions.&quot;</span>,
         offset: <span class="number">6</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">2 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">1 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_atomics&quot;</span>,
         description: <span class="string">&quot;Enable the use of atomic instructions&quot;</span>,
         offset: <span class="number">6</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">3 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">2 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_safepoints&quot;</span>,
         description: <span class="string">&quot;Enable safepoint instruction insertions.&quot;</span>,
         offset: <span class="number">6</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">4 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">3 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_llvm_abi_extensions&quot;</span>,
         description: <span class="string">&quot;Enable various ABI extensions defined by LLVM&#39;s behavior.&quot;</span>,
         offset: <span class="number">6</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">5 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">4 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;unwind_info&quot;</span>,
         description: <span class="string">&quot;Generate unwind information.&quot;</span>,
         offset: <span class="number">6</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">6 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">5 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;preserve_frame_pointers&quot;</span>,
         description: <span class="string">&quot;Preserve frame pointers&quot;</span>,
         offset: <span class="number">6</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">7 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">6 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;machine_code_cfg_info&quot;</span>,
         description: <span class="string">&quot;Generate CFG metadata for machine code.&quot;</span>,
-        offset: <span class="number">7</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">0 </span>},
+        offset: <span class="number">6</span>,
+        detail: detail::Detail::Bool { bit: <span class="number">7 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_probestack&quot;</span>,
         description: <span class="string">&quot;Enable the use of stack probes for supported calling conventions.&quot;</span>,
         offset: <span class="number">7</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">1 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">0 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;probestack_func_adjusts_sp&quot;</span>,
         description: <span class="string">&quot;Enable if the stack probe adjusts the stack pointer.&quot;</span>,
         offset: <span class="number">7</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">2 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">1 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_jump_tables&quot;</span>,
         description: <span class="string">&quot;Enable the use of jump tables in generated machine code.&quot;</span>,
         offset: <span class="number">7</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">3 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">2 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_heap_access_spectre_mitigation&quot;</span>,
         description: <span class="string">&quot;Enable Spectre mitigation on heap bounds checks.&quot;</span>,
         offset: <span class="number">7</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">4 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">3 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_table_access_spectre_mitigation&quot;</span>,
         description: <span class="string">&quot;Enable Spectre mitigation on table bounds checks.&quot;</span>,
         offset: <span class="number">7</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">5 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">4 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_incremental_compilation_cache_checks&quot;</span>,
         description: <span class="string">&quot;Enable additional checks for debugging the incremental compilation cache.&quot;</span>,
         offset: <span class="number">7</span>,
-        detail: detail::Detail::Bool { bit: <span class="number">6 </span>},
+        detail: detail::Detail::Bool { bit: <span class="number">5 </span>},
     },
 ];
 <span class="kw">static </span>ENUMERATORS: [<span class="kw-2">&amp;</span>str; <span class="number">16</span>] = [
@@ -1516,17 +1484,17 @@
     <span class="number">1</span>,
     <span class="number">7</span>,
     <span class="number">0xffff</span>,
-    <span class="number">26</span>,
-    <span class="number">15</span>,
-    <span class="number">20</span>,
-    <span class="number">23</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">27</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">17</span>,
-    <span class="number">0xffff</span>,
+    <span class="number">25</span>,
     <span class="number">14</span>,
+    <span class="number">19</span>,
+    <span class="number">22</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">26</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">16</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">13</span>,
     <span class="number">0xffff</span>,
     <span class="number">0xffff</span>,
     <span class="number">0xffff</span>,
@@ -1539,32 +1507,32 @@
     <span class="number">0xffff</span>,
     <span class="number">4</span>,
     <span class="number">0</span>,
-    <span class="number">10</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">22</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">13</span>,
-    <span class="number">18</span>,
     <span class="number">9</span>,
-    <span class="number">16</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">21</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">12</span>,
+    <span class="number">17</span>,
+    <span class="number">8</span>,
+    <span class="number">15</span>,
     <span class="number">0xffff</span>,
     <span class="number">5</span>,
     <span class="number">0xffff</span>,
     <span class="number">0xffff</span>,
-    <span class="number">19</span>,
+    <span class="number">18</span>,
     <span class="number">3</span>,
     <span class="number">0xffff</span>,
-    <span class="number">8</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">25</span>,
-    <span class="number">21</span>,
     <span class="number">24</span>,
     <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">20</span>,
+    <span class="number">23</span>,
+    <span class="number">0xffff</span>,
     <span class="number">6</span>,
-    <span class="number">11</span>,
+    <span class="number">10</span>,
     <span class="number">2</span>,
     <span class="number">0xffff</span>,
     <span class="number">0xffff</span>,
@@ -1572,7 +1540,7 @@
     <span class="number">0xffff</span>,
     <span class="number">0xffff</span>,
     <span class="number">0xffff</span>,
-    <span class="number">12</span>,
+    <span class="number">11</span>,
     <span class="number">0xffff</span>,
 ];
 <span class="kw">static </span>PRESETS: [(u8, u8); <span class="number">0</span>] = [
@@ -1582,7 +1550,7 @@
     descriptors: <span class="kw-2">&amp;</span>DESCRIPTORS,
     enumerators: <span class="kw-2">&amp;</span>ENUMERATORS,
     hash_table: <span class="kw-2">&amp;</span>HASH_TABLE,
-    defaults: <span class="kw-2">&amp;</span>[<span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x0c</span>, <span class="number">0x00</span>, <span class="number">0x9c</span>, <span class="number">0x48</span>, <span class="number">0x38</span>],
+    defaults: <span class="kw-2">&amp;</span>[<span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x0c</span>, <span class="number">0x00</span>, <span class="number">0x4c</span>, <span class="number">0x24</span>, <span class="number">0x1c</span>],
     presets: <span class="kw-2">&amp;</span>PRESETS,
 };
 <span class="doccomment">/// Create a `settings::Builder` for the shared settings group.

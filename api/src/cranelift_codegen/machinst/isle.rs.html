@@ -825,29 +825,6 @@
 <a href="#825" id="825">825</a>
 <a href="#826" id="826">826</a>
 <a href="#827" id="827">827</a>
-<a href="#828" id="828">828</a>
-<a href="#829" id="829">829</a>
-<a href="#830" id="830">830</a>
-<a href="#831" id="831">831</a>
-<a href="#832" id="832">832</a>
-<a href="#833" id="833">833</a>
-<a href="#834" id="834">834</a>
-<a href="#835" id="835">835</a>
-<a href="#836" id="836">836</a>
-<a href="#837" id="837">837</a>
-<a href="#838" id="838">838</a>
-<a href="#839" id="839">839</a>
-<a href="#840" id="840">840</a>
-<a href="#841" id="841">841</a>
-<a href="#842" id="842">842</a>
-<a href="#843" id="843">843</a>
-<a href="#844" id="844">844</a>
-<a href="#845" id="845">845</a>
-<a href="#846" id="846">846</a>
-<a href="#847" id="847">847</a>
-<a href="#848" id="848">848</a>
-<a href="#849" id="849">849</a>
-<a href="#850" id="850">850</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::ir::{BlockCall, Value, ValueList};
 <span class="kw">use </span>alloc::boxed::Box;
 <span class="kw">use </span>alloc::vec::Vec;
@@ -978,29 +955,6 @@
 
         <span class="attr">#[inline]
         </span><span class="kw">fn </span>put_in_regs(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: Value) -&gt; ValueRegs {
-            <span class="comment">// If the value is a constant, then (re)materialize it at each
-            // use. This lowers register pressure. (Only do this if we are
-            // not using egraph-based compilation; the egraph framework
-            // more efficiently rematerializes constants where needed.)
-            </span><span class="kw">if </span>!(<span class="self">self</span>.backend.flags().use_egraphs()
-                &amp;&amp; <span class="self">self</span>.backend.flags().opt_level() != OptLevel::None)
-            {
-                <span class="kw">let </span>inputs = <span class="self">self</span>.lower_ctx.get_value_as_source_or_const(val);
-                <span class="kw">if </span>inputs.constant.is_some() {
-                    <span class="kw">let </span>insn = <span class="kw">match </span>inputs.inst {
-                        InputSourceInst::UniqueUse(insn, <span class="number">0</span>) =&gt; <span class="prelude-val">Some</span>(insn),
-                        InputSourceInst::Use(insn, <span class="number">0</span>) =&gt; <span class="prelude-val">Some</span>(insn),
-                        <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
-                    };
-                    <span class="kw">if let </span><span class="prelude-val">Some</span>(insn) = insn {
-                        <span class="kw">if let </span><span class="prelude-val">Some</span>(regs) = <span class="self">self</span>.backend.lower(<span class="self">self</span>.lower_ctx, insn) {
-                            <span class="macro">assert!</span>(regs.len() == <span class="number">1</span>);
-                            <span class="kw">return </span>regs[<span class="number">0</span>];
-                        }
-                    }
-                }
-            }
-
             <span class="self">self</span>.lower_ctx.put_value_in_regs(val)
         }
 
