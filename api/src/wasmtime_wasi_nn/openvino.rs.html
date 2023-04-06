@@ -284,7 +284,7 @@
 
     <span class="kw">fn </span>get_output(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: u32, destination: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;u32, BackendError&gt; {
         <span class="kw">let </span>output_name = <span class="self">self</span>.<span class="number">0</span>.get_output_name(index <span class="kw">as </span>usize)<span class="question-mark">?</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>blob = <span class="self">self</span>.<span class="number">1</span>.get_blob(<span class="kw-2">&amp;</span>output_name)<span class="question-mark">?</span>;
+        <span class="kw">let </span>blob = <span class="self">self</span>.<span class="number">1</span>.get_blob(<span class="kw-2">&amp;</span>output_name)<span class="question-mark">?</span>;
         <span class="kw">let </span>blob_size = blob.byte_len()<span class="question-mark">?</span>;
         <span class="kw">if </span>blob_size &gt; destination.len() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(BackendError::NotEnoughMemory(blob_size));
