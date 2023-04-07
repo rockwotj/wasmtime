@@ -244,6 +244,11 @@
 <a href="#244" id="244">244</a>
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a call frame (activation record) for the Cranelift interpreter.
 
 </span><span class="kw">use </span>cranelift_codegen::data_value::DataValue;
@@ -258,7 +263,7 @@
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Frame&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="doccomment">/// The currently executing function.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) function: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Function,
+    </span>function: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Function,
     <span class="doccomment">/// The current mapping of SSA value-references to their actual values. For efficiency, each SSA value is used as an
     /// index into the Vec, meaning some slots may be unused.
     </span>registers: Entries,
@@ -345,6 +350,11 @@
     <span class="doccomment">/// Accessor for the current entries in the frame.
     </span><span class="kw">pub fn </span>entries_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[<span class="prelude-ty">Option</span>&lt;DataValue&gt;] {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.registers
+    }
+
+    <span class="doccomment">/// Accessor for the [`Function`] of this frame.
+    </span><span class="kw">pub fn </span>function(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Function {
+        <span class="self">self</span>.function
     }
 }
 

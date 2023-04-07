@@ -1070,24 +1070,6 @@
 <a href="#1070" id="1070">1070</a>
 <a href="#1071" id="1071">1071</a>
 <a href="#1072" id="1072">1072</a>
-<a href="#1073" id="1073">1073</a>
-<a href="#1074" id="1074">1074</a>
-<a href="#1075" id="1075">1075</a>
-<a href="#1076" id="1076">1076</a>
-<a href="#1077" id="1077">1077</a>
-<a href="#1078" id="1078">1078</a>
-<a href="#1079" id="1079">1079</a>
-<a href="#1080" id="1080">1080</a>
-<a href="#1081" id="1081">1081</a>
-<a href="#1082" id="1082">1082</a>
-<a href="#1083" id="1083">1083</a>
-<a href="#1084" id="1084">1084</a>
-<a href="#1085" id="1085">1085</a>
-<a href="#1086" id="1086">1086</a>
-<a href="#1087" id="1087">1087</a>
-<a href="#1088" id="1088">1088</a>
-<a href="#1089" id="1089">1089</a>
-<a href="#1090" id="1090">1090</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Cranelift IR interpreter.
 //!
 //! This module partially contains the logic for interpreting Cranelift IR.
@@ -1183,7 +1165,7 @@
     /// instructions, which may continue in other blocks, until the function returns.
     </span><span class="kw">fn </span>block(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: Block) -&gt; <span class="prelude-ty">Result</span>&lt;ControlFlow&lt;<span class="lifetime">&#39;a</span>, DataValue&gt;, InterpreterError&gt; {
         <span class="macro">trace!</span>(<span class="string">&quot;Block: {}&quot;</span>, block);
-        <span class="kw">let </span>function = <span class="self">self</span>.state.current_frame_mut().function;
+        <span class="kw">let </span>function = <span class="self">self</span>.state.current_frame_mut().function();
         <span class="kw">let </span>layout = <span class="kw-2">&amp;</span>function.layout;
         <span class="kw">let </span><span class="kw-2">mut </span>maybe_inst = layout.first_inst(block);
         <span class="kw">while let </span><span class="prelude-val">Some</span>(inst) = maybe_inst {
@@ -1347,10 +1329,10 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; State&lt;<span class="lifetime">&#39;a</span>, DataValue&gt; <span class="kw">for </span>InterpreterState&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">fn </span>get_function(<span class="kw-2">&amp;</span><span class="self">self</span>, func_ref: FuncRef) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Function&gt; {
         <span class="self">self</span>.functions
-            .get_from_func_ref(func_ref, <span class="self">self</span>.frame_stack.last().unwrap().function)
+            .get_from_func_ref(func_ref, <span class="self">self</span>.frame_stack.last().unwrap().function())
     }
     <span class="kw">fn </span>get_current_function(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Function {
-        <span class="self">self</span>.current_frame().function
+        <span class="self">self</span>.current_frame().function()
     }
 
     <span class="kw">fn </span>get_libcall_handler(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LibCallHandler&lt;DataValue&gt; {
@@ -1359,7 +1341,7 @@
 
     <span class="kw">fn </span>push_frame(<span class="kw-2">&amp;mut </span><span class="self">self</span>, function: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Function) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(frame) = <span class="self">self</span>.frame_stack.iter().last() {
-            <span class="self">self</span>.frame_offset += frame.function.fixed_stack_size() <span class="kw">as </span>usize;
+            <span class="self">self</span>.frame_offset += frame.function().fixed_stack_size() <span class="kw">as </span>usize;
         }
 
         <span class="comment">// Grow the stack by the space necessary for this frame
@@ -1372,11 +1354,11 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(frame) = <span class="self">self</span>.frame_stack.pop() {
             <span class="comment">// Shorten the stack after exiting the frame
             </span><span class="self">self</span>.stack
-                .truncate(<span class="self">self</span>.stack.len() - frame.function.fixed_stack_size() <span class="kw">as </span>usize);
+                .truncate(<span class="self">self</span>.stack.len() - frame.function().fixed_stack_size() <span class="kw">as </span>usize);
 
             <span class="comment">// Reset frame_offset to the start of this function
             </span><span class="kw">if let </span><span class="prelude-val">Some</span>(frame) = <span class="self">self</span>.frame_stack.iter().last() {
-                <span class="self">self</span>.frame_offset -= frame.function.fixed_stack_size() <span class="kw">as </span>usize;
+                <span class="self">self</span>.frame_offset -= frame.function().fixed_stack_size() <span class="kw">as </span>usize;
             }
         }
     }
@@ -1638,24 +1620,6 @@
                 </span><span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(current_val),
             }
         }
-    }
-
-    <span class="kw">fn </span>validate_address(<span class="kw-2">&amp;</span><span class="self">self</span>, addr: <span class="kw-2">&amp;</span>Address) -&gt; <span class="prelude-ty">Result</span>&lt;(), MemoryError&gt; {
-        <span class="kw">match </span>addr.region {
-            AddressRegion::Stack =&gt; {
-                <span class="kw">let </span>stack_len = <span class="self">self</span>.stack.len() <span class="kw">as </span>u64;
-
-                <span class="kw">if </span>addr.offset &gt; stack_len {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(MemoryError::InvalidEntry {
-                        entry: addr.entry,
-                        max: <span class="self">self</span>.stack.len() <span class="kw">as </span>u64,
-                    });
-                }
-            }
-            <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(),
-        };
-
-        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn </span>get_pinned_reg(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; DataValue {
@@ -2144,18 +2108,18 @@
             ss0 = explicit_slot 69
             ss1 = explicit_slot 69
             ss2 = explicit_slot 69
-        
+
         block0:
             v0 = f32const -0x1.434342p-60
             v1 = stack_addr.i64 ss2+24
             store notrap aligned v0, v1
             return v0
         }
-        
+
         function %u1() -&gt; f32 system_v {
             sig0 = () -&gt; f32 system_v
             fn0 = colocated %u2 sig0
-        
+
         block0:
             v57 = call fn0()
             return v57

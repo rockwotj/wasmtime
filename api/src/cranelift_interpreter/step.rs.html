@@ -1644,8 +1644,6 @@
 <a href="#1644" id="1644">1644</a>
 <a href="#1645" id="1645">1645</a>
 <a href="#1646" id="1646">1646</a>
-<a href="#1647" id="1647">1647</a>
-<a href="#1648" id="1648">1648</a>
 </pre><pre class="rust"><code><span class="doccomment">//! The [step] function interprets a single Cranelift instruction given its [State] and
 //! [InstructionContext]; the interpretation is generic over [Value]s.
 </span><span class="kw">use </span><span class="kw">crate</span>::address::{Address, AddressSize};
@@ -2211,15 +2209,13 @@
         Opcode::DynamicStackAddr =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;DynamicStackSlot&quot;</span>),
         Opcode::DynamicStackLoad =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;DynamicStackLoad&quot;</span>),
         Opcode::DynamicStackStore =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;DynamicStackStore&quot;</span>),
-        Opcode::GlobalValue =&gt; {
+        Opcode::GlobalValue | Opcode::SymbolValue | Opcode::TlsValue =&gt; {
             <span class="kw">if let </span>InstructionData::UnaryGlobalValue { global_value, .. } = inst {
                 assign_or_memtrap(state.resolve_global_value(global_value))
             } <span class="kw">else </span>{
                 <span class="macro">unreachable!</span>()
             }
         }
-        Opcode::SymbolValue =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;SymbolValue&quot;</span>),
-        Opcode::TlsValue =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;TlsValue&quot;</span>),
         Opcode::GetPinnedReg =&gt; assign(state.get_pinned_reg()),
         Opcode::SetPinnedReg =&gt; {
             <span class="kw">let </span>arg0 = arg(<span class="number">0</span>)<span class="question-mark">?</span>;
