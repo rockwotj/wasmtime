@@ -2193,7 +2193,7 @@ places. Shift in zero bits to the LSB.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.ushr" class="method"><a class="srclink rightside" href="../../src/cranelift_codegen/home/runner/work/wasmtime/wasmtime/target/debug/build/cranelift-codegen-e148f8dc68c5330f/out/inst_builder.rs.html#2478-2482">source</a><h4 class="code-header">fn <a href="#method.ushr" class="fn">ushr</a>(self, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>, y: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a></h4></section></summary><div class="docblock"><p>Unsigned shift right. Shift bits in <code>x</code> towards the LSB by <code>y</code>
 places, shifting in zero bits to the MSB. Also called a <em>logical
 shift</em>.</p>
-<p>The shift amount is masked to the size of the register.</p>
+<p>The shift amount is masked to the size of <code>x</code>.</p>
 <p>When shifting a B-bits integer type, this instruction computes:</p>
 <div class="example-wrap"><pre class="language-text"><code>    s &amp;:= y \pmod B,
     a &amp;:= \lfloor x \cdot 2^{-s} \rfloor.
@@ -2210,7 +2210,7 @@ shift</em>.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.sshr" class="method"><a class="srclink rightside" href="../../src/cranelift_codegen/home/runner/work/wasmtime/wasmtime/target/debug/build/cranelift-codegen-e148f8dc68c5330f/out/inst_builder.rs.html#2499-2503">source</a><h4 class="code-header">fn <a href="#method.sshr" class="fn">sshr</a>(self, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>, y: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a></h4></section></summary><div class="docblock"><p>Signed shift right. Shift bits in <code>x</code> towards the LSB by <code>y</code>
 places, shifting in sign bits to the MSB. Also called an <em>arithmetic
 shift</em>.</p>
-<p>The shift amount is masked to the size of the register.</p>
+<p>The shift amount is masked to the size of <code>x</code>.</p>
 <p>Inputs:</p>
 <ul>
 <li>x: Scalar or vector value to shift</li>
@@ -2232,7 +2232,7 @@ shift</em>.</p>
 <li>a: A scalar or vector integer type</li>
 </ul>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.ushr_imm" class="method"><a class="srclink rightside" href="../../src/cranelift_codegen/home/runner/work/wasmtime/wasmtime/target/debug/build/cranelift-codegen-e148f8dc68c5330f/out/inst_builder.rs.html#2538-2543">source</a><h4 class="code-header">fn <a href="#method.ushr_imm" class="fn">ushr_imm</a>&lt;T1: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="immediates/struct.Imm64.html" title="struct cranelift_codegen::ir::immediates::Imm64">Imm64</a>&gt;&gt;(self, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>, Y: T1) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a></h4></section></summary><div class="docblock"><p>Unsigned shift right by immediate.</p>
-<p>The shift amount is masked to the size of the register.</p>
+<p>The shift amount is masked to the size of <code>x</code>.</p>
 <p>Inputs:</p>
 <ul>
 <li>x: Scalar or vector value to shift</li>
@@ -2243,7 +2243,7 @@ shift</em>.</p>
 <li>a: A scalar or vector integer type</li>
 </ul>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.sshr_imm" class="method"><a class="srclink rightside" href="../../src/cranelift_codegen/home/runner/work/wasmtime/wasmtime/target/debug/build/cranelift-codegen-e148f8dc68c5330f/out/inst_builder.rs.html#2558-2563">source</a><h4 class="code-header">fn <a href="#method.sshr_imm" class="fn">sshr_imm</a>&lt;T1: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="immediates/struct.Imm64.html" title="struct cranelift_codegen::ir::immediates::Imm64">Imm64</a>&gt;&gt;(self, x: <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>, Y: T1) -&gt; <a class="struct" href="entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a></h4></section></summary><div class="docblock"><p>Signed shift right by immediate.</p>
-<p>The shift amount is masked to the size of the register.</p>
+<p>The shift amount is masked to the size of <code>x</code>.</p>
 <p>Inputs:</p>
 <ul>
 <li>x: Scalar or vector value to shift</li>

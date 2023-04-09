@@ -997,6 +997,7 @@
 <a href="#997" id="997">997</a>
 <a href="#998" id="998">998</a>
 <a href="#999" id="999">999</a>
+<a href="#1000" id="1000">1000</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Instruction formats and opcodes.
 //!
 //! The `instructions` module contains definitions for instruction formats, opcodes, and the
@@ -1932,6 +1933,7 @@
         <span class="macro">assert!</span>(cmp.requires_typevar_operand());
         <span class="macro">assert_eq!</span>(cmp.num_fixed_results(), <span class="number">1</span>);
         <span class="macro">assert_eq!</span>(cmp.num_fixed_value_arguments(), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(cmp.result_type(<span class="number">0</span>, types::I64), types::I8);
     }
 
     <span class="attr">#[test]
