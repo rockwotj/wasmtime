@@ -557,6 +557,14 @@
 <a href="#557" id="557">557</a>
 <a href="#558" id="558">558</a>
 <a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Cranelift IR entity references.
 //!
 //! Instructions in Cranelift IR need to reference other entities in the function. This can be other
@@ -895,7 +903,7 @@
 <span class="doccomment">/// An opaque reference to a function [`Signature`](super::Signature).
 ///
 /// `SigRef`s are used to declare a function with
-/// [`FunctionBuiler::import_function`](https://docs.rs/cranelift-frontend/*/cranelift_frontend/struct.FunctionBuilder.html#method.import_function)
+/// [`FunctionBuilder::import_function`](https://docs.rs/cranelift-frontend/*/cranelift_frontend/struct.FunctionBuilder.html#method.import_function)
 /// as well as to make an [indirect function call](super::InstBuilder::call_indirect).
 ///
 /// `SigRef`s can be created with
@@ -1108,6 +1116,14 @@
             mem::size_of::&lt;Value&gt;(),
             mem::size_of::&lt;PackedOption&lt;Value&gt;&gt;()
         );
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>memory_option() {
+        <span class="kw">use </span>core::mem;
+        <span class="comment">// PackedOption is used because Option&lt;EntityRef&gt; is twice as large
+        // as EntityRef. If this ever fails to be the case, this test will fail.
+        </span><span class="macro">assert_eq!</span>(mem::size_of::&lt;Value&gt;() * <span class="number">2</span>, mem::size_of::&lt;<span class="prelude-ty">Option</span>&lt;Value&gt;&gt;());
     }
 
     <span class="attr">#[test]

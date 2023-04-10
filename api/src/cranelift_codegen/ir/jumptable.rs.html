@@ -196,7 +196,7 @@
 }
 
 <span class="kw">impl </span>JumpTableData {
-    <span class="doccomment">/// Create a new jump table with the provided blocks
+    <span class="doccomment">/// Create a new jump table with the provided blocks.
     </span><span class="kw">pub fn </span>new(def: BlockCall, table: <span class="kw-2">&amp;</span>[BlockCall]) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             table: std::iter::once(def).chain(table.iter().copied()).collect(),

@@ -1824,10 +1824,10 @@
     <span class="doccomment">/// Saves Value labels.
     </span><span class="kw">pub </span>values_labels: <span class="prelude-ty">Option</span>&lt;BTreeMap&lt;Value, ValueLabelAssignments&gt;&gt;,
 
-    <span class="doccomment">/// Constants used within the function
+    <span class="doccomment">/// Constants used within the function.
     </span><span class="kw">pub </span>constants: ConstantPool,
 
-    <span class="doccomment">/// Stores large immediates that otherwise will not fit on InstructionData
+    <span class="doccomment">/// Stores large immediates that otherwise will not fit on InstructionData.
     </span><span class="kw">pub </span>immediates: PrimaryMap&lt;Immediate, ConstantData&gt;,
 
     <span class="doccomment">/// Jump tables used in this function.
@@ -1961,12 +1961,12 @@
     }
 }
 
-<span class="doccomment">/// Iterator over all Values in a DFG
+<span class="doccomment">/// Iterator over all Values in a DFG.
 </span><span class="kw">pub struct </span>Values&lt;<span class="lifetime">&#39;a</span>&gt; {
     inner: entity::Iter&lt;<span class="lifetime">&#39;a</span>, Value, ValueDataPacked&gt;,
 }
 
-<span class="doccomment">/// Check for non-values
+<span class="doccomment">/// Check for non-values.
 </span><span class="kw">fn </span>valid_valuedata(data: ValueDataPacked) -&gt; bool {
     <span class="kw">let </span>data = ValueData::from(data);
     <span class="kw">if let </span>ValueData::Alias {
