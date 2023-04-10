@@ -2230,8 +2230,8 @@
     }
 
     <span class="doccomment">/// Declares the type of a variable, so that it can be used later (by calling
-    /// [`FunctionBuilder::use_var`]). This function will return an error if it
-    /// was not possible to use the variable.
+    /// [`FunctionBuilder::use_var`]). This function will return an error if the variable
+    /// has been previously declared.
     </span><span class="kw">pub fn </span>try_declare_var(<span class="kw-2">&amp;mut </span><span class="self">self</span>, var: Variable, ty: Type) -&gt; <span class="prelude-ty">Result</span>&lt;(), DeclareVariableError&gt; {
         <span class="kw">if </span><span class="self">self</span>.func_ctx.types[var] != types::INVALID {
             <span class="kw">return </span><span class="prelude-val">Err</span>(DeclareVariableError::DeclaredMultipleTimes(var));
