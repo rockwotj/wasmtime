@@ -210,6 +210,15 @@
 <a href="#210" id="210">210</a>
 <a href="#211" id="211">211</a>
 <a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
 </pre><pre class="rust"><code><span class="kw">use </span>proc_macro2::{Span, TokenStream};
 <span class="kw">use </span>std::path::{Path, PathBuf};
 <span class="kw">use </span>syn::parse::{Error, Parse, ParseStream, <span class="prelude-ty">Result</span>};
@@ -288,6 +297,7 @@
                     Opt::Tracing(val) =&gt; opts.tracing = val,
                     Opt::Async(val) =&gt; opts.async_ = val,
                     Opt::TrappableErrorType(val) =&gt; opts.trappable_error_type = val,
+                    Opt::DuplicateIfNecessary(val) =&gt; opts.duplicate_if_necessary = val,
                 }
             }
         } <span class="kw">else </span>{
@@ -343,6 +353,7 @@
     <span class="macro">syn::custom_keyword!</span>(tracing);
     <span class="macro">syn::custom_keyword!</span>(trappable_error_type);
     <span class="macro">syn::custom_keyword!</span>(world);
+    <span class="macro">syn::custom_keyword!</span>(duplicate_if_necessary);
 }
 
 <span class="kw">enum </span>Opt {
@@ -352,6 +363,7 @@
     Tracing(bool),
     Async(bool),
     TrappableErrorType(Vec&lt;TrappableError&gt;),
+    DuplicateIfNecessary(bool),
 }
 
 <span class="kw">impl </span>Parse <span class="kw">for </span>Opt {
@@ -377,6 +389,12 @@
             input.parse::&lt;<span class="macro">Token!</span>[<span class="kw">async</span>]&gt;()<span class="question-mark">?</span>;
             input.parse::&lt;<span class="macro">Token!</span>[:]&gt;()<span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(Opt::Async(input.parse::&lt;syn::LitBool&gt;()<span class="question-mark">?</span>.value))
+        } <span class="kw">else if </span>l.peek(kw::duplicate_if_necessary) {
+            input.parse::&lt;kw::duplicate_if_necessary&gt;()<span class="question-mark">?</span>;
+            input.parse::&lt;<span class="macro">Token!</span>[:]&gt;()<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>(Opt::DuplicateIfNecessary(
+                input.parse::&lt;syn::LitBool&gt;()<span class="question-mark">?</span>.value,
+            ))
         } <span class="kw">else if </span>l.peek(kw::trappable_error_type) {
             input.parse::&lt;kw::trappable_error_type&gt;()<span class="question-mark">?</span>;
             input.parse::&lt;<span class="macro">Token!</span>[:]&gt;()<span class="question-mark">?</span>;

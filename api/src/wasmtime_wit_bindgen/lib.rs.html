@@ -1407,6 +1407,15 @@
 <a href="#1407" id="1407">1407</a>
 <a href="#1408" id="1408">1408</a>
 <a href="#1409" id="1409">1409</a>
+<a href="#1410" id="1410">1410</a>
+<a href="#1411" id="1411">1411</a>
+<a href="#1412" id="1412">1412</a>
+<a href="#1413" id="1413">1413</a>
+<a href="#1414" id="1414">1414</a>
+<a href="#1415" id="1415">1415</a>
+<a href="#1416" id="1416">1416</a>
+<a href="#1417" id="1417">1417</a>
+<a href="#1418" id="1418">1418</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::rust::{to_rust_ident, to_rust_upper_camel_case, RustGenerator, TypeMode};
 <span class="kw">use </span><span class="kw">crate</span>::types::{TypeInfo, Types};
 <span class="kw">use </span>heck::<span class="kw-2">*</span>;
@@ -1470,6 +1479,11 @@
     <span class="doccomment">/// A list of &quot;trappable errors&quot; which are used to replace the `E` in
     /// `result&lt;T, E&gt;` found in WIT.
     </span><span class="kw">pub </span>trappable_error_type: Vec&lt;TrappableError&gt;,
+
+    <span class="doccomment">/// Whether or not to generate &quot;duplicate&quot; type definitions for a single
+    /// WIT type if necessary, for example if it&#39;s used as both an import and an
+    /// export.
+    </span><span class="kw">pub </span>duplicate_if_necessary: bool,
 }
 
 <span class="attr">#[derive(Debug, Clone)]
@@ -2792,6 +2806,10 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; RustGenerator&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>InterfaceGenerator&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">fn </span>resolve(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Resolve {
         <span class="self">self</span>.resolve
+    }
+
+    <span class="kw">fn </span>duplicate_if_necessary(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.gen.opts.duplicate_if_necessary
     }
 
     <span class="kw">fn </span>path_to_interface(<span class="kw-2">&amp;</span><span class="self">self</span>, interface: InterfaceId) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
