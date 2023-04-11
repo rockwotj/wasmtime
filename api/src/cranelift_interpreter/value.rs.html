@@ -738,35 +738,9 @@
 <a href="#738" id="738">738</a>
 <a href="#739" id="739">739</a>
 <a href="#740" id="740">740</a>
-<a href="#741" id="741">741</a>
-<a href="#742" id="742">742</a>
-<a href="#743" id="743">743</a>
-<a href="#744" id="744">744</a>
-<a href="#745" id="745">745</a>
-<a href="#746" id="746">746</a>
-<a href="#747" id="747">747</a>
-<a href="#748" id="748">748</a>
-<a href="#749" id="749">749</a>
-<a href="#750" id="750">750</a>
-<a href="#751" id="751">751</a>
-<a href="#752" id="752">752</a>
-<a href="#753" id="753">753</a>
-<a href="#754" id="754">754</a>
-<a href="#755" id="755">755</a>
-<a href="#756" id="756">756</a>
-<a href="#757" id="757">757</a>
-<a href="#758" id="758">758</a>
-<a href="#759" id="759">759</a>
-<a href="#760" id="760">760</a>
-<a href="#761" id="761">761</a>
-<a href="#762" id="762">762</a>
-<a href="#763" id="763">763</a>
-<a href="#764" id="764">764</a>
-<a href="#765" id="765">765</a>
-</pre><pre class="rust"><code><span class="doccomment">//! The [Value] trait describes what operations can be performed on interpreter values. The
-//! interpreter usually executes using [DataValue]s so an implementation is provided here. The fact
-//! that [Value] is a trait, however, allows interpretation of Cranelift IR on other kinds of
-//! values.
+</pre><pre class="rust"><code><span class="doccomment">//! The [DataValueExt] trait is an extension trait for [DataValue]. It provides a lot of functions
+//! used by the rest of the interpreter.
+
 </span><span class="kw">use </span>core::convert::TryFrom;
 <span class="kw">use </span>core::fmt::{<span class="self">self</span>, Display, Formatter};
 <span class="kw">use </span>cranelift_codegen::data_value::{DataValue, DataValueCastFailure};
@@ -776,10 +750,9 @@
 
 <span class="kw">pub type </span>ValueResult&lt;T&gt; = <span class="prelude-ty">Result</span>&lt;T, ValueError&gt;;
 
-<span class="kw">pub trait </span>Value: Clone + From&lt;DataValue&gt; {
+<span class="kw">pub trait </span>DataValueExt: Sized {
     <span class="comment">// Identity.
-    </span><span class="kw">fn </span>ty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Type;
-    <span class="kw">fn </span>int(n: i128, ty: Type) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
+    </span><span class="kw">fn </span>int(n: i128, ty: Type) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
     <span class="kw">fn </span>into_int(<span class="self">self</span>) -&gt; ValueResult&lt;i128&gt;;
     <span class="kw">fn </span>float(n: u64, ty: Type) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
     <span class="kw">fn </span>into_float(<span class="self">self</span>) -&gt; ValueResult&lt;f64&gt;;
@@ -799,18 +772,7 @@
     <span class="kw">fn </span>min(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
 
     <span class="comment">// Comparison.
-    </span><span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ValueResult&lt;bool&gt;;
-    <span class="kw">fn </span>gt(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ValueResult&lt;bool&gt;;
-    <span class="kw">fn </span>ge(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ValueResult&lt;bool&gt; {
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.eq(other)<span class="question-mark">? </span>|| <span class="self">self</span>.gt(other)<span class="question-mark">?</span>)
-    }
-    <span class="kw">fn </span>lt(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ValueResult&lt;bool&gt; {
-        other.gt(<span class="self">self</span>)
-    }
-    <span class="kw">fn </span>le(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ValueResult&lt;bool&gt; {
-        <span class="prelude-val">Ok</span>(other.eq(<span class="self">self</span>)<span class="question-mark">? </span>|| other.gt(<span class="self">self</span>)<span class="question-mark">?</span>)
-    }
-    <span class="kw">fn </span>uno(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ValueResult&lt;bool&gt;;
+    </span><span class="kw">fn </span>uno(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ValueResult&lt;bool&gt;;
 
     <span class="comment">// Arithmetic.
     </span><span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
@@ -1005,11 +967,7 @@
     };
 }
 
-<span class="kw">impl </span>Value <span class="kw">for </span>DataValue {
-    <span class="kw">fn </span>ty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Type {
-        <span class="self">self</span>.ty()
-    }
-
+<span class="kw">impl </span>DataValueExt <span class="kw">for </span>DataValue {
     <span class="kw">fn </span>int(n: i128, ty: Type) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
         <span class="kw">if </span>ty.is_int() &amp;&amp; !ty.is_vector() {
             DataValue::from_integer(n, ty).map_err(|<span class="kw">_</span>| ValueError::InvalidValue(ty))
@@ -1272,7 +1230,7 @@
     }
 
     <span class="kw">fn </span>max(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">if </span>Value::gt(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other)<span class="question-mark">? </span>{
+        <span class="kw">if </span><span class="self">self </span>&gt; other {
             <span class="prelude-val">Ok</span>(<span class="self">self</span>)
         } <span class="kw">else </span>{
             <span class="prelude-val">Ok</span>(other)
@@ -1280,19 +1238,11 @@
     }
 
     <span class="kw">fn </span>min(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">if </span>Value::lt(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other)<span class="question-mark">? </span>{
+        <span class="kw">if </span><span class="self">self </span>&lt; other {
             <span class="prelude-val">Ok</span>(<span class="self">self</span>)
         } <span class="kw">else </span>{
             <span class="prelude-val">Ok</span>(other)
         }
-    }
-
-    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ValueResult&lt;bool&gt; {
-        <span class="prelude-val">Ok</span>(<span class="self">self </span>== other)
-    }
-
-    <span class="kw">fn </span>gt(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ValueResult&lt;bool&gt; {
-        <span class="prelude-val">Ok</span>(<span class="self">self </span>&gt; other)
     }
 
     <span class="kw">fn </span>uno(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ValueResult&lt;bool&gt; {
@@ -1331,7 +1281,7 @@
         <span class="kw">let </span>denominator = other.clone().into_int()<span class="question-mark">?</span>;
 
         <span class="comment">// Check if we are dividing INT_MIN / -1. This causes an integer overflow trap.
-        </span><span class="kw">let </span>min = Value::int(<span class="number">1i128 </span>&lt;&lt; (<span class="self">self</span>.ty().bits() - <span class="number">1</span>), <span class="self">self</span>.ty())<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>min = DataValueExt::int(<span class="number">1i128 </span>&lt;&lt; (<span class="self">self</span>.ty().bits() - <span class="number">1</span>), <span class="self">self</span>.ty())<span class="question-mark">?</span>;
         <span class="kw">if </span><span class="self">self </span>== min &amp;&amp; denominator == -<span class="number">1 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(ValueError::IntegerOverflow);
         }
@@ -1347,7 +1297,7 @@
         <span class="kw">let </span>denominator = other.clone().into_int()<span class="question-mark">?</span>;
 
         <span class="comment">// Check if we are dividing INT_MIN / -1. This causes an integer overflow trap.
-        </span><span class="kw">let </span>min = Value::int(<span class="number">1i128 </span>&lt;&lt; (<span class="self">self</span>.ty().bits() - <span class="number">1</span>), <span class="self">self</span>.ty())<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>min = DataValueExt::int(<span class="number">1i128 </span>&lt;&lt; (<span class="self">self</span>.ty().bits() - <span class="number">1</span>), <span class="self">self</span>.ty())<span class="question-mark">?</span>;
         <span class="kw">if </span><span class="self">self </span>== min &amp;&amp; denominator == -<span class="number">1 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(ValueError::IntegerOverflow);
         }

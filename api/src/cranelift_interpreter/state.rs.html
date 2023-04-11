@@ -233,9 +233,6 @@
 <a href="#233" id="233">233</a>
 <a href="#234" id="234">234</a>
 <a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
-<a href="#237" id="237">237</a>
-<a href="#238" id="238">238</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Cranelift instructions modify the state of the machine; the [State] trait describes these
 //! ways this can happen.
 </span><span class="kw">use </span><span class="kw">crate</span>::address::{Address, AddressSize};
@@ -260,13 +257,13 @@
 /// instructions--no heap knowledge required), we can partially implement this trait. See
 /// [ImmutableRegisterState] for an example of this: it only exposes the values referenced by the
 /// SSA references in the current frame and not much else.
-</span><span class="kw">pub trait </span>State&lt;<span class="lifetime">&#39;a</span>, V&gt; {
+</span><span class="kw">pub trait </span>State&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="doccomment">/// Retrieve a reference to a [Function].
     </span><span class="kw">fn </span>get_function(<span class="kw-2">&amp;</span><span class="self">self</span>, func_ref: FuncRef) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Function&gt;;
     <span class="doccomment">/// Retrieve a reference to the currently executing [Function].
     </span><span class="kw">fn </span>get_current_function(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Function;
     <span class="doccomment">/// Retrieve the handler callback for a [LibCall](cranelift_codegen::ir::LibCall)
-    </span><span class="kw">fn </span>get_libcall_handler(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LibCallHandler&lt;V&gt;;
+    </span><span class="kw">fn </span>get_libcall_handler(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LibCallHandler;
     <span class="doccomment">/// Record that an interpreter has called into a new [Function].
     </span><span class="kw">fn </span>push_frame(<span class="kw-2">&amp;mut </span><span class="self">self</span>, function: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Function);
     <span class="doccomment">/// Record that an interpreter has returned from a called [Function].
@@ -274,14 +271,14 @@
 
     <span class="doccomment">/// Retrieve a value `V` by its [value reference](cranelift_codegen::ir::Value) from the
     /// virtual register file.
-    </span><span class="kw">fn </span>get_value(<span class="kw-2">&amp;</span><span class="self">self</span>, name: Value) -&gt; <span class="prelude-ty">Option</span>&lt;V&gt;;
+    </span><span class="kw">fn </span>get_value(<span class="kw-2">&amp;</span><span class="self">self</span>, name: Value) -&gt; <span class="prelude-ty">Option</span>&lt;DataValue&gt;;
     <span class="doccomment">/// Assign a value `V` to its [value reference](cranelift_codegen::ir::Value) in the
     /// virtual register file.
-    </span><span class="kw">fn </span>set_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: Value, value: V) -&gt; <span class="prelude-ty">Option</span>&lt;V&gt;;
+    </span><span class="kw">fn </span>set_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: Value, value: DataValue) -&gt; <span class="prelude-ty">Option</span>&lt;DataValue&gt;;
     <span class="doccomment">/// Collect a list of values `V` by their  [value references](cranelift_codegen::ir::Value);
     /// this is a convenience method for `get_value`. If no value is found for a value reference,
     /// return an `Err` containing the offending reference.
-    </span><span class="kw">fn </span>collect_values(<span class="kw-2">&amp;</span><span class="self">self</span>, names: <span class="kw-2">&amp;</span>[Value]) -&gt; <span class="prelude-ty">Result</span>&lt;SmallVec&lt;[V; <span class="number">1</span>]&gt;, Value&gt; {
+    </span><span class="kw">fn </span>collect_values(<span class="kw-2">&amp;</span><span class="self">self</span>, names: <span class="kw-2">&amp;</span>[Value]) -&gt; <span class="prelude-ty">Result</span>&lt;SmallVec&lt;[DataValue; <span class="number">1</span>]&gt;, Value&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>values = SmallVec::with_capacity(names.len());
         <span class="kw">for </span><span class="kw-2">&amp;</span>n <span class="kw">in </span>names {
             <span class="kw">match </span><span class="self">self</span>.get_value(n) {
@@ -306,13 +303,13 @@
         address: Address,
         ty: Type,
         mem_flags: MemFlags,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;V, MemoryError&gt;;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;DataValue, MemoryError&gt;;
     <span class="doccomment">/// Store a value `V` into memory at the given `address`, checking if it belongs either to the
     /// stack or to one of the heaps; the number of bytes stored corresponds to the specified [Type].
     </span><span class="kw">fn </span>checked_store(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         address: Address,
-        v: V,
+        v: DataValue,
         mem_flags: MemFlags,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), MemoryError&gt;;
 
@@ -328,12 +325,12 @@
 
     <span class="doccomment">/// Given a global value, compute the final value for that global value, applying all operations
     /// in intermediate global values.
-    </span><span class="kw">fn </span>resolve_global_value(<span class="kw-2">&amp;</span><span class="self">self</span>, gv: GlobalValue) -&gt; <span class="prelude-ty">Result</span>&lt;V, MemoryError&gt;;
+    </span><span class="kw">fn </span>resolve_global_value(<span class="kw-2">&amp;</span><span class="self">self</span>, gv: GlobalValue) -&gt; <span class="prelude-ty">Result</span>&lt;DataValue, MemoryError&gt;;
 
     <span class="doccomment">/// Retrieves the current pinned reg value
-    </span><span class="kw">fn </span>get_pinned_reg(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; V;
+    </span><span class="kw">fn </span>get_pinned_reg(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; DataValue;
     <span class="doccomment">/// Sets a value for the pinned reg
-    </span><span class="kw">fn </span>set_pinned_reg(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: V);
+    </span><span class="kw">fn </span>set_pinned_reg(<span class="kw-2">&amp;mut </span><span class="self">self</span>, v: DataValue);
 }
 
 <span class="kw">pub enum </span>InterpreterFunctionRef&lt;<span class="lifetime">&#39;a</span>&gt; {
@@ -384,17 +381,14 @@
 }
 
 <span class="doccomment">/// This dummy state allows interpretation over an immutable mapping of values in a single frame.
-</span><span class="kw">pub struct </span>ImmutableRegisterState&lt;<span class="lifetime">&#39;a</span>, V&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>PrimaryMap&lt;Value, V&gt;);
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, V&gt; ImmutableRegisterState&lt;<span class="lifetime">&#39;a</span>, V&gt; {
-    <span class="kw">pub fn </span>new(values: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>PrimaryMap&lt;Value, V&gt;) -&gt; <span class="self">Self </span>{
+</span><span class="kw">pub struct </span>ImmutableRegisterState&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>PrimaryMap&lt;Value, DataValue&gt;);
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ImmutableRegisterState&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">pub fn </span>new(values: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>PrimaryMap&lt;Value, DataValue&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>(values)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, V&gt; State&lt;<span class="lifetime">&#39;a</span>, V&gt; <span class="kw">for </span>ImmutableRegisterState&lt;<span class="lifetime">&#39;a</span>, V&gt;
-<span class="kw">where
-    </span>V: Clone,
-{
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; State&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>ImmutableRegisterState&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">fn </span>get_function(<span class="kw-2">&amp;</span><span class="self">self</span>, _func_ref: FuncRef) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Function&gt; {
         <span class="prelude-val">None
     </span>}
@@ -403,7 +397,7 @@
         <span class="macro">unimplemented!</span>()
     }
 
-    <span class="kw">fn </span>get_libcall_handler(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LibCallHandler&lt;V&gt; {
+    <span class="kw">fn </span>get_libcall_handler(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LibCallHandler {
         <span class="macro">unimplemented!</span>()
     }
 
@@ -415,11 +409,11 @@
         <span class="macro">unimplemented!</span>()
     }
 
-    <span class="kw">fn </span>get_value(<span class="kw-2">&amp;</span><span class="self">self</span>, name: Value) -&gt; <span class="prelude-ty">Option</span>&lt;V&gt; {
+    <span class="kw">fn </span>get_value(<span class="kw-2">&amp;</span><span class="self">self</span>, name: Value) -&gt; <span class="prelude-ty">Option</span>&lt;DataValue&gt; {
         <span class="self">self</span>.<span class="number">0</span>.get(name).cloned()
     }
 
-    <span class="kw">fn </span>set_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _name: Value, _value: V) -&gt; <span class="prelude-ty">Option</span>&lt;V&gt; {
+    <span class="kw">fn </span>set_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _name: Value, _value: DataValue) -&gt; <span class="prelude-ty">Option</span>&lt;DataValue&gt; {
         <span class="prelude-val">None
     </span>}
 
@@ -437,14 +431,14 @@
         _addr: Address,
         _ty: Type,
         _mem_flags: MemFlags,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;V, MemoryError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;DataValue, MemoryError&gt; {
         <span class="macro">unimplemented!</span>()
     }
 
     <span class="kw">fn </span>checked_store(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         _addr: Address,
-        _v: V,
+        _v: DataValue,
         _mem_flags: MemFlags,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), MemoryError&gt; {
         <span class="macro">unimplemented!</span>()
@@ -462,15 +456,15 @@
         <span class="macro">unimplemented!</span>()
     }
 
-    <span class="kw">fn </span>resolve_global_value(<span class="kw-2">&amp;</span><span class="self">self</span>, _gv: GlobalValue) -&gt; <span class="prelude-ty">Result</span>&lt;V, MemoryError&gt; {
+    <span class="kw">fn </span>resolve_global_value(<span class="kw-2">&amp;</span><span class="self">self</span>, _gv: GlobalValue) -&gt; <span class="prelude-ty">Result</span>&lt;DataValue, MemoryError&gt; {
         <span class="macro">unimplemented!</span>()
     }
 
-    <span class="kw">fn </span>get_pinned_reg(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; V {
+    <span class="kw">fn </span>get_pinned_reg(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; DataValue {
         <span class="macro">unimplemented!</span>()
     }
 
-    <span class="kw">fn </span>set_pinned_reg(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _v: V) {
+    <span class="kw">fn </span>set_pinned_reg(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _v: DataValue) {
         <span class="macro">unimplemented!</span>()
     }
 }

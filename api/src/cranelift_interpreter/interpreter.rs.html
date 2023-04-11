@@ -1080,7 +1080,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::instruction::DfgInstructionContext;
 <span class="kw">use </span><span class="kw">crate</span>::state::{InterpreterFunctionRef, MemoryError, State};
 <span class="kw">use </span><span class="kw">crate</span>::step::{step, ControlFlow, StepError};
-<span class="kw">use </span><span class="kw">crate</span>::value::{Value, ValueError};
+<span class="kw">use </span><span class="kw">crate</span>::value::{DataValueExt, ValueError};
 <span class="kw">use </span>cranelift_codegen::data_value::DataValue;
 <span class="kw">use </span>cranelift_codegen::ir::{
     ArgumentPurpose, Block, Endianness, ExternalName, FuncRef, Function, GlobalValue,
@@ -1118,7 +1118,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         func_name: <span class="kw-2">&amp;</span>str,
         arguments: <span class="kw-2">&amp;</span>[DataValue],
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ControlFlow&lt;<span class="lifetime">&#39;a</span>, DataValue&gt;, InterpreterError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ControlFlow&lt;<span class="lifetime">&#39;a</span>&gt;, InterpreterError&gt; {
         <span class="kw">let </span>index = <span class="self">self
             </span>.state
             .functions
@@ -1133,7 +1133,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         index: FuncIndex,
         arguments: <span class="kw-2">&amp;</span>[DataValue],
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ControlFlow&lt;<span class="lifetime">&#39;a</span>, DataValue&gt;, InterpreterError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ControlFlow&lt;<span class="lifetime">&#39;a</span>&gt;, InterpreterError&gt; {
         <span class="kw">match </span><span class="self">self</span>.state.functions.get_by_index(index) {
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(InterpreterError::UnknownFunctionIndex(index)),
             <span class="prelude-val">Some</span>(func) =&gt; <span class="self">self</span>.call(func, arguments),
@@ -1145,7 +1145,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         function: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Function,
         arguments: <span class="kw-2">&amp;</span>[DataValue],
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ControlFlow&lt;<span class="lifetime">&#39;a</span>, DataValue&gt;, InterpreterError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ControlFlow&lt;<span class="lifetime">&#39;a</span>&gt;, InterpreterError&gt; {
         <span class="macro">trace!</span>(<span class="string">&quot;Call: {}({:?})&quot;</span>, function.name, arguments);
         <span class="kw">let </span>first_block = function
             .layout
@@ -1163,7 +1163,7 @@
 
     <span class="doccomment">/// Interpret a [Block] in a [Function]. This drives the interpretation over sequences of
     /// instructions, which may continue in other blocks, until the function returns.
-    </span><span class="kw">fn </span>block(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: Block) -&gt; <span class="prelude-ty">Result</span>&lt;ControlFlow&lt;<span class="lifetime">&#39;a</span>, DataValue&gt;, InterpreterError&gt; {
+    </span><span class="kw">fn </span>block(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: Block) -&gt; <span class="prelude-ty">Result</span>&lt;ControlFlow&lt;<span class="lifetime">&#39;a</span>&gt;, InterpreterError&gt; {
         <span class="macro">trace!</span>(<span class="string">&quot;Block: {}&quot;</span>, block);
         <span class="kw">let </span>function = <span class="self">self</span>.state.current_frame_mut().function();
         <span class="kw">let </span>layout = <span class="kw-2">&amp;</span>function.layout;
@@ -1264,13 +1264,13 @@
     </span>FuelExhausted,
 }
 
-<span class="kw">pub type </span>LibCallValues&lt;V&gt; = SmallVec&lt;[V; <span class="number">1</span>]&gt;;
-<span class="kw">pub type </span>LibCallHandler&lt;V&gt; = <span class="kw">fn</span>(LibCall, LibCallValues&lt;V&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;LibCallValues&lt;V&gt;, TrapCode&gt;;
+<span class="kw">pub type </span>LibCallValues = SmallVec&lt;[DataValue; <span class="number">1</span>]&gt;;
+<span class="kw">pub type </span>LibCallHandler = <span class="kw">fn</span>(LibCall, LibCallValues) -&gt; <span class="prelude-ty">Result</span>&lt;LibCallValues, TrapCode&gt;;
 
 <span class="doccomment">/// Maintains the [Interpreter]&#39;s state, implementing the [State] trait.
 </span><span class="kw">pub struct </span>InterpreterState&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">pub </span>functions: FunctionStore&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw">pub </span>libcall_handler: LibCallHandler&lt;DataValue&gt;,
+    <span class="kw">pub </span>libcall_handler: LibCallHandler,
     <span class="kw">pub </span>frame_stack: Vec&lt;Frame&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
     <span class="doccomment">/// Number of bytes from the bottom of the stack where the current frame&#39;s stack space is
     </span><span class="kw">pub </span>frame_offset: usize,
@@ -1304,7 +1304,7 @@
     }
 
     <span class="doccomment">/// Registers a libcall handler
-    </span><span class="kw">pub fn </span>with_libcall_handler(<span class="kw-2">mut </span><span class="self">self</span>, handler: LibCallHandler&lt;DataValue&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>with_libcall_handler(<span class="kw-2">mut </span><span class="self">self</span>, handler: LibCallHandler) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.libcall_handler = handler;
         <span class="self">self
     </span>}
@@ -1326,7 +1326,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; State&lt;<span class="lifetime">&#39;a</span>, DataValue&gt; <span class="kw">for </span>InterpreterState&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; State&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>InterpreterState&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">fn </span>get_function(<span class="kw-2">&amp;</span><span class="self">self</span>, func_ref: FuncRef) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Function&gt; {
         <span class="self">self</span>.functions
             .get_from_func_ref(func_ref, <span class="self">self</span>.frame_stack.last().unwrap().function())
@@ -1335,7 +1335,7 @@
         <span class="self">self</span>.current_frame().function()
     }
 
-    <span class="kw">fn </span>get_libcall_handler(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LibCallHandler&lt;DataValue&gt; {
+    <span class="kw">fn </span>get_libcall_handler(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LibCallHandler {
         <span class="self">self</span>.libcall_handler
     }
 
