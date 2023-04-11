@@ -478,7 +478,7 @@
 
     <span class="comment">// TODO avoid recreating signatures for every single Libcall function.
     </span><span class="kw">let </span>call_conv = CallConv::for_libcall(flags, CallConv::triple_default(triple));
-    <span class="kw">let </span>sig = libcall.signature(call_conv);
+    <span class="kw">let </span>sig = libcall.signature(call_conv, types::I64);
     <span class="kw">let </span>caller_conv = ctx.abi().call_conv(ctx.sigs());
 
     <span class="kw">if </span>!ctx.sigs().have_abi_sig_for_signature(<span class="kw-2">&amp;</span>sig) {

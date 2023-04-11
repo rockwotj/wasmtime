@@ -1767,7 +1767,7 @@
 
     <span class="kw">fn </span>libcall_1(<span class="kw-2">&amp;mut </span><span class="self">self</span>, libcall: <span class="kw-2">&amp;</span>LibCall, a: Reg) -&gt; Reg {
         <span class="kw">let </span>call_conv = <span class="self">self</span>.lower_ctx.abi().call_conv(<span class="self">self</span>.lower_ctx.sigs());
-        <span class="kw">let </span>ret_ty = libcall.signature(call_conv).returns[<span class="number">0</span>].value_type;
+        <span class="kw">let </span>ret_ty = libcall.signature(call_conv, I64).returns[<span class="number">0</span>].value_type;
         <span class="kw">let </span>output_reg = <span class="self">self</span>.lower_ctx.alloc_tmp(ret_ty).only_reg().unwrap();
 
         emit_vm_call(
@@ -1785,7 +1785,7 @@
 
     <span class="kw">fn </span>libcall_3(<span class="kw-2">&amp;mut </span><span class="self">self</span>, libcall: <span class="kw-2">&amp;</span>LibCall, a: Reg, b: Reg, c: Reg) -&gt; Reg {
         <span class="kw">let </span>call_conv = <span class="self">self</span>.lower_ctx.abi().call_conv(<span class="self">self</span>.lower_ctx.sigs());
-        <span class="kw">let </span>ret_ty = libcall.signature(call_conv).returns[<span class="number">0</span>].value_type;
+        <span class="kw">let </span>ret_ty = libcall.signature(call_conv, I64).returns[<span class="number">0</span>].value_type;
         <span class="kw">let </span>output_reg = <span class="self">self</span>.lower_ctx.alloc_tmp(ret_ty).only_reg().unwrap();
 
         emit_vm_call(

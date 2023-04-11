@@ -1849,6 +1849,9 @@
 <a href="#1849" id="1849">1849</a>
 <a href="#1850" id="1850">1850</a>
 <a href="#1851" id="1851">1851</a>
+<a href="#1852" id="1852">1852</a>
+<a href="#1853" id="1853">1853</a>
+<a href="#1854" id="1854">1854</a>
 </pre><pre class="rust"><code><span class="doccomment">//! A frontend for building Cranelift IR from other languages.
 </span><span class="kw">use </span><span class="kw">crate</span>::ssa::{SSABuilder, SideEffects};
 <span class="kw">use </span><span class="kw">crate</span>::variable::Variable;
@@ -2604,6 +2607,7 @@
             s.params.push(AbiParam::new(pointer_type));
             s.params.push(AbiParam::new(pointer_type));
             s.params.push(AbiParam::new(pointer_type));
+            s.returns.push(AbiParam::new(pointer_type));
             <span class="self">self</span>.import_signature(s)
         };
 
@@ -2704,6 +2708,7 @@
             s.params.push(AbiParam::new(pointer_type));
             s.params.push(AbiParam::new(types::I32));
             s.params.push(AbiParam::new(pointer_type));
+            s.returns.push(AbiParam::new(pointer_type));
             <span class="self">self</span>.import_signature(s)
         };
 
@@ -2800,6 +2805,7 @@
             s.params.push(AbiParam::new(pointer_type));
             s.params.push(AbiParam::new(pointer_type));
             s.params.push(AbiParam::new(pointer_type));
+            s.returns.push(AbiParam::new(pointer_type));
             <span class="self">self</span>.import_signature(s)
         };
 
@@ -3134,15 +3140,15 @@
         check(
             <span class="kw-2">&amp;</span>func,
             <span class="string">&quot;function %sample() -&gt; i32 system_v {
-    sig0 = (i64, i64, i64) system_v
+    sig0 = (i64, i64, i64) -&gt; i64 system_v
     fn0 = %Memcpy sig0
 
 block0:
+    v4 = iconst.i64 0
+    v1 -&gt; v4
     v3 = iconst.i64 0
-    v1 -&gt; v3
-    v2 = iconst.i64 0
-    v0 -&gt; v2
-    call fn0(v1, v0, v1)  ; v1 = 0, v0 = 0, v1 = 0
+    v0 -&gt; v3
+    v2 = call fn0(v1, v0, v1)  ; v1 = 0, v0 = 0, v1 = 0
     return v1  ; v1 = 0
 }
 &quot;</span>,
@@ -3244,16 +3250,16 @@ block0:
         check(
             <span class="kw-2">&amp;</span>func,
             <span class="string">&quot;function %sample() -&gt; i32 system_v {
-    sig0 = (i64, i64, i64) system_v
+    sig0 = (i64, i64, i64) -&gt; i64 system_v
     fn0 = %Memcpy sig0
 
 block0:
+    v5 = iconst.i64 0
+    v1 -&gt; v5
     v4 = iconst.i64 0
-    v1 -&gt; v4
-    v3 = iconst.i64 0
-    v0 -&gt; v3
+    v0 -&gt; v4
     v2 = iconst.i64 8192
-    call fn0(v1, v0, v2)  ; v1 = 0, v0 = 0, v2 = 8192
+    v3 = call fn0(v1, v0, v2)  ; v1 = 0, v0 = 0, v2 = 8192
     return v1  ; v1 = 0
 }
 &quot;</span>,
@@ -3329,16 +3335,16 @@ block0:
         check(
             <span class="kw-2">&amp;</span>func,
             <span class="string">&quot;function %sample() -&gt; i32 system_v {
-    sig0 = (i64, i32, i64) system_v
+    sig0 = (i64, i32, i64) -&gt; i64 system_v
     fn0 = %Memset sig0
 
 block0:
-    v4 = iconst.i64 0
-    v0 -&gt; v4
+    v5 = iconst.i64 0
+    v0 -&gt; v5
     v1 = iconst.i8 1
     v2 = iconst.i64 8192
     v3 = uextend.i32 v1  ; v1 = 1
-    call fn0(v0, v3, v2)  ; v0 = 0, v2 = 8192
+    v4 = call fn0(v0, v3, v2)  ; v0 = 0, v2 = 8192
     return v0  ; v0 = 0
 }
 &quot;</span>,

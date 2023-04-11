@@ -642,28 +642,6 @@
 <a href="#642" id="642">642</a>
 <a href="#643" id="643">643</a>
 <a href="#644" id="644">644</a>
-<a href="#645" id="645">645</a>
-<a href="#646" id="646">646</a>
-<a href="#647" id="647">647</a>
-<a href="#648" id="648">648</a>
-<a href="#649" id="649">649</a>
-<a href="#650" id="650">650</a>
-<a href="#651" id="651">651</a>
-<a href="#652" id="652">652</a>
-<a href="#653" id="653">653</a>
-<a href="#654" id="654">654</a>
-<a href="#655" id="655">655</a>
-<a href="#656" id="656">656</a>
-<a href="#657" id="657">657</a>
-<a href="#658" id="658">658</a>
-<a href="#659" id="659">659</a>
-<a href="#660" id="660">660</a>
-<a href="#661" id="661">661</a>
-<a href="#662" id="662">662</a>
-<a href="#663" id="663">663</a>
-<a href="#664" id="664">664</a>
-<a href="#665" id="665">665</a>
-<a href="#666" id="666">666</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Cursor library.
 //!
 //! This module defines cursor data types that can be used for inserting instructions.
@@ -1301,28 +1279,6 @@
     }
 
     <span class="kw">fn </span>insert_built_inst(<span class="self">self</span>, inst: ir::Inst) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;c </span><span class="kw-2">mut </span>ir::DataFlowGraph {
-        <span class="comment">// TODO: Remove this assertion once #796 is fixed.
-        </span><span class="attr">#[cfg(debug_assertions)]
-        </span>{
-            <span class="kw">if let </span>CursorPosition::At(<span class="kw">_</span>) = <span class="self">self</span>.position() {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(curr) = <span class="self">self</span>.current_inst() {
-                    <span class="kw">if let </span><span class="prelude-val">Some</span>(prev) = <span class="self">self</span>.layout().prev_inst(curr) {
-                        <span class="kw">let </span>prev_op = <span class="self">self</span>.data_flow_graph().insts[prev].opcode();
-                        <span class="kw">let </span>inst_op = <span class="self">self</span>.data_flow_graph().insts[inst].opcode();
-                        <span class="kw">let </span>curr_op = <span class="self">self</span>.data_flow_graph().insts[curr].opcode();
-                        <span class="kw">if </span>prev_op.is_branch()
-                            &amp;&amp; !prev_op.is_terminator()
-                            &amp;&amp; !inst_op.is_terminator()
-                        {
-                            <span class="macro">panic!</span>(
-                                <span class="string">&quot;Inserting instruction {} after {}, and before {}&quot;</span>,
-                                inst_op, prev_op, curr_op
-                            )
-                        }
-                    };
-                };
-            };
-        }
         <span class="self">self</span>.insert_inst(inst);
         <span class="kw">if </span>!<span class="self">self</span>.srcloc.is_default() {
             <span class="self">self</span>.func.set_srcloc(inst, <span class="self">self</span>.srcloc);

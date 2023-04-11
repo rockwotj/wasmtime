@@ -132,8 +132,8 @@ instructions to it, otherwise this could interfere with SSA construction.</p>
 other jump instructions.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.is_unreachable" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#709-720">source</a><h4 class="code-header">pub fn <a href="#method.is_unreachable" class="fn">is_unreachable</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Returns <code>true</code> if and only if the current <code>Block</code> is sealed and has no predecessors declared.</p>
 <p>The entry block of a function is never unreachable.</p>
-</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-FunctionBuilder%3C'a%3E-2" class="impl"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#736-1078">source</a><a href="#impl-FunctionBuilder%3C'a%3E-2" class="anchor">§</a><h3 class="code-header">impl&lt;'a&gt; <a class="struct" href="struct.FunctionBuilder.html" title="struct cranelift_frontend::FunctionBuilder">FunctionBuilder</a>&lt;'a&gt;</h3></section></summary><div class="docblock"><p>Helper functions</p>
-</div><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.call_memcpy" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#743-766">source</a><h4 class="code-header">pub fn <a href="#method.call_memcpy" class="fn">call_memcpy</a>(
+</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-FunctionBuilder%3C'a%3E-2" class="impl"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#736-1081">source</a><a href="#impl-FunctionBuilder%3C'a%3E-2" class="anchor">§</a><h3 class="code-header">impl&lt;'a&gt; <a class="struct" href="struct.FunctionBuilder.html" title="struct cranelift_frontend::FunctionBuilder">FunctionBuilder</a>&lt;'a&gt;</h3></section></summary><div class="docblock"><p>Helper functions</p>
+</div><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.call_memcpy" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#743-767">source</a><h4 class="code-header">pub fn <a href="#method.call_memcpy" class="fn">call_memcpy</a>(
     &amp;mut self,
     config: <a class="struct" href="../cranelift_codegen/isa/struct.TargetFrontendConfig.html" title="struct cranelift_codegen::isa::TargetFrontendConfig">TargetFrontendConfig</a>,
     dest: <a class="struct" href="../cranelift_codegen/ir/entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>,
@@ -144,7 +144,7 @@ other jump instructions.</p>
 won’t overlap onto <code>dest</code>. If <code>dest</code> and <code>src</code> overlap, the behavior is
 undefined. Applications in which <code>dest</code> and <code>src</code> might overlap should
 use <code>call_memmove</code> instead.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.emit_small_memory_copy" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#776-838">source</a><h4 class="code-header">pub fn <a href="#method.emit_small_memory_copy" class="fn">emit_small_memory_copy</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.emit_small_memory_copy" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#777-839">source</a><h4 class="code-header">pub fn <a href="#method.emit_small_memory_copy" class="fn">emit_small_memory_copy</a>(
     &amp;mut self,
     config: <a class="struct" href="../cranelift_codegen/isa/struct.TargetFrontendConfig.html" title="struct cranelift_codegen::isa::TargetFrontendConfig">TargetFrontendConfig</a>,
     dest: <a class="struct" href="../cranelift_codegen/ir/entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>,
@@ -161,7 +161,7 @@ use <code>call_memmove</code> instead.</p>
 <li><code>src_align</code> and <code>dest_align</code> are an upper-bound on the alignment of <code>src</code> respectively <code>dest</code>.</li>
 <li>If <code>non_overlapping</code> is true, then this must be correct.</li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.call_memset" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#843-867">source</a><h4 class="code-header">pub fn <a href="#method.call_memset" class="fn">call_memset</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.call_memset" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#844-869">source</a><h4 class="code-header">pub fn <a href="#method.call_memset" class="fn">call_memset</a>(
     &amp;mut self,
     config: <a class="struct" href="../cranelift_codegen/isa/struct.TargetFrontendConfig.html" title="struct cranelift_codegen::isa::TargetFrontendConfig">TargetFrontendConfig</a>,
     buffer: <a class="struct" href="../cranelift_codegen/ir/entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>,
@@ -169,7 +169,7 @@ use <code>call_memmove</code> instead.</p>
     size: <a class="struct" href="../cranelift_codegen/ir/entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>
 )</h4></section></summary><div class="docblock"><p>Calls libc.memset</p>
 <p>Writes <code>size</code> bytes of i8 value <code>ch</code> to memory starting at <code>buffer</code>.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.emit_small_memset" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#872-933">source</a><h4 class="code-header">pub fn <a href="#method.emit_small_memset" class="fn">emit_small_memset</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.emit_small_memset" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#874-935">source</a><h4 class="code-header">pub fn <a href="#method.emit_small_memset" class="fn">emit_small_memset</a>(
     &amp;mut self,
     config: <a class="struct" href="../cranelift_codegen/isa/struct.TargetFrontendConfig.html" title="struct cranelift_codegen::isa::TargetFrontendConfig">TargetFrontendConfig</a>,
     buffer: <a class="struct" href="../cranelift_codegen/ir/entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>,
@@ -179,7 +179,7 @@ use <code>call_memmove</code> instead.</p>
     flags: <a class="struct" href="../cranelift_codegen/ir/memflags/struct.MemFlags.html" title="struct cranelift_codegen::ir::memflags::MemFlags">MemFlags</a>
 )</h4></section></summary><div class="docblock"><p>Calls libc.memset</p>
 <p>Writes <code>size</code> bytes of value <code>ch</code> to memory starting at <code>buffer</code>.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.call_memmove" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#939-962">source</a><h4 class="code-header">pub fn <a href="#method.call_memmove" class="fn">call_memmove</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.call_memmove" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#941-965">source</a><h4 class="code-header">pub fn <a href="#method.call_memmove" class="fn">call_memmove</a>(
     &amp;mut self,
     config: <a class="struct" href="../cranelift_codegen/isa/struct.TargetFrontendConfig.html" title="struct cranelift_codegen::isa::TargetFrontendConfig">TargetFrontendConfig</a>,
     dest: <a class="struct" href="../cranelift_codegen/ir/entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>,
@@ -188,7 +188,7 @@ use <code>call_memmove</code> instead.</p>
 )</h4></section></summary><div class="docblock"><p>Calls libc.memmove</p>
 <p>Copies <code>size</code> bytes from memory starting at <code>source</code> to memory starting
 at <code>dest</code>. <code>source</code> is always read before writing to <code>dest</code>.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.call_memcmp" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#972-998">source</a><h4 class="code-header">pub fn <a href="#method.call_memcmp" class="fn">call_memcmp</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.call_memcmp" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#975-1001">source</a><h4 class="code-header">pub fn <a href="#method.call_memcmp" class="fn">call_memcmp</a>(
     &amp;mut self,
     config: <a class="struct" href="../cranelift_codegen/isa/struct.TargetFrontendConfig.html" title="struct cranelift_codegen::isa::TargetFrontendConfig">TargetFrontendConfig</a>,
     left: <a class="struct" href="../cranelift_codegen/ir/entities/struct.Value.html" title="struct cranelift_codegen::ir::entities::Value">Value</a>,
@@ -200,7 +200,7 @@ at <code>right</code>. Returns <code>0</code> if all <code>n</code> bytes are eq
 is at offset <code>i</code>, returns a positive integer if <code>ugt(left[i], right[i])</code>
 and a negative integer if <code>ult(left[i], right[i])</code>.</p>
 <p>Returns a C <code>int</code>, which is currently always <a href="../cranelift_codegen/ir/types/constant.I32.html" title="constant cranelift_codegen::ir::types::I32"><code>types::I32</code></a>.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.emit_small_memory_compare" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#1012-1077">source</a><h4 class="code-header">pub fn <a href="#method.emit_small_memory_compare" class="fn">emit_small_memory_compare</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.emit_small_memory_compare" class="method"><a class="srclink rightside" href="../src/cranelift_frontend/frontend.rs.html#1015-1080">source</a><h4 class="code-header">pub fn <a href="#method.emit_small_memory_compare" class="fn">emit_small_memory_compare</a>(
     &amp;mut self,
     config: <a class="struct" href="../cranelift_codegen/isa/struct.TargetFrontendConfig.html" title="struct cranelift_codegen::isa::TargetFrontendConfig">TargetFrontendConfig</a>,
     int_cc: <a class="enum" href="../cranelift_codegen/ir/condcodes/enum.IntCC.html" title="enum cranelift_codegen::ir::condcodes::IntCC">IntCC</a>,

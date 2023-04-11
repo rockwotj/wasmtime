@@ -132,6 +132,7 @@
 <a href="#132" id="132">132</a>
 <a href="#133" id="133">133</a>
 <a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Cranelift instructions modify the state of the machine; the [State] trait describes these
 //! ways this can happen.
 </span><span class="kw">use </span><span class="kw">crate</span>::address::{Address, AddressSize};
@@ -139,8 +140,8 @@
 <span class="kw">use </span><span class="kw">crate</span>::interpreter::LibCallHandler;
 <span class="kw">use </span>cranelift_codegen::data_value::DataValue;
 <span class="kw">use </span>cranelift_codegen::ir::{
-    ExternalName, FuncRef, Function, GlobalValue, LibCall, MemFlags, Signature, StackSlot, Type,
-    Value,
+    types, ExternalName, FuncRef, Function, GlobalValue, LibCall, MemFlags, Signature, StackSlot,
+    Type, Value,
 };
 <span class="kw">use </span>cranelift_codegen::isa::CallConv;
 <span class="kw">use </span>smallvec::SmallVec;
@@ -230,7 +231,8 @@
         <span class="kw">match </span><span class="self">self </span>{
             InterpreterFunctionRef::Function(f) =&gt; f.stencil.signature.clone(),
             <span class="comment">// CallConv here is sort of irrelevant, since we don&#39;t use it for anything
-            </span>InterpreterFunctionRef::LibCall(lc) =&gt; lc.signature(CallConv::SystemV),
+            // FIXME handle non-64bit systems
+            </span>InterpreterFunctionRef::LibCall(lc) =&gt; lc.signature(CallConv::SystemV, types::I64),
         }
     }
 }
