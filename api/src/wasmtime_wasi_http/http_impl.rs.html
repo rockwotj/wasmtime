@@ -209,6 +209,24 @@
 <a href="#209" id="209">209</a>
 <a href="#210" id="210">210</a>
 <a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::r#struct::ActiveResponse;
 <span class="kw">pub use crate</span>::r#struct::WasiHttp;
 <span class="kw">use </span><span class="kw">crate</span>::types::{RequestOptions, Scheme};
@@ -219,6 +237,7 @@
 <span class="kw">use </span>http_body_util::{BodyExt, Full};
 <span class="kw">use </span>hyper::Method;
 <span class="kw">use </span>hyper::Request;
+<span class="kw">use </span>std::collections::HashMap;
 <span class="attr">#[cfg(not(any(target_arch = <span class="string">&quot;riscv64&quot;</span>, target_arch = <span class="string">&quot;s390x&quot;</span>)))]
 </span><span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::time::Duration;
@@ -411,6 +430,23 @@
             <span class="kw">let </span>frame = next<span class="question-mark">?</span>;
             <span class="kw">if let </span><span class="prelude-val">Some</span>(chunk) = frame.data_ref() {
                 buf.put(chunk.clone());
+            }
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(trailers) = frame.trailers_ref() {
+                response.trailers = <span class="self">self</span>.fields_id_base;
+                <span class="self">self</span>.fields_id_base += <span class="number">1</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>map: HashMap&lt;String, Vec&lt;String&gt;&gt; = HashMap::new();
+                <span class="kw">for </span>(name, value) <span class="kw">in </span>trailers.iter() {
+                    <span class="kw">let </span>key = name.to_string();
+                    <span class="kw">match </span>map.get_mut(<span class="kw-2">&amp;</span>key) {
+                        <span class="prelude-val">Some</span>(vec) =&gt; vec.push(value.to_str()<span class="question-mark">?</span>.to_string()),
+                        <span class="prelude-val">None </span>=&gt; {
+                            <span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::new();
+                            vec.push(value.to_str()<span class="question-mark">?</span>.to_string());
+                            map.insert(key, vec);
+                        }
+                    };
+                }
+                <span class="self">self</span>.fields.insert(response.trailers, map);
             }
         }
         response.body = <span class="self">self</span>.streams_id_base;

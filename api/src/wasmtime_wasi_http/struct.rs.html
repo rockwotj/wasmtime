@@ -78,6 +78,8 @@
 <a href="#78" id="78">78</a>
 <a href="#79" id="79">79</a>
 <a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::types::{Method, Scheme};
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>std::collections::HashMap;
@@ -114,6 +116,7 @@
     <span class="kw">pub </span>status: u16,
     <span class="kw">pub </span>body: u32,
     <span class="kw">pub </span>response_headers: HashMap&lt;String, Vec&lt;String&gt;&gt;,
+    <span class="kw">pub </span>trailers: u32,
 }
 
 <span class="kw">impl </span>ActiveRequest {
@@ -140,6 +143,7 @@
             status: <span class="number">0</span>,
             body: <span class="number">0</span>,
             response_headers: HashMap::new(),
+            trailers: <span class="number">0</span>,
         }
     }
 }

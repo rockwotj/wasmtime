@@ -91,10 +91,35 @@
 <a href="#91" id="91">91</a>
 <a href="#92" id="92">92</a>
 <a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::poll::Pollable;
 <span class="kw">use </span><span class="kw">crate</span>::streams::{InputStream, OutputStream, StreamError};
 <span class="kw">use </span><span class="kw">crate</span>::WasiHttp;
 <span class="kw">use </span>anyhow::{anyhow, bail};
+<span class="kw">use </span>bytes::BufMut;
 <span class="kw">use </span>std::vec::Vec;
 
 <span class="kw">impl </span><span class="kw">crate</span>::streams::Host <span class="kw">for </span>WasiHttp {
@@ -120,10 +145,23 @@
 
     <span class="kw">fn </span>skip(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        _this: InputStream,
-        _len: u64,
+        stream: InputStream,
+        len: u64,
     ) -&gt; wasmtime::Result&lt;<span class="prelude-ty">Result</span>&lt;(u64, bool), StreamError&gt;&gt; {
-        <span class="macro">bail!</span>(<span class="string">&quot;unimplemented: skip&quot;</span>);
+        <span class="kw">let </span>s = <span class="self">self
+            </span>.streams
+            .get_mut(<span class="kw-2">&amp;</span>stream)
+            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;stream not found: {stream}&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">if </span>len == <span class="number">0 </span>{
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>((<span class="number">0</span>, s.len() &gt; <span class="number">0</span>)))
+        } <span class="kw">else if </span>s.len() &gt; len.try_into()<span class="question-mark">? </span>{
+            s.truncate(len.try_into()<span class="question-mark">?</span>);
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>((len, <span class="bool-val">false</span>)))
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>bytes = s.len();
+            s.truncate(s.len());
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>((bytes.try_into()<span class="question-mark">?</span>, <span class="bool-val">true</span>)))
+        }
     }
 
     <span class="kw">fn </span>subscribe_to_input_stream(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _this: InputStream) -&gt; wasmtime::Result&lt;Pollable&gt; {
@@ -131,11 +169,7 @@
     }
 
     <span class="kw">fn </span>drop_input_stream(<span class="kw-2">&amp;mut </span><span class="self">self</span>, stream: InputStream) -&gt; wasmtime::Result&lt;()&gt; {
-        <span class="kw">let </span>r = <span class="self">self
-            </span>.streams
-            .get_mut(<span class="kw-2">&amp;</span>stream)
-            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;no such input-stream {stream}&quot;</span>))<span class="question-mark">?</span>;
-        r.truncate(<span class="number">0</span>);
+        <span class="self">self</span>.streams.remove(<span class="kw-2">&amp;</span>stream);
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -144,17 +178,32 @@
         this: OutputStream,
         buf: Vec&lt;u8&gt;,
     ) -&gt; wasmtime::Result&lt;<span class="prelude-ty">Result</span>&lt;u64, StreamError&gt;&gt; {
-        <span class="comment">// TODO: Make this a real write not a replace.
-        </span><span class="self">self</span>.streams.insert(this, bytes::Bytes::from(buf.clone()));
+        <span class="kw">match </span><span class="self">self</span>.streams.get(<span class="kw-2">&amp;</span>this) {
+            <span class="prelude-val">Some</span>(data) =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>new = bytes::BytesMut::with_capacity(data.len() + buf.len());
+                new.put(data.clone());
+                new.put(bytes::Bytes::from(buf.clone()));
+                <span class="self">self</span>.streams.insert(this, new.freeze());
+            }
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="self">self</span>.streams.insert(this, bytes::Bytes::from(buf.clone()));
+            }
+        }
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(buf.len().try_into()<span class="question-mark">?</span>))
     }
 
     <span class="kw">fn </span>write_zeroes(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        _this: OutputStream,
-        _len: u64,
+        this: OutputStream,
+        len: u64,
     ) -&gt; wasmtime::Result&lt;<span class="prelude-ty">Result</span>&lt;u64, StreamError&gt;&gt; {
-        <span class="macro">bail!</span>(<span class="string">&quot;unimplemented: write_zeroes&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>data = Vec::with_capacity(len.try_into()<span class="question-mark">?</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>;
+        <span class="kw">while </span>i &lt; len {
+            data.push(<span class="number">0</span>);
+            i = i + <span class="number">1</span>;
+        }
+        <span class="self">self</span>.write(this, data)
     }
 
     <span class="kw">fn </span>splice(
@@ -178,10 +227,9 @@
         <span class="macro">bail!</span>(<span class="string">&quot;unimplemented: subscribe_to_output_stream&quot;</span>);
     }
 
-    <span class="kw">fn </span>drop_output_stream(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _this: OutputStream) -&gt; wasmtime::Result&lt;()&gt; {
-        <span class="comment">//bail!(&quot;unimplemented: drop_output_stream&quot;);
-        //FIXME: intentionally ignoring
-        </span><span class="prelude-val">Ok</span>(())
+    <span class="kw">fn </span>drop_output_stream(<span class="kw-2">&amp;mut </span><span class="self">self</span>, stream: OutputStream) -&gt; wasmtime::Result&lt;()&gt; {
+        <span class="self">self</span>.streams.remove(<span class="kw-2">&amp;</span>stream);
+        <span class="prelude-val">Ok</span>(())
     }
 }
 </code></pre></div>
