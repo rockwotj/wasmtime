@@ -415,6 +415,18 @@
 <a href="#415" id="415">415</a>
 <a href="#416" id="416">416</a>
 <a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module gives users to instantiate values that Cranelift understands. These values are used,
 //! for example, during interpretation and for wrapping immediates.
 </span><span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64, Offset32};
@@ -674,6 +686,18 @@
             // works around it in the tests themselves.
             </span>(DataValue::F32(a), DataValue::F32(b)) =&gt; a.bits() == b.bits(),
             (DataValue::F64(a), DataValue::F64(b)) =&gt; a.bits() == b.bits(),
+
+            <span class="comment">// when testing for bitwise equality, the sign information does not matter
+            </span>(DataValue::I8(a), DataValue::U8(b)) =&gt; <span class="kw-2">*</span>a <span class="kw">as </span>u8 == <span class="kw-2">*</span>b,
+            (DataValue::U8(a), DataValue::I8(b)) =&gt; <span class="kw-2">*</span>a == <span class="kw-2">*</span>b <span class="kw">as </span>u8,
+            (DataValue::I16(a), DataValue::U16(b)) =&gt; <span class="kw-2">*</span>a <span class="kw">as </span>u16 == <span class="kw-2">*</span>b,
+            (DataValue::U16(a), DataValue::I16(b)) =&gt; <span class="kw-2">*</span>a == <span class="kw-2">*</span>b <span class="kw">as </span>u16,
+            (DataValue::I32(a), DataValue::U32(b)) =&gt; <span class="kw-2">*</span>a <span class="kw">as </span>u32 == <span class="kw-2">*</span>b,
+            (DataValue::U32(a), DataValue::I32(b)) =&gt; <span class="kw-2">*</span>a == <span class="kw-2">*</span>b <span class="kw">as </span>u32,
+            (DataValue::I64(a), DataValue::U64(b)) =&gt; <span class="kw-2">*</span>a <span class="kw">as </span>u64 == <span class="kw-2">*</span>b,
+            (DataValue::U64(a), DataValue::I64(b)) =&gt; <span class="kw-2">*</span>a == <span class="kw-2">*</span>b <span class="kw">as </span>u64,
+            (DataValue::I128(a), DataValue::U128(b)) =&gt; <span class="kw-2">*</span>a <span class="kw">as </span>u128 == <span class="kw-2">*</span>b,
+            (DataValue::U128(a), DataValue::I128(b)) =&gt; <span class="kw-2">*</span>a == <span class="kw-2">*</span>b <span class="kw">as </span>u128,
 
             <span class="comment">// We don&#39;t need to worry about F32x4 / F64x2 Since we compare V128 which is already the
             // raw bytes anyway

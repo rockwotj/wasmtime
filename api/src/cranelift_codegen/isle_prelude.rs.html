@@ -808,6 +808,14 @@
 <a href="#808" id="808">808</a>
 <a href="#809" id="809">809</a>
 <a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
+<a href="#812" id="812">812</a>
+<a href="#813" id="813">813</a>
+<a href="#814" id="814">814</a>
+<a href="#815" id="815">815</a>
+<a href="#816" id="816">816</a>
+<a href="#817" id="817">817</a>
+<a href="#818" id="818">818</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Shared ISLE prelude implementation for optimization (mid-end) and
 //! lowering (backend) ISLE environments.
 
@@ -1161,6 +1169,14 @@
         </span><span class="kw">fn </span>ty_int_ref_64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type) -&gt; <span class="prelude-ty">Option</span>&lt;Type&gt; {
             <span class="kw">match </span>ty {
                 I64 | R64 =&gt; <span class="prelude-val">Some</span>(ty),
+                <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
+            }
+        }
+
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>ty_int_ref_16_to_64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type) -&gt; <span class="prelude-ty">Option</span>&lt;Type&gt; {
+            <span class="kw">match </span>ty {
+                I16 | I32 | I64 | R64 =&gt; <span class="prelude-val">Some</span>(ty),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
             }
         }

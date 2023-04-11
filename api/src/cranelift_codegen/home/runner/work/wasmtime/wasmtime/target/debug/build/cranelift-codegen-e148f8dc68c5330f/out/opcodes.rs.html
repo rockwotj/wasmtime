@@ -5062,6 +5062,102 @@
 <a href="#5062" id="5062">5062</a>
 <a href="#5063" id="5063">5063</a>
 <a href="#5064" id="5064">5064</a>
+<a href="#5065" id="5065">5065</a>
+<a href="#5066" id="5066">5066</a>
+<a href="#5067" id="5067">5067</a>
+<a href="#5068" id="5068">5068</a>
+<a href="#5069" id="5069">5069</a>
+<a href="#5070" id="5070">5070</a>
+<a href="#5071" id="5071">5071</a>
+<a href="#5072" id="5072">5072</a>
+<a href="#5073" id="5073">5073</a>
+<a href="#5074" id="5074">5074</a>
+<a href="#5075" id="5075">5075</a>
+<a href="#5076" id="5076">5076</a>
+<a href="#5077" id="5077">5077</a>
+<a href="#5078" id="5078">5078</a>
+<a href="#5079" id="5079">5079</a>
+<a href="#5080" id="5080">5080</a>
+<a href="#5081" id="5081">5081</a>
+<a href="#5082" id="5082">5082</a>
+<a href="#5083" id="5083">5083</a>
+<a href="#5084" id="5084">5084</a>
+<a href="#5085" id="5085">5085</a>
+<a href="#5086" id="5086">5086</a>
+<a href="#5087" id="5087">5087</a>
+<a href="#5088" id="5088">5088</a>
+<a href="#5089" id="5089">5089</a>
+<a href="#5090" id="5090">5090</a>
+<a href="#5091" id="5091">5091</a>
+<a href="#5092" id="5092">5092</a>
+<a href="#5093" id="5093">5093</a>
+<a href="#5094" id="5094">5094</a>
+<a href="#5095" id="5095">5095</a>
+<a href="#5096" id="5096">5096</a>
+<a href="#5097" id="5097">5097</a>
+<a href="#5098" id="5098">5098</a>
+<a href="#5099" id="5099">5099</a>
+<a href="#5100" id="5100">5100</a>
+<a href="#5101" id="5101">5101</a>
+<a href="#5102" id="5102">5102</a>
+<a href="#5103" id="5103">5103</a>
+<a href="#5104" id="5104">5104</a>
+<a href="#5105" id="5105">5105</a>
+<a href="#5106" id="5106">5106</a>
+<a href="#5107" id="5107">5107</a>
+<a href="#5108" id="5108">5108</a>
+<a href="#5109" id="5109">5109</a>
+<a href="#5110" id="5110">5110</a>
+<a href="#5111" id="5111">5111</a>
+<a href="#5112" id="5112">5112</a>
+<a href="#5113" id="5113">5113</a>
+<a href="#5114" id="5114">5114</a>
+<a href="#5115" id="5115">5115</a>
+<a href="#5116" id="5116">5116</a>
+<a href="#5117" id="5117">5117</a>
+<a href="#5118" id="5118">5118</a>
+<a href="#5119" id="5119">5119</a>
+<a href="#5120" id="5120">5120</a>
+<a href="#5121" id="5121">5121</a>
+<a href="#5122" id="5122">5122</a>
+<a href="#5123" id="5123">5123</a>
+<a href="#5124" id="5124">5124</a>
+<a href="#5125" id="5125">5125</a>
+<a href="#5126" id="5126">5126</a>
+<a href="#5127" id="5127">5127</a>
+<a href="#5128" id="5128">5128</a>
+<a href="#5129" id="5129">5129</a>
+<a href="#5130" id="5130">5130</a>
+<a href="#5131" id="5131">5131</a>
+<a href="#5132" id="5132">5132</a>
+<a href="#5133" id="5133">5133</a>
+<a href="#5134" id="5134">5134</a>
+<a href="#5135" id="5135">5135</a>
+<a href="#5136" id="5136">5136</a>
+<a href="#5137" id="5137">5137</a>
+<a href="#5138" id="5138">5138</a>
+<a href="#5139" id="5139">5139</a>
+<a href="#5140" id="5140">5140</a>
+<a href="#5141" id="5141">5141</a>
+<a href="#5142" id="5142">5142</a>
+<a href="#5143" id="5143">5143</a>
+<a href="#5144" id="5144">5144</a>
+<a href="#5145" id="5145">5145</a>
+<a href="#5146" id="5146">5146</a>
+<a href="#5147" id="5147">5147</a>
+<a href="#5148" id="5148">5148</a>
+<a href="#5149" id="5149">5149</a>
+<a href="#5150" id="5150">5150</a>
+<a href="#5151" id="5151">5151</a>
+<a href="#5152" id="5152">5152</a>
+<a href="#5153" id="5153">5153</a>
+<a href="#5154" id="5154">5154</a>
+<a href="#5155" id="5155">5155</a>
+<a href="#5156" id="5156">5156</a>
+<a href="#5157" id="5157">5157</a>
+<a href="#5158" id="5158">5158</a>
+<a href="#5159" id="5159">5159</a>
+<a href="#5160" id="5160">5160</a>
 </pre><pre class="rust"><code><span class="doccomment">/// An instruction format
 ///
 /// Every opcode has a corresponding instruction format
@@ -6778,6 +6874,24 @@
     <span class="doccomment">/// `a, c_out = iadd_carry x, y, c_in`. (Ternary)
     /// Type inferred from `y`.
     </span>IaddCarry,
+    <span class="doccomment">/// `a, of = uadd_overflow x, y`. (Binary)
+    /// Type inferred from `x`.
+    </span>UaddOverflow,
+    <span class="doccomment">/// `a, of = sadd_overflow x, y`. (Binary)
+    /// Type inferred from `x`.
+    </span>SaddOverflow,
+    <span class="doccomment">/// `a, of = usub_overflow x, y`. (Binary)
+    /// Type inferred from `x`.
+    </span>UsubOverflow,
+    <span class="doccomment">/// `a, of = ssub_overflow x, y`. (Binary)
+    /// Type inferred from `x`.
+    </span>SsubOverflow,
+    <span class="doccomment">/// `a, of = umul_overflow x, y`. (Binary)
+    /// Type inferred from `x`.
+    </span>UmulOverflow,
+    <span class="doccomment">/// `a, of = smul_overflow x, y`. (Binary)
+    /// Type inferred from `x`.
+    </span>SmulOverflow,
     <span class="doccomment">/// `a = uadd_overflow_trap x, y, code`. (IntAddTrap)
     /// Type inferred from `x`.
     </span>UaddOverflowTrap,
@@ -7291,6 +7405,12 @@
             Opcode::IaddCin,
             Opcode::IaddCout,
             Opcode::IaddCarry,
+            Opcode::UaddOverflow,
+            Opcode::SaddOverflow,
+            Opcode::UsubOverflow,
+            Opcode::SsubOverflow,
+            Opcode::UmulOverflow,
+            Opcode::SmulOverflow,
             Opcode::UaddOverflowTrap,
             Opcode::IsubBin,
             Opcode::IsubBout,
@@ -7381,7 +7501,7 @@
 
 }
 
-<span class="kw">const </span>OPCODE_FORMAT: [InstructionFormat; <span class="number">185</span>] = [
+<span class="kw">const </span>OPCODE_FORMAT: [InstructionFormat; <span class="number">191</span>] = [
     InstructionFormat::Jump, <span class="comment">// jump
     </span>InstructionFormat::Brif, <span class="comment">// brif
     </span>InstructionFormat::BranchTable, <span class="comment">// br_table
@@ -7482,6 +7602,12 @@
     </span>InstructionFormat::Ternary, <span class="comment">// iadd_cin
     </span>InstructionFormat::Binary, <span class="comment">// iadd_cout
     </span>InstructionFormat::Ternary, <span class="comment">// iadd_carry
+    </span>InstructionFormat::Binary, <span class="comment">// uadd_overflow
+    </span>InstructionFormat::Binary, <span class="comment">// sadd_overflow
+    </span>InstructionFormat::Binary, <span class="comment">// usub_overflow
+    </span>InstructionFormat::Binary, <span class="comment">// ssub_overflow
+    </span>InstructionFormat::Binary, <span class="comment">// umul_overflow
+    </span>InstructionFormat::Binary, <span class="comment">// smul_overflow
     </span>InstructionFormat::IntAddTrap, <span class="comment">// uadd_overflow_trap
     </span>InstructionFormat::Ternary, <span class="comment">// isub_bin
     </span>InstructionFormat::Binary, <span class="comment">// isub_bout
@@ -7907,6 +8033,9 @@
         Opcode::RotrImm =&gt; {
             <span class="string">&quot;rotr_imm&quot;
         </span>}
+        Opcode::SaddOverflow =&gt; {
+            <span class="string">&quot;sadd_overflow&quot;
+        </span>}
         Opcode::SaddSat =&gt; {
             <span class="string">&quot;sadd_sat&quot;
         </span>}
@@ -7958,6 +8087,9 @@
         Opcode::Smin =&gt; {
             <span class="string">&quot;smin&quot;
         </span>}
+        Opcode::SmulOverflow =&gt; {
+            <span class="string">&quot;smul_overflow&quot;
+        </span>}
         Opcode::Smulhi =&gt; {
             <span class="string">&quot;smulhi&quot;
         </span>}
@@ -7984,6 +8116,9 @@
         </span>}
         Opcode::SshrImm =&gt; {
             <span class="string">&quot;sshr_imm&quot;
+        </span>}
+        Opcode::SsubOverflow =&gt; {
+            <span class="string">&quot;ssub_overflow&quot;
         </span>}
         Opcode::SsubSat =&gt; {
             <span class="string">&quot;ssub_sat&quot;
@@ -8030,6 +8165,9 @@
         Opcode::Trunc =&gt; {
             <span class="string">&quot;trunc&quot;
         </span>}
+        Opcode::UaddOverflow =&gt; {
+            <span class="string">&quot;uadd_overflow&quot;
+        </span>}
         Opcode::UaddOverflowTrap =&gt; {
             <span class="string">&quot;uadd_overflow_trap&quot;
         </span>}
@@ -8069,6 +8207,9 @@
         Opcode::Umin =&gt; {
             <span class="string">&quot;umin&quot;
         </span>}
+        Opcode::UmulOverflow =&gt; {
+            <span class="string">&quot;umul_overflow&quot;
+        </span>}
         Opcode::Umulhi =&gt; {
             <span class="string">&quot;umulhi&quot;
         </span>}
@@ -8086,6 +8227,9 @@
         </span>}
         Opcode::UshrImm =&gt; {
             <span class="string">&quot;ushr_imm&quot;
+        </span>}
+        Opcode::UsubOverflow =&gt; {
+            <span class="string">&quot;usub_overflow&quot;
         </span>}
         Opcode::UsubSat =&gt; {
             <span class="string">&quot;usub_sat&quot;
@@ -8176,10 +8320,10 @@
     <span class="prelude-val">Some</span>(Opcode::VallTrue),
     <span class="prelude-val">Some</span>(Opcode::Band),
     <span class="prelude-val">Some</span>(Opcode::BxorImm),
-    <span class="prelude-val">Some</span>(Opcode::Fmax),
+    <span class="prelude-val">Some</span>(Opcode::SsubOverflow),
     <span class="prelude-val">Some</span>(Opcode::Uload16x4),
     <span class="prelude-val">Some</span>(Opcode::Ishl),
-    <span class="prelude-val">None</span>,
+    <span class="prelude-val">Some</span>(Opcode::Fmax),
     <span class="prelude-val">Some</span>(Opcode::Vconst),
     <span class="prelude-val">Some</span>(Opcode::Call),
     <span class="prelude-val">Some</span>(Opcode::ExtractVector),
@@ -8208,13 +8352,13 @@
     <span class="prelude-val">Some</span>(Opcode::Fmul),
     <span class="prelude-val">Some</span>(Opcode::FcvtToSint),
     <span class="prelude-val">None</span>,
-    <span class="prelude-val">Some</span>(Opcode::IsubBin),
+    <span class="prelude-val">Some</span>(Opcode::UsubOverflow),
     <span class="prelude-val">Some</span>(Opcode::Uload8x8),
     <span class="prelude-val">None</span>,
     <span class="prelude-val">Some</span>(Opcode::ResumableTrapnz),
     <span class="prelude-val">Some</span>(Opcode::Fdiv),
     <span class="prelude-val">None</span>,
-    <span class="prelude-val">None</span>,
+    <span class="prelude-val">Some</span>(Opcode::IsubBin),
     <span class="prelude-val">Some</span>(Opcode::Sextend),
     <span class="prelude-val">Some</span>(Opcode::UremImm),
     <span class="prelude-val">Some</span>(Opcode::AtomicLoad),
@@ -8278,10 +8422,10 @@
     <span class="prelude-val">Some</span>(Opcode::Extractlane),
     <span class="prelude-val">Some</span>(Opcode::StackAddr),
     <span class="prelude-val">None</span>,
-    <span class="prelude-val">Some</span>(Opcode::BandImm),
+    <span class="prelude-val">Some</span>(Opcode::UaddOverflow),
     <span class="prelude-val">Some</span>(Opcode::IsubBorrow),
     <span class="prelude-val">Some</span>(Opcode::Return),
-    <span class="prelude-val">None</span>,
+    <span class="prelude-val">Some</span>(Opcode::BandImm),
     <span class="prelude-val">Some</span>(Opcode::Uload32x2),
     <span class="prelude-val">None</span>,
     <span class="prelude-val">None</span>,
@@ -8294,9 +8438,9 @@
     <span class="prelude-val">None</span>,
     <span class="prelude-val">Some</span>(Opcode::DynamicStackLoad),
     <span class="prelude-val">Some</span>(Opcode::Iconcat),
+    <span class="prelude-val">Some</span>(Opcode::SmulOverflow),
+    <span class="prelude-val">None</span>,
     <span class="prelude-val">Some</span>(Opcode::Fence),
-    <span class="prelude-val">None</span>,
-    <span class="prelude-val">None</span>,
     <span class="prelude-val">None</span>,
     <span class="prelude-val">None</span>,
     <span class="prelude-val">Some</span>(Opcode::Fma),
@@ -8312,17 +8456,17 @@
     <span class="prelude-val">Some</span>(Opcode::X86Pmulhrsw),
     <span class="prelude-val">Some</span>(Opcode::Debugtrap),
     <span class="prelude-val">Some</span>(Opcode::Sload16x4),
-    <span class="prelude-val">Some</span>(Opcode::IsubBout),
+    <span class="prelude-val">Some</span>(Opcode::UmulOverflow),
     <span class="prelude-val">Some</span>(Opcode::IshlImm),
-    <span class="prelude-val">Some</span>(Opcode::BandNot),
-    <span class="prelude-val">Some</span>(Opcode::Ctz),
+    <span class="prelude-val">Some</span>(Opcode::SaddOverflow),
+    <span class="prelude-val">Some</span>(Opcode::IsubBout),
     <span class="prelude-val">Some</span>(Opcode::Cls),
     <span class="prelude-val">Some</span>(Opcode::Floor),
-    <span class="prelude-val">Some</span>(Opcode::UwidenHigh),
+    <span class="prelude-val">Some</span>(Opcode::BandNot),
     <span class="prelude-val">Some</span>(Opcode::Clz),
-    <span class="prelude-val">None</span>,
+    <span class="prelude-val">Some</span>(Opcode::UwidenHigh),
     <span class="prelude-val">Some</span>(Opcode::Uextend),
-    <span class="prelude-val">None</span>,
+    <span class="prelude-val">Some</span>(Opcode::Ctz),
     <span class="prelude-val">Some</span>(Opcode::UaddSat),
     <span class="prelude-val">Some</span>(Opcode::Sload32x2),
     <span class="prelude-val">None</span>,
@@ -8390,7 +8534,7 @@
 
 
 <span class="comment">// Table of opcode constraints.
-</span><span class="kw">const </span>OPCODE_CONSTRAINTS: [OpcodeConstraints; <span class="number">185</span>] = [
+</span><span class="kw">const </span>OPCODE_CONSTRAINTS: [OpcodeConstraints; <span class="number">191</span>] = [
     <span class="comment">// Jump: fixed_results=0, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=0
     // Constraints=[]
     </span>OpcodeConstraints {
@@ -9175,6 +9319,54 @@
     </span>OpcodeConstraints {
         flags: <span class="number">0x6a</span>,
         typeset_offset: <span class="number">0</span>,
+        constraint_offset: <span class="number">38</span>,
+    },
+    <span class="comment">// UaddOverflow: fixed_results=2, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=2
+    // Constraints=[&#39;Same&#39;, &#39;Concrete(ir::types::I8)&#39;, &#39;Same&#39;, &#39;Same&#39;]
+    // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64, 128})
+    </span>OpcodeConstraints {
+        flags: <span class="number">0x4a</span>,
+        typeset_offset: <span class="number">0</span>,
+        constraint_offset: <span class="number">38</span>,
+    },
+    <span class="comment">// SaddOverflow: fixed_results=2, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=2
+    // Constraints=[&#39;Same&#39;, &#39;Concrete(ir::types::I8)&#39;, &#39;Same&#39;, &#39;Same&#39;]
+    // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64, 128})
+    </span>OpcodeConstraints {
+        flags: <span class="number">0x4a</span>,
+        typeset_offset: <span class="number">0</span>,
+        constraint_offset: <span class="number">38</span>,
+    },
+    <span class="comment">// UsubOverflow: fixed_results=2, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=2
+    // Constraints=[&#39;Same&#39;, &#39;Concrete(ir::types::I8)&#39;, &#39;Same&#39;, &#39;Same&#39;]
+    // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64, 128})
+    </span>OpcodeConstraints {
+        flags: <span class="number">0x4a</span>,
+        typeset_offset: <span class="number">0</span>,
+        constraint_offset: <span class="number">38</span>,
+    },
+    <span class="comment">// SsubOverflow: fixed_results=2, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=2
+    // Constraints=[&#39;Same&#39;, &#39;Concrete(ir::types::I8)&#39;, &#39;Same&#39;, &#39;Same&#39;]
+    // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64, 128})
+    </span>OpcodeConstraints {
+        flags: <span class="number">0x4a</span>,
+        typeset_offset: <span class="number">0</span>,
+        constraint_offset: <span class="number">38</span>,
+    },
+    <span class="comment">// UmulOverflow: fixed_results=2, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=2
+    // Constraints=[&#39;Same&#39;, &#39;Concrete(ir::types::I8)&#39;, &#39;Same&#39;, &#39;Same&#39;]
+    // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64})
+    </span>OpcodeConstraints {
+        flags: <span class="number">0x4a</span>,
+        typeset_offset: <span class="number">9</span>,
+        constraint_offset: <span class="number">38</span>,
+    },
+    <span class="comment">// SmulOverflow: fixed_results=2, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=2
+    // Constraints=[&#39;Same&#39;, &#39;Concrete(ir::types::I8)&#39;, &#39;Same&#39;, &#39;Same&#39;]
+    // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64})
+    </span>OpcodeConstraints {
+        flags: <span class="number">0x4a</span>,
+        typeset_offset: <span class="number">9</span>,
         constraint_offset: <span class="number">38</span>,
     },
     <span class="comment">// UaddOverflowTrap: fixed_results=1, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=2

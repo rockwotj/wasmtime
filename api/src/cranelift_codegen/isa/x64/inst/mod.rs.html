@@ -2704,6 +2704,51 @@
 <a href="#2704" id="2704">2704</a>
 <a href="#2705" id="2705">2705</a>
 <a href="#2706" id="2706">2706</a>
+<a href="#2707" id="2707">2707</a>
+<a href="#2708" id="2708">2708</a>
+<a href="#2709" id="2709">2709</a>
+<a href="#2710" id="2710">2710</a>
+<a href="#2711" id="2711">2711</a>
+<a href="#2712" id="2712">2712</a>
+<a href="#2713" id="2713">2713</a>
+<a href="#2714" id="2714">2714</a>
+<a href="#2715" id="2715">2715</a>
+<a href="#2716" id="2716">2716</a>
+<a href="#2717" id="2717">2717</a>
+<a href="#2718" id="2718">2718</a>
+<a href="#2719" id="2719">2719</a>
+<a href="#2720" id="2720">2720</a>
+<a href="#2721" id="2721">2721</a>
+<a href="#2722" id="2722">2722</a>
+<a href="#2723" id="2723">2723</a>
+<a href="#2724" id="2724">2724</a>
+<a href="#2725" id="2725">2725</a>
+<a href="#2726" id="2726">2726</a>
+<a href="#2727" id="2727">2727</a>
+<a href="#2728" id="2728">2728</a>
+<a href="#2729" id="2729">2729</a>
+<a href="#2730" id="2730">2730</a>
+<a href="#2731" id="2731">2731</a>
+<a href="#2732" id="2732">2732</a>
+<a href="#2733" id="2733">2733</a>
+<a href="#2734" id="2734">2734</a>
+<a href="#2735" id="2735">2735</a>
+<a href="#2736" id="2736">2736</a>
+<a href="#2737" id="2737">2737</a>
+<a href="#2738" id="2738">2738</a>
+<a href="#2739" id="2739">2739</a>
+<a href="#2740" id="2740">2740</a>
+<a href="#2741" id="2741">2741</a>
+<a href="#2742" id="2742">2742</a>
+<a href="#2743" id="2743">2743</a>
+<a href="#2744" id="2744">2744</a>
+<a href="#2745" id="2745">2745</a>
+<a href="#2746" id="2746">2746</a>
+<a href="#2747" id="2747">2747</a>
+<a href="#2748" id="2748">2748</a>
+<a href="#2749" id="2749">2749</a>
+<a href="#2750" id="2750">2750</a>
+<a href="#2751" id="2751">2751</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines x86_64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc, StackMap};
@@ -2807,6 +2852,7 @@
             | Inst::MovsxRmR { .. }
             | Inst::MovzxRmR { .. }
             | Inst::MulHi { .. }
+            | Inst::UMulLo { .. }
             | Inst::Neg { .. }
             | Inst::Not { .. }
             | Inst::Nop { .. }
@@ -2886,7 +2932,6 @@
         src: RegMemImm,
         dst: Writable&lt;Reg&gt;,
     ) -&gt; <span class="self">Self </span>{
-        <span class="macro">debug_assert!</span>(size.is_one_of(<span class="kw-2">&amp;</span>[OperandSize::Size32, OperandSize::Size64]));
         src.assert_regclass_is(RegClass::Int);
         <span class="macro">debug_assert!</span>(dst.to_reg().class() == RegClass::Int);
         <span class="self">Self</span>::AluRmiR {
@@ -3363,7 +3408,8 @@
             .to_string()
         }
 
-        <span class="kw">fn </span>suffix_lqb(size: OperandSize) -&gt; String {
+        <span class="attr">#[allow(dead_code)]
+        </span><span class="kw">fn </span>suffix_lqb(size: OperandSize) -&gt; String {
             <span class="kw">match </span>size {
                 OperandSize::Size32 =&gt; <span class="string">&quot;l&quot;</span>,
                 OperandSize::Size64 =&gt; <span class="string">&quot;q&quot;</span>,
@@ -3397,7 +3443,7 @@
                 <span class="kw">let </span>src2 = src2.pretty_print(size_bytes, allocs);
                 <span class="macro">format!</span>(
                     <span class="string">&quot;{} {}, {}, {}&quot;</span>,
-                    ljustify2(op.to_string(), suffix_lqb(<span class="kw-2">*</span>size)),
+                    ljustify2(op.to_string(), suffix_bwlq(<span class="kw-2">*</span>size)),
                     src1,
                     src2,
                     dst
@@ -3422,7 +3468,7 @@
                 <span class="kw">let </span>src1_dst = src1_dst.pretty_print(size_bytes, allocs);
                 <span class="macro">format!</span>(
                     <span class="string">&quot;{} {}, {}&quot;</span>,
-                    ljustify2(op.to_string(), suffix_lqb(<span class="kw-2">*</span>size)),
+                    ljustify2(op.to_string(), suffix_bwlq(<span class="kw-2">*</span>size)),
                     src2,
                     src1_dst,
                 )
@@ -3552,6 +3598,24 @@
                     src2,
                     dst_lo,
                     dst_hi,
+                )
+            }
+
+            Inst::UMulLo {
+                size,
+                src1,
+                src2,
+                dst,
+            } =&gt; {
+                <span class="kw">let </span>src1 = pretty_print_reg(src1.to_reg(), size.to_bytes(), allocs);
+                <span class="kw">let </span>dst = pretty_print_reg(dst.to_reg().to_reg(), size.to_bytes(), allocs);
+                <span class="kw">let </span>src2 = src2.pretty_print(size.to_bytes(), allocs);
+                <span class="macro">format!</span>(
+                    <span class="string">&quot;{} {}, {}, {}&quot;</span>,
+                    ljustify2(<span class="string">&quot;mul&quot;</span>.to_string(), suffix_bwlq(<span class="kw-2">*</span>size)),
+                    src1,
+                    src2,
+                    dst,
                 )
             }
 
@@ -4560,11 +4624,23 @@
     // method above.
     </span><span class="kw">match </span>inst {
         Inst::AluRmiR {
-            src1, src2, dst, ..
+            size,
+            op,
+            src1,
+            src2,
+            dst,
+            ..
         } =&gt; {
-            collector.reg_use(src1.to_reg());
-            collector.reg_reuse_def(dst.to_writable_reg(), <span class="number">0</span>);
-            src2.get_operands(collector);
+            <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size8 &amp;&amp; <span class="kw-2">*</span>op == AluRmiROpcode::Mul {
+                <span class="comment">// 8-bit imul has RAX as a fixed input/output
+                </span>collector.reg_fixed_use(src1.to_reg(), regs::rax());
+                collector.reg_fixed_def(dst.to_writable_reg(), regs::rax());
+                src2.get_operands(collector);
+            } <span class="kw">else </span>{
+                collector.reg_use(src1.to_reg());
+                collector.reg_reuse_def(dst.to_writable_reg(), <span class="number">0</span>);
+                src2.get_operands(collector);
+            }
         }
         Inst::AluConstOp { dst, .. } =&gt; collector.reg_def(dst.to_writable_reg()),
         Inst::AluRM { src1_dst, src2, .. } =&gt; {
@@ -4629,6 +4705,20 @@
             collector.reg_fixed_use(src1.to_reg(), regs::rax());
             collector.reg_fixed_def(dst_lo.to_writable_reg(), regs::rax());
             collector.reg_fixed_def(dst_hi.to_writable_reg(), regs::rdx());
+            src2.get_operands(collector);
+        }
+        Inst::UMulLo {
+            size,
+            src1,
+            src2,
+            dst,
+            ..
+        } =&gt; {
+            collector.reg_fixed_use(src1.to_reg(), regs::rax());
+            collector.reg_fixed_def(dst.to_writable_reg(), regs::rax());
+            <span class="kw">if </span><span class="kw-2">*</span>size != OperandSize::Size8 {
+                collector.reg_clobbers(PRegSet::empty().with(regs::gpr_preg(regs::ENC_RDX)));
+            }
             src2.get_operands(collector);
         }
         Inst::SignExtendData { size, src, dst } =&gt; {

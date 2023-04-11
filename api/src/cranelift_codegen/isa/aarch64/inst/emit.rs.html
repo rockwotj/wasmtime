@@ -3648,6 +3648,14 @@
 <a href="#3648" id="3648">3648</a>
 <a href="#3649" id="3649">3649</a>
 <a href="#3650" id="3650">3650</a>
+<a href="#3651" id="3651">3651</a>
+<a href="#3652" id="3652">3652</a>
+<a href="#3653" id="3653">3653</a>
+<a href="#3654" id="3654">3654</a>
+<a href="#3655" id="3655">3655</a>
+<a href="#3656" id="3656">3656</a>
+<a href="#3657" id="3657">3657</a>
+<a href="#3658" id="3658">3658</a>
 </pre><pre class="rust"><code><span class="doccomment">//! AArch64 ISA: binary code emission.
 
 </span><span class="kw">use </span>cranelift_control::ControlPlane;
@@ -4439,6 +4447,14 @@
                 <span class="kw">let </span>(top11, bit15) = <span class="kw">match </span>alu_op {
                     ALUOp3::MAdd =&gt; (<span class="number">0b0_00_11011_000</span>, <span class="number">0</span>),
                     ALUOp3::MSub =&gt; (<span class="number">0b0_00_11011_000</span>, <span class="number">1</span>),
+                    ALUOp3::UMAddL =&gt; {
+                        <span class="macro">debug_assert!</span>(size == OperandSize::Size32);
+                        (<span class="number">0b1_00_11011_1_01</span>, <span class="number">0</span>)
+                    }
+                    ALUOp3::SMAddL =&gt; {
+                        <span class="macro">debug_assert!</span>(size == OperandSize::Size32);
+                        (<span class="number">0b1_00_11011_0_01</span>, <span class="number">0</span>)
+                    }
                 };
                 <span class="kw">let </span>top11 = top11 | size.sf_bit() &lt;&lt; <span class="number">10</span>;
                 sink.put4(enc_arith_rrrr(top11, rm, bit15, ra, rn, rd));

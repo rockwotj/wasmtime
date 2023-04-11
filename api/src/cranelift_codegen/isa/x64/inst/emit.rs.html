@@ -3906,6 +3906,98 @@
 <a href="#3906" id="3906">3906</a>
 <a href="#3907" id="3907">3907</a>
 <a href="#3908" id="3908">3908</a>
+<a href="#3909" id="3909">3909</a>
+<a href="#3910" id="3910">3910</a>
+<a href="#3911" id="3911">3911</a>
+<a href="#3912" id="3912">3912</a>
+<a href="#3913" id="3913">3913</a>
+<a href="#3914" id="3914">3914</a>
+<a href="#3915" id="3915">3915</a>
+<a href="#3916" id="3916">3916</a>
+<a href="#3917" id="3917">3917</a>
+<a href="#3918" id="3918">3918</a>
+<a href="#3919" id="3919">3919</a>
+<a href="#3920" id="3920">3920</a>
+<a href="#3921" id="3921">3921</a>
+<a href="#3922" id="3922">3922</a>
+<a href="#3923" id="3923">3923</a>
+<a href="#3924" id="3924">3924</a>
+<a href="#3925" id="3925">3925</a>
+<a href="#3926" id="3926">3926</a>
+<a href="#3927" id="3927">3927</a>
+<a href="#3928" id="3928">3928</a>
+<a href="#3929" id="3929">3929</a>
+<a href="#3930" id="3930">3930</a>
+<a href="#3931" id="3931">3931</a>
+<a href="#3932" id="3932">3932</a>
+<a href="#3933" id="3933">3933</a>
+<a href="#3934" id="3934">3934</a>
+<a href="#3935" id="3935">3935</a>
+<a href="#3936" id="3936">3936</a>
+<a href="#3937" id="3937">3937</a>
+<a href="#3938" id="3938">3938</a>
+<a href="#3939" id="3939">3939</a>
+<a href="#3940" id="3940">3940</a>
+<a href="#3941" id="3941">3941</a>
+<a href="#3942" id="3942">3942</a>
+<a href="#3943" id="3943">3943</a>
+<a href="#3944" id="3944">3944</a>
+<a href="#3945" id="3945">3945</a>
+<a href="#3946" id="3946">3946</a>
+<a href="#3947" id="3947">3947</a>
+<a href="#3948" id="3948">3948</a>
+<a href="#3949" id="3949">3949</a>
+<a href="#3950" id="3950">3950</a>
+<a href="#3951" id="3951">3951</a>
+<a href="#3952" id="3952">3952</a>
+<a href="#3953" id="3953">3953</a>
+<a href="#3954" id="3954">3954</a>
+<a href="#3955" id="3955">3955</a>
+<a href="#3956" id="3956">3956</a>
+<a href="#3957" id="3957">3957</a>
+<a href="#3958" id="3958">3958</a>
+<a href="#3959" id="3959">3959</a>
+<a href="#3960" id="3960">3960</a>
+<a href="#3961" id="3961">3961</a>
+<a href="#3962" id="3962">3962</a>
+<a href="#3963" id="3963">3963</a>
+<a href="#3964" id="3964">3964</a>
+<a href="#3965" id="3965">3965</a>
+<a href="#3966" id="3966">3966</a>
+<a href="#3967" id="3967">3967</a>
+<a href="#3968" id="3968">3968</a>
+<a href="#3969" id="3969">3969</a>
+<a href="#3970" id="3970">3970</a>
+<a href="#3971" id="3971">3971</a>
+<a href="#3972" id="3972">3972</a>
+<a href="#3973" id="3973">3973</a>
+<a href="#3974" id="3974">3974</a>
+<a href="#3975" id="3975">3975</a>
+<a href="#3976" id="3976">3976</a>
+<a href="#3977" id="3977">3977</a>
+<a href="#3978" id="3978">3978</a>
+<a href="#3979" id="3979">3979</a>
+<a href="#3980" id="3980">3980</a>
+<a href="#3981" id="3981">3981</a>
+<a href="#3982" id="3982">3982</a>
+<a href="#3983" id="3983">3983</a>
+<a href="#3984" id="3984">3984</a>
+<a href="#3985" id="3985">3985</a>
+<a href="#3986" id="3986">3986</a>
+<a href="#3987" id="3987">3987</a>
+<a href="#3988" id="3988">3988</a>
+<a href="#3989" id="3989">3989</a>
+<a href="#3990" id="3990">3990</a>
+<a href="#3991" id="3991">3991</a>
+<a href="#3992" id="3992">3992</a>
+<a href="#3993" id="3993">3993</a>
+<a href="#3994" id="3994">3994</a>
+<a href="#3995" id="3995">3995</a>
+<a href="#3996" id="3996">3996</a>
+<a href="#3997" id="3997">3997</a>
+<a href="#3998" id="3998">3998</a>
+<a href="#3999" id="3999">3999</a>
+<a href="#4000" id="4000">4000</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -4062,35 +4154,69 @@
             <span class="macro">debug_assert_eq!</span>(src1, reg_g);
             <span class="kw">let </span>src2 = src2.clone().to_reg_mem_imm().with_allocs(allocs);
 
-            <span class="kw">let </span>rex = RexFlags::from(<span class="kw-2">*</span>size);
+            <span class="kw">let </span>prefix = <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size16 {
+                LegacyPrefixes::_66
+            } <span class="kw">else </span>{
+                LegacyPrefixes::None
+            };
+
+            <span class="kw">let </span><span class="kw-2">mut </span>rex = RexFlags::from(<span class="kw-2">*</span>size);
             <span class="kw">if </span><span class="kw-2">*</span>op == AluRmiROpcode::Mul {
                 <span class="comment">// We kinda freeloaded Mul into RMI_R_Op, but it doesn&#39;t fit the usual pattern, so
                 // we have to special-case it.
-                </span><span class="kw">match </span>src2 {
-                    RegMemImm::Reg { reg: reg_e } =&gt; {
-                        emit_std_reg_reg(sink, LegacyPrefixes::None, <span class="number">0x0FAF</span>, <span class="number">2</span>, reg_g, reg_e, rex);
-                    }
+                </span><span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size8 {
+                    <span class="kw">match </span>src2 {
+                        RegMemImm::Reg { reg: reg_e } =&gt; {
+                            <span class="macro">debug_assert!</span>(reg_e.is_real());
+                            rex.always_emit_if_8bit_needed(reg_e);
+                            <span class="kw">let </span>enc_e = int_reg_enc(reg_e);
+                            emit_std_enc_enc(sink, LegacyPrefixes::None, <span class="number">0xF6</span>, <span class="number">1</span>, <span class="number">5</span>, enc_e, rex);
+                        }
 
-                    RegMemImm::Mem { addr } =&gt; {
-                        <span class="kw">let </span>amode = addr.finalize(state, sink);
-                        emit_std_reg_mem(
-                            sink,
-                            LegacyPrefixes::None,
-                            <span class="number">0x0FAF</span>,
-                            <span class="number">2</span>,
-                            reg_g,
-                            <span class="kw-2">&amp;</span>amode,
-                            rex,
-                            <span class="number">0</span>,
-                        );
-                    }
+                        RegMemImm::Mem { addr } =&gt; {
+                            <span class="kw">let </span>amode = addr.finalize(state, sink);
+                            emit_std_enc_mem(
+                                sink,
+                                LegacyPrefixes::None,
+                                <span class="number">0xF6</span>,
+                                <span class="number">1</span>,
+                                <span class="number">5</span>,
+                                <span class="kw-2">&amp;</span>amode,
+                                rex,
+                                <span class="number">0</span>,
+                            );
+                        }
 
-                    RegMemImm::Imm { simm32 } =&gt; {
-                        <span class="kw">let </span>use_imm8 = low8_will_sign_extend_to_32(simm32);
-                        <span class="kw">let </span>opcode = <span class="kw">if </span>use_imm8 { <span class="number">0x6B </span>} <span class="kw">else </span>{ <span class="number">0x69 </span>};
-                        <span class="comment">// Yes, really, reg_g twice.
-                        </span>emit_std_reg_reg(sink, LegacyPrefixes::None, opcode, <span class="number">1</span>, reg_g, reg_g, rex);
-                        emit_simm(sink, <span class="kw">if </span>use_imm8 { <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">4 </span>}, simm32);
+                        RegMemImm::Imm { .. } =&gt; {
+                            <span class="macro">panic!</span>(<span class="string">&quot;Cannot emit 8bit imul with 8bit immediate&quot;</span>);
+                        }
+                    }
+                } <span class="kw">else </span>{
+                    <span class="kw">match </span>src2 {
+                        RegMemImm::Reg { reg: reg_e } =&gt; {
+                            emit_std_reg_reg(sink, prefix, <span class="number">0x0FAF</span>, <span class="number">2</span>, reg_g, reg_e, rex);
+                        }
+
+                        RegMemImm::Mem { addr } =&gt; {
+                            <span class="kw">let </span>amode = addr.finalize(state, sink);
+                            emit_std_reg_mem(sink, prefix, <span class="number">0x0FAF</span>, <span class="number">2</span>, reg_g, <span class="kw-2">&amp;</span>amode, rex, <span class="number">0</span>);
+                        }
+
+                        RegMemImm::Imm { simm32 } =&gt; {
+                            <span class="kw">let </span>imm_size = <span class="kw">if </span>low8_will_sign_extend_to_32(simm32) {
+                                <span class="number">1
+                            </span>} <span class="kw">else </span>{
+                                <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size16 {
+                                    <span class="number">2
+                                </span>} <span class="kw">else </span>{
+                                    <span class="number">4
+                                </span>}
+                            };
+                            <span class="kw">let </span>opcode = <span class="kw">if </span>imm_size == <span class="number">1 </span>{ <span class="number">0x6B </span>} <span class="kw">else </span>{ <span class="number">0x69 </span>};
+                            <span class="comment">// Yes, really, reg_g twice.
+                            </span>emit_std_reg_reg(sink, prefix, opcode, <span class="number">1</span>, reg_g, reg_g, rex);
+                            emit_simm(sink, imm_size, simm32);
+                        }
                     }
                 }
             } <span class="kw">else </span>{
@@ -4105,52 +4231,63 @@
                     AluRmiROpcode::Mul =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unreachable&quot;</span>),
                 };
 
+                <span class="kw">let </span>(opcode_r, opcode_m) = <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size8 {
+                    (opcode_r - <span class="number">1</span>, opcode_m - <span class="number">1</span>)
+                } <span class="kw">else </span>{
+                    (opcode_r, opcode_m)
+                };
+
+                <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size8 {
+                    <span class="macro">debug_assert!</span>(reg_g.is_real());
+                    rex.always_emit_if_8bit_needed(reg_g);
+                }
+
                 <span class="kw">match </span>src2 {
                     RegMemImm::Reg { reg: reg_e } =&gt; {
+                        <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size8 {
+                            <span class="macro">debug_assert!</span>(reg_e.is_real());
+                            rex.always_emit_if_8bit_needed(reg_e);
+                        }
+
                         <span class="comment">// GCC/llvm use the swapped operand encoding (viz., the R/RM vs RM/R
                         // duality). Do this too, so as to be able to compare generated machine
                         // code easily.
-                        </span>emit_std_reg_reg(
-                            sink,
-                            LegacyPrefixes::None,
-                            opcode_r,
-                            <span class="number">1</span>,
-                            reg_e,
-                            reg_g,
-                            rex,
-                        );
+                        </span>emit_std_reg_reg(sink, prefix, opcode_r, <span class="number">1</span>, reg_e, reg_g, rex);
                     }
 
                     RegMemImm::Mem { addr } =&gt; {
                         <span class="kw">let </span>amode = addr.finalize(state, sink);
                         <span class="comment">// Here we revert to the &quot;normal&quot; G-E ordering.
-                        </span>emit_std_reg_mem(
-                            sink,
-                            LegacyPrefixes::None,
-                            opcode_m,
-                            <span class="number">1</span>,
-                            reg_g,
-                            <span class="kw-2">&amp;</span>amode,
-                            rex,
-                            <span class="number">0</span>,
-                        );
+                        </span>emit_std_reg_mem(sink, prefix, opcode_m, <span class="number">1</span>, reg_g, <span class="kw-2">&amp;</span>amode, rex, <span class="number">0</span>);
                     }
 
                     RegMemImm::Imm { simm32 } =&gt; {
-                        <span class="kw">let </span>use_imm8 = low8_will_sign_extend_to_32(simm32);
-                        <span class="kw">let </span>opcode = <span class="kw">if </span>use_imm8 { <span class="number">0x83 </span>} <span class="kw">else </span>{ <span class="number">0x81 </span>};
+                        <span class="kw">let </span>imm_size = <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size8 {
+                            <span class="number">1
+                        </span>} <span class="kw">else </span>{
+                            <span class="kw">if </span>low8_will_sign_extend_to_32(simm32) {
+                                <span class="number">1
+                            </span>} <span class="kw">else </span>{
+                                <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size16 {
+                                    <span class="number">2
+                                </span>} <span class="kw">else </span>{
+                                    <span class="number">4
+                                </span>}
+                            }
+                        };
+
+                        <span class="kw">let </span>opcode = <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size8 {
+                            <span class="number">0x80
+                        </span>} <span class="kw">else if </span>low8_will_sign_extend_to_32(simm32) {
+                            <span class="number">0x83
+                        </span>} <span class="kw">else </span>{
+                            <span class="number">0x81
+                        </span>};
+
                         <span class="comment">// And also here we use the &quot;normal&quot; G-E ordering.
                         </span><span class="kw">let </span>enc_g = int_reg_enc(reg_g);
-                        emit_std_enc_enc(
-                            sink,
-                            LegacyPrefixes::None,
-                            opcode,
-                            <span class="number">1</span>,
-                            subopcode_i,
-                            enc_g,
-                            rex,
-                        );
-                        emit_simm(sink, <span class="kw">if </span>use_imm8 { <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">4 </span>}, simm32);
+                        emit_std_enc_enc(sink, prefix, opcode, <span class="number">1</span>, subopcode_i, enc_g, rex);
+                        emit_simm(sink, imm_size, simm32);
                     }
                 }
             }
@@ -4182,7 +4319,6 @@
             <span class="kw">let </span>src2 = allocs.next(src2.to_reg());
             <span class="kw">let </span>src1_dst = src1_dst.finalize(state, sink).with_allocs(allocs);
 
-            <span class="macro">assert!</span>(<span class="kw-2">*</span>size == OperandSize::Size32 || <span class="kw-2">*</span>size == OperandSize::Size64);
             <span class="kw">let </span>opcode = <span class="kw">match </span>op {
                 AluRmiROpcode::Add =&gt; <span class="number">0x01</span>,
                 AluRmiROpcode::Sub =&gt; <span class="number">0x29</span>,
@@ -4191,17 +4327,26 @@
                 AluRmiROpcode::Xor =&gt; <span class="number">0x31</span>,
                 <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported read-modify-write ALU opcode&quot;</span>),
             };
+
+            <span class="kw">let </span>prefix = <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size16 {
+                LegacyPrefixes::_66
+            } <span class="kw">else </span>{
+                LegacyPrefixes::None
+            };
+            <span class="kw">let </span>opcode = <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size8 {
+                opcode - <span class="number">1
+            </span>} <span class="kw">else </span>{
+                opcode
+            };
+
+            <span class="kw">let </span><span class="kw-2">mut </span>rex = RexFlags::from(<span class="kw-2">*</span>size);
+            <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size8 {
+                <span class="macro">debug_assert!</span>(src2.is_real());
+                rex.always_emit_if_8bit_needed(src2);
+            }
+
             <span class="kw">let </span>enc_g = int_reg_enc(src2);
-            emit_std_enc_mem(
-                sink,
-                LegacyPrefixes::None,
-                opcode,
-                <span class="number">1</span>,
-                enc_g,
-                <span class="kw-2">&amp;</span>src1_dst,
-                RexFlags::from(<span class="kw-2">*</span>size),
-                <span class="number">0</span>,
-            );
+            emit_std_enc_mem(sink, prefix, opcode, <span class="number">1</span>, enc_g, <span class="kw-2">&amp;</span>src1_dst, rex, <span class="number">0</span>);
         }
 
         Inst::AluRmRVex {
@@ -4425,6 +4570,45 @@
                 RegMem::Mem { addr: src } =&gt; {
                     <span class="kw">let </span>amode = src.finalize(state, sink).with_allocs(allocs);
                     emit_std_enc_mem(sink, prefix, <span class="number">0xF7</span>, <span class="number">1</span>, subopcode, <span class="kw-2">&amp;</span>amode, rex_flags, <span class="number">0</span>);
+                }
+            }
+        }
+
+        Inst::UMulLo {
+            size,
+            src1,
+            src2,
+            dst,
+        } =&gt; {
+            <span class="kw">let </span>src1 = allocs.next(src1.to_reg());
+            <span class="kw">let </span>dst = allocs.next(dst.to_reg().to_reg());
+            <span class="macro">debug_assert_eq!</span>(src1, regs::rax());
+            <span class="macro">debug_assert_eq!</span>(dst, regs::rax());
+
+            <span class="kw">let </span><span class="kw-2">mut </span>rex = RexFlags::from(<span class="kw-2">*</span>size);
+            <span class="kw">let </span>prefix = <span class="kw">match </span>size {
+                OperandSize::Size16 =&gt; LegacyPrefixes::_66,
+                <span class="kw">_ </span>=&gt; LegacyPrefixes::None,
+            };
+
+            <span class="kw">let </span>opcode = <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size8 {
+                <span class="number">0xF6
+            </span>} <span class="kw">else </span>{
+                <span class="number">0xF7
+            </span>};
+
+            <span class="kw">match </span>src2.clone().to_reg_mem() {
+                RegMem::Reg { reg } =&gt; {
+                    <span class="kw">let </span>reg = allocs.next(reg);
+                    <span class="kw">if </span><span class="kw-2">*</span>size == OperandSize::Size8 {
+                        rex.always_emit_if_8bit_needed(reg);
+                    }
+                    <span class="kw">let </span>reg_e = int_reg_enc(reg);
+                    emit_std_enc_enc(sink, prefix, opcode, <span class="number">1</span>, <span class="number">4</span>, reg_e, rex);
+                }
+                RegMem::Mem { addr: src } =&gt; {
+                    <span class="kw">let </span>amode = src.finalize(state, sink).with_allocs(allocs);
+                    emit_std_enc_mem(sink, prefix, opcode, <span class="number">1</span>, <span class="number">4</span>, <span class="kw-2">&amp;</span>amode, rex, <span class="number">0</span>);
                 }
             }
         }

@@ -475,10 +475,6 @@
 <a href="#475" id="475">475</a>
 <a href="#476" id="476">476</a>
 <a href="#477" id="477">477</a>
-<a href="#478" id="478">478</a>
-<a href="#479" id="479">479</a>
-<a href="#480" id="480">480</a>
-<a href="#481" id="481">481</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for riscv64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -782,10 +778,6 @@
 
     <span class="kw">fn </span>has_zbs(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.backend.isa_flags.has_zbs()
-    }
-
-    <span class="kw">fn </span>inst_output_get(<span class="kw-2">&amp;mut </span><span class="self">self</span>, x: InstOutput, index: u8) -&gt; ValueRegs {
-        x[index <span class="kw">as </span>usize]
     }
 
     <span class="kw">fn </span>move_f_to_x(<span class="kw-2">&amp;mut </span><span class="self">self</span>, r: Reg, ty: Type) -&gt; Reg {

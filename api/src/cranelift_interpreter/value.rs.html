@@ -738,6 +738,40 @@
 <a href="#738" id="738">738</a>
 <a href="#739" id="739">739</a>
 <a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
 </pre><pre class="rust"><code><span class="doccomment">//! The [DataValueExt] trait is an extension trait for [DataValue]. It provides a lot of functions
 //! used by the rest of the interpreter.
 
@@ -784,6 +818,9 @@
     <span class="kw">fn </span>fma(<span class="self">self</span>, a: <span class="self">Self</span>, b: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
     <span class="kw">fn </span>abs(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
     <span class="kw">fn </span>checked_add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;&gt;;
+    <span class="kw">fn </span>overflowing_add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt;;
+    <span class="kw">fn </span>overflowing_sub(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt;;
+    <span class="kw">fn </span>overflowing_mul(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt;;
 
     <span class="comment">// Float operations
     </span><span class="kw">fn </span>neg(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
@@ -918,6 +955,15 @@
     ( option <span class="macro-nonterminal">$op</span>:ident(<span class="macro-nonterminal">$arg1</span>:expr, <span class="macro-nonterminal">$arg2</span>:expr); [ $( <span class="macro-nonterminal">$data_value_ty</span>:ident ),* ] ) =&gt; {
         <span class="kw">match </span>(<span class="macro-nonterminal">$arg1</span>, <span class="macro-nonterminal">$arg2</span>) {
             $( (DataValue::<span class="macro-nonterminal">$data_value_ty</span>(a), DataValue::<span class="macro-nonterminal">$data_value_ty</span>(b)) =&gt; { <span class="prelude-val">Ok</span>(a.<span class="macro-nonterminal">$op</span>(<span class="kw-2">*</span>b).map(DataValue::<span class="macro-nonterminal">$data_value_ty</span>)) } )*
+            <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>()
+        }
+    };
+    ( pair <span class="macro-nonterminal">$op</span>:ident(<span class="macro-nonterminal">$arg1</span>:expr, <span class="macro-nonterminal">$arg2</span>:expr); [ $( <span class="macro-nonterminal">$data_value_ty</span>:ident ),* ] ) =&gt; {
+        <span class="kw">match </span>(<span class="macro-nonterminal">$arg1</span>, <span class="macro-nonterminal">$arg2</span>) {
+            $( (DataValue::<span class="macro-nonterminal">$data_value_ty</span>(a), DataValue::<span class="macro-nonterminal">$data_value_ty</span>(b)) =&gt; {
+                <span class="kw">let </span>(f, s) = a.<span class="macro-nonterminal">$op</span>(<span class="kw-2">*</span>b);
+                <span class="prelude-val">Ok</span>((DataValue::<span class="macro-nonterminal">$data_value_ty</span>(f), s))
+            } )*
             <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>()
         }
     };
@@ -1179,6 +1225,11 @@
                 DataValue::I32(n) =&gt; DataValue::U32(n <span class="kw">as </span>u32),
                 DataValue::I64(n) =&gt; DataValue::U64(n <span class="kw">as </span>u64),
                 DataValue::I128(n) =&gt; DataValue::U128(n <span class="kw">as </span>u128),
+                DataValue::U8(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
+                DataValue::U16(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
+                DataValue::U32(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
+                DataValue::U64(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
+                DataValue::U128(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
                 <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;conversion: {} -&gt; {:?}&quot;</span>, <span class="self">self</span>.ty(), kind),
             },
             ValueConversionKind::ToSigned =&gt; <span class="kw">match </span><span class="self">self </span>{
@@ -1187,6 +1238,11 @@
                 DataValue::U32(n) =&gt; DataValue::I32(n <span class="kw">as </span>i32),
                 DataValue::U64(n) =&gt; DataValue::I64(n <span class="kw">as </span>i64),
                 DataValue::U128(n) =&gt; DataValue::I128(n <span class="kw">as </span>i128),
+                DataValue::I8(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
+                DataValue::I16(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
+                DataValue::I32(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
+                DataValue::I64(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
+                DataValue::I128(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
                 <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;conversion: {} -&gt; {:?}&quot;</span>, <span class="self">self</span>.ty(), kind),
             },
             ValueConversionKind::RoundNearestEven(ty) =&gt; <span class="kw">match </span>(<span class="self">self</span>, ty) {
@@ -1353,6 +1409,18 @@
 
     <span class="kw">fn </span>checked_add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;&gt; {
         <span class="macro">binary_match!</span>(option checked_add(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128])
+    }
+
+    <span class="kw">fn </span>overflowing_add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt; {
+        <span class="macro">binary_match!</span>(pair overflowing_add(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128])
+    }
+
+    <span class="kw">fn </span>overflowing_sub(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt; {
+        <span class="macro">binary_match!</span>(pair overflowing_sub(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128])
+    }
+
+    <span class="kw">fn </span>overflowing_mul(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt; {
+        <span class="macro">binary_match!</span>(pair overflowing_mul(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128])
     }
 
     <span class="kw">fn </span>neg(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {

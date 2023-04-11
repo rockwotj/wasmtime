@@ -2922,6 +2922,8 @@
 <a href="#2922" id="2922">2922</a>
 <a href="#2923" id="2923">2923</a>
 <a href="#2924" id="2924">2924</a>
+<a href="#2925" id="2925">2925</a>
+<a href="#2926" id="2926">2926</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines aarch64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc};
@@ -4115,14 +4117,16 @@
                 rm,
                 ra,
             } =&gt; {
-                <span class="kw">let </span>op = <span class="kw">match </span>alu_op {
-                    ALUOp3::MAdd =&gt; <span class="string">&quot;madd&quot;</span>,
-                    ALUOp3::MSub =&gt; <span class="string">&quot;msub&quot;</span>,
+                <span class="kw">let </span>(op, da_size) = <span class="kw">match </span>alu_op {
+                    ALUOp3::MAdd =&gt; (<span class="string">&quot;madd&quot;</span>, size),
+                    ALUOp3::MSub =&gt; (<span class="string">&quot;msub&quot;</span>, size),
+                    ALUOp3::UMAddL =&gt; (<span class="string">&quot;umaddl&quot;</span>, OperandSize::Size64),
+                    ALUOp3::SMAddL =&gt; (<span class="string">&quot;smaddl&quot;</span>, OperandSize::Size64),
                 };
-                <span class="kw">let </span>rd = pretty_print_ireg(rd.to_reg(), size, allocs);
+                <span class="kw">let </span>rd = pretty_print_ireg(rd.to_reg(), da_size, allocs);
                 <span class="kw">let </span>rn = pretty_print_ireg(rn, size, allocs);
                 <span class="kw">let </span>rm = pretty_print_ireg(rm, size, allocs);
-                <span class="kw">let </span>ra = pretty_print_ireg(ra, size, allocs);
+                <span class="kw">let </span>ra = pretty_print_ireg(ra, da_size, allocs);
 
                 <span class="macro">format!</span>(<span class="string">&quot;{} {}, {}, {}, {}&quot;</span>, op, rd, rn, rm, ra)
             }

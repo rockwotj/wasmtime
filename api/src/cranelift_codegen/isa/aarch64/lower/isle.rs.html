@@ -800,6 +800,17 @@
 <a href="#800" id="800">800</a>
 <a href="#801" id="801">801</a>
 <a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
+<a href="#812" id="812">812</a>
+<a href="#813" id="813">813</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for aarch64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -952,6 +963,17 @@
         <span class="kw">if </span>shiftee_bits &lt;= std::u8::MAX <span class="kw">as </span>usize {
             <span class="kw">let </span>shiftimm = shiftimm.mask(shiftee_bits <span class="kw">as </span>u8);
             <span class="prelude-val">Some</span>(ShiftOpAndAmt::new(ShiftOp::LSL, shiftimm))
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
+    }
+
+    <span class="kw">fn </span>ashr_from_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type, n: u64) -&gt; <span class="prelude-ty">Option</span>&lt;ShiftOpAndAmt&gt; {
+        <span class="kw">let </span>shiftimm = ShiftOpShiftImm::maybe_from_shift(n)<span class="question-mark">?</span>;
+        <span class="kw">let </span>shiftee_bits = ty_bits(ty);
+        <span class="kw">if </span>shiftee_bits &lt;= std::u8::MAX <span class="kw">as </span>usize {
+            <span class="kw">let </span>shiftimm = shiftimm.mask(shiftee_bits <span class="kw">as </span>u8);
+            <span class="prelude-val">Some</span>(ShiftOpAndAmt::new(ShiftOp::ASR, shiftimm))
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
