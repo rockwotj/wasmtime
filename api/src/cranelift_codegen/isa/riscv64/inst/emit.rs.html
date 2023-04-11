@@ -2720,48 +2720,6 @@
 <a href="#2720" id="2720">2720</a>
 <a href="#2721" id="2721">2721</a>
 <a href="#2722" id="2722">2722</a>
-<a href="#2723" id="2723">2723</a>
-<a href="#2724" id="2724">2724</a>
-<a href="#2725" id="2725">2725</a>
-<a href="#2726" id="2726">2726</a>
-<a href="#2727" id="2727">2727</a>
-<a href="#2728" id="2728">2728</a>
-<a href="#2729" id="2729">2729</a>
-<a href="#2730" id="2730">2730</a>
-<a href="#2731" id="2731">2731</a>
-<a href="#2732" id="2732">2732</a>
-<a href="#2733" id="2733">2733</a>
-<a href="#2734" id="2734">2734</a>
-<a href="#2735" id="2735">2735</a>
-<a href="#2736" id="2736">2736</a>
-<a href="#2737" id="2737">2737</a>
-<a href="#2738" id="2738">2738</a>
-<a href="#2739" id="2739">2739</a>
-<a href="#2740" id="2740">2740</a>
-<a href="#2741" id="2741">2741</a>
-<a href="#2742" id="2742">2742</a>
-<a href="#2743" id="2743">2743</a>
-<a href="#2744" id="2744">2744</a>
-<a href="#2745" id="2745">2745</a>
-<a href="#2746" id="2746">2746</a>
-<a href="#2747" id="2747">2747</a>
-<a href="#2748" id="2748">2748</a>
-<a href="#2749" id="2749">2749</a>
-<a href="#2750" id="2750">2750</a>
-<a href="#2751" id="2751">2751</a>
-<a href="#2752" id="2752">2752</a>
-<a href="#2753" id="2753">2753</a>
-<a href="#2754" id="2754">2754</a>
-<a href="#2755" id="2755">2755</a>
-<a href="#2756" id="2756">2756</a>
-<a href="#2757" id="2757">2757</a>
-<a href="#2758" id="2758">2758</a>
-<a href="#2759" id="2759">2759</a>
-<a href="#2760" id="2760">2760</a>
-<a href="#2761" id="2761">2761</a>
-<a href="#2762" id="2762">2762</a>
-<a href="#2763" id="2763">2763</a>
-<a href="#2764" id="2764">2764</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::StackMap;
@@ -4627,48 +4585,6 @@
                     sink.add_stack_map(StackMapExtent::UpcomingBytes(<span class="number">4</span>), s);
                 }
                 sink.put_data(Inst::TRAP_OPCODE);
-            }
-            <span class="kw-2">&amp;</span>Inst::SelectIf {
-                if_spectre_guard: _if_spectre_guard, <span class="comment">// _if_spectre_guard not use because it is used to not be removed by optimization pass and some other staff.
-                </span><span class="kw-2">ref </span>rd,
-                test,
-                <span class="kw-2">ref </span>x,
-                <span class="kw-2">ref </span>y,
-            } =&gt; {
-                <span class="kw">let </span>label_select_x = sink.get_label();
-                <span class="kw">let </span>label_select_y = sink.get_label();
-                <span class="kw">let </span>label_jump_over = sink.get_label();
-                <span class="kw">let </span>test = allocs.next(test);
-                <span class="kw">let </span>x = alloc_value_regs(x, <span class="kw-2">&amp;mut </span>allocs);
-                <span class="kw">let </span>y = alloc_value_regs(y, <span class="kw-2">&amp;mut </span>allocs);
-                <span class="kw">let </span>rd: Vec&lt;<span class="kw">_</span>&gt; = rd.iter().map(|r| allocs.next_writable(<span class="kw-2">*</span>r)).collect();
-                Inst::CondBr {
-                    taken: BranchTarget::Label(label_select_x),
-                    not_taken: BranchTarget::Label(label_select_y),
-                    kind: IntegerCompare {
-                        kind: IntCC::NotEqual,
-                        rs1: test,
-                        rs2: zero_reg(),
-                    },
-                }
-                .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-
-                <span class="comment">// here select x.
-                </span>sink.bind_label(label_select_x, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
-                gen_moves(<span class="kw-2">&amp;</span>rd[..], x.regs())
-                    .into_iter()
-                    .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
-                <span class="comment">// jump over
-                </span>Inst::Jal {
-                    dest: BranchTarget::Label(label_jump_over),
-                }
-                .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                <span class="comment">// here select y.
-                </span>sink.bind_label(label_select_y, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
-                gen_moves(<span class="kw-2">&amp;</span>rd[..], y.regs())
-                    .into_iter()
-                    .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
-                sink.bind_label(label_jump_over, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::AtomicLoad { rd, ty, p } =&gt; {
                 <span class="kw">let </span>p = allocs.next(p);
