@@ -1416,6 +1416,53 @@
 <a href="#1416" id="1416">1416</a>
 <a href="#1417" id="1417">1417</a>
 <a href="#1418" id="1418">1418</a>
+<a href="#1419" id="1419">1419</a>
+<a href="#1420" id="1420">1420</a>
+<a href="#1421" id="1421">1421</a>
+<a href="#1422" id="1422">1422</a>
+<a href="#1423" id="1423">1423</a>
+<a href="#1424" id="1424">1424</a>
+<a href="#1425" id="1425">1425</a>
+<a href="#1426" id="1426">1426</a>
+<a href="#1427" id="1427">1427</a>
+<a href="#1428" id="1428">1428</a>
+<a href="#1429" id="1429">1429</a>
+<a href="#1430" id="1430">1430</a>
+<a href="#1431" id="1431">1431</a>
+<a href="#1432" id="1432">1432</a>
+<a href="#1433" id="1433">1433</a>
+<a href="#1434" id="1434">1434</a>
+<a href="#1435" id="1435">1435</a>
+<a href="#1436" id="1436">1436</a>
+<a href="#1437" id="1437">1437</a>
+<a href="#1438" id="1438">1438</a>
+<a href="#1439" id="1439">1439</a>
+<a href="#1440" id="1440">1440</a>
+<a href="#1441" id="1441">1441</a>
+<a href="#1442" id="1442">1442</a>
+<a href="#1443" id="1443">1443</a>
+<a href="#1444" id="1444">1444</a>
+<a href="#1445" id="1445">1445</a>
+<a href="#1446" id="1446">1446</a>
+<a href="#1447" id="1447">1447</a>
+<a href="#1448" id="1448">1448</a>
+<a href="#1449" id="1449">1449</a>
+<a href="#1450" id="1450">1450</a>
+<a href="#1451" id="1451">1451</a>
+<a href="#1452" id="1452">1452</a>
+<a href="#1453" id="1453">1453</a>
+<a href="#1454" id="1454">1454</a>
+<a href="#1455" id="1455">1455</a>
+<a href="#1456" id="1456">1456</a>
+<a href="#1457" id="1457">1457</a>
+<a href="#1458" id="1458">1458</a>
+<a href="#1459" id="1459">1459</a>
+<a href="#1460" id="1460">1460</a>
+<a href="#1461" id="1461">1461</a>
+<a href="#1462" id="1462">1462</a>
+<a href="#1463" id="1463">1463</a>
+<a href="#1464" id="1464">1464</a>
+<a href="#1465" id="1465">1465</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::rust::{to_rust_ident, to_rust_upper_camel_case, RustGenerator, TypeMode};
 <span class="kw">use </span><span class="kw">crate</span>::types::{TypeInfo, Types};
 <span class="kw">use </span>heck::<span class="kw-2">*</span>;
@@ -1443,6 +1490,15 @@
 <span class="kw">mod </span>types;
 <span class="kw">use </span>source::Source;
 
+<span class="kw">struct </span>InterfaceName {
+    <span class="doccomment">/// True when this interface name has been remapped through the use of `with` in the `bindgen!`
+    /// macro invocation.
+    </span>remapped: bool,
+
+    <span class="doccomment">/// The string name for this interface.
+    </span>name: String,
+}
+
 <span class="attr">#[derive(Default)]
 </span><span class="kw">struct </span>Wasmtime {
     src: Source,
@@ -1451,7 +1507,7 @@
     exports: Exports,
     types: Types,
     sizes: SizeAlign,
-    interface_names: HashMap&lt;InterfaceId, String&gt;,
+    interface_names: HashMap&lt;InterfaceId, InterfaceName&gt;,
 }
 
 <span class="kw">enum </span>Import {
@@ -1484,6 +1540,13 @@
     /// WIT type if necessary, for example if it&#39;s used as both an import and an
     /// export.
     </span><span class="kw">pub </span>duplicate_if_necessary: bool,
+
+    <span class="doccomment">/// Whether or not to generate code for only the interfaces of this wit file or not.
+    </span><span class="kw">pub </span>only_interfaces: bool,
+
+    <span class="doccomment">/// Remapping of interface names to rust module names.
+    /// TODO: is there a better type to use for the value of this map?
+    </span><span class="kw">pub </span>with: HashMap&lt;String, String&gt;,
 }
 
 <span class="attr">#[derive(Debug, Clone)]
@@ -1513,14 +1576,37 @@
 }
 
 <span class="kw">impl </span>Wasmtime {
+    <span class="kw">fn </span>name_interface(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: InterfaceId, name: String) -&gt; bool {
+        <span class="kw">let </span>entry = <span class="kw">if let </span><span class="prelude-val">Some</span>(remapped_name) = <span class="self">self</span>.opts.with.get(<span class="kw-2">&amp;</span>name) {
+            InterfaceName {
+                remapped: <span class="bool-val">true</span>,
+                name: remapped_name.clone(),
+            }
+        } <span class="kw">else </span>{
+            InterfaceName {
+                remapped: <span class="bool-val">false</span>,
+                name,
+            }
+        };
+
+        <span class="kw">let </span>remapped = entry.remapped;
+        <span class="self">self</span>.interface_names.insert(id, entry);
+
+        remapped
+    }
+
     <span class="kw">fn </span>generate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, resolve: <span class="kw-2">&amp;</span>Resolve, id: WorldId) -&gt; String {
         <span class="self">self</span>.types.analyze(resolve, id);
         <span class="kw">let </span>world = <span class="kw-2">&amp;</span>resolve.worlds[id];
         <span class="kw">for </span>(name, import) <span class="kw">in </span>world.imports.iter() {
-            <span class="self">self</span>.import(resolve, name, import);
+            <span class="kw">if </span>!<span class="self">self</span>.opts.only_interfaces || <span class="macro">matches!</span>(import, WorldItem::Interface(<span class="kw">_</span>)) {
+                <span class="self">self</span>.import(resolve, name, import);
+            }
         }
         <span class="kw">for </span>(name, export) <span class="kw">in </span>world.exports.iter() {
-            <span class="self">self</span>.export(resolve, name, export);
+            <span class="kw">if </span>!<span class="self">self</span>.opts.only_interfaces || <span class="macro">matches!</span>(export, WorldItem::Interface(<span class="kw">_</span>)) {
+                <span class="self">self</span>.export(resolve, name, export);
+            }
         }
         <span class="self">self</span>.finish(resolve, id)
     }
@@ -1537,7 +1623,9 @@
                 Import::Function { sig, add_to_linker }
             }
             WorldItem::Interface(id) =&gt; {
-                gen.gen.interface_names.insert(<span class="kw-2">*</span>id, snake.clone());
+                <span class="kw">if </span>gen.gen.name_interface(<span class="kw-2">*</span>id, snake.clone()) {
+                    <span class="kw">return</span>;
+                }
                 gen.current_interface = <span class="prelude-val">Some</span>(<span class="kw-2">*</span>id);
                 gen.types(<span class="kw-2">*</span>id);
                 gen.generate_trappable_error_types(TypeOwner::Interface(<span class="kw-2">*</span>id));
@@ -1584,7 +1672,7 @@
             }
             WorldItem::Type(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
             WorldItem::Interface(id) =&gt; {
-                gen.gen.interface_names.insert(<span class="kw-2">*</span>id, snake.clone());
+                gen.gen.name_interface(<span class="kw-2">*</span>id, snake.clone());
                 gen.current_interface = <span class="prelude-val">Some</span>(<span class="kw-2">*</span>id);
                 gen.types(<span class="kw-2">*</span>id);
                 gen.generate_trappable_error_types(TypeOwner::Interface(<span class="kw-2">*</span>id));
@@ -1664,7 +1752,7 @@
         <span class="macro">assert!</span>(prev.is_none());
     }
 
-    <span class="kw">fn </span>finish(<span class="kw-2">&amp;mut </span><span class="self">self</span>, resolve: <span class="kw-2">&amp;</span>Resolve, world: WorldId) -&gt; String {
+    <span class="kw">fn </span>build_struct(<span class="kw-2">&amp;mut </span><span class="self">self</span>, resolve: <span class="kw-2">&amp;</span>Resolve, world: WorldId) {
         <span class="kw">let </span>camel = to_rust_upper_camel_case(<span class="kw-2">&amp;</span>resolve.worlds[world].name);
         <span class="macro">uwriteln!</span>(<span class="self">self</span>.src, <span class="string">&quot;pub struct {camel} {{&quot;</span>);
         <span class="kw">for </span>(name, (ty, <span class="kw">_</span>)) <span class="kw">in </span><span class="self">self</span>.exports.fields.iter() {
@@ -1745,8 +1833,14 @@
         <span class="macro">uwriteln!</span>(<span class="self">self</span>.src, <span class="string">&quot;}}&quot;</span>); <span class="comment">// close `impl {camel}`
 
         </span><span class="macro">uwriteln!</span>(<span class="self">self</span>.src, <span class="string">&quot;}};&quot;</span>); <span class="comment">// close `const _: () = ...
+    </span>}
 
-        </span><span class="kw">let </span><span class="kw-2">mut </span>src = mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.src);
+    <span class="kw">fn </span>finish(<span class="kw-2">&amp;mut </span><span class="self">self</span>, resolve: <span class="kw-2">&amp;</span>Resolve, world: WorldId) -&gt; String {
+        <span class="kw">if </span>!<span class="self">self</span>.opts.only_interfaces {
+            <span class="self">self</span>.build_struct(resolve, world)
+        }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>src = mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.src);
         <span class="kw">if </span><span class="self">self</span>.opts.rustfmt {
             <span class="kw">let </span><span class="kw-2">mut </span>child = Command::new(<span class="string">&quot;rustfmt&quot;</span>)
                 .arg(<span class="string">&quot;--edition=2018&quot;</span>)
@@ -2816,8 +2910,8 @@
         <span class="kw">match </span><span class="self">self</span>.current_interface {
             <span class="prelude-val">Some</span>(id) <span class="kw">if </span>id == interface =&gt; <span class="prelude-val">None</span>,
             <span class="kw">_ </span>=&gt; {
-                <span class="kw">let </span>name = <span class="kw-2">&amp;</span><span class="self">self</span>.gen.interface_names[<span class="kw-2">&amp;</span>interface];
-                <span class="prelude-val">Some</span>(<span class="kw">if </span><span class="self">self</span>.current_interface.is_some() {
+                <span class="kw">let </span>InterfaceName { remapped, name } = <span class="kw-2">&amp;</span><span class="self">self</span>.gen.interface_names[<span class="kw-2">&amp;</span>interface];
+                <span class="prelude-val">Some</span>(<span class="kw">if </span><span class="self">self</span>.current_interface.is_some() &amp;&amp; !remapped {
                     <span class="macro">format!</span>(<span class="string">&quot;super::{name}&quot;</span>)
                 } <span class="kw">else </span>{
                     name.clone()
