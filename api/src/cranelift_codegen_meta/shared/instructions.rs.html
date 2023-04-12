@@ -3849,6 +3849,22 @@
 <a href="#3849" id="3849">3849</a>
 <a href="#3850" id="3850">3850</a>
 <a href="#3851" id="3851">3851</a>
+<a href="#3852" id="3852">3852</a>
+<a href="#3853" id="3853">3853</a>
+<a href="#3854" id="3854">3854</a>
+<a href="#3855" id="3855">3855</a>
+<a href="#3856" id="3856">3856</a>
+<a href="#3857" id="3857">3857</a>
+<a href="#3858" id="3858">3858</a>
+<a href="#3859" id="3859">3859</a>
+<a href="#3860" id="3860">3860</a>
+<a href="#3861" id="3861">3861</a>
+<a href="#3862" id="3862">3862</a>
+<a href="#3863" id="3863">3863</a>
+<a href="#3864" id="3864">3864</a>
+<a href="#3865" id="3865">3865</a>
+<a href="#3866" id="3866">3866</a>
+<a href="#3867" id="3867">3867</a>
 </pre><pre class="rust"><code><span class="attr">#![allow(non_snake_case)]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::cdsl::instructions::{
@@ -5466,6 +5482,14 @@
 
         When this instruction compares integer vectors, it returns a vector of
         lane-wise comparisons.
+
+        When comparing scalars, the result is:
+            - `1` if the condition holds.
+            - `0` if the condition does not hold.
+
+        When comparing vectors, the result is:
+            - `-1` (i.e. all ones) in each lane where the condition holds.
+            - `0` in each lane where the condition does not hold.
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.int_compare,
         )
@@ -6592,6 +6616,14 @@
 
         When this instruction compares floating point vectors, it returns a
         vector with the results of lane-wise comparisons.
+
+        When comparing scalars, the result is:
+            - `1` if the condition holds.
+            - `0` if the condition does not hold.
+
+        When comparing vectors, the result is:
+            - `-1` (i.e. all ones) in each lane where the condition holds.
+            - `0` in each lane where the condition does not hold.
         &quot;#</span>,
             <span class="kw-2">&amp;</span>formats.float_compare,
         )
