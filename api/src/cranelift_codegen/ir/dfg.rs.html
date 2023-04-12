@@ -3330,7 +3330,7 @@
         </span><span class="macro">assert_eq!</span>(pos.func.dfg.resolve_aliases(v1), v1);
 
         <span class="kw">let </span>arg0 = pos.func.dfg.append_block_param(block0, types::I32);
-        <span class="kw">let </span>(s, c) = pos.ins().iadd_cout(v1, arg0);
+        <span class="kw">let </span>(s, c) = pos.ins().uadd_overflow(v1, arg0);
         <span class="kw">let </span>iadd = <span class="kw">match </span>pos.func.dfg.value_def(s) {
             ValueDef::Result(i, <span class="number">0</span>) =&gt; i,
             <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(),
@@ -3340,7 +3340,7 @@
         </span>pos.func.dfg.clear_results(iadd);
         pos.func.dfg.attach_result(iadd, s);
 
-        <span class="comment">// Replace `iadd_cout` with a normal `iadd` and an `icmp`.
+        <span class="comment">// Replace `uadd_overflow` with a normal `iadd` and an `icmp`.
         </span>pos.func.dfg.replace(iadd).iadd(v1, arg0);
         <span class="kw">let </span>c2 = pos.ins().icmp(IntCC::Equal, s, v1);
         pos.func.dfg.change_to_alias(c, c2);

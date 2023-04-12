@@ -5126,38 +5126,6 @@
 <a href="#5126" id="5126">5126</a>
 <a href="#5127" id="5127">5127</a>
 <a href="#5128" id="5128">5128</a>
-<a href="#5129" id="5129">5129</a>
-<a href="#5130" id="5130">5130</a>
-<a href="#5131" id="5131">5131</a>
-<a href="#5132" id="5132">5132</a>
-<a href="#5133" id="5133">5133</a>
-<a href="#5134" id="5134">5134</a>
-<a href="#5135" id="5135">5135</a>
-<a href="#5136" id="5136">5136</a>
-<a href="#5137" id="5137">5137</a>
-<a href="#5138" id="5138">5138</a>
-<a href="#5139" id="5139">5139</a>
-<a href="#5140" id="5140">5140</a>
-<a href="#5141" id="5141">5141</a>
-<a href="#5142" id="5142">5142</a>
-<a href="#5143" id="5143">5143</a>
-<a href="#5144" id="5144">5144</a>
-<a href="#5145" id="5145">5145</a>
-<a href="#5146" id="5146">5146</a>
-<a href="#5147" id="5147">5147</a>
-<a href="#5148" id="5148">5148</a>
-<a href="#5149" id="5149">5149</a>
-<a href="#5150" id="5150">5150</a>
-<a href="#5151" id="5151">5151</a>
-<a href="#5152" id="5152">5152</a>
-<a href="#5153" id="5153">5153</a>
-<a href="#5154" id="5154">5154</a>
-<a href="#5155" id="5155">5155</a>
-<a href="#5156" id="5156">5156</a>
-<a href="#5157" id="5157">5157</a>
-<a href="#5158" id="5158">5158</a>
-<a href="#5159" id="5159">5159</a>
-<a href="#5160" id="5160">5160</a>
 </pre><pre class="rust"><code><span class="doccomment">/// An instruction format
 ///
 /// Every opcode has a corresponding instruction format
@@ -6868,9 +6836,6 @@
     <span class="doccomment">/// `a = iadd_cin x, y, c_in`. (Ternary)
     /// Type inferred from `y`.
     </span>IaddCin,
-    <span class="doccomment">/// `a, c_out = iadd_cout x, y`. (Binary)
-    /// Type inferred from `x`.
-    </span>IaddCout,
     <span class="doccomment">/// `a, c_out = iadd_carry x, y, c_in`. (Ternary)
     /// Type inferred from `y`.
     </span>IaddCarry,
@@ -6898,9 +6863,6 @@
     <span class="doccomment">/// `a = isub_bin x, y, b_in`. (Ternary)
     /// Type inferred from `y`.
     </span>IsubBin,
-    <span class="doccomment">/// `a, b_out = isub_bout x, y`. (Binary)
-    /// Type inferred from `x`.
-    </span>IsubBout,
     <span class="doccomment">/// `a, b_out = isub_borrow x, y, b_in`. (Ternary)
     /// Type inferred from `y`.
     </span>IsubBorrow,
@@ -7403,7 +7365,6 @@
             Opcode::SremImm,
             Opcode::IrsubImm,
             Opcode::IaddCin,
-            Opcode::IaddCout,
             Opcode::IaddCarry,
             Opcode::UaddOverflow,
             Opcode::SaddOverflow,
@@ -7413,7 +7374,6 @@
             Opcode::SmulOverflow,
             Opcode::UaddOverflowTrap,
             Opcode::IsubBin,
-            Opcode::IsubBout,
             Opcode::IsubBorrow,
             Opcode::Band,
             Opcode::Bor,
@@ -7501,7 +7461,7 @@
 
 }
 
-<span class="kw">const </span>OPCODE_FORMAT: [InstructionFormat; <span class="number">191</span>] = [
+<span class="kw">const </span>OPCODE_FORMAT: [InstructionFormat; <span class="number">189</span>] = [
     InstructionFormat::Jump, <span class="comment">// jump
     </span>InstructionFormat::Brif, <span class="comment">// brif
     </span>InstructionFormat::BranchTable, <span class="comment">// br_table
@@ -7600,7 +7560,6 @@
     </span>InstructionFormat::BinaryImm64, <span class="comment">// srem_imm
     </span>InstructionFormat::BinaryImm64, <span class="comment">// irsub_imm
     </span>InstructionFormat::Ternary, <span class="comment">// iadd_cin
-    </span>InstructionFormat::Binary, <span class="comment">// iadd_cout
     </span>InstructionFormat::Ternary, <span class="comment">// iadd_carry
     </span>InstructionFormat::Binary, <span class="comment">// uadd_overflow
     </span>InstructionFormat::Binary, <span class="comment">// sadd_overflow
@@ -7610,7 +7569,6 @@
     </span>InstructionFormat::Binary, <span class="comment">// smul_overflow
     </span>InstructionFormat::IntAddTrap, <span class="comment">// uadd_overflow_trap
     </span>InstructionFormat::Ternary, <span class="comment">// isub_bin
-    </span>InstructionFormat::Binary, <span class="comment">// isub_bout
     </span>InstructionFormat::Ternary, <span class="comment">// isub_borrow
     </span>InstructionFormat::Binary, <span class="comment">// band
     </span>InstructionFormat::Binary, <span class="comment">// bor
@@ -7913,9 +7871,6 @@
         Opcode::IaddCin =&gt; {
             <span class="string">&quot;iadd_cin&quot;
         </span>}
-        Opcode::IaddCout =&gt; {
-            <span class="string">&quot;iadd_cout&quot;
-        </span>}
         Opcode::IaddImm =&gt; {
             <span class="string">&quot;iadd_imm&quot;
         </span>}
@@ -7984,9 +7939,6 @@
         </span>}
         Opcode::IsubBorrow =&gt; {
             <span class="string">&quot;isub_borrow&quot;
-        </span>}
-        Opcode::IsubBout =&gt; {
-            <span class="string">&quot;isub_bout&quot;
         </span>}
         Opcode::Jump =&gt; {
             <span class="string">&quot;jump&quot;
@@ -8281,7 +8233,7 @@
     <span class="prelude-val">Some</span>(Opcode::Nearest),
     <span class="prelude-val">Some</span>(Opcode::FcvtToSintSat),
     <span class="prelude-val">Some</span>(Opcode::Fsub),
-    <span class="prelude-val">Some</span>(Opcode::Rotr),
+    <span class="prelude-val">Some</span>(Opcode::Trunc),
     <span class="prelude-val">Some</span>(Opcode::TableAddr),
     <span class="prelude-val">Some</span>(Opcode::Iconst),
     <span class="prelude-val">Some</span>(Opcode::ReturnCall),
@@ -8344,7 +8296,7 @@
     <span class="prelude-val">Some</span>(Opcode::FmaxPseudo),
     <span class="prelude-val">Some</span>(Opcode::Isplit),
     <span class="prelude-val">Some</span>(Opcode::FcvtToUint),
-    <span class="prelude-val">Some</span>(Opcode::Trunc),
+    <span class="prelude-val">None</span>,
     <span class="prelude-val">None</span>,
     <span class="prelude-val">Some</span>(Opcode::RotlImm),
     <span class="prelude-val">Some</span>(Opcode::Fcmp),
@@ -8459,14 +8411,14 @@
     <span class="prelude-val">Some</span>(Opcode::UmulOverflow),
     <span class="prelude-val">Some</span>(Opcode::IshlImm),
     <span class="prelude-val">Some</span>(Opcode::SaddOverflow),
-    <span class="prelude-val">Some</span>(Opcode::IsubBout),
+    <span class="prelude-val">Some</span>(Opcode::Ctz),
     <span class="prelude-val">Some</span>(Opcode::Cls),
     <span class="prelude-val">Some</span>(Opcode::Floor),
     <span class="prelude-val">Some</span>(Opcode::BandNot),
     <span class="prelude-val">Some</span>(Opcode::Clz),
     <span class="prelude-val">Some</span>(Opcode::UwidenHigh),
     <span class="prelude-val">Some</span>(Opcode::Uextend),
-    <span class="prelude-val">Some</span>(Opcode::Ctz),
+    <span class="prelude-val">None</span>,
     <span class="prelude-val">Some</span>(Opcode::UaddSat),
     <span class="prelude-val">Some</span>(Opcode::Sload32x2),
     <span class="prelude-val">None</span>,
@@ -8510,7 +8462,7 @@
     <span class="prelude-val">Some</span>(Opcode::UdivImm),
     <span class="prelude-val">None</span>,
     <span class="prelude-val">Some</span>(Opcode::Splat),
-    <span class="prelude-val">Some</span>(Opcode::IaddCout),
+    <span class="prelude-val">Some</span>(Opcode::Rotr),
     <span class="prelude-val">Some</span>(Opcode::Snarrow),
     <span class="prelude-val">Some</span>(Opcode::CallIndirect),
     <span class="prelude-val">Some</span>(Opcode::Sload8),
@@ -8534,7 +8486,7 @@
 
 
 <span class="comment">// Table of opcode constraints.
-</span><span class="kw">const </span>OPCODE_CONSTRAINTS: [OpcodeConstraints; <span class="number">191</span>] = [
+</span><span class="kw">const </span>OPCODE_CONSTRAINTS: [OpcodeConstraints; <span class="number">189</span>] = [
     <span class="comment">// Jump: fixed_results=0, use_typevar_operand=false, requires_typevar_operand=false, fixed_values=0
     // Constraints=[]
     </span>OpcodeConstraints {
@@ -9305,14 +9257,6 @@
         typeset_offset: <span class="number">0</span>,
         constraint_offset: <span class="number">30</span>,
     },
-    <span class="comment">// IaddCout: fixed_results=2, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=2
-    // Constraints=[&#39;Same&#39;, &#39;Concrete(ir::types::I8)&#39;, &#39;Same&#39;, &#39;Same&#39;]
-    // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64, 128})
-    </span>OpcodeConstraints {
-        flags: <span class="number">0x4a</span>,
-        typeset_offset: <span class="number">0</span>,
-        constraint_offset: <span class="number">38</span>,
-    },
     <span class="comment">// IaddCarry: fixed_results=2, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=3
     // Constraints=[&#39;Same&#39;, &#39;Concrete(ir::types::I8)&#39;, &#39;Same&#39;, &#39;Same&#39;, &#39;Concrete(ir::types::I8)&#39;]
     // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64, 128})
@@ -9384,14 +9328,6 @@
         flags: <span class="number">0x69</span>,
         typeset_offset: <span class="number">0</span>,
         constraint_offset: <span class="number">30</span>,
-    },
-    <span class="comment">// IsubBout: fixed_results=2, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=2
-    // Constraints=[&#39;Same&#39;, &#39;Concrete(ir::types::I8)&#39;, &#39;Same&#39;, &#39;Same&#39;]
-    // Polymorphic over TypeSet(lanes={1}, ints={8, 16, 32, 64, 128})
-    </span>OpcodeConstraints {
-        flags: <span class="number">0x4a</span>,
-        typeset_offset: <span class="number">0</span>,
-        constraint_offset: <span class="number">38</span>,
     },
     <span class="comment">// IsubBorrow: fixed_results=2, use_typevar_operand=true, requires_typevar_operand=false, fixed_values=3
     // Constraints=[&#39;Same&#39;, &#39;Concrete(ir::types::I8)&#39;, &#39;Same&#39;, &#39;Same&#39;, &#39;Concrete(ir::types::I8)&#39;]

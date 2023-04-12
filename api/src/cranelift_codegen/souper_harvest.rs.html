@@ -587,8 +587,6 @@
 <a href="#587" id="587">587</a>
 <a href="#588" id="588">588</a>
 <a href="#589" id="589">589</a>
-<a href="#590" id="590">590</a>
-<a href="#591" id="591">591</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Harvest left-hand side superoptimization candidates.
 //!
 //! Given a clif function, harvest all its integer subexpressions, so that they
@@ -720,7 +718,6 @@
                 | ir::Opcode::Clz
                 | ir::Opcode::Ctz
                 <span class="comment">// TODO: ir::Opcode::IaddCarry
-                // TODO: ir::Opcode::IaddCout
                 </span>| ir::Opcode::SaddSat
                 | ir::Opcode::SsubSat
                 | ir::Opcode::UsubSat =&gt; <span class="bool-val">true</span>,
@@ -1061,7 +1058,6 @@
                         ast::Instruction::Cttz { a }.into()
                     }
                     <span class="comment">// TODO: ir::Opcode::IaddCarry
-                    // TODO: ir::Opcode::IaddCout
                     </span>(ir::Opcode::SaddSat, <span class="kw">_</span>) =&gt; {
                         <span class="kw">let </span>a = arg(allocs, <span class="number">0</span>);
                         <span class="kw">let </span>b = arg(allocs, <span class="number">1</span>);
