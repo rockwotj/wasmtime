@@ -1463,6 +1463,29 @@
 <a href="#1463" id="1463">1463</a>
 <a href="#1464" id="1464">1464</a>
 <a href="#1465" id="1465">1465</a>
+<a href="#1466" id="1466">1466</a>
+<a href="#1467" id="1467">1467</a>
+<a href="#1468" id="1468">1468</a>
+<a href="#1469" id="1469">1469</a>
+<a href="#1470" id="1470">1470</a>
+<a href="#1471" id="1471">1471</a>
+<a href="#1472" id="1472">1472</a>
+<a href="#1473" id="1473">1473</a>
+<a href="#1474" id="1474">1474</a>
+<a href="#1475" id="1475">1475</a>
+<a href="#1476" id="1476">1476</a>
+<a href="#1477" id="1477">1477</a>
+<a href="#1478" id="1478">1478</a>
+<a href="#1479" id="1479">1479</a>
+<a href="#1480" id="1480">1480</a>
+<a href="#1481" id="1481">1481</a>
+<a href="#1482" id="1482">1482</a>
+<a href="#1483" id="1483">1483</a>
+<a href="#1484" id="1484">1484</a>
+<a href="#1485" id="1485">1485</a>
+<a href="#1486" id="1486">1486</a>
+<a href="#1487" id="1487">1487</a>
+<a href="#1488" id="1488">1488</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::rust::{to_rust_ident, to_rust_upper_camel_case, RustGenerator, TypeMode};
 <span class="kw">use </span><span class="kw">crate</span>::types::{TypeInfo, Types};
 <span class="kw">use </span>heck::<span class="kw-2">*</span>;
@@ -2577,11 +2600,12 @@
         }
 
         <span class="kw">if </span><span class="self">self</span>.gen.opts.tracing {
-            <span class="self">self</span>.src.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+            <span class="macro">uwrite!</span>(
+                <span class="self">self</span>.src,
                 <span class="string">&quot;
                    let span = tracing::span!(
                        tracing::Level::TRACE,
-                       \&quot;wit-bindgen guest import\&quot;,
+                       \&quot;wit-bindgen import\&quot;,
                        module = \&quot;{}\&quot;,
                        function = \&quot;{}\&quot;,
                    );
@@ -2596,7 +2620,22 @@
                     TypeOwner::None =&gt; <span class="string">&quot;&lt;no owner&gt;&quot;</span>,
                 },
                 func.name,
-            ));
+            );
+            <span class="kw">let </span><span class="kw-2">mut </span>event_fields = func
+                .params
+                .iter()
+                .enumerate()
+                .map(|(i, (name, _ty))| {
+                    <span class="kw">let </span>name = to_rust_ident(<span class="kw-2">&amp;</span>name);
+                    <span class="macro">format!</span>(<span class="string">&quot;{name} = tracing::field::debug(&amp;arg{i})&quot;</span>)
+                })
+                .collect::&lt;Vec&lt;String&gt;&gt;();
+            event_fields.push(<span class="macro">format!</span>(<span class="string">&quot;\&quot;call\&quot;&quot;</span>));
+            <span class="macro">uwrite!</span>(
+                <span class="self">self</span>.src,
+                <span class="string">&quot;tracing::event!(tracing::Level::TRACE, {});\n&quot;</span>,
+                event_fields.join(<span class="string">&quot;, &quot;</span>)
+            );
         }
 
         <span class="self">self</span>.src.push_str(<span class="string">&quot;let host = get(caller.data_mut());\n&quot;</span>);
@@ -2609,6 +2648,13 @@
             <span class="macro">uwrite!</span>(<span class="self">self</span>.src, <span class="string">&quot;).await;\n&quot;</span>);
         } <span class="kw">else </span>{
             <span class="macro">uwrite!</span>(<span class="self">self</span>.src, <span class="string">&quot;);\n&quot;</span>);
+        }
+
+        <span class="kw">if </span><span class="self">self</span>.gen.opts.tracing {
+            <span class="macro">uwrite!</span>(
+                <span class="self">self</span>.src,
+                <span class="string">&quot;tracing::event!(tracing::Level::TRACE, result = tracing::field::debug(&amp;r), \&quot;return\&quot;);&quot;
+            </span>);
         }
 
         <span class="kw">if </span><span class="self">self
@@ -2737,7 +2783,7 @@
                 <span class="string">&quot;
                    let span = tracing::span!(
                        tracing::Level::TRACE,
-                       \&quot;wit-bindgen guest export\&quot;,
+                       \&quot;wit-bindgen export\&quot;,
                        module = \&quot;{}\&quot;,
                        function = \&quot;{}\&quot;,
                    );
