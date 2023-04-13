@@ -899,10 +899,6 @@
 <a href="#899" id="899">899</a>
 <a href="#900" id="900">900</a>
 <a href="#901" id="901">901</a>
-<a href="#902" id="902">902</a>
-<a href="#903" id="903">903</a>
-<a href="#904" id="904">904</a>
-<a href="#905" id="905">905</a>
 </pre><pre class="rust"><code><span class="doccomment">//! &quot;Dummy&quot; implementations of `ModuleEnvironment` and `FuncEnvironment` for testing
 //! wasm translation. For complete implementations of `ModuleEnvironment` and
 //! `FuncEnvironment`, see [wasmtime-environ] in [Wasmtime].
@@ -1559,10 +1555,6 @@
         _count: ir::Value,
     ) -&gt; WasmResult&lt;ir::Value&gt; {
         <span class="prelude-val">Ok</span>(pos.ins().iconst(I32, <span class="number">0</span>))
-    }
-
-    <span class="kw">fn </span>unsigned_add_overflow_condition(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ir::condcodes::IntCC {
-        <span class="macro">unimplemented!</span>()
     }
 }
 

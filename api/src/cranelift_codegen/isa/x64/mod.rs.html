@@ -254,19 +254,13 @@
 <a href="#254" id="254">254</a>
 <a href="#255" id="255">255</a>
 <a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
 </pre><pre class="rust"><code><span class="doccomment">//! X86_64-bit Instruction Set Architecture.
 
 </span><span class="kw">pub use </span><span class="self">self</span>::inst::{args, CallInfo, EmitInfo, EmitState, Inst};
 
 <span class="kw">use super</span>::{OwnedTargetIsa, TargetIsa};
 <span class="kw">use </span><span class="kw">crate</span>::dominator_tree::DominatorTree;
-<span class="kw">use </span><span class="kw">crate</span>::ir::{condcodes::IntCC, Function, Type};
+<span class="kw">use </span><span class="kw">crate</span>::ir::{Function, Type};
 <span class="attr">#[cfg(feature = <span class="string">&quot;unwind&quot;</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::isa::unwind::systemv;
 <span class="kw">use </span><span class="kw">crate</span>::isa::x64::{inst::regs::create_reg_env_systemv, settings <span class="kw">as </span>x64_settings};
@@ -384,12 +378,6 @@
 
     <span class="kw">fn </span>triple(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Triple {
         <span class="kw-2">&amp;</span><span class="self">self</span>.triple
-    }
-
-    <span class="kw">fn </span>unsigned_add_overflow_condition(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; IntCC {
-        <span class="comment">// Unsigned `&lt;`; this corresponds to the carry flag set on x86, which
-        // indicates an add has overflowed.
-        </span>IntCC::UnsignedLessThan
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;unwind&quot;</span>)]

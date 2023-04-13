@@ -404,9 +404,6 @@
 <a href="#404" id="404">404</a>
 <a href="#405" id="405">405</a>
 <a href="#406" id="406">406</a>
-<a href="#407" id="407">407</a>
-<a href="#408" id="408">408</a>
-<a href="#409" id="409">409</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Instruction Set Architectures.
 //!
 //! The `isa` module provides a `TargetIsa` trait which provides the behavior specialization needed
@@ -694,9 +691,6 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;u16, RegisterMappingError&gt; {
         <span class="prelude-val">Err</span>(RegisterMappingError::UnsupportedArchitecture)
     }
-
-    <span class="doccomment">/// IntCC condition for Unsigned Addition Overflow (Carry).
-    </span><span class="kw">fn </span>unsigned_add_overflow_condition(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ir::condcodes::IntCC;
 
     <span class="doccomment">/// Creates unwind information for the function.
     ///

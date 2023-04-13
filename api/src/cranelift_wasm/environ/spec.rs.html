@@ -805,10 +805,6 @@
 <a href="#805" id="805">805</a>
 <a href="#806" id="806">806</a>
 <a href="#807" id="807">807</a>
-<a href="#808" id="808">808</a>
-<a href="#809" id="809">809</a>
-<a href="#810" id="810">810</a>
-<a href="#811" id="811">811</a>
 </pre><pre class="rust"><code><span class="doccomment">//! All the runtime support necessary for the wasm to cranelift translation is formalized by the
 //! traits `FunctionEnvironment` and `ModuleEnvironment`.
 //!
@@ -1332,10 +1328,6 @@
     ) -&gt; WasmResult&lt;()&gt; {
         <span class="prelude-val">Ok</span>(())
     }
-
-    <span class="doccomment">/// Returns the target ISA&#39;s condition to check for unsigned addition
-    /// overflowing.
-    </span><span class="kw">fn </span>unsigned_add_overflow_condition(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ir::condcodes::IntCC;
 
     <span class="doccomment">/// Whether or not to force relaxed simd instructions to have deterministic
     /// lowerings meaning they will produce the same results across all hosts,

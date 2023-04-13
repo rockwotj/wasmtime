@@ -212,20 +212,9 @@
 <a href="#212" id="212">212</a>
 <a href="#213" id="213">213</a>
 <a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
-<a href="#220" id="220">220</a>
-<a href="#221" id="221">221</a>
-<a href="#222" id="222">222</a>
-<a href="#223" id="223">223</a>
-<a href="#224" id="224">224</a>
 </pre><pre class="rust"><code><span class="doccomment">//! IBM Z 64-bit Instruction Set Architecture.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::dominator_tree::DominatorTree;
-<span class="kw">use </span><span class="kw">crate</span>::ir::condcodes::IntCC;
 <span class="kw">use </span><span class="kw">crate</span>::ir::{Function, Type};
 <span class="kw">use </span><span class="kw">crate</span>::isa::s390x::settings <span class="kw">as </span>s390x_settings;
 <span class="attr">#[cfg(feature = <span class="string">&quot;unwind&quot;</span>)]
@@ -354,15 +343,6 @@
     <span class="kw">fn </span>dynamic_vector_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, _dyn_ty: Type) -&gt; u32 {
         <span class="number">16
     </span>}
-
-    <span class="kw">fn </span>unsigned_add_overflow_condition(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; IntCC {
-        <span class="comment">// The ADD LOGICAL family of instructions set the condition code
-        // differently from normal comparisons, in a way that cannot be
-        // represented by any of the standard IntCC values.  So we use a
-        // dummy value here, which gets remapped to the correct condition
-        // code mask during lowering.
-        </span>IntCC::UnsignedGreaterThan
-    }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;unwind&quot;</span>)]
     </span><span class="kw">fn </span>emit_unwind_info(
