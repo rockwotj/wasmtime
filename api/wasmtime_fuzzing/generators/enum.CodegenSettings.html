@@ -14,7 +14,7 @@
     &amp;mut self,
     module_config: &amp;<a class="struct" href="struct.ModuleConfig.html" title="struct wasmtime_fuzzing::generators::ModuleConfig">ModuleConfig</a>,
     u: &amp;mut Unstructured&lt;'_&gt;
-) -&gt; Result&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;</h4></section></summary><div class="docblock"><p>Features such as sse4.2 are unconditionally enabled on the x86_64 target
+) -&gt; Result&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;</h4></section></summary><div class="docblock"><p>Features such as sse3 are unconditionally enabled on the x86_64 target
 because they are hard required for SIMD, but when SIMD is disabled, for
 example, we support disabling these features.</p>
 <p>This method will take the wasm feature selection chosen, through
