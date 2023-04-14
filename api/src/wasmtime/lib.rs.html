@@ -513,7 +513,7 @@
 //!     let engine = Engine::default();
 //!     let wat = r#&quot;
 //!         (module
-//!             (import &quot;host&quot; &quot;hello&quot; (func $host_hello (param i32)))
+//!             (import &quot;host&quot; &quot;host_func&quot; (func $host_hello (param i32)))
 //!
 //!             (func (export &quot;hello&quot;)
 //!                 i32.const 3
@@ -526,7 +526,7 @@
 //!     // `Store` has a type parameter to store host-specific data, which in
 //!     // this case we&#39;re using `4` for.
 //!     let mut store = Store::new(&amp;engine, 4);
-//!     let host_hello = Func::wrap(&amp;mut store, |caller: Caller&lt;&#39;_, u32&gt;, param: i32| {
+//!     let host_func = Func::wrap(&amp;mut store, |caller: Caller&lt;&#39;_, u32&gt;, param: i32| {
 //!         println!(&quot;Got {} from WebAssembly&quot;, param);
 //!         println!(&quot;my host state is: {}&quot;, caller.data());
 //!     });
@@ -534,7 +534,7 @@
 //!     // Instantiation of a module requires specifying its imports and then
 //!     // afterwards we can fetch exports by name, as well as asserting the
 //!     // type signature of the function with `get_typed_func`.
-//!     let instance = Instance::new(&amp;mut store, &amp;module, &amp;[host_hello.into()])?;
+//!     let instance = Instance::new(&amp;mut store, &amp;module, &amp;[host_func.into()])?;
 //!     let hello = instance.get_typed_func::&lt;(), ()&gt;(&amp;mut store, &quot;hello&quot;)?;
 //!
 //!     // And finally we can call the wasm!
@@ -625,7 +625,7 @@
 //!     let engine = Engine::default();
 //!     let wat = r#&quot;
 //!         (module
-//!             (import &quot;host&quot; &quot;hello&quot; (func $host_hello (param i32)))
+//!             (import &quot;host&quot; &quot;host_func&quot; (func $host_hello (param i32)))
 //!
 //!             (func (export &quot;hello&quot;)
 //!                 i32.const 3
@@ -636,7 +636,7 @@
 //!
 //!     // Create a `Linker` and define our host function in it:
 //!     let mut linker = Linker::new(&amp;engine);
-//!     linker.func_wrap(&quot;host&quot;, &quot;hello&quot;, |caller: Caller&lt;&#39;_, u32&gt;, param: i32| {
+//!     linker.func_wrap(&quot;host&quot;, &quot;host_func&quot;, |caller: Caller&lt;&#39;_, u32&gt;, param: i32| {
 //!         println!(&quot;Got {} from WebAssembly&quot;, param);
 //!         println!(&quot;my host state is: {}&quot;, caller.data());
 //!     })?;

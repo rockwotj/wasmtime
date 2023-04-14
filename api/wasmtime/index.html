@@ -29,7 +29,7 @@ sandboxed.</p>
     </span><span class="kw">let </span>engine = Engine::default();
     <span class="kw">let </span>wat = <span class="string">r#&quot;
         (module
-            (import &quot;host&quot; &quot;hello&quot; (func $host_hello (param i32)))
+            (import &quot;host&quot; &quot;host_func&quot; (func $host_hello (param i32)))
 
             (func (export &quot;hello&quot;)
                 i32.const 3
@@ -42,7 +42,7 @@ sandboxed.</p>
     // `Store` has a type parameter to store host-specific data, which in
     // this case we&#39;re using `4` for.
     </span><span class="kw">let </span><span class="kw-2">mut </span>store = Store::new(<span class="kw-2">&amp;</span>engine, <span class="number">4</span>);
-    <span class="kw">let </span>host_hello = Func::wrap(<span class="kw-2">&amp;mut </span>store, |caller: Caller&lt;<span class="lifetime">&#39;_</span>, u32&gt;, param: i32| {
+    <span class="kw">let </span>host_func = Func::wrap(<span class="kw-2">&amp;mut </span>store, |caller: Caller&lt;<span class="lifetime">&#39;_</span>, u32&gt;, param: i32| {
         <span class="macro">println!</span>(<span class="string">&quot;Got {} from WebAssembly&quot;</span>, param);
         <span class="macro">println!</span>(<span class="string">&quot;my host state is: {}&quot;</span>, caller.data());
     });
@@ -50,7 +50,7 @@ sandboxed.</p>
     <span class="comment">// Instantiation of a module requires specifying its imports and then
     // afterwards we can fetch exports by name, as well as asserting the
     // type signature of the function with `get_typed_func`.
-    </span><span class="kw">let </span>instance = Instance::new(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;</span>module, <span class="kw-2">&amp;</span>[host_hello.into()])<span class="question-mark">?</span>;
+    </span><span class="kw">let </span>instance = Instance::new(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;</span>module, <span class="kw-2">&amp;</span>[host_func.into()])<span class="question-mark">?</span>;
     <span class="kw">let </span>hello = instance.get_typed_func::&lt;(), ()&gt;(<span class="kw-2">&amp;mut </span>store, <span class="string">&quot;hello&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="comment">// And finally we can call the wasm!
@@ -139,7 +139,7 @@ later be used for instantiation.</p>
     <span class="kw">let </span>engine = Engine::default();
     <span class="kw">let </span>wat = <span class="string">r#&quot;
         (module
-            (import &quot;host&quot; &quot;hello&quot; (func $host_hello (param i32)))
+            (import &quot;host&quot; &quot;host_func&quot; (func $host_hello (param i32)))
 
             (func (export &quot;hello&quot;)
                 i32.const 3
@@ -150,7 +150,7 @@ later be used for instantiation.</p>
 
     <span class="comment">// Create a `Linker` and define our host function in it:
     </span><span class="kw">let </span><span class="kw-2">mut </span>linker = Linker::new(<span class="kw-2">&amp;</span>engine);
-    linker.func_wrap(<span class="string">&quot;host&quot;</span>, <span class="string">&quot;hello&quot;</span>, |caller: Caller&lt;<span class="lifetime">&#39;_</span>, u32&gt;, param: i32| {
+    linker.func_wrap(<span class="string">&quot;host&quot;</span>, <span class="string">&quot;host_func&quot;</span>, |caller: Caller&lt;<span class="lifetime">&#39;_</span>, u32&gt;, param: i32| {
         <span class="macro">println!</span>(<span class="string">&quot;Got {} from WebAssembly&quot;</span>, param);
         <span class="macro">println!</span>(<span class="string">&quot;my host state is: {}&quot;</span>, caller.data());
     })<span class="question-mark">?</span>;
