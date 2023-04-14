@@ -131,13 +131,15 @@
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
 <a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     abi::ABI,
     codegen::{CodeGen, CodeGenContext},
 };
 
 <span class="kw">use </span><span class="kw">crate</span>::frame::{DefinedLocals, Frame};
-<span class="kw">use </span><span class="kw">crate</span>::isa::x64::masm::MacroAssembler <span class="kw">as </span>X64Masm;
+<span class="kw">use </span><span class="kw">crate</span>::isa::{x64::masm::MacroAssembler <span class="kw">as </span>X64Masm, CallingConvention};
 <span class="kw">use </span><span class="kw">crate</span>::masm::MacroAssembler;
 <span class="kw">use </span><span class="kw">crate</span>::regalloc::RegAlloc;
 <span class="kw">use </span><span class="kw">crate</span>::stack::Stack;
@@ -230,7 +232,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>masm = X64Masm::new(<span class="self">self</span>.shared_flags.clone(), <span class="self">self</span>.isa_flags.clone());
         <span class="kw">let </span>stack = Stack::new();
         <span class="kw">let </span>abi = abi::X64ABI::default();
-        <span class="kw">let </span>abi_sig = abi.sig(sig);
+        <span class="kw">let </span>abi_sig = abi.sig(sig, <span class="kw-2">&amp;</span>CallingConvention::Default);
 
         <span class="kw">let </span>defined_locals = DefinedLocals::new(<span class="kw-2">&amp;mut </span>body, validator)<span class="question-mark">?</span>;
         <span class="kw">let </span>frame = Frame::new(<span class="kw-2">&amp;</span>abi_sig, <span class="kw-2">&amp;</span>defined_locals, <span class="kw-2">&amp;</span>abi)<span class="question-mark">?</span>;
@@ -256,8 +258,10 @@
     <span class="kw">fn </span>host_to_wasm_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, ty: <span class="kw-2">&amp;</span>FuncType) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt; {
         <span class="kw">let </span>abi = abi::X64ABI::default();
         <span class="kw">let </span><span class="kw-2">mut </span>masm = X64Masm::new(<span class="self">self</span>.shared_flags.clone(), <span class="self">self</span>.isa_flags.clone());
+        <span class="kw">let </span>call_conv = <span class="self">self</span>.wasmtime_call_conv();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>trampoline = Trampoline::new(<span class="kw-2">&amp;mut </span>masm, <span class="kw-2">&amp;</span>abi, regs::scratch(), regs::argv());
+        <span class="kw">let </span><span class="kw-2">mut </span>trampoline =
+            Trampoline::new(<span class="kw-2">&amp;mut </span>masm, <span class="kw-2">&amp;</span>abi, regs::scratch(), regs::argv(), <span class="kw-2">&amp;</span>call_conv);
 
         trampoline.emit_host_to_wasm(ty);
 

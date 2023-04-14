@@ -125,7 +125,7 @@
     abi::ABI,
     codegen::{CodeGen, CodeGenContext},
     frame::{DefinedLocals, Frame},
-    isa::{Builder, TargetIsa},
+    isa::{Builder, CallingConvention, TargetIsa},
     masm::MacroAssembler,
     regalloc::RegAlloc,
     regset::RegSet,
@@ -214,7 +214,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>masm = Aarch64Masm::new(<span class="self">self</span>.shared_flags.clone());
         <span class="kw">let </span>stack = Stack::new();
         <span class="kw">let </span>abi = abi::Aarch64ABI::default();
-        <span class="kw">let </span>abi_sig = abi.sig(sig);
+        <span class="kw">let </span>abi_sig = abi.sig(sig, <span class="kw-2">&amp;</span>CallingConvention::Default);
 
         <span class="kw">let </span>defined_locals = DefinedLocals::new(<span class="kw-2">&amp;mut </span>body, validator)<span class="question-mark">?</span>;
         <span class="kw">let </span>frame = Frame::new(<span class="kw-2">&amp;</span>abi_sig, <span class="kw-2">&amp;</span>defined_locals, <span class="kw-2">&amp;</span>abi)<span class="question-mark">?</span>;

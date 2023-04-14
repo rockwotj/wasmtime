@@ -154,10 +154,33 @@
 <a href="#154" id="154">154</a>
 <a href="#155" id="155">155</a>
 <a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
 </pre><pre class="rust"><code><span class="doccomment">//! X64 register definition.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::isa::reg::Reg;
+</span><span class="kw">use </span><span class="kw">crate</span>::isa::{reg::Reg, CallingConvention};
 <span class="kw">use </span>regalloc2::{PReg, RegClass};
+<span class="kw">use </span>smallvec::{smallvec, SmallVec};
 
 <span class="kw">const </span>ENC_RAX: u8 = <span class="number">0</span>;
 <span class="kw">const </span>ENC_RCX: u8 = <span class="number">1</span>;
@@ -310,5 +333,26 @@
 
 <span class="doccomment">/// Bitmask to represent the available general purpose registers.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>ALL_GPR: u32 = ALLOCATABLE_GPR &amp; !NON_ALLOCATABLE_GPR;
+
+<span class="doccomment">/// Returns the callee-saved registers according to a particular calling
+/// convention.
+///
+/// This function will return the set of registers that need to be saved
+/// according to the system ABI and that are known not to be saved during the
+/// prologue emission.
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>callee_saved(call_conv: <span class="kw-2">&amp;</span>CallingConvention) -&gt; SmallVec&lt;[Reg; <span class="number">9</span>]&gt; {
+    <span class="kw">use </span>CallingConvention::<span class="kw-2">*</span>;
+    <span class="kw">match </span>call_conv {
+        WasmtimeSystemV =&gt; {
+            <span class="macro">smallvec!</span>[rbx(), r12(), r13(), r14(), r15(),]
+        }
+        <span class="comment">// TODO: Once float registers are supported,
+        // account for callee-saved float registers.
+        </span>WasmtimeFastcall =&gt; {
+            <span class="macro">smallvec!</span>[rbx(), rdi(), rsi(), r12(), r13(), r14(), r15(),]
+        }
+        <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+    }
+}
 </code></pre></div>
 </section></main></body></html>

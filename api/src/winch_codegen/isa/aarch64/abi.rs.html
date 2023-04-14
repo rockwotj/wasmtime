@@ -212,9 +212,16 @@
 <a href="#212" id="212">212</a>
 <a href="#213" id="213">213</a>
 <a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::regs;
 <span class="kw">use </span><span class="kw">crate</span>::abi::{ABIArg, ABIResult, ABISig, ABI};
-<span class="kw">use </span><span class="kw">crate</span>::isa::reg::Reg;
+<span class="kw">use </span><span class="kw">crate</span>::isa::{reg::Reg, CallingConvention};
 <span class="kw">use </span>smallvec::SmallVec;
 <span class="kw">use </span>wasmparser::{FuncType, ValType};
 
@@ -273,7 +280,9 @@
         <span class="number">64
     </span>}
 
-    <span class="kw">fn </span>sig(<span class="kw-2">&amp;</span><span class="self">self</span>, wasm_sig: <span class="kw-2">&amp;</span>FuncType) -&gt; ABISig {
+    <span class="kw">fn </span>sig(<span class="kw-2">&amp;</span><span class="self">self</span>, wasm_sig: <span class="kw-2">&amp;</span>FuncType, call_conv: <span class="kw-2">&amp;</span>CallingConvention) -&gt; ABISig {
+        <span class="macro">assert!</span>(call_conv.is_apple_aarch64() || call_conv.is_default());
+
         <span class="kw">if </span>wasm_sig.results().len() &gt; <span class="number">1 </span>{
             <span class="macro">panic!</span>(<span class="string">&quot;multi-value not supported&quot;</span>);
         }
@@ -297,6 +306,10 @@
 
     <span class="kw">fn </span>scratch_reg() -&gt; Reg {
         <span class="macro">todo!</span>()
+    }
+
+    <span class="kw">fn </span>callee_saved_regs(_call_conv: <span class="kw-2">&amp;</span>CallingConvention) -&gt; SmallVec&lt;[Reg; <span class="number">9</span>]&gt; {
+        regs::callee_saved()
     }
 }
 
@@ -332,6 +345,7 @@
         abi::{ABIArg, ABI},
         isa::aarch64::regs,
         isa::reg::Reg,
+        isa::CallingConvention,
     };
     <span class="kw">use </span>wasmparser::{
         FuncType,
@@ -354,7 +368,7 @@
         <span class="kw">let </span>wasm_sig = FuncType::new([I32, I64, I32, I64, I32, I32, I64, I32, I64], []);
 
         <span class="kw">let </span>abi = Aarch64ABI::default();
-        <span class="kw">let </span>sig = abi.sig(<span class="kw-2">&amp;</span>wasm_sig);
+        <span class="kw">let </span>sig = abi.sig(<span class="kw-2">&amp;</span>wasm_sig, <span class="kw-2">&amp;</span>CallingConvention::Default);
         <span class="kw">let </span>params = sig.params;
 
         match_reg_arg(params.get(<span class="number">0</span>).unwrap(), I32, regs::xreg(<span class="number">0</span>));
@@ -373,7 +387,7 @@
         <span class="kw">let </span>wasm_sig = FuncType::new([F32, F64, F32, F64, F32, F32, F64, F32, F64], []);
 
         <span class="kw">let </span>abi = Aarch64ABI::default();
-        <span class="kw">let </span>sig = abi.sig(<span class="kw-2">&amp;</span>wasm_sig);
+        <span class="kw">let </span>sig = abi.sig(<span class="kw-2">&amp;</span>wasm_sig, <span class="kw-2">&amp;</span>CallingConvention::Default);
         <span class="kw">let </span>params = sig.params;
 
         match_reg_arg(params.get(<span class="number">0</span>).unwrap(), F32, regs::vreg(<span class="number">0</span>));
@@ -392,7 +406,7 @@
         <span class="kw">let </span>wasm_sig = FuncType::new([F32, I32, I64, F64, I32, F32, F64, F32, F64], []);
 
         <span class="kw">let </span>abi = Aarch64ABI::default();
-        <span class="kw">let </span>sig = abi.sig(<span class="kw-2">&amp;</span>wasm_sig);
+        <span class="kw">let </span>sig = abi.sig(<span class="kw-2">&amp;</span>wasm_sig, <span class="kw-2">&amp;</span>CallingConvention::Default);
         <span class="kw">let </span>params = sig.params;
 
         match_reg_arg(params.get(<span class="number">0</span>).unwrap(), F32, regs::vreg(<span class="number">0</span>));

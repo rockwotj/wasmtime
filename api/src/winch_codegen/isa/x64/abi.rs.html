@@ -238,10 +238,107 @@
 <a href="#238" id="238">238</a>
 <a href="#239" id="239">239</a>
 <a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::regs;
 <span class="kw">use crate</span>::{
     abi::{ABIArg, ABIResult, ABISig, ABI},
-    isa::reg::Reg,
+    isa::{reg::Reg, CallingConvention},
 };
 <span class="kw">use </span>smallvec::SmallVec;
 <span class="kw">use </span>wasmparser::{FuncType, ValType};
@@ -252,15 +349,39 @@
 /// The first element tracks the general purpose register index.
 /// The second element tracks the floating point register index.
 </span><span class="attr">#[derive(Default)]
-</span><span class="kw">struct </span>RegIndexEnv(u8, u8);
+</span><span class="kw">struct </span>RegIndexEnv {
+    <span class="doccomment">/// General purpose register index or the field used for absolute
+    /// counts.
+    </span>gpr_or_absolute_count: u8,
+    <span class="doccomment">/// Floating point register index.
+    </span>fpr: u8,
+    <span class="doccomment">/// Whether the count should be absolute rather than per register class.
+    /// When this field is true, only the `gpr_or_absolute_count` field is
+    /// incremented.
+    </span>absolute_count: bool,
+}
+
+<span class="kw">impl </span>RegIndexEnv {
+    <span class="kw">fn </span>with_absolute_count() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            gpr_or_absolute_count: <span class="number">0</span>,
+            fpr: <span class="number">0</span>,
+            absolute_count: <span class="bool-val">true</span>,
+        }
+    }
+}
 
 <span class="kw">impl </span>RegIndexEnv {
     <span class="kw">fn </span>next_gpr(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u8 {
-        <span class="self">Self</span>::increment(<span class="kw-2">&amp;mut </span><span class="self">self</span>.<span class="number">0</span>)
+        <span class="self">Self</span>::increment(<span class="kw-2">&amp;mut </span><span class="self">self</span>.gpr_or_absolute_count)
     }
 
     <span class="kw">fn </span>next_fpr(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u8 {
-        <span class="self">Self</span>::increment(<span class="kw-2">&amp;mut </span><span class="self">self</span>.<span class="number">1</span>)
+        <span class="kw">if </span><span class="self">self</span>.absolute_count {
+            <span class="self">Self</span>::increment(<span class="kw-2">&amp;mut </span><span class="self">self</span>.gpr_or_absolute_count)
+        } <span class="kw">else </span>{
+            <span class="self">Self</span>::increment(<span class="kw-2">&amp;mut </span><span class="self">self</span>.fpr)
+        }
     }
 
     <span class="kw">fn </span>increment(index: <span class="kw-2">&amp;mut </span>u8) -&gt; u8 {
@@ -300,22 +421,33 @@
         <span class="number">64
     </span>}
 
-    <span class="kw">fn </span>sig(<span class="kw-2">&amp;</span><span class="self">self</span>, wasm_sig: <span class="kw-2">&amp;</span>FuncType) -&gt; ABISig {
+    <span class="kw">fn </span>sig(<span class="kw-2">&amp;</span><span class="self">self</span>, wasm_sig: <span class="kw-2">&amp;</span>FuncType, call_conv: <span class="kw-2">&amp;</span>CallingConvention) -&gt; ABISig {
+        <span class="macro">assert!</span>(call_conv.is_fastcall() || call_conv.is_systemv() || call_conv.is_default());
+
         <span class="kw">if </span>wasm_sig.results().len() &gt; <span class="number">1 </span>{
             <span class="macro">panic!</span>(<span class="string">&quot;multi-value not supported&quot;</span>);
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>stack_offset = <span class="number">0</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>index_env = RegIndexEnv::default();
+        <span class="kw">let </span>is_fastcall = call_conv.is_fastcall();
+        <span class="comment">// In the fastcall calling convention, the callee gets a contiguous
+        // stack area of 32 bytes (4 register arguments) just before its frame.
+        // See
+        // https://learn.microsoft.com/en-us/cpp/build/stack-usage?view=msvc-170#stack-allocation
+        </span><span class="kw">let </span>(<span class="kw-2">mut </span>stack_offset, <span class="kw-2">mut </span>index_env) = <span class="kw">if </span>is_fastcall {
+            (<span class="number">32</span>, RegIndexEnv::with_absolute_count())
+        } <span class="kw">else </span>{
+            (<span class="number">0</span>, RegIndexEnv::default())
+        };
 
         <span class="kw">let </span>params: SmallVec&lt;[ABIArg; <span class="number">6</span>]&gt; = wasm_sig
             .params()
             .iter()
-            .map(|arg| <span class="self">Self</span>::to_abi_arg(arg, <span class="kw-2">&amp;mut </span>stack_offset, <span class="kw-2">&amp;mut </span>index_env))
+            .map(|arg| <span class="self">Self</span>::to_abi_arg(arg, <span class="kw-2">&amp;mut </span>stack_offset, <span class="kw-2">&amp;mut </span>index_env, is_fastcall))
             .collect();
 
         <span class="kw">let </span>ty = wasm_sig.results().get(<span class="number">0</span>).map(|e| e.clone());
-        <span class="comment">// NOTE temporarily defaulting to rax.
+        <span class="comment">// The `Default`, `WasmtimeFastcall` and `WasmtimeSystemV use `rax`.
+        // NOTE This should be updated when supporting multi-value.
         </span><span class="kw">let </span>reg = regs::rax();
         <span class="kw">let </span>result = ABIResult::reg(ty, reg);
 
@@ -325,6 +457,10 @@
     <span class="kw">fn </span>scratch_reg() -&gt; Reg {
         regs::scratch()
     }
+
+    <span class="kw">fn </span>callee_saved_regs(call_conv: <span class="kw-2">&amp;</span>CallingConvention) -&gt; SmallVec&lt;[Reg; <span class="number">9</span>]&gt; {
+        regs::callee_saved(call_conv)
+    }
 }
 
 <span class="kw">impl </span>X64ABI {
@@ -332,11 +468,16 @@
         wasm_arg: <span class="kw-2">&amp;</span>ValType,
         stack_offset: <span class="kw-2">&amp;mut </span>u32,
         index_env: <span class="kw-2">&amp;mut </span>RegIndexEnv,
+        fastcall: bool,
     ) -&gt; ABIArg {
         <span class="kw">let </span>(reg, ty) = <span class="kw">match </span>wasm_arg {
-            ty @ (ValType::I32 | ValType::I64) =&gt; (<span class="self">Self</span>::int_reg_for(index_env.next_gpr()), ty),
+            ty @ (ValType::I32 | ValType::I64) =&gt; {
+                (<span class="self">Self</span>::int_reg_for(index_env.next_gpr(), fastcall), ty)
+            }
 
-            ty @ (ValType::F32 | ValType::F64) =&gt; (<span class="self">Self</span>::float_reg_for(index_env.next_fpr()), ty),
+            ty @ (ValType::F32 | ValType::F64) =&gt; {
+                (<span class="self">Self</span>::float_reg_for(index_env.next_fpr(), fastcall), ty)
+            }
 
             ty =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;Unsupported argument type {:?}&quot;</span>, ty),
         };
@@ -351,28 +492,36 @@
         reg.map_or_else(default, |reg| ABIArg::reg(reg, <span class="kw-2">*</span>ty))
     }
 
-    <span class="kw">fn </span>int_reg_for(index: u8) -&gt; <span class="prelude-ty">Option</span>&lt;Reg&gt; {
-        <span class="kw">match </span>index {
-            <span class="number">0 </span>=&gt; <span class="prelude-val">Some</span>(regs::rdi()),
-            <span class="number">1 </span>=&gt; <span class="prelude-val">Some</span>(regs::rsi()),
-            <span class="number">2 </span>=&gt; <span class="prelude-val">Some</span>(regs::rdx()),
-            <span class="number">3 </span>=&gt; <span class="prelude-val">Some</span>(regs::rcx()),
-            <span class="number">4 </span>=&gt; <span class="prelude-val">Some</span>(regs::r8()),
-            <span class="number">5 </span>=&gt; <span class="prelude-val">Some</span>(regs::r9()),
+    <span class="kw">fn </span>int_reg_for(index: u8, fastcall: bool) -&gt; <span class="prelude-ty">Option</span>&lt;Reg&gt; {
+        <span class="kw">match </span>(fastcall, index) {
+            (<span class="bool-val">false</span>, <span class="number">0</span>) =&gt; <span class="prelude-val">Some</span>(regs::rdi()),
+            (<span class="bool-val">false</span>, <span class="number">1</span>) =&gt; <span class="prelude-val">Some</span>(regs::rsi()),
+            (<span class="bool-val">false</span>, <span class="number">2</span>) =&gt; <span class="prelude-val">Some</span>(regs::rdx()),
+            (<span class="bool-val">false</span>, <span class="number">3</span>) =&gt; <span class="prelude-val">Some</span>(regs::rcx()),
+            (<span class="bool-val">false</span>, <span class="number">4</span>) =&gt; <span class="prelude-val">Some</span>(regs::r8()),
+            (<span class="bool-val">false</span>, <span class="number">5</span>) =&gt; <span class="prelude-val">Some</span>(regs::r9()),
+            (<span class="bool-val">true</span>, <span class="number">0</span>) =&gt; <span class="prelude-val">Some</span>(regs::rcx()),
+            (<span class="bool-val">true</span>, <span class="number">1</span>) =&gt; <span class="prelude-val">Some</span>(regs::rdx()),
+            (<span class="bool-val">true</span>, <span class="number">2</span>) =&gt; <span class="prelude-val">Some</span>(regs::r8()),
+            (<span class="bool-val">true</span>, <span class="number">3</span>) =&gt; <span class="prelude-val">Some</span>(regs::r9()),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
 
-    <span class="kw">fn </span>float_reg_for(index: u8) -&gt; <span class="prelude-ty">Option</span>&lt;Reg&gt; {
-        <span class="kw">match </span>index {
-            <span class="number">0 </span>=&gt; <span class="prelude-val">Some</span>(regs::xmm0()),
-            <span class="number">1 </span>=&gt; <span class="prelude-val">Some</span>(regs::xmm1()),
-            <span class="number">2 </span>=&gt; <span class="prelude-val">Some</span>(regs::xmm2()),
-            <span class="number">3 </span>=&gt; <span class="prelude-val">Some</span>(regs::xmm3()),
-            <span class="number">4 </span>=&gt; <span class="prelude-val">Some</span>(regs::xmm4()),
-            <span class="number">5 </span>=&gt; <span class="prelude-val">Some</span>(regs::xmm5()),
-            <span class="number">6 </span>=&gt; <span class="prelude-val">Some</span>(regs::xmm6()),
-            <span class="number">7 </span>=&gt; <span class="prelude-val">Some</span>(regs::xmm7()),
+    <span class="kw">fn </span>float_reg_for(index: u8, fastcall: bool) -&gt; <span class="prelude-ty">Option</span>&lt;Reg&gt; {
+        <span class="kw">match </span>(fastcall, index) {
+            (<span class="bool-val">false</span>, <span class="number">0</span>) =&gt; <span class="prelude-val">Some</span>(regs::xmm0()),
+            (<span class="bool-val">false</span>, <span class="number">1</span>) =&gt; <span class="prelude-val">Some</span>(regs::xmm1()),
+            (<span class="bool-val">false</span>, <span class="number">2</span>) =&gt; <span class="prelude-val">Some</span>(regs::xmm2()),
+            (<span class="bool-val">false</span>, <span class="number">3</span>) =&gt; <span class="prelude-val">Some</span>(regs::xmm3()),
+            (<span class="bool-val">false</span>, <span class="number">4</span>) =&gt; <span class="prelude-val">Some</span>(regs::xmm4()),
+            (<span class="bool-val">false</span>, <span class="number">5</span>) =&gt; <span class="prelude-val">Some</span>(regs::xmm5()),
+            (<span class="bool-val">false</span>, <span class="number">6</span>) =&gt; <span class="prelude-val">Some</span>(regs::xmm6()),
+            (<span class="bool-val">false</span>, <span class="number">7</span>) =&gt; <span class="prelude-val">Some</span>(regs::xmm7()),
+            (<span class="bool-val">true</span>, <span class="number">0</span>) =&gt; <span class="prelude-val">Some</span>(regs::xmm0()),
+            (<span class="bool-val">true</span>, <span class="number">1</span>) =&gt; <span class="prelude-val">Some</span>(regs::xmm1()),
+            (<span class="bool-val">true</span>, <span class="number">2</span>) =&gt; <span class="prelude-val">Some</span>(regs::xmm2()),
+            (<span class="bool-val">true</span>, <span class="number">3</span>) =&gt; <span class="prelude-val">Some</span>(regs::xmm3()),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
@@ -385,6 +534,7 @@
         abi::{ABIArg, ABI},
         isa::reg::Reg,
         isa::x64::regs,
+        isa::CallingConvention,
     };
     <span class="kw">use </span>wasmparser::{
         FuncType,
@@ -403,11 +553,20 @@
     }
 
     <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_reg_index_env_absolute_count() {
+        <span class="kw">let </span><span class="kw-2">mut </span>e = RegIndexEnv::with_absolute_count();
+        <span class="macro">assert!</span>(e.next_gpr() == <span class="number">0</span>);
+        <span class="macro">assert!</span>(e.next_fpr() == <span class="number">1</span>);
+        <span class="macro">assert!</span>(e.next_gpr() == <span class="number">2</span>);
+        <span class="macro">assert!</span>(e.next_fpr() == <span class="number">3</span>);
+    }
+
+    <span class="attr">#[test]
     </span><span class="kw">fn </span>int_abi_sig() {
         <span class="kw">let </span>wasm_sig = FuncType::new([I32, I64, I32, I64, I32, I32, I64, I32], []);
 
         <span class="kw">let </span>abi = X64ABI::default();
-        <span class="kw">let </span>sig = abi.sig(<span class="kw-2">&amp;</span>wasm_sig);
+        <span class="kw">let </span>sig = abi.sig(<span class="kw-2">&amp;</span>wasm_sig, <span class="kw-2">&amp;</span>CallingConvention::Default);
         <span class="kw">let </span>params = sig.params;
 
         match_reg_arg(params.get(<span class="number">0</span>).unwrap(), I32, regs::rdi());
@@ -425,7 +584,7 @@
         <span class="kw">let </span>wasm_sig = FuncType::new([F32, F64, F32, F64, F32, F32, F64, F32, F64], []);
 
         <span class="kw">let </span>abi = X64ABI::default();
-        <span class="kw">let </span>sig = abi.sig(<span class="kw-2">&amp;</span>wasm_sig);
+        <span class="kw">let </span>sig = abi.sig(<span class="kw-2">&amp;</span>wasm_sig, <span class="kw-2">&amp;</span>CallingConvention::Default);
         <span class="kw">let </span>params = sig.params;
 
         match_reg_arg(params.get(<span class="number">0</span>).unwrap(), F32, regs::xmm0());
@@ -444,7 +603,7 @@
         <span class="kw">let </span>wasm_sig = FuncType::new([F32, I32, I64, F64, I32, F32, F64, F32, F64], []);
 
         <span class="kw">let </span>abi = X64ABI::default();
-        <span class="kw">let </span>sig = abi.sig(<span class="kw-2">&amp;</span>wasm_sig);
+        <span class="kw">let </span>sig = abi.sig(<span class="kw-2">&amp;</span>wasm_sig, <span class="kw-2">&amp;</span>CallingConvention::Default);
         <span class="kw">let </span>params = sig.params;
 
         match_reg_arg(params.get(<span class="number">0</span>).unwrap(), F32, regs::xmm0());
@@ -456,6 +615,41 @@
         match_reg_arg(params.get(<span class="number">6</span>).unwrap(), F64, regs::xmm3());
         match_reg_arg(params.get(<span class="number">7</span>).unwrap(), F32, regs::xmm4());
         match_reg_arg(params.get(<span class="number">8</span>).unwrap(), F64, regs::xmm5());
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>system_v_call_conv() {
+        <span class="kw">let </span>wasm_sig = FuncType::new([F32, I32, I64, F64, I32, F32, F64, F32, F64], []);
+
+        <span class="kw">let </span>abi = X64ABI::default();
+        <span class="kw">let </span>sig = abi.sig(<span class="kw-2">&amp;</span>wasm_sig, <span class="kw-2">&amp;</span>CallingConvention::WasmtimeSystemV);
+        <span class="kw">let </span>params = sig.params;
+
+        match_reg_arg(params.get(<span class="number">0</span>).unwrap(), F32, regs::xmm0());
+        match_reg_arg(params.get(<span class="number">1</span>).unwrap(), I32, regs::rdi());
+        match_reg_arg(params.get(<span class="number">2</span>).unwrap(), I64, regs::rsi());
+        match_reg_arg(params.get(<span class="number">3</span>).unwrap(), F64, regs::xmm1());
+        match_reg_arg(params.get(<span class="number">4</span>).unwrap(), I32, regs::rdx());
+        match_reg_arg(params.get(<span class="number">5</span>).unwrap(), F32, regs::xmm2());
+        match_reg_arg(params.get(<span class="number">6</span>).unwrap(), F64, regs::xmm3());
+        match_reg_arg(params.get(<span class="number">7</span>).unwrap(), F32, regs::xmm4());
+        match_reg_arg(params.get(<span class="number">8</span>).unwrap(), F64, regs::xmm5());
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>fastcall_call_conv() {
+        <span class="kw">let </span>wasm_sig = FuncType::new([F32, I32, I64, F64, I32, F32, F64, F32, F64], []);
+
+        <span class="kw">let </span>abi = X64ABI::default();
+        <span class="kw">let </span>sig = abi.sig(<span class="kw-2">&amp;</span>wasm_sig, <span class="kw-2">&amp;</span>CallingConvention::WasmtimeFastcall);
+        <span class="kw">let </span>params = sig.params;
+
+        match_reg_arg(params.get(<span class="number">0</span>).unwrap(), F32, regs::xmm0());
+        match_reg_arg(params.get(<span class="number">1</span>).unwrap(), I32, regs::rdx());
+        match_reg_arg(params.get(<span class="number">2</span>).unwrap(), I64, regs::r8());
+        match_reg_arg(params.get(<span class="number">3</span>).unwrap(), F64, regs::xmm3());
+        match_stack_arg(params.get(<span class="number">4</span>).unwrap(), I32, <span class="number">32</span>);
+        match_stack_arg(params.get(<span class="number">5</span>).unwrap(), F32, <span class="number">40</span>);
     }
 
     <span class="kw">fn </span>match_reg_arg(abi_arg: <span class="kw-2">&amp;</span>ABIArg, expected_ty: ValType, expected_reg: Reg) {

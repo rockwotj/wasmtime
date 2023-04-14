@@ -174,15 +174,48 @@
 <a href="#174" id="174">174</a>
 <a href="#175" id="175">175</a>
 <a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     abi::{align_to, calculate_frame_adjustment, ABIArg, ABIResult, ABI},
+    isa::CallingConvention,
     masm::{CalleeKind, MacroAssembler, OperandSize, RegImm},
     reg::Reg,
 };
+<span class="kw">use </span>smallvec::SmallVec;
 <span class="kw">use </span>std::mem;
 <span class="kw">use </span>wasmparser::{FuncType, ValType};
 
-<span class="doccomment">/// A trampoline to provide interopt between different calling conventions.
+<span class="doccomment">/// A trampoline to provide interopt between different calling
+/// conventions.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Trampoline&lt;<span class="lifetime">&#39;a</span>, A, M&gt;
 <span class="kw">where
     </span>A: ABI,
@@ -192,11 +225,19 @@
     </span>masm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>M,
     <span class="doccomment">/// The ABI.
     </span>abi: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>A,
-    <span class="doccomment">/// The main scratch register for the current architecture. It is not allocatable for the callee.
+    <span class="doccomment">/// The main scratch register for the current architecture. It is
+    /// not allocatable for the callee.
     </span>scratch_reg: Reg,
-    <span class="doccomment">/// A second scratch register. This will be allocatable for the callee, so it can only be used
-    /// after the callee-saved registers are on the stack.
+    <span class="doccomment">/// A second scratch register. This will be allocatable for the
+    /// callee, so it can only be used after the callee-saved
+    /// registers are on the stack.
     </span>alloc_scratch_reg: Reg,
+    <span class="doccomment">/// Registers to be saved as part of the trampoline&#39;s prologue and epilogue.
+    </span>callee_saved_regs: SmallVec&lt;[Reg; <span class="number">9</span>]&gt;,
+    <span class="doccomment">/// The calling convention used by the trampoline,
+    /// which is the Wasmtime variant of the system ABI&#39;s
+    /// calling convention.
+    </span>call_conv: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>CallingConvention,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, A, M&gt; Trampoline&lt;<span class="lifetime">&#39;a</span>, A, M&gt;
@@ -205,38 +246,44 @@
     M: MacroAssembler,
 {
     <span class="doccomment">/// Create a new trampoline.
-    </span><span class="kw">pub fn </span>new(masm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>M, abi: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>A, scratch_reg: Reg, alloc_scratch_reg: Reg) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(
+        masm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>M,
+        abi: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>A,
+        scratch_reg: Reg,
+        alloc_scratch_reg: Reg,
+        call_conv: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>CallingConvention,
+    ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             masm,
             abi,
             scratch_reg,
             alloc_scratch_reg,
+            callee_saved_regs: &lt;A <span class="kw">as </span>ABI&gt;::callee_saved_regs(call_conv),
+            call_conv,
         }
     }
 
     <span class="doccomment">/// Emit the host to wasm trampoline.
     </span><span class="kw">pub fn </span>emit_host_to_wasm(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: <span class="kw-2">&amp;</span>FuncType) {
-        <span class="comment">// The host to wasm trampoline is currently hard coded (see vmcontext.rs in the
-        // wasmtime-runtime crate, VMTrampoline).
-        // The first two parameters are VMContexts (not used at this time).
-        // The third parameter is the function pointer to call.
-        // The fourth parameter is an address to storage space for both the return value and the
-        // arguments to the function.
+        <span class="comment">// The host to wasm trampoline is currently hard coded (see
+        // vmcontext.rs in the wasmtime-runtime crate, VMTrampoline).
+        // The first two parameters are VMContexts (not used at this
+        // time). The third parameter is the function pointer to call.
+        // The fourth parameter is an address to storage space for
+        // both the return value and the arguments to the function.
         </span><span class="kw">let </span>trampoline_ty = FuncType::new(
             <span class="macro">vec!</span>[ValType::I64, ValType::I64, ValType::I64, ValType::I64],
             <span class="macro">vec!</span>[],
         );
 
-        <span class="comment">// TODO: We should be passing a calling convention here so the signature can determine the
-        // correct location of arguments. When we fully support system ABIs, this will need to be
-        // updated.
-        </span><span class="kw">let </span>trampoline_sig = <span class="self">self</span>.abi.sig(<span class="kw-2">&amp;</span>trampoline_ty);
+        <span class="kw">let </span>trampoline_sig = <span class="self">self</span>.abi.sig(<span class="kw-2">&amp;</span>trampoline_ty, <span class="self">self</span>.call_conv);
 
-        <span class="comment">// Hard-coding the size in bytes of the trampoline arguments since it&#39;s static, based on
-        // the current signature we should always have 4 arguments, each of which is 8 bytes.
+        <span class="comment">// Hard-coding the size in bytes of the trampoline arguments
+        // since it&#39;s static, based on the current signature we should
+        // always have 4 arguments, each of which is 8 bytes.
         </span><span class="kw">let </span>trampoline_arg_size = <span class="number">32</span>;
 
-        <span class="kw">let </span>callee_sig = <span class="self">self</span>.abi.sig(ty);
+        <span class="kw">let </span>callee_sig = <span class="self">self</span>.abi.sig(ty, <span class="kw-2">&amp;</span>CallingConvention::Default);
 
         <span class="kw">let </span>val_ptr = <span class="kw">if let </span>ABIArg::Reg { reg, ty: _ty } = <span class="kw-2">&amp;</span>trampoline_sig.params[<span class="number">3</span>] {
             <span class="prelude-val">Ok</span>(RegImm::reg(<span class="kw-2">*</span>reg))
@@ -245,13 +292,9 @@
         }
         .unwrap();
 
-        <span class="self">self</span>.masm.prologue();
+        <span class="self">self</span>.prologue();
 
-        <span class="comment">// TODO: When we include support for passing calling conventions, we need to update this to
-        // adhere to the system ABI. Currently, callee-saved registers are not preserved while we
-        // are building this out.
-
-        </span><span class="kw">let </span><span class="kw-2">mut </span>trampoline_arg_offsets: [u32; <span class="number">4</span>] = [<span class="number">0</span>; <span class="number">4</span>];
+        <span class="kw">let </span><span class="kw-2">mut </span>trampoline_arg_offsets: [u32; <span class="number">4</span>] = [<span class="number">0</span>; <span class="number">4</span>];
 
         trampoline_sig
             .params
@@ -267,21 +310,19 @@
         <span class="kw">let </span>val_ptr_offset = trampoline_arg_offsets[<span class="number">3</span>];
         <span class="kw">let </span>func_ptr_offset = trampoline_arg_offsets[<span class="number">2</span>];
 
-        <span class="self">self</span>.masm.mov(
-            val_ptr,
-            RegImm::reg(<span class="self">self</span>.scratch_reg),
-            <span class="kw">crate</span>::masm::OperandSize::S64,
-        );
+        <span class="self">self</span>.masm
+            .mov(val_ptr, RegImm::reg(<span class="self">self</span>.scratch_reg), OperandSize::S64);
 
-        <span class="comment">// How much we need to adjust the stack pointer by to account for the alignment
-        // required by the ISA.
+        <span class="comment">// How much we need to adjust the stack pointer by to account
+        // for the alignment required by the ISA.
         </span><span class="kw">let </span>delta = calculate_frame_adjustment(
             <span class="self">self</span>.masm.sp_offset(),
             <span class="self">self</span>.abi.arg_base_offset() <span class="kw">as </span>u32,
             <span class="self">self</span>.abi.call_stack_align() <span class="kw">as </span>u32,
         );
 
-        <span class="comment">// The total amount of stack space we need to reserve for the arguments.
+        <span class="comment">// The total amount of stack space we need to reserve for the
+        // arguments.
         </span><span class="kw">let </span>total_arg_stack_space = align_to(
             callee_sig.stack_bytes + delta,
             <span class="self">self</span>.abi.call_stack_align() <span class="kw">as </span>u32,
@@ -289,7 +330,8 @@
 
         <span class="self">self</span>.masm.reserve_stack(total_arg_stack_space);
 
-        <span class="comment">// The max size a value can be when reading from the params memory location.
+        <span class="comment">// The max size a value can be when reading from the params
+        // memory location.
         </span><span class="kw">let </span>value_size = mem::size_of::&lt;u128&gt;();
 
         callee_sig.params.iter().enumerate().for_each(|(i, param)| {
@@ -316,7 +358,8 @@
             }
         });
 
-        <span class="comment">// Move the function pointer from it&#39;s stack location into a scratch register.
+        <span class="comment">// Move the function pointer from it&#39;s stack location into a
+        // scratch register.
         </span><span class="self">self</span>.masm.load(
             <span class="self">self</span>.masm.address_from_sp(func_ptr_offset),
             <span class="self">self</span>.scratch_reg,
@@ -328,26 +371,43 @@
 
         <span class="self">self</span>.masm.free_stack(total_arg_stack_space);
 
-        <span class="comment">// Move the val ptr back into the scratch register so we can load the return values.
+        <span class="comment">// Move the val ptr back into the scratch register so we can
+        // load the return values.
         </span><span class="self">self</span>.masm.load(
             <span class="self">self</span>.masm.address_from_sp(val_ptr_offset),
             <span class="self">self</span>.scratch_reg,
             OperandSize::S64,
         );
 
-        <span class="comment">// Move the return values into the value ptr.
-        // We are only support a single return value at this time.
+        <span class="comment">// Move the return values into the value ptr.  We are only
+        // supporting a single return value at this time.
         </span><span class="kw">let </span>ABIResult::Reg { reg, ty } = <span class="kw-2">&amp;</span>callee_sig.result;
         <span class="self">self</span>.masm.store(
             RegImm::reg(<span class="kw-2">*</span>reg),
             <span class="self">self</span>.masm.address_from_reg(<span class="self">self</span>.scratch_reg, <span class="number">0</span>),
             (<span class="kw-2">*</span>ty).unwrap().into(),
         );
+        <span class="self">self</span>.epilogue(trampoline_arg_size);
+    }
 
-        <span class="comment">// TODO: Once we support system ABIs better, callee-saved registers will need to be
-        // restored here.
+    <span class="doccomment">/// The trampoline&#39;s prologue.
+    </span><span class="kw">fn </span>prologue(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.masm.prologue();
+        <span class="comment">// Save any callee-saved registers.
+        </span><span class="kw">for </span>r <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.callee_saved_regs {
+            <span class="self">self</span>.masm.push(<span class="kw-2">*</span>r);
+        }
+    }
 
-        </span><span class="self">self</span>.masm.epilogue(trampoline_arg_size);
+    <span class="doccomment">/// The trampoline&#39;s epilogue.
+    </span><span class="kw">fn </span>epilogue(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg_size: u32) {
+        <span class="comment">// Free the stack space allocated by pushing the trampoline arguments.
+        </span><span class="self">self</span>.masm.free_stack(arg_size);
+        <span class="comment">// Restore the callee-saved registers.
+        </span><span class="kw">for </span>r <span class="kw">in </span><span class="self">self</span>.callee_saved_regs.iter().rev() {
+            <span class="self">self</span>.masm.pop(<span class="kw-2">*</span>r);
+        }
+        <span class="self">self</span>.masm.epilogue(<span class="number">0</span>);
     }
 }
 </code></pre></div>

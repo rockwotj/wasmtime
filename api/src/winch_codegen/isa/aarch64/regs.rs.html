@@ -135,10 +135,34 @@
 <a href="#135" id="135">135</a>
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
 </pre><pre class="rust"><code><span class="doccomment">//! AArch64 register definition.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::isa::reg::Reg;
 <span class="kw">use </span>regalloc2::{PReg, RegClass};
+<span class="kw">use </span>smallvec::{smallvec, SmallVec};
 
 <span class="doccomment">/// Construct a X-register from an index.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>xreg(num: u8) -&gt; Reg {
@@ -272,5 +296,27 @@
 
 <span class="doccomment">/// Bitmask to represent the available general purpose registers.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>ALL_GPR: u32 = u32::MAX &amp; !NON_ALLOCATABLE_GPR;
+
+<span class="doccomment">/// Returns the callee-saved registers.
+///
+/// This function will return the set of registers that need to be saved
+/// according to the system ABI and that are known not to be saved during the
+/// prologue emission.
+</span><span class="comment">// TODO: Once float registers are supported,
+// account for callee-saved float registers.
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>callee_saved() -&gt; SmallVec&lt;[Reg; <span class="number">9</span>]&gt; {
+    <span class="macro">smallvec!</span>[
+        xreg(<span class="number">19</span>),
+        xreg(<span class="number">20</span>),
+        xreg(<span class="number">21</span>),
+        xreg(<span class="number">22</span>),
+        xreg(<span class="number">23</span>),
+        xreg(<span class="number">24</span>),
+        xreg(<span class="number">25</span>),
+        xreg(<span class="number">26</span>),
+        xreg(<span class="number">27</span>),
+        xreg(<span class="number">28</span>),
+    ]
+}
 </code></pre></div>
 </section></main></body></html>
