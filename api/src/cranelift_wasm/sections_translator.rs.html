@@ -746,7 +746,7 @@
                     }
                 };
                 environ.declare_table_elements(
-                    TableIndex::from_u32(table_index),
+                    TableIndex::from_u32(table_index.unwrap_or(<span class="number">0</span>)),
                     base,
                     offset,
                     segments,
