@@ -94,7 +94,7 @@
     <span class="kw">let </span><span class="kw-2">mut </span>table = <span class="macro">vec!</span>[<span class="prelude-val">None</span>; size];
 
     <span class="kw">for </span>i <span class="kw">in </span>items {
-        <span class="kw">let </span><span class="kw-2">mut </span>h = hash_function(<span class="kw-2">&amp;</span>i) % size;
+        <span class="kw">let </span><span class="kw-2">mut </span>h = hash_function(i) % size;
         <span class="kw">let </span><span class="kw-2">mut </span>s = <span class="number">0</span>;
         <span class="kw">while </span>table[h].is_some() {
             s += <span class="number">1</span>;

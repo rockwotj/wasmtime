@@ -438,11 +438,6 @@
 <a href="#438" id="438">438</a>
 <a href="#439" id="439">439</a>
 <a href="#440" id="440">440</a>
-<a href="#441" id="441">441</a>
-<a href="#442" id="442">442</a>
-<a href="#443" id="443">443</a>
-<a href="#444" id="444">444</a>
-<a href="#445" id="445">445</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::iter;
 
 <span class="attr">#[derive(Clone, Copy, Hash, PartialEq, Eq)]
@@ -520,14 +515,14 @@
     OtherPreset(PresetIndex),
 }
 
-<span class="kw">impl </span>Into&lt;PresetType&gt; <span class="kw">for </span>BoolSettingIndex {
-    <span class="kw">fn </span>into(<span class="self">self</span>) -&gt; PresetType {
-        PresetType::BoolSetting(<span class="self">self</span>)
+<span class="kw">impl </span>From&lt;BoolSettingIndex&gt; <span class="kw">for </span>PresetType {
+    <span class="kw">fn </span>from(bool_setting_index: BoolSettingIndex) -&gt; <span class="self">Self </span>{
+        PresetType::BoolSetting(bool_setting_index)
     }
 }
-<span class="kw">impl </span>Into&lt;PresetType&gt; <span class="kw">for </span>PresetIndex {
-    <span class="kw">fn </span>into(<span class="self">self</span>) -&gt; PresetType {
-        PresetType::OtherPreset(<span class="self">self</span>)
+<span class="kw">impl </span>From&lt;PresetIndex&gt; <span class="kw">for </span>PresetType {
+    <span class="kw">fn </span>from(value: PresetIndex) -&gt; <span class="self">Self </span>{
+        PresetType::OtherPreset(value)
     }
 }
 
@@ -579,13 +574,7 @@
     <span class="kw">fn </span>num_bool_settings(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
         <span class="self">self</span>.settings
             .iter()
-            .filter(|s| {
-                <span class="kw">if let </span>SpecificSetting::Bool(<span class="kw">_</span>) = s.specific {
-                    <span class="bool-val">true
-                </span>} <span class="kw">else </span>{
-                    <span class="bool-val">false
-                </span>}
-            })
+            .filter(|s| <span class="macro">matches!</span>(s.specific, SpecificSetting::Bool(<span class="kw">_</span>)))
             .count() <span class="kw">as </span>u8
     }
 
@@ -629,14 +618,15 @@
     And(Box&lt;PredicateNode&gt;, Box&lt;PredicateNode&gt;),
 }
 
-<span class="kw">impl </span>Into&lt;PredicateNode&gt; <span class="kw">for </span>BoolSettingIndex {
-    <span class="kw">fn </span>into(<span class="self">self</span>) -&gt; PredicateNode {
-        PredicateNode::OwnedBool(<span class="self">self</span>)
+<span class="kw">impl </span>From&lt;BoolSettingIndex&gt; <span class="kw">for </span>PredicateNode {
+    <span class="kw">fn </span>from(bool_setting_index: BoolSettingIndex) -&gt; <span class="self">Self </span>{
+        PredicateNode::OwnedBool(bool_setting_index)
     }
 }
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Into&lt;PredicateNode&gt; <span class="kw">for </span>(BoolSettingIndex, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>SettingGroup) {
-    <span class="kw">fn </span>into(<span class="self">self</span>) -&gt; PredicateNode {
-        <span class="kw">let </span>(index, group) = (<span class="self">self</span>.<span class="number">0</span>, <span class="self">self</span>.<span class="number">1</span>);
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;(BoolSettingIndex, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>SettingGroup)&gt; <span class="kw">for </span>PredicateNode {
+    <span class="kw">fn </span>from(val: (BoolSettingIndex, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>SettingGroup)) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>(index, group) = (val.<span class="number">0</span>, val.<span class="number">1</span>);
         <span class="kw">let </span>setting = <span class="kw-2">&amp;</span>group.settings[index.<span class="number">0</span>];
         PredicateNode::SharedBool(group.name, setting.name)
     }

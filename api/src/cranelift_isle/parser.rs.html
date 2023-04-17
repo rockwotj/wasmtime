@@ -560,8 +560,6 @@
 <a href="#560" id="560">560</a>
 <a href="#561" id="561">561</a>
 <a href="#562" id="562">562</a>
-<a href="#563" id="563">563</a>
-<a href="#564" id="564">564</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Parser for ISLE language.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::ast::<span class="kw-2">*</span>;
@@ -632,7 +630,7 @@
     }
 
     <span class="kw">fn </span>is&lt;F: Fn(<span class="kw-2">&amp;</span>Token) -&gt; bool&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: F) -&gt; bool {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>(<span class="kw">_</span>, <span class="kw-2">ref </span>peek)) = <span class="self">self</span>.lexer.peek() {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>((<span class="kw">_</span>, peek)) = <span class="self">self</span>.lexer.peek() {
             f(peek)
         } <span class="kw">else </span>{
             <span class="bool-val">false
@@ -663,7 +661,7 @@
 
     <span class="kw">fn </span>is_const(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.is(|tok| <span class="kw">match </span>tok {
-            <span class="kw-2">&amp;</span>Token::Symbol(<span class="kw-2">ref </span>tok_s) <span class="kw">if </span>tok_s.starts_with(<span class="string">&quot;$&quot;</span>) =&gt; <span class="bool-val">true</span>,
+            Token::Symbol(tok_s) <span class="kw">if </span>tok_s.starts_with(<span class="string">&#39;$&#39;</span>) =&gt; <span class="bool-val">true</span>,
             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         })
     }
@@ -687,7 +685,7 @@
 
     <span class="kw">fn </span>eat_sym_str(<span class="kw-2">&amp;mut </span><span class="self">self</span>, s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
         <span class="self">self</span>.eat(|tok| <span class="kw">match </span>tok {
-            <span class="kw-2">&amp;</span>Token::Symbol(<span class="kw-2">ref </span>tok_s) <span class="kw">if </span>tok_s == s =&gt; <span class="bool-val">true</span>,
+            Token::Symbol(<span class="kw-2">ref </span>tok_s) <span class="kw">if </span>tok_s == s =&gt; <span class="bool-val">true</span>,
             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         })
         .map(|token| token.is_some())
@@ -766,8 +764,7 @@
     <span class="kw">fn </span>parse_const(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Ident&gt; {
         <span class="kw">let </span>pos = <span class="self">self</span>.pos();
         <span class="kw">let </span>ident = <span class="self">self</span>.parse_ident()<span class="question-mark">?</span>;
-        <span class="kw">if </span>ident.<span class="number">0</span>.starts_with(<span class="string">&quot;$&quot;</span>) {
-            <span class="kw">let </span>s = <span class="kw-2">&amp;</span>ident.<span class="number">0</span>[<span class="number">1</span>..];
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(s) = ident.<span class="number">0</span>.strip_prefix(<span class="string">&#39;$&#39;</span>) {
             <span class="prelude-val">Ok</span>(Ident(s.to_string(), ident.<span class="number">1</span>))
         } <span class="kw">else </span>{
             <span class="prelude-val">Err</span>(<span class="self">self</span>.error(
@@ -780,9 +777,8 @@
     <span class="kw">fn </span>parse_pragma(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Pragma&gt; {
         <span class="kw">let </span>ident = <span class="self">self</span>.parse_ident()<span class="question-mark">?</span>;
         <span class="comment">// currently, no pragmas are defined, but the infrastructure is useful to keep around
-        </span><span class="kw">match </span>ident.<span class="number">0</span>.as_str() {
-            pragma =&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.error(ident.<span class="number">1</span>, <span class="macro">format!</span>(<span class="string">&quot;Unknown pragma &#39;{}&#39;&quot;</span>, pragma))),
-        }
+        </span><span class="kw">let </span>pragma = ident.<span class="number">0</span>.as_str();
+        <span class="prelude-val">Err</span>(<span class="self">self</span>.error(ident.<span class="number">1</span>, <span class="macro">format!</span>(<span class="string">&quot;Unknown pragma &#39;{}&#39;&quot;</span>, pragma)))
     }
 
     <span class="kw">fn </span>parse_type(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Type&gt; {
@@ -1036,7 +1032,7 @@
             <span class="self">self</span>.expect_rparen()<span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(ret)
         } <span class="kw">else </span>{
-            <span class="self">self</span>.parse_expr().map(|expr| IfLetOrExpr::Expr(expr))
+            <span class="self">self</span>.parse_expr().map(IfLetOrExpr::Expr)
         }
     }
 

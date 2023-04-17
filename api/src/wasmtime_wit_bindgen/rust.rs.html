@@ -708,7 +708,7 @@
         <span class="kw">if </span><span class="self">self</span>.uses_two_names(<span class="kw-2">&amp;</span>info) {
             result.push((<span class="self">self</span>.param_name(ty), TypeMode::AllBorrowed(<span class="string">&quot;&#39;a&quot;</span>)));
         }
-        <span class="kw">return </span>result;
+        result
     }
 
     <span class="doccomment">/// Writes the camel-cased &#39;name&#39; of the passed type to `out`, as used to name union variants.

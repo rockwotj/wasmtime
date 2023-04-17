@@ -2490,9 +2490,6 @@
 <a href="#2490" id="2490">2490</a>
 <a href="#2491" id="2491">2491</a>
 <a href="#2492" id="2492">2492</a>
-<a href="#2493" id="2493">2493</a>
-<a href="#2494" id="2494">2494</a>
-<a href="#2495" id="2495">2495</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Semantic analysis.
 //!
 //! This module primarily contains the type environment and term environment.
@@ -3090,14 +3087,14 @@
 <span class="kw">impl </span>Pattern {
     <span class="doccomment">/// Get this pattern&#39;s type.
     </span><span class="kw">pub fn </span>ty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TypeId {
-        <span class="kw">match </span><span class="self">self </span>{
-            <span class="kw-2">&amp;</span><span class="self">Self</span>::BindPattern(t, ..) =&gt; t,
-            <span class="kw-2">&amp;</span><span class="self">Self</span>::Var(t, ..) =&gt; t,
-            <span class="kw-2">&amp;</span><span class="self">Self</span>::ConstInt(t, ..) =&gt; t,
-            <span class="kw-2">&amp;</span><span class="self">Self</span>::ConstPrim(t, ..) =&gt; t,
-            <span class="kw-2">&amp;</span><span class="self">Self</span>::Term(t, ..) =&gt; t,
-            <span class="kw-2">&amp;</span><span class="self">Self</span>::Wildcard(t, ..) =&gt; t,
-            <span class="kw-2">&amp;</span><span class="self">Self</span>::And(t, ..) =&gt; t,
+        <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
+            <span class="self">Self</span>::BindPattern(t, ..) =&gt; t,
+            <span class="self">Self</span>::Var(t, ..) =&gt; t,
+            <span class="self">Self</span>::ConstInt(t, ..) =&gt; t,
+            <span class="self">Self</span>::ConstPrim(t, ..) =&gt; t,
+            <span class="self">Self</span>::Term(t, ..) =&gt; t,
+            <span class="self">Self</span>::Wildcard(t, ..) =&gt; t,
+            <span class="self">Self</span>::And(t, ..) =&gt; t,
         }
     }
 
@@ -3109,14 +3106,14 @@
         termenv: <span class="kw-2">&amp;</span>TermEnv,
         vars: <span class="kw-2">&amp;mut </span>HashMap&lt;VarId, V::PatternId&gt;,
     ) {
-        <span class="kw">match </span><span class="self">self </span>{
-            <span class="kw-2">&amp;</span>Pattern::BindPattern(_ty, var, <span class="kw-2">ref </span>subpat) =&gt; {
+        <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
+            Pattern::BindPattern(_ty, var, <span class="kw-2">ref </span>subpat) =&gt; {
                 <span class="comment">// Bind the appropriate variable and recurse.
                 </span><span class="macro">assert!</span>(!vars.contains_key(<span class="kw-2">&amp;</span>var));
                 vars.insert(var, input);
                 subpat.visit(visitor, input, termenv, vars);
             }
-            <span class="kw-2">&amp;</span>Pattern::Var(ty, var) =&gt; {
+            Pattern::Var(ty, var) =&gt; {
                 <span class="comment">// Assert that the value matches the existing bound var.
                 </span><span class="kw">let </span>var_val = vars
                     .get(<span class="kw-2">&amp;</span>var)
@@ -3124,9 +3121,9 @@
                     .expect(<span class="string">&quot;Variable should already be bound&quot;</span>);
                 visitor.add_match_equal(input, var_val, ty);
             }
-            <span class="kw-2">&amp;</span>Pattern::ConstInt(ty, value) =&gt; visitor.add_match_int(input, ty, value),
-            <span class="kw-2">&amp;</span>Pattern::ConstPrim(ty, value) =&gt; visitor.add_match_prim(input, ty, value),
-            <span class="kw-2">&amp;</span>Pattern::Term(ty, term, <span class="kw-2">ref </span>args) =&gt; {
+            Pattern::ConstInt(ty, value) =&gt; visitor.add_match_int(input, ty, value),
+            Pattern::ConstPrim(ty, value) =&gt; visitor.add_match_prim(input, ty, value),
+            Pattern::Term(ty, term, <span class="kw-2">ref </span>args) =&gt; {
                 <span class="comment">// Determine whether the term has an external extractor or not.
                 </span><span class="kw">let </span>termdata = <span class="kw-2">&amp;</span>termenv.terms[term.index()];
                 <span class="kw">let </span>arg_values = <span class="kw">match </span><span class="kw-2">&amp;</span>termdata.kind {
@@ -3168,12 +3165,12 @@
                     pat.visit(visitor, val, termenv, vars);
                 }
             }
-            <span class="kw-2">&amp;</span>Pattern::And(_ty, <span class="kw-2">ref </span>children) =&gt; {
+            Pattern::And(_ty, <span class="kw-2">ref </span>children) =&gt; {
                 <span class="kw">for </span>child <span class="kw">in </span>children {
                     child.visit(visitor, input, termenv, vars);
                 }
             }
-            <span class="kw-2">&amp;</span>Pattern::Wildcard(_ty) =&gt; {
+            Pattern::Wildcard(_ty) =&gt; {
                 <span class="comment">// Nothing!
             </span>}
         }
@@ -3214,12 +3211,12 @@
 <span class="kw">impl </span>Expr {
     <span class="doccomment">/// Get this expression&#39;s type.
     </span><span class="kw">pub fn </span>ty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TypeId {
-        <span class="kw">match </span><span class="self">self </span>{
-            <span class="kw-2">&amp;</span><span class="self">Self</span>::Term(t, ..) =&gt; t,
-            <span class="kw-2">&amp;</span><span class="self">Self</span>::Var(t, ..) =&gt; t,
-            <span class="kw-2">&amp;</span><span class="self">Self</span>::ConstInt(t, ..) =&gt; t,
-            <span class="kw-2">&amp;</span><span class="self">Self</span>::ConstPrim(t, ..) =&gt; t,
-            <span class="kw-2">&amp;</span><span class="self">Self</span>::Let { ty: t, .. } =&gt; t,
+        <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
+            <span class="self">Self</span>::Term(t, ..) =&gt; t,
+            <span class="self">Self</span>::Var(t, ..) =&gt; t,
+            <span class="self">Self</span>::ConstInt(t, ..) =&gt; t,
+            <span class="self">Self</span>::ConstPrim(t, ..) =&gt; t,
+            <span class="self">Self</span>::Let { ty: t, .. } =&gt; t,
         }
     }
 
@@ -3231,10 +3228,10 @@
         vars: <span class="kw-2">&amp;</span>HashMap&lt;VarId, V::ExprId&gt;,
     ) -&gt; V::ExprId {
         <span class="macro">log!</span>(<span class="string">&quot;Expr::visit: expr {:?}&quot;</span>, <span class="self">self</span>);
-        <span class="kw">match </span><span class="self">self </span>{
-            <span class="kw-2">&amp;</span>Expr::ConstInt(ty, val) =&gt; visitor.add_const_int(ty, val),
-            <span class="kw-2">&amp;</span>Expr::ConstPrim(ty, val) =&gt; visitor.add_const_prim(ty, val),
-            <span class="kw-2">&amp;</span>Expr::Let {
+        <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
+            Expr::ConstInt(ty, val) =&gt; visitor.add_const_int(ty, val),
+            Expr::ConstPrim(ty, val) =&gt; visitor.add_const_prim(ty, val),
+            Expr::Let {
                 ty: _ty,
                 <span class="kw-2">ref </span>bindings,
                 <span class="kw-2">ref </span>body,
@@ -3246,8 +3243,8 @@
                 }
                 body.visit(visitor, termenv, <span class="kw-2">&amp;</span>vars)
             }
-            <span class="kw-2">&amp;</span>Expr::Var(_ty, var_id) =&gt; <span class="kw-2">*</span>vars.get(<span class="kw-2">&amp;</span>var_id).unwrap(),
-            <span class="kw-2">&amp;</span>Expr::Term(ty, term, <span class="kw-2">ref </span>arg_exprs) =&gt; {
+            Expr::Var(_ty, var_id) =&gt; <span class="kw-2">*</span>vars.get(<span class="kw-2">&amp;</span>var_id).unwrap(),
+            Expr::Term(ty, term, <span class="kw-2">ref </span>arg_exprs) =&gt; {
                 <span class="kw">let </span>termdata = <span class="kw-2">&amp;</span>termenv.terms[term.index()];
                 <span class="kw">let </span>arg_values_tys = arg_exprs
                     .iter()
@@ -3452,23 +3449,21 @@
 
         <span class="comment">// Now collect types for extern constants.
         </span><span class="kw">for </span>def <span class="kw">in </span><span class="kw-2">&amp;</span>defs.defs {
-            <span class="kw">match </span>def {
-                <span class="kw-2">&amp;</span>ast::Def::Extern(ast::Extern::Const {
-                    <span class="kw-2">ref </span>name,
-                    <span class="kw-2">ref </span>ty,
-                    pos,
-                }) =&gt; {
-                    <span class="kw">let </span>ty = <span class="kw">match </span>tyenv.get_type_by_name(ty) {
-                        <span class="prelude-val">Some</span>(ty) =&gt; ty,
-                        <span class="prelude-val">None </span>=&gt; {
-                            tyenv.report_error(pos, <span class="string">&quot;Unknown type for constant&quot;</span>);
-                            <span class="kw">continue</span>;
-                        }
-                    };
-                    <span class="kw">let </span>name = tyenv.intern_mut(name);
-                    tyenv.const_types.insert(name, ty);
-                }
-                <span class="kw">_ </span>=&gt; {}
+            <span class="kw">if let </span><span class="kw-2">&amp;</span>ast::Def::Extern(ast::Extern::Const {
+                <span class="kw-2">ref </span>name,
+                <span class="kw-2">ref </span>ty,
+                pos,
+            }) = def
+            {
+                <span class="kw">let </span>ty = <span class="kw">match </span>tyenv.get_type_by_name(ty) {
+                    <span class="prelude-val">Some</span>(ty) =&gt; ty,
+                    <span class="prelude-val">None </span>=&gt; {
+                        tyenv.report_error(pos, <span class="string">&quot;Unknown type for constant&quot;</span>);
+                        <span class="kw">continue</span>;
+                    }
+                };
+                <span class="kw">let </span>name = tyenv.intern_mut(name);
+                tyenv.const_types.insert(name, ty);
             }
         }
 
@@ -3716,7 +3711,6 @@
                         .map(|id| {
                             tyenv.get_type_by_name(id).ok_or_else(|| {
                                 tyenv.report_error(id.<span class="number">1</span>, <span class="macro">format!</span>(<span class="string">&quot;Unknown arg type: &#39;{}&#39;&quot;</span>, id.<span class="number">0</span>));
-                                ()
                             })
                         })
                         .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw">_</span>&gt;, <span class="kw">_</span>&gt;&gt;();

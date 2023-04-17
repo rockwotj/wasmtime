@@ -97,9 +97,9 @@
         <span class="kw-2">&amp;</span>shared_defs.settings,
         gen_settings::ParentGroup::None,
         <span class="string">&quot;settings.rs&quot;</span>,
-        <span class="kw-2">&amp;</span>out_dir,
+        out_dir,
     )<span class="question-mark">?</span>;
-    gen_types::generate(<span class="string">&quot;types.rs&quot;</span>, <span class="kw-2">&amp;</span>out_dir)<span class="question-mark">?</span>;
+    gen_types::generate(<span class="string">&quot;types.rs&quot;</span>, out_dir)<span class="question-mark">?</span>;
 
     <span class="comment">// - per ISA definitions.
     </span><span class="kw">let </span>target_isas = isa::define(isas, <span class="kw-2">&amp;mut </span>shared_defs);
@@ -115,7 +115,7 @@
         <span class="string">&quot;inst_builder.rs&quot;</span>,
         <span class="string">&quot;clif_opt.isle&quot;</span>,
         <span class="string">&quot;clif_lower.isle&quot;</span>,
-        <span class="kw-2">&amp;</span>out_dir,
+        out_dir,
         isle_dir,
     )<span class="question-mark">?</span>;
 
@@ -124,7 +124,7 @@
             <span class="kw-2">&amp;</span>isa.settings,
             gen_settings::ParentGroup::Shared,
             <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;settings-{}.rs&quot;</span>, isa.name),
-            <span class="kw-2">&amp;</span>out_dir,
+            out_dir,
         )<span class="question-mark">?</span>;
     }
 

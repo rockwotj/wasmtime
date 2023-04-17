@@ -722,8 +722,8 @@
     </span>}
 
     <span class="kw">fn </span>build(<span class="self">self</span>) -&gt; Instruction {
-        <span class="kw">let </span>operands_in = <span class="self">self</span>.operands_in.unwrap_or_else(Vec::new);
-        <span class="kw">let </span>operands_out = <span class="self">self</span>.operands_out.unwrap_or_else(Vec::new);
+        <span class="kw">let </span>operands_in = <span class="self">self</span>.operands_in.unwrap_or_default();
+        <span class="kw">let </span>operands_out = <span class="self">self</span>.operands_out.unwrap_or_default();
 
         <span class="kw">let </span><span class="kw-2">mut </span>value_opnums = Vec::new();
         <span class="kw">let </span><span class="kw-2">mut </span>imm_opnums = Vec::new();
@@ -869,7 +869,7 @@
             <span class="kw">if </span>(free_typevar.is_some() &amp;&amp; tv == <span class="kw-2">&amp;</span>free_typevar.unwrap())
                 || tv.singleton_type().is_some()
             {
-                <span class="kw">match </span>is_ctrl_typevar_candidate(tv, <span class="kw-2">&amp;</span>operands_in, <span class="kw-2">&amp;</span>operands_out) {
+                <span class="kw">match </span>is_ctrl_typevar_candidate(tv, operands_in, operands_out) {
                     <span class="prelude-val">Ok</span>(_other_typevars) =&gt; {
                         <span class="kw">return </span><span class="prelude-val">Some</span>(PolymorphicInfo {
                             use_typevar_operand: <span class="bool-val">true</span>,
@@ -904,7 +904,7 @@
 
     <span class="comment">// At this point, if the next unwrap() fails, it means the output type couldn&#39;t be used as a
     // controlling type variable either; panicking is the right behavior.
-    </span>is_ctrl_typevar_candidate(tv, <span class="kw-2">&amp;</span>operands_in, <span class="kw-2">&amp;</span>operands_out).unwrap();
+    </span>is_ctrl_typevar_candidate(tv, operands_in, operands_out).unwrap();
 
     <span class="prelude-val">Some</span>(PolymorphicInfo {
         use_typevar_operand: <span class="bool-val">false</span>,

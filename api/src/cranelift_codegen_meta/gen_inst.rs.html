@@ -2484,7 +2484,7 @@
     <span class="kw">if let </span><span class="prelude-val">Some</span>(free_typevar) = type_var.free_typevar() {
         <span class="kw">if </span>ctrl_typevar.is_some() &amp;&amp; free_typevar != <span class="kw-2">*</span>ctrl_typevar.unwrap() {
             <span class="macro">assert!</span>(type_var.base.is_none());
-            <span class="kw">return </span><span class="macro">format!</span>(<span class="string">&quot;Free({})&quot;</span>, type_sets.add(<span class="kw-2">&amp;</span>type_var.get_raw_typeset()));
+            <span class="kw">return </span><span class="macro">format!</span>(<span class="string">&quot;Free({})&quot;</span>, type_sets.add(type_var.get_raw_typeset()));
         }
     }
 
@@ -2593,7 +2593,7 @@
     fmt.indent(|fmt| {
         <span class="kw">for </span>inst <span class="kw">in </span>all_inst.iter() {
             <span class="kw">let </span>(ctrl_typevar, ctrl_typeset) = <span class="kw">if let </span><span class="prelude-val">Some</span>(poly) = <span class="kw-2">&amp;</span>inst.polymorphic_info {
-                <span class="kw">let </span>index = type_sets.add(<span class="kw-2">&amp;*</span>poly.ctrl_typevar.get_raw_typeset());
+                <span class="kw">let </span>index = type_sets.add(poly.ctrl_typevar.get_raw_typeset());
                 (<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>poly.ctrl_typevar), index)
             } <span class="kw">else </span>{
                 (<span class="prelude-val">None</span>, TYPESET_LIMIT)
@@ -2641,7 +2641,7 @@
                 .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
                 .join(<span class="string">&quot;, &quot;</span>)));
             <span class="kw">if let </span><span class="prelude-val">Some</span>(poly) = <span class="kw-2">&amp;</span>inst.polymorphic_info {
-                fmt.comment(<span class="macro">format!</span>(<span class="string">&quot;Polymorphic over {}&quot;</span>, typeset_to_string(<span class="kw-2">&amp;</span>poly.ctrl_typevar.get_raw_typeset())));
+                fmt.comment(<span class="macro">format!</span>(<span class="string">&quot;Polymorphic over {}&quot;</span>, typeset_to_string(poly.ctrl_typevar.get_raw_typeset())));
             }
 
             <span class="comment">// Compute the bit field encoding, c.f. instructions.rs.
@@ -3514,7 +3514,7 @@
     fmt.line(<span class="string">&quot;pub trait InstBuilder&lt;&#39;f&gt;: InstBuilderBase&lt;&#39;f&gt; {&quot;</span>);
     fmt.indent(|fmt| {
         <span class="kw">for </span>inst <span class="kw">in </span>instructions.iter() {
-            gen_inst_builder(inst, <span class="kw-2">&amp;*</span>inst.format, fmt);
+            gen_inst_builder(inst, <span class="kw-2">&amp;</span>inst.format, fmt);
             fmt.empty_line();
         }
         <span class="kw">for </span>(i, format) <span class="kw">in </span>formats.iter().enumerate() {

@@ -167,12 +167,6 @@
 <a href="#167" id="167">167</a>
 <a href="#168" id="168">168</a>
 <a href="#169" id="169">169</a>
-<a href="#170" id="170">170</a>
-<a href="#171" id="171">171</a>
-<a href="#172" id="172">172</a>
-<a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span><span class="kw">crate</span>::cdsl::typevar::TypeVar;
@@ -225,10 +219,7 @@
     }
 
     <span class="kw">pub fn </span>is_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">match </span><span class="self">self</span>.kind.fields {
-            OperandKindFields::TypeVar(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-        }
+        <span class="macro">matches!</span>(<span class="self">self</span>.kind.fields, OperandKindFields::TypeVar(<span class="kw">_</span>))
     }
 
     <span class="kw">pub fn </span>type_var(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>TypeVar&gt; {
@@ -239,28 +230,25 @@
     }
 
     <span class="kw">pub fn </span>is_varargs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">match </span><span class="self">self</span>.kind.fields {
-            OperandKindFields::VariableArgs =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-        }
+        <span class="macro">matches!</span>(<span class="self">self</span>.kind.fields, OperandKindFields::VariableArgs)
     }
 
     <span class="doccomment">/// Returns true if the operand has an immediate kind or is an EntityRef.
     </span><span class="kw">pub fn </span>is_immediate_or_entityref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">match </span><span class="self">self</span>.kind.fields {
+        <span class="macro">matches!</span>(
+            <span class="self">self</span>.kind.fields,
             OperandKindFields::ImmEnum(<span class="kw">_</span>)
-            | OperandKindFields::ImmValue
-            | OperandKindFields::EntityRef =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-        }
+                | OperandKindFields::ImmValue
+                | OperandKindFields::EntityRef
+        )
     }
 
     <span class="doccomment">/// Returns true if the operand has an immediate kind.
     </span><span class="kw">pub fn </span>is_immediate(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">match </span><span class="self">self</span>.kind.fields {
-            OperandKindFields::ImmEnum(<span class="kw">_</span>) | OperandKindFields::ImmValue =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-        }
+        <span class="macro">matches!</span>(
+            <span class="self">self</span>.kind.fields,
+            OperandKindFields::ImmEnum(<span class="kw">_</span>) | OperandKindFields::ImmValue
+        )
     }
 }
 
@@ -333,19 +321,19 @@
     </span>}
 }
 
-<span class="kw">impl </span>Into&lt;OperandKind&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>TypeVar {
-    <span class="kw">fn </span>into(<span class="self">self</span>) -&gt; OperandKind {
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>TypeVar&gt; <span class="kw">for </span>OperandKind {
+    <span class="kw">fn </span>from(type_var: <span class="kw-2">&amp;</span>TypeVar) -&gt; <span class="self">Self </span>{
         OperandKind {
             rust_field_name: <span class="string">&quot;value&quot;</span>,
             rust_type: <span class="string">&quot;ir::Value&quot;</span>,
-            fields: OperandKindFields::TypeVar(<span class="self">self</span>.into()),
+            fields: OperandKindFields::TypeVar(type_var.into()),
             doc: <span class="prelude-val">None</span>,
         }
     }
 }
-<span class="kw">impl </span>Into&lt;OperandKind&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>OperandKind {
-    <span class="kw">fn </span>into(<span class="self">self</span>) -&gt; OperandKind {
-        <span class="self">self</span>.clone()
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>OperandKind&gt; <span class="kw">for </span>OperandKind {
+    <span class="kw">fn </span>from(kind: <span class="kw-2">&amp;</span>OperandKind) -&gt; <span class="self">Self </span>{
+        kind.clone()
     }
 }
 </code></pre></div>

@@ -145,7 +145,7 @@
             <span class="comment">// Check name.
             </span><span class="kw">if let </span><span class="prelude-val">Some</span>(existing_format) = format_names.get(<span class="kw-2">&amp;</span>inst.format.name) {
                 <span class="macro">assert!</span>(
-                    Rc::ptr_eq(<span class="kw-2">&amp;</span>existing_format, <span class="kw-2">&amp;</span>inst.format),
+                    Rc::ptr_eq(existing_format, <span class="kw-2">&amp;</span>inst.format),
                     <span class="string">&quot;formats must uniquely named; there&#39;s a\
                      conflict on the name &#39;{}&#39;, please make sure it is used only once.&quot;</span>,
                     existing_format.name
@@ -167,7 +167,7 @@
             }
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>result = Vec::from_iter(format_structures.into_iter().map(|(<span class="kw">_</span>, v)| v));
+        <span class="kw">let </span><span class="kw-2">mut </span>result = Vec::from_iter(format_structures.into_values());
         result.sort_by_key(|format| format.name);
         result
     }

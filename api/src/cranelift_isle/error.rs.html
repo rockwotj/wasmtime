@@ -336,13 +336,13 @@
         }
         <span class="kw">let </span>diagnostics = Vec::from_iter(<span class="self">self</span>.errors.iter().map(|e| {
             <span class="kw">let </span>message = <span class="kw">match </span>e {
-                Error::IoError { context, .. } =&gt; <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, context),
+                Error::IoError { context, .. } =&gt; context.clone(),
                 Error::ParseError { msg, .. } =&gt; <span class="macro">format!</span>(<span class="string">&quot;parse error: {}&quot;</span>, msg),
                 Error::TypeError { msg, .. } =&gt; <span class="macro">format!</span>(<span class="string">&quot;type error: {}&quot;</span>, msg),
                 Error::UnreachableError { msg, .. } =&gt; <span class="macro">format!</span>(<span class="string">&quot;unreachable rule: {}&quot;</span>, msg),
                 Error::OverlapError { msg, .. } =&gt; <span class="macro">format!</span>(<span class="string">&quot;overlap error: {}&quot;</span>, msg),
                 Error::ShadowedError { .. } =&gt; {
-                    <span class="macro">format!</span>(<span class="string">&quot;more general higher-priority rule shadows other rules&quot;</span>)
+                    <span class="string">&quot;more general higher-priority rule shadows other rules&quot;</span>.to_string()
                 }
             };
 

@@ -979,12 +979,6 @@
 <a href="#979" id="979">979</a>
 <a href="#980" id="980">980</a>
 <a href="#981" id="981">981</a>
-<a href="#982" id="982">982</a>
-<a href="#983" id="983">983</a>
-<a href="#984" id="984">984</a>
-<a href="#985" id="985">985</a>
-<a href="#986" id="986">986</a>
-<a href="#987" id="987">987</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::collections::BTreeSet;
 <span class="kw">use </span>std::fmt;
@@ -1266,14 +1260,14 @@
     }
 }
 
-<span class="kw">impl </span>Into&lt;TypeVar&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>TypeVar {
-    <span class="kw">fn </span>into(<span class="self">self</span>) -&gt; TypeVar {
-        <span class="self">self</span>.clone()
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>TypeVar&gt; <span class="kw">for </span>TypeVar {
+    <span class="kw">fn </span>from(type_var: <span class="kw-2">&amp;</span>TypeVar) -&gt; <span class="self">Self </span>{
+        type_var.clone()
     }
 }
-<span class="kw">impl </span>Into&lt;TypeVar&gt; <span class="kw">for </span>ValueType {
-    <span class="kw">fn </span>into(<span class="self">self</span>) -&gt; TypeVar {
-        TypeVar::new_singleton(<span class="self">self</span>)
+<span class="kw">impl </span>From&lt;ValueType&gt; <span class="kw">for </span>TypeVar {
+    <span class="kw">fn </span>from(value_type: ValueType) -&gt; <span class="self">Self </span>{
+        TypeVar::new_singleton(value_type)
     }
 }
 
@@ -1494,7 +1488,7 @@
             <span class="self">self</span>.dynamic_lanes
                 .iter()
                 .filter(|&amp;&amp;x| x &lt; MAX_LANES)
-                .map(|<span class="kw-2">&amp;</span>x| x),
+                .copied(),
         );
         copy.dynamic_lanes = NumSet::new();
         copy
@@ -1647,13 +1641,7 @@
 <span class="kw">impl </span>Interval {
     <span class="kw">fn </span>to_range(<span class="kw-2">&amp;</span><span class="self">self</span>, full_range: Range, default: <span class="prelude-ty">Option</span>&lt;RangeBound&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Range&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            Interval::None =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(default_val) = default {
-                    <span class="prelude-val">Some</span>(default_val..default_val)
-                } <span class="kw">else </span>{
-                    <span class="prelude-val">None
-                </span>}
-            }
+            Interval::None =&gt; default.map(|default_val| default_val..default_val),
 
             Interval::All =&gt; <span class="prelude-val">Some</span>(full_range),
 
@@ -1670,9 +1658,9 @@
     }
 }
 
-<span class="kw">impl </span>Into&lt;Interval&gt; <span class="kw">for </span>Range {
-    <span class="kw">fn </span>into(<span class="self">self</span>) -&gt; Interval {
-        Interval::Range(<span class="self">self</span>)
+<span class="kw">impl </span>From&lt;Range&gt; <span class="kw">for </span>Interval {
+    <span class="kw">fn </span>from(range: Range) -&gt; <span class="self">Self </span>{
+        Interval::Range(range)
     }
 }
 

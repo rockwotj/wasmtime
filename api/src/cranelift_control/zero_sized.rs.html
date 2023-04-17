@@ -41,7 +41,7 @@
 /// disabled. It doesn&#39;t consume any bytes and always returns a default
 /// control plane.
 </span><span class="kw">impl </span>arbitrary::Arbitrary&lt;<span class="lifetime">&#39;_</span>&gt; <span class="kw">for </span>ControlPlane {
-    <span class="kw">fn </span>arbitrary&lt;<span class="lifetime">&#39;a</span>&gt;(_u: <span class="kw-2">&amp;mut </span>arbitrary::Unstructured&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; arbitrary::Result&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">fn </span>arbitrary(_u: <span class="kw-2">&amp;mut </span>arbitrary::Unstructured&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; arbitrary::Result&lt;<span class="self">Self</span>&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>::default())
     }
 }

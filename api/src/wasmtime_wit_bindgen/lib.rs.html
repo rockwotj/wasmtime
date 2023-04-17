@@ -1639,9 +1639,9 @@
         <span class="kw">let </span><span class="kw-2">mut </span>gen = InterfaceGenerator::new(<span class="self">self</span>, resolve);
         <span class="kw">let </span>import = <span class="kw">match </span>item {
             WorldItem::Function(func) =&gt; {
-                gen.generate_function_trait_sig(TypeOwner::None, <span class="kw-2">&amp;</span>func);
+                gen.generate_function_trait_sig(TypeOwner::None, func);
                 <span class="kw">let </span>sig = mem::take(<span class="kw-2">&amp;mut </span>gen.src).into();
-                gen.generate_add_function_to_linker(TypeOwner::None, <span class="kw-2">&amp;</span>func, <span class="string">&quot;linker&quot;</span>);
+                gen.generate_add_function_to_linker(TypeOwner::None, func, <span class="string">&quot;linker&quot;</span>);
                 <span class="kw">let </span>add_to_linker = gen.src.into();
                 Import::Function { sig, add_to_linker }
             }
@@ -1691,7 +1691,7 @@
                 <span class="kw">let </span>(_name, getter) = gen.extract_typed_function(func);
                 <span class="macro">assert!</span>(gen.src.is_empty());
                 <span class="self">self</span>.exports.funcs.push(body);
-                (<span class="macro">format!</span>(<span class="string">&quot;wasmtime::component::Func&quot;</span>), getter)
+                (<span class="string">&quot;wasmtime::component::Func&quot;</span>.to_string(), getter)
             }
             WorldItem::Type(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
             WorldItem::Interface(id) =&gt; {
@@ -2539,9 +2539,9 @@
         <span class="macro">uwriteln!</span>(<span class="self">self</span>.src, <span class="string">&quot;}}&quot;</span>);
 
         <span class="kw">let </span>where_clause = <span class="kw">if </span><span class="self">self</span>.gen.opts.async_ {
-            <span class="macro">format!</span>(<span class="string">&quot;T: Send, U: Host + Send&quot;</span>)
+            <span class="string">&quot;T: Send, U: Host + Send&quot;</span>.to_string()
         } <span class="kw">else </span>{
-            <span class="macro">format!</span>(<span class="string">&quot;U: Host&quot;</span>)
+            <span class="string">&quot;U: Host&quot;</span>.to_string()
         };
         <span class="macro">uwriteln!</span>(
             <span class="self">self</span>.src,
@@ -2747,7 +2747,7 @@
 
         <span class="kw">let </span>ret = (snake, mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.src).to_string());
         <span class="self">self</span>.src = prev;
-        <span class="kw">return </span>ret;
+        ret
     }
 
     <span class="kw">fn </span>define_rust_guest_export(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ns: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;, func: <span class="kw-2">&amp;</span>Function) {

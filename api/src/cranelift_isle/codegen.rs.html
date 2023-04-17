@@ -949,7 +949,7 @@
     }
 
     <span class="kw">fn </span>generate_ctx_trait(<span class="kw-2">&amp;</span><span class="self">self</span>, code: <span class="kw-2">&amp;mut </span>String) {
-        <span class="macro">writeln!</span>(code, <span class="string">&quot;&quot;</span>).unwrap();
+        <span class="macro">writeln!</span>(code).unwrap();
         <span class="macro">writeln!</span>(
             code,
             <span class="string">&quot;/// Context during lowering: an implementation of this trait&quot;
@@ -1050,7 +1050,7 @@
                             <span class="kw">for </span>field <span class="kw">in </span><span class="kw-2">&amp;</span>variant.fields {
                                 <span class="kw">let </span>name = <span class="kw-2">&amp;</span><span class="self">self</span>.typeenv.syms[field.name.index()];
                                 <span class="kw">let </span>ty_name =
-                                    <span class="self">self</span>.typeenv.types[field.ty.index()].name(<span class="kw-2">&amp;</span><span class="self">self</span>.typeenv);
+                                    <span class="self">self</span>.typeenv.types[field.ty.index()].name(<span class="self">self</span>.typeenv);
                                 <span class="macro">writeln!</span>(code, <span class="string">&quot;        {}: {},&quot;</span>, name, ty_name).unwrap();
                             }
                             <span class="macro">writeln!</span>(code, <span class="string">&quot;    }},&quot;</span>).unwrap();
@@ -1064,9 +1064,9 @@
     }
 
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>, typeid: TypeId, by_ref: bool) -&gt; String {
-        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.typeenv.types[typeid.index()] {
-            <span class="kw-2">&amp;</span>Type::Primitive(<span class="kw">_</span>, sym, <span class="kw">_</span>) =&gt; <span class="self">self</span>.typeenv.syms[sym.index()].clone(),
-            <span class="kw-2">&amp;</span>Type::Enum { name, .. } =&gt; {
+        <span class="kw">match </span><span class="self">self</span>.typeenv.types[typeid.index()] {
+            Type::Primitive(<span class="kw">_</span>, sym, <span class="kw">_</span>) =&gt; <span class="self">self</span>.typeenv.syms[sym.index()].clone(),
+            Type::Enum { name, .. } =&gt; {
                 <span class="kw">let </span>r = <span class="kw">if </span>by_ref { <span class="string">&quot;&amp;&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;&quot; </span>};
                 <span class="macro">format!</span>(<span class="string">&quot;{}{}&quot;</span>, r, <span class="self">self</span>.typeenv.syms[name.index()])
             }
@@ -1383,7 +1383,7 @@
                             <span class="kw-2">&amp;</span><span class="self">self</span>.typeenv.syms[field.name.index()],
                         )<span class="question-mark">?</span>;
                         <span class="self">self</span>.emit_expr(ctx, <span class="kw-2">*</span>value)<span class="question-mark">?</span>;
-                        <span class="kw">if </span>ctx.is_ref.contains(<span class="kw-2">&amp;</span>value) {
+                        <span class="kw">if </span>ctx.is_ref.contains(value) {
                             <span class="macro">write!</span>(ctx.out, <span class="string">&quot;.clone()&quot;</span>)<span class="question-mark">?</span>;
                         }
                         <span class="macro">writeln!</span>(ctx.out, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
