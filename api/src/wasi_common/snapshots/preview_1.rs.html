@@ -1683,6 +1683,12 @@
 <a href="#1683" id="1683">1683</a>
 <a href="#1684" id="1684">1684</a>
 <a href="#1685" id="1685">1685</a>
+<a href="#1686" id="1686">1686</a>
+<a href="#1687" id="1687">1687</a>
+<a href="#1688" id="1688">1688</a>
+<a href="#1689" id="1689">1689</a>
+<a href="#1690" id="1690">1690</a>
+<a href="#1691" id="1691">1691</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     dir::{DirCaps, DirEntry, DirEntryExt, DirFdStat, ReaddirCursor, ReaddirEntity, TableDirExt},
     file::{
@@ -1808,15 +1814,21 @@
     <span class="kw">async fn </span>fd_allocate(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         fd: types::Fd,
-        offset: types::Filesize,
-        len: types::Filesize,
+        _offset: types::Filesize,
+        _len: types::Filesize,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="self">self</span>.table()
+        <span class="comment">// Check if fd is a file, and has rights, just to reject those cases
+        // with the errors expected:
+        </span><span class="kw">let _ </span>= <span class="self">self
+            </span>.table()
             .get_file(u32::from(fd))<span class="question-mark">?
-            </span>.get_cap(FileCaps::ALLOCATE)<span class="question-mark">?
-            </span>.allocate(offset, len)
-            .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(())
+            </span>.get_cap(FileCaps::ALLOCATE)<span class="question-mark">?</span>;
+        <span class="comment">// This operation from cloudabi is linux-specific, isn&#39;t even
+        // supported across all linux filesystems, and has no support on macos
+        // or windows. Rather than ship spotty support, it has been removed
+        // from preview 2, and we are no longer supporting it in preview 1 as
+        // well.
+        </span><span class="prelude-val">Err</span>(Error::not_supported())
     }
 
     <span class="kw">async fn </span>fd_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, fd: types::Fd) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
