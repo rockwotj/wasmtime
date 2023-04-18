@@ -694,6 +694,39 @@
 <a href="#694" id="694">694</a>
 <a href="#695" id="695">695</a>
 <a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
+<a href="#717" id="717">717</a>
+<a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
+<a href="#725" id="725">725</a>
+<a href="#726" id="726">726</a>
+<a href="#727" id="727">727</a>
+<a href="#728" id="728">728</a>
+<a href="#729" id="729">729</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::signatures::SignatureRegistry;
 <span class="kw">use </span><span class="kw">crate</span>::Config;
 <span class="kw">use </span>anyhow::{Context, <span class="prelude-ty">Result</span>};
@@ -933,6 +966,18 @@
         </span><span class="kw">let </span>bytes = wat::parse_bytes(<span class="kw-2">&amp;</span>bytes)<span class="question-mark">?</span>;
         <span class="kw">let </span>(mmap, <span class="kw">_</span>) = <span class="kw">crate</span>::component::Component::build_artifacts(<span class="self">self</span>, <span class="kw-2">&amp;</span>bytes)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(mmap.to_vec())
+    }
+
+    <span class="doccomment">/// Returns a [`std::hash::Hash`] that can be used to check precompiled WebAssembly compatibility.
+    ///
+    /// The outputs of [`Engine::precompile_module`] and [`Engine::precompile_component`]
+    /// are compatible with a different [`Engine`] instance only if the two engines use
+    /// compatible [`Config`]s. If this Hash matches between two [`Engine`]s then binaries
+    /// from one are guaranteed to deserialize in the other.
+    </span><span class="attr">#[cfg(compiler)]
+    #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
+    </span><span class="kw">pub fn </span>precompile_compatibility_hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>std::hash::Hash + <span class="lifetime">&#39;_ </span>{
+        <span class="kw">crate</span>::module::HashedEngineCompileEnv(<span class="self">self</span>)
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>run_maybe_parallel&lt;
@@ -1324,6 +1369,11 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
+    <span class="kw">use </span>std::{
+        collections::hash_map::DefaultHasher,
+        hash::{Hash, Hasher},
+    };
+
     <span class="kw">use crate</span>::{Config, Engine, Module, OptLevel};
 
     <span class="kw">use </span>anyhow::Result;
@@ -1388,6 +1438,22 @@
         <span class="macro">assert_eq!</span>(engine.config().cache_config.cache_misses(), <span class="number">1</span>);
 
         <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>precompile_compatibility_key_accounts_for_opt_level() {
+        <span class="kw">fn </span>hash_for_config(cfg: <span class="kw-2">&amp;</span>Config) -&gt; u64 {
+            <span class="kw">let </span>engine = Engine::new(cfg).expect(<span class="string">&quot;Config should be valid&quot;</span>);
+            <span class="kw">let </span><span class="kw-2">mut </span>hasher = DefaultHasher::new();
+            engine.precompile_compatibility_hash().hash(<span class="kw-2">&amp;mut </span>hasher);
+            hasher.finish()
+        }
+        <span class="kw">let </span><span class="kw-2">mut </span>cfg = Config::new();
+        cfg.cranelift_opt_level(OptLevel::None);
+        <span class="kw">let </span>opt_none_hash = hash_for_config(<span class="kw-2">&amp;</span>cfg);
+        cfg.cranelift_opt_level(OptLevel::Speed);
+        <span class="kw">let </span>opt_speed_hash = hash_for_config(<span class="kw-2">&amp;</span>cfg);
+        <span class="macro">assert_ne!</span>(opt_none_hash, opt_speed_hash)
     }
 }
 </code></pre></div>
