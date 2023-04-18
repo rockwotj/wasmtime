@@ -31432,7 +31432,7 @@
                         <span class="kw">let </span>v2193 = <span class="kw-2">&amp;</span>C::xmm_to_xmm_mem(ctx, v2192);
                         <span class="kw">let </span>v2194 = constructor_x64_pxor(ctx, v2191, v2193);
                         <span class="kw">let </span>v2195 = constructor_output_xmm(ctx, v2194);
-                        <span class="comment">// Rule at src/isa/x64/lower.isle line 4023.
+                        <span class="comment">// Rule at src/isa/x64/lower.isle line 4022.
                         </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2195);
                     }
                 }
@@ -31444,7 +31444,7 @@
                         <span class="kw">let </span>v69 = <span class="kw-2">&amp;</span>C::put_in_xmm_mem(ctx, v38.<span class="number">1</span>);
                         <span class="kw">let </span>v2196 = constructor_x64_pmulhrsw(ctx, v68, v69);
                         <span class="kw">let </span>v2197 = constructor_output_xmm(ctx, v2196);
-                        <span class="comment">// Rule at src/isa/x64/lower.isle line 4034.
+                        <span class="comment">// Rule at src/isa/x64/lower.isle line 4033.
                         </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2197);
                     }
                 }
@@ -32976,7 +32976,7 @@
                                                         <span class="kw">let </span>v2209 = <span class="kw-2">&amp;</span>C::xmm_to_xmm_mem(ctx, v2198);
                                                         <span class="kw">let </span>v2211 = constructor_x64_shufps(ctx, v2208, v2209, <span class="number">0x88</span>);
                                                         <span class="kw">let </span>v2212 = constructor_output_xmm(ctx, v2211);
-                                                        <span class="comment">// Rule at src/isa/x64/lower.isle line 4051.
+                                                        <span class="comment">// Rule at src/isa/x64/lower.isle line 4050.
                                                         </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2212);
                                                     }
                                                 }
@@ -33245,7 +33245,7 @@
                         <span class="kw">let </span>v2174 = C::put_in_reg(ctx, v38.<span class="number">1</span>);
                         <span class="kw">let </span>v2175 = C::value_regs(ctx, v2173, v2174);
                         <span class="kw">let </span>v2176 = C::output(ctx, v2175);
-                        <span class="comment">// Rule at src/isa/x64/lower.isle line 3999.
+                        <span class="comment">// Rule at src/isa/x64/lower.isle line 3998.
                         </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2176);
                     }
                 }
@@ -33310,7 +33310,7 @@
                                 <span class="kw">let </span>v2050 = C::u8_from_uimm8(ctx, v2049);
                                 <span class="kw">let </span>v2065 = constructor_x64_pextrb(ctx, v2064, v2050);
                                 <span class="kw">let </span>v2066 = constructor_output_gpr(ctx, v2065);
-                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3828.
+                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3827.
                                 </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2066);
                             }
                         }
@@ -33320,7 +33320,7 @@
                                 <span class="kw">let </span>v2050 = C::u8_from_uimm8(ctx, v2049);
                                 <span class="kw">let </span>v2067 = constructor_x64_pextrw(ctx, v2064, v2050);
                                 <span class="kw">let </span>v2068 = constructor_output_gpr(ctx, v2067);
-                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3833.
+                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3832.
                                 </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2068);
                             }
                         }
@@ -33330,7 +33330,7 @@
                                 <span class="kw">let </span>v2050 = C::u8_from_uimm8(ctx, v2049);
                                 <span class="kw">let </span>v2069 = constructor_x64_pextrd(ctx, v2064, v2050);
                                 <span class="kw">let </span>v2070 = constructor_output_gpr(ctx, v2069);
-                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3838.
+                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3837.
                                 </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2070);
                             }
                         }
@@ -33340,7 +33340,7 @@
                                 <span class="kw">let </span>v2050 = C::u8_from_uimm8(ctx, v2049);
                                 <span class="kw">let </span>v2071 = constructor_x64_pextrq(ctx, v2064, v2050);
                                 <span class="kw">let </span>v2072 = constructor_output_gpr(ctx, v2071);
-                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3841.
+                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3840.
                                 </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2072);
                             }
                         }
@@ -34523,7 +34523,7 @@
                 <span class="kw-2">&amp;</span>Opcode::Nop =&gt; {
                     <span class="kw">let </span>v2213 = C::invalid_reg(ctx);
                     <span class="kw">let </span>v2214 = constructor_output_reg(ctx, v2213);
-                    <span class="comment">// Rule at src/isa/x64/lower.isle line 4077.
+                    <span class="comment">// Rule at src/isa/x64/lower.isle line 4076.
                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2214);
                 }
                 <span class="kw-2">&amp;</span>Opcode::Fence =&gt; {
@@ -35726,7 +35726,7 @@
                                                 <span class="kw">let </span>v2134 = <span class="kw-2">&amp;</span>constructor_sink_load_to_xmm_mem(ctx, v2076);
                                                 <span class="kw">let </span>v2135 = constructor_x64_vbroadcastss(ctx, v2134);
                                                 <span class="kw">let </span>v2136 = constructor_output_xmm(ctx, v2135);
-                                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3937.
+                                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3936.
                                                 </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2136);
                                             }
                                             <span class="kw">let </span>v2079 = <span class="kw-2">&amp;</span>C::sink_load(ctx, v2076);
@@ -35734,7 +35734,7 @@
                                             <span class="kw">let </span>v2130 = <span class="kw-2">&amp;</span>C::xmm_to_xmm_mem(ctx, v2080);
                                             <span class="kw">let </span>v2131 = constructor_x64_shufps(ctx, v2080, v2130, <span class="number">0x0</span>);
                                             <span class="kw">let </span>v2132 = constructor_output_xmm(ctx, v2131);
-                                            <span class="comment">// Rule at src/isa/x64/lower.isle line 3934.
+                                            <span class="comment">// Rule at src/isa/x64/lower.isle line 3933.
                                             </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2132);
                                         }
                                     }
@@ -35746,7 +35746,7 @@
                                             <span class="kw">let </span>v2134 = <span class="kw-2">&amp;</span>constructor_sink_load_to_xmm_mem(ctx, v2076);
                                             <span class="kw">let </span>v2143 = constructor_x64_movddup(ctx, v2134);
                                             <span class="kw">let </span>v2144 = constructor_output_xmm(ctx, v2143);
-                                            <span class="comment">// Rule at src/isa/x64/lower.isle line 3948.
+                                            <span class="comment">// Rule at src/isa/x64/lower.isle line 3947.
                                             </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2144);
                                         }
                                     }
@@ -35763,7 +35763,7 @@
                                         <span class="kw">let </span>v2104 = <span class="kw-2">&amp;</span>constructor_sink_load_to_xmm_mem(ctx, v2096);
                                         <span class="kw">let </span>v2105 = constructor_x64_vpbroadcastb(ctx, v2104);
                                         <span class="kw">let </span>v2106 = constructor_output_xmm(ctx, v2105);
-                                        <span class="comment">// Rule at src/isa/x64/lower.isle line 3885.
+                                        <span class="comment">// Rule at src/isa/x64/lower.isle line 3884.
                                         </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2106);
                                     }
                                     <span class="kw">let </span>v2097 = constructor_xmm_uninit_value(ctx);
@@ -35773,7 +35773,7 @@
                                     <span class="kw">let </span>v2101 = <span class="kw-2">&amp;</span>C::xmm_to_xmm_mem(ctx, v2100);
                                     <span class="kw">let </span>v2102 = constructor_x64_pshufb(ctx, v2099, v2101);
                                     <span class="kw">let </span>v2103 = constructor_output_xmm(ctx, v2102);
-                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3883.
+                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3882.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2103);
                                 }
                                 <span class="kw">let </span>v2091 = C::use_avx2_simd(ctx);
@@ -35783,7 +35783,7 @@
                                     <span class="kw">let </span>v2092 = <span class="kw-2">&amp;</span>C::xmm_to_xmm_mem(ctx, v2086);
                                     <span class="kw">let </span>v2093 = constructor_x64_vpbroadcastb(ctx, v2092);
                                     <span class="kw">let </span>v2094 = constructor_output_xmm(ctx, v2093);
-                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3880.
+                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3879.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2094);
                                 }
                                 <span class="kw">let </span>v320 = constructor_put_in_gpr(ctx, v319);
@@ -35792,7 +35792,7 @@
                                 <span class="kw">let </span>v2088 = <span class="kw-2">&amp;</span>C::xmm_to_xmm_mem(ctx, v2087);
                                 <span class="kw">let </span>v2089 = constructor_x64_pshufb(ctx, v2086, v2088);
                                 <span class="kw">let </span>v2090 = constructor_output_xmm(ctx, v2089);
-                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3878.
+                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3877.
                                 </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2090);
                             }
                             I16X8 =&gt; {
@@ -35803,7 +35803,7 @@
                                         <span class="kw">let </span>v2104 = <span class="kw-2">&amp;</span>constructor_sink_load_to_xmm_mem(ctx, v2096);
                                         <span class="kw">let </span>v2119 = constructor_x64_vpbroadcastw(ctx, v2104);
                                         <span class="kw">let </span>v2120 = constructor_output_xmm(ctx, v2119);
-                                        <span class="comment">// Rule at src/isa/x64/lower.isle line 3901.
+                                        <span class="comment">// Rule at src/isa/x64/lower.isle line 3900.
                                         </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2120);
                                     }
                                     <span class="kw">let </span>v2097 = constructor_xmm_uninit_value(ctx);
@@ -35814,7 +35814,7 @@
                                     <span class="kw">let </span>v2116 = <span class="kw-2">&amp;</span>C::xmm_to_xmm_mem(ctx, v2115);
                                     <span class="kw">let </span>v2117 = constructor_x64_pshufd(ctx, v2116, <span class="number">0x0</span>);
                                     <span class="kw">let </span>v2118 = constructor_output_xmm(ctx, v2117);
-                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3899.
+                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3898.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2118);
                                 }
                                 <span class="kw">let </span>v2091 = C::use_avx2_simd(ctx);
@@ -35824,7 +35824,7 @@
                                     <span class="kw">let </span>v2092 = <span class="kw-2">&amp;</span>C::xmm_to_xmm_mem(ctx, v2086);
                                     <span class="kw">let </span>v2111 = constructor_x64_vpbroadcastw(ctx, v2092);
                                     <span class="kw">let </span>v2112 = constructor_output_xmm(ctx, v2111);
-                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3896.
+                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3895.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2112);
                                 }
                                 <span class="kw">let </span>v320 = constructor_put_in_gpr(ctx, v319);
@@ -35834,7 +35834,7 @@
                                 <span class="kw">let </span>v2108 = <span class="kw-2">&amp;</span>C::xmm_to_xmm_mem(ctx, v2107);
                                 <span class="kw">let </span>v2109 = constructor_x64_pshufd(ctx, v2108, <span class="number">0x0</span>);
                                 <span class="kw">let </span>v2110 = constructor_output_xmm(ctx, v2109);
-                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3894.
+                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3893.
                                 </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2110);
                             }
                             I32X4 =&gt; {
@@ -35845,7 +35845,7 @@
                                     <span class="kw">let </span>v2092 = <span class="kw-2">&amp;</span>C::xmm_to_xmm_mem(ctx, v2086);
                                     <span class="kw">let </span>v2123 = constructor_x64_vpbroadcastd(ctx, v2092);
                                     <span class="kw">let </span>v2124 = constructor_output_xmm(ctx, v2123);
-                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3911.
+                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3910.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2124);
                                 }
                                 <span class="kw">let </span>v320 = constructor_put_in_gpr(ctx, v319);
@@ -35853,7 +35853,7 @@
                                 <span class="kw">let </span>v2092 = <span class="kw-2">&amp;</span>C::xmm_to_xmm_mem(ctx, v2086);
                                 <span class="kw">let </span>v2121 = constructor_x64_pshufd(ctx, v2092, <span class="number">0x0</span>);
                                 <span class="kw">let </span>v2122 = constructor_output_xmm(ctx, v2121);
-                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3909.
+                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3908.
                                 </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2122);
                             }
                             I64X2 =&gt; {
@@ -35862,7 +35862,7 @@
                                 <span class="kw">let </span>v2138 = <span class="kw-2">&amp;</span>C::xmm_to_xmm_mem(ctx, v2137);
                                 <span class="kw">let </span>v2139 = constructor_x64_movddup(ctx, v2138);
                                 <span class="kw">let </span>v2140 = constructor_output_xmm(ctx, v2139);
-                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3944.
+                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3943.
                                 </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2140);
                             }
                             F32X4 =&gt; {
@@ -35871,7 +35871,7 @@
                                     <span class="kw">let </span>v478 = <span class="kw-2">&amp;</span>C::put_in_xmm_mem(ctx, v319);
                                     <span class="kw">let </span>v2128 = constructor_x64_vbroadcastss(ctx, v478);
                                     <span class="kw">let </span>v2129 = constructor_output_xmm(ctx, v2128);
-                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3921.
+                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3920.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2129);
                                 }
                                 <span class="kw">let </span>v488 = constructor_put_in_xmm(ctx, v319);
@@ -35879,14 +35879,14 @@
                                 <span class="kw">let </span>v335 = <span class="kw-2">&amp;</span>C::put_in_xmm_mem(ctx, v319);
                                 <span class="kw">let </span>v2126 = constructor_x64_shufps(ctx, v2125, v335, <span class="number">0x0</span>);
                                 <span class="kw">let </span>v2127 = constructor_output_xmm(ctx, v2126);
-                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3918.
+                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3917.
                                 </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2127);
                             }
                             F64X2 =&gt; {
                                 <span class="kw">let </span>v478 = <span class="kw-2">&amp;</span>C::put_in_xmm_mem(ctx, v319);
                                 <span class="kw">let </span>v2141 = constructor_x64_movddup(ctx, v478);
                                 <span class="kw">let </span>v2142 = constructor_output_xmm(ctx, v2141);
-                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3946.
+                                <span class="comment">// Rule at src/isa/x64/lower.isle line 3945.
                                 </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2142);
                             }
                             <span class="kw">_ </span>=&gt; {}
@@ -35907,7 +35907,7 @@
                     <span class="kw">let </span>v2146 = <span class="kw-2">&amp;</span>constructor_x64_setcc(ctx, <span class="kw-2">&amp;</span>CC::NZ);
                     <span class="kw">let </span>v2147 = constructor_with_flags(ctx, v2145, v2146);
                     <span class="kw">let </span>v2148 = C::output(ctx, v2147);
-                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3953.
+                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3952.
                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2148);
                 }
                 <span class="kw-2">&amp;</span>Opcode::VallTrue =&gt; {
@@ -35922,7 +35922,7 @@
                     <span class="kw">let </span>v2155 = <span class="kw-2">&amp;</span>constructor_x64_setcc(ctx, <span class="kw-2">&amp;</span>CC::Z);
                     <span class="kw">let </span>v2156 = constructor_with_flags(ctx, v2154, v2155);
                     <span class="kw">let </span>v2157 = C::output(ctx, v2156);
-                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3959.
+                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3958.
                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2157);
                 }
                 <span class="kw-2">&amp;</span>Opcode::VhighBits =&gt; {
@@ -35935,7 +35935,7 @@
                                     <span class="kw">let </span>v488 = constructor_put_in_xmm(ctx, v319);
                                     <span class="kw">let </span>v2163 = constructor_x64_pmovmskb(ctx, <span class="kw-2">&amp;</span>OperandSize::Size32, v488);
                                     <span class="kw">let </span>v2164 = constructor_output_gpr(ctx, v2163);
-                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3976.
+                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3975.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2164);
                                 }
                             }
@@ -35951,7 +35951,7 @@
                                     <span class="kw">let </span>v1876 = <span class="kw-2">&amp;</span>C::imm8_reg_to_imm8_gpr(ctx, <span class="kw-2">&amp;</span>v986);
                                     <span class="kw">let </span>v2171 = constructor_x64_shr(ctx, I64, v2170, v1876);
                                     <span class="kw">let </span>v2172 = constructor_output_gpr(ctx, v2171);
-                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3991.
+                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3990.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2172);
                                 }
                             }
@@ -35960,7 +35960,7 @@
                                     <span class="kw">let </span>v488 = constructor_put_in_xmm(ctx, v319);
                                     <span class="kw">let </span>v2165 = constructor_x64_movmskps(ctx, <span class="kw-2">&amp;</span>OperandSize::Size32, v488);
                                     <span class="kw">let </span>v2166 = constructor_output_gpr(ctx, v2165);
-                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3979.
+                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3978.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2166);
                                 }
                             }
@@ -35969,7 +35969,7 @@
                                     <span class="kw">let </span>v488 = constructor_put_in_xmm(ctx, v319);
                                     <span class="kw">let </span>v2167 = constructor_x64_movmskpd(ctx, <span class="kw-2">&amp;</span>OperandSize::Size32, v488);
                                     <span class="kw">let </span>v2168 = constructor_output_gpr(ctx, v2167);
-                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3982.
+                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3981.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2168);
                                 }
                             }
@@ -36673,7 +36673,7 @@
                             <span class="kw">let </span>v2079 = <span class="kw-2">&amp;</span>C::sink_load(ctx, v2076);
                             <span class="kw">let </span>v2084 = constructor_x64_movsd_load(ctx, v2079);
                             <span class="kw">let </span>v2085 = constructor_output_xmm(ctx, v2084);
-                            <span class="comment">// Rule at src/isa/x64/lower.isle line 3862.
+                            <span class="comment">// Rule at src/isa/x64/lower.isle line 3861.
                             </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2085);
                         }
                         <span class="kw">let </span>v2077 = C::ty_32(ctx, v548);
@@ -36681,7 +36681,7 @@
                             <span class="kw">let </span>v2079 = <span class="kw-2">&amp;</span>C::sink_load(ctx, v2076);
                             <span class="kw">let </span>v2080 = constructor_x64_movss_load(ctx, v2079);
                             <span class="kw">let </span>v2081 = constructor_output_xmm(ctx, v2080);
-                            <span class="comment">// Rule at src/isa/x64/lower.isle line 3860.
+                            <span class="comment">// Rule at src/isa/x64/lower.isle line 3859.
                             </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2081);
                         }
                     }
@@ -36689,13 +36689,13 @@
                     <span class="kw">let </span>v1633 = C::ty_scalar_float(ctx, v548);
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(v1634) = v1633 {
                         <span class="kw">let </span>v1027 = constructor_output_value(ctx, v319);
-                        <span class="comment">// Rule at src/isa/x64/lower.isle line 3850.
+                        <span class="comment">// Rule at src/isa/x64/lower.isle line 3849.
                         </span><span class="kw">return </span><span class="prelude-val">Some</span>(v1027);
                     }
                     <span class="kw">let </span>v320 = constructor_put_in_gpr(ctx, v319);
                     <span class="kw">let </span>v2073 = constructor_bitcast_gpr_to_xmm(ctx, v548, v320);
                     <span class="kw">let </span>v2074 = constructor_output_xmm(ctx, v2073);
-                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3855.
+                    <span class="comment">// Rule at src/isa/x64/lower.isle line 3854.
                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2074);
                 }
                 <span class="kw-2">&amp;</span>Opcode::Bmask =&gt; {
@@ -37355,7 +37355,7 @@
                         <span class="kw">let </span>v2179 = C::value_reg(ctx, v2177);
                         <span class="kw">let </span>v2180 = C::value_reg(ctx, v2178);
                         <span class="kw">let </span>v2181 = C::output_pair(ctx, v2179, v2180);
-                        <span class="comment">// Rule at src/isa/x64/lower.isle line 4004.
+                        <span class="comment">// Rule at src/isa/x64/lower.isle line 4003.
                         </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2181);
                     }
                 }
@@ -37403,19 +37403,19 @@
                                 <span class="kw-2">&amp;</span>TlsModel::ElfGd =&gt; {
                                     <span class="kw">let </span>v2183 = constructor_elf_tls_get_addr(ctx, v1468.<span class="number">0</span>);
                                     <span class="kw">let </span>v2184 = constructor_output_gpr(ctx, v2183);
-                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 4012.
+                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 4011.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2184);
                                 }
                                 <span class="kw-2">&amp;</span>TlsModel::Macho =&gt; {
                                     <span class="kw">let </span>v2185 = constructor_macho_tls_get_addr(ctx, v1468.<span class="number">0</span>);
                                     <span class="kw">let </span>v2186 = constructor_output_gpr(ctx, v2185);
-                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 4015.
+                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 4014.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2186);
                                 }
                                 <span class="kw-2">&amp;</span>TlsModel::Coff =&gt; {
                                     <span class="kw">let </span>v2187 = constructor_coff_tls_get_addr(ctx, v1468.<span class="number">0</span>);
                                     <span class="kw">let </span>v2188 = constructor_output_gpr(ctx, v2187);
-                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 4018.
+                                    <span class="comment">// Rule at src/isa/x64/lower.isle line 4017.
                                     </span><span class="kw">return </span><span class="prelude-val">Some</span>(v2188);
                                 }
                                 <span class="kw">_ </span>=&gt; {}

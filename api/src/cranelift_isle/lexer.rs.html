@@ -386,6 +386,19 @@
 <a href="#386" id="386">386</a>
 <a href="#387" id="387">387</a>
 <a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Lexer for the ISLE language.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::error::{Error, Errors, Span};
@@ -631,14 +644,27 @@
 
                 <span class="kw">let </span><span class="kw-2">mut </span>radix = <span class="number">10</span>;
 
-                <span class="comment">// Check for hex literals.
-                </span><span class="kw">if </span><span class="self">self</span>.buf.get(<span class="self">self</span>.pos.offset).copied() == <span class="prelude-val">Some</span>(<span class="string">b&#39;0&#39;</span>)
-                    &amp;&amp; (<span class="self">self</span>.buf.get(<span class="self">self</span>.pos.offset + <span class="number">1</span>).copied() == <span class="prelude-val">Some</span>(<span class="string">b&#39;x&#39;</span>)
-                        || <span class="self">self</span>.buf.get(<span class="self">self</span>.pos.offset + <span class="number">1</span>).copied() == <span class="prelude-val">Some</span>(<span class="string">b&#39;X&#39;</span>))
-                {
-                    <span class="self">self</span>.advance_pos();
-                    <span class="self">self</span>.advance_pos();
-                    radix = <span class="number">16</span>;
+                <span class="comment">// Check for prefixed literals.
+                </span><span class="kw">match </span>(
+                    <span class="self">self</span>.buf.get(<span class="self">self</span>.pos.offset),
+                    <span class="self">self</span>.buf.get(<span class="self">self</span>.pos.offset + <span class="number">1</span>),
+                ) {
+                    (<span class="prelude-val">Some</span>(<span class="string">b&#39;0&#39;</span>), <span class="prelude-val">Some</span>(<span class="string">b&#39;x&#39;</span>)) | (<span class="prelude-val">Some</span>(<span class="string">b&#39;0&#39;</span>), <span class="prelude-val">Some</span>(<span class="string">b&#39;X&#39;</span>)) =&gt; {
+                        <span class="self">self</span>.advance_pos();
+                        <span class="self">self</span>.advance_pos();
+                        radix = <span class="number">16</span>;
+                    }
+                    (<span class="prelude-val">Some</span>(<span class="string">b&#39;0&#39;</span>), <span class="prelude-val">Some</span>(<span class="string">b&#39;o&#39;</span>)) =&gt; {
+                        <span class="self">self</span>.advance_pos();
+                        <span class="self">self</span>.advance_pos();
+                        radix = <span class="number">8</span>;
+                    }
+                    (<span class="prelude-val">Some</span>(<span class="string">b&#39;0&#39;</span>), <span class="prelude-val">Some</span>(<span class="string">b&#39;b&#39;</span>)) =&gt; {
+                        <span class="self">self</span>.advance_pos();
+                        <span class="self">self</span>.advance_pos();
+                        radix = <span class="number">2</span>;
+                    }
+                    <span class="kw">_ </span>=&gt; {}
                 }
 
                 <span class="comment">// Find the range in the buffer for this integer literal. We&#39;ll
@@ -646,7 +672,7 @@
                 // string-to-integer conversion.
                 </span><span class="kw">let </span><span class="kw-2">mut </span>s = <span class="macro">vec!</span>[];
                 <span class="kw">while </span><span class="self">self</span>.pos.offset &lt; <span class="self">self</span>.buf.len()
-                    &amp;&amp; ((radix == <span class="number">10 </span>&amp;&amp; <span class="self">self</span>.buf[<span class="self">self</span>.pos.offset].is_ascii_digit())
+                    &amp;&amp; ((radix &lt;= <span class="number">10 </span>&amp;&amp; <span class="self">self</span>.buf[<span class="self">self</span>.pos.offset].is_ascii_digit())
                         || (radix == <span class="number">16 </span>&amp;&amp; <span class="self">self</span>.buf[<span class="self">self</span>.pos.offset].is_ascii_hexdigit())
                         || <span class="self">self</span>.buf[<span class="self">self</span>.pos.offset] == <span class="string">b&#39;_&#39;</span>)
                 {
