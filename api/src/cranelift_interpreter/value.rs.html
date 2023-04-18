@@ -772,6 +772,43 @@
 <a href="#772" id="772">772</a>
 <a href="#773" id="773">773</a>
 <a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
 </pre><pre class="rust"><code><span class="doccomment">//! The [DataValueExt] trait is an extension trait for [DataValue]. It provides a lot of functions
 //! used by the rest of the interpreter.
 
@@ -787,7 +824,8 @@
 <span class="kw">pub trait </span>DataValueExt: Sized {
     <span class="comment">// Identity.
     </span><span class="kw">fn </span>int(n: i128, ty: Type) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
-    <span class="kw">fn </span>into_int(<span class="self">self</span>) -&gt; ValueResult&lt;i128&gt;;
+    <span class="kw">fn </span>into_int_signed(<span class="self">self</span>) -&gt; ValueResult&lt;i128&gt;;
+    <span class="kw">fn </span>into_int_unsigned(<span class="self">self</span>) -&gt; ValueResult&lt;u128&gt;;
     <span class="kw">fn </span>float(n: u64, ty: Type) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
     <span class="kw">fn </span>into_float(<span class="self">self</span>) -&gt; ValueResult&lt;f64&gt;;
     <span class="kw">fn </span>is_float(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool;
@@ -802,8 +840,10 @@
     <span class="kw">fn </span>is_negative(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ValueResult&lt;bool&gt;;
     <span class="kw">fn </span>is_zero(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ValueResult&lt;bool&gt;;
 
-    <span class="kw">fn </span>max(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
-    <span class="kw">fn </span>min(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>umax(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>smax(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>umin(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>smin(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
 
     <span class="comment">// Comparison.
     </span><span class="kw">fn </span>uno(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; ValueResult&lt;bool&gt;;
@@ -812,15 +852,21 @@
     </span><span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
     <span class="kw">fn </span>sub(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
     <span class="kw">fn </span>mul(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
-    <span class="kw">fn </span>div(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
-    <span class="kw">fn </span>rem(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>udiv(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>sdiv(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>urem(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>srem(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
     <span class="kw">fn </span>sqrt(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
     <span class="kw">fn </span>fma(<span class="self">self</span>, a: <span class="self">Self</span>, b: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
     <span class="kw">fn </span>abs(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
-    <span class="kw">fn </span>checked_add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;&gt;;
-    <span class="kw">fn </span>overflowing_add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt;;
-    <span class="kw">fn </span>overflowing_sub(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt;;
-    <span class="kw">fn </span>overflowing_mul(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt;;
+    <span class="kw">fn </span>uadd_checked(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;&gt;;
+    <span class="kw">fn </span>sadd_checked(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;&gt;;
+    <span class="kw">fn </span>uadd_overflow(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt;;
+    <span class="kw">fn </span>sadd_overflow(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt;;
+    <span class="kw">fn </span>usub_overflow(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt;;
+    <span class="kw">fn </span>ssub_overflow(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt;;
+    <span class="kw">fn </span>umul_overflow(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt;;
+    <span class="kw">fn </span>smul_overflow(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt;;
 
     <span class="comment">// Float operations
     </span><span class="kw">fn </span>neg(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
@@ -831,13 +877,15 @@
     <span class="kw">fn </span>nearest(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
 
     <span class="comment">// Saturating arithmetic.
-    </span><span class="kw">fn </span>add_sat(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
-    <span class="kw">fn </span>sub_sat(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
+    </span><span class="kw">fn </span>uadd_sat(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>sadd_sat(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>usub_sat(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>ssub_sat(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
 
     <span class="comment">// Bitwise.
     </span><span class="kw">fn </span>shl(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
     <span class="kw">fn </span>ushr(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
-    <span class="kw">fn </span>ishr(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>sshr(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
     <span class="kw">fn </span>rotl(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
     <span class="kw">fn </span>rotr(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
     <span class="kw">fn </span>and(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt;;
@@ -906,12 +954,6 @@
     <span class="doccomment">/// Convert to a larger integer type, extending with zeroes; e.g. in `i8` to `i16`, `0xff`
     /// becomes `0x00ff`.
     </span>ZeroExtend(Type),
-    <span class="doccomment">/// Convert a signed integer to its unsigned value of the same size; e.g. in `i8` to `u8`,
-    /// `0xff` (`-1`) becomes `0xff` (`255`).
-    </span>ToUnsigned,
-    <span class="doccomment">/// Convert an unsigned integer to its signed value of the same size; e.g. in `u8` to `i8`,
-    /// `0xff` (`255`) becomes `0xff` (`-1`).
-    </span>ToSigned,
     <span class="doccomment">/// Convert a floating point number by rounding to the nearest possible value with ties to even.
     /// See `fdemote`, e.g.
     </span>RoundNearestEven(Type),
@@ -952,17 +994,23 @@
             <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>()
         }
     };
-    ( option <span class="macro-nonterminal">$op</span>:ident(<span class="macro-nonterminal">$arg1</span>:expr, <span class="macro-nonterminal">$arg2</span>:expr); [ $( <span class="macro-nonterminal">$data_value_ty</span>:ident ),* ] ) =&gt; {
+    ( <span class="macro-nonterminal">$op</span>:ident(<span class="macro-nonterminal">$arg1</span>:expr, <span class="macro-nonterminal">$arg2</span>:expr); [ $( <span class="macro-nonterminal">$data_value_ty</span>:ident ),* ]; [ $( <span class="macro-nonterminal">$op_type</span>:ty ),* ] ) =&gt; {
         <span class="kw">match </span>(<span class="macro-nonterminal">$arg1</span>, <span class="macro-nonterminal">$arg2</span>) {
-            $( (DataValue::<span class="macro-nonterminal">$data_value_ty</span>(a), DataValue::<span class="macro-nonterminal">$data_value_ty</span>(b)) =&gt; { <span class="prelude-val">Ok</span>(a.<span class="macro-nonterminal">$op</span>(<span class="kw-2">*</span>b).map(DataValue::<span class="macro-nonterminal">$data_value_ty</span>)) } )*
+            $( (DataValue::<span class="macro-nonterminal">$data_value_ty</span>(a), DataValue::<span class="macro-nonterminal">$data_value_ty</span>(b)) =&gt; { <span class="prelude-val">Ok</span>(DataValue::<span class="macro-nonterminal">$data_value_ty</span>((<span class="kw-2">*</span>a <span class="kw">as </span><span class="macro-nonterminal">$op_type</span>).<span class="macro-nonterminal">$op</span>(<span class="kw-2">*</span>b <span class="kw">as </span><span class="macro-nonterminal">$op_type</span>) <span class="kw">as _</span>)) } )*
             <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>()
         }
     };
-    ( pair <span class="macro-nonterminal">$op</span>:ident(<span class="macro-nonterminal">$arg1</span>:expr, <span class="macro-nonterminal">$arg2</span>:expr); [ $( <span class="macro-nonterminal">$data_value_ty</span>:ident ),* ] ) =&gt; {
+    ( option <span class="macro-nonterminal">$op</span>:ident(<span class="macro-nonterminal">$arg1</span>:expr, <span class="macro-nonterminal">$arg2</span>:expr); [ $( <span class="macro-nonterminal">$data_value_ty</span>:ident ),* ]; [ $( <span class="macro-nonterminal">$op_type</span>:ty ),* ] ) =&gt; {
+        <span class="kw">match </span>(<span class="macro-nonterminal">$arg1</span>, <span class="macro-nonterminal">$arg2</span>) {
+            $( (DataValue::<span class="macro-nonterminal">$data_value_ty</span>(a), DataValue::<span class="macro-nonterminal">$data_value_ty</span>(b)) =&gt; { <span class="prelude-val">Ok</span>((<span class="kw-2">*</span>a <span class="kw">as </span><span class="macro-nonterminal">$op_type</span>).<span class="macro-nonterminal">$op</span>(<span class="kw-2">*</span>b <span class="kw">as </span><span class="macro-nonterminal">$op_type</span>).map(|v| DataValue::<span class="macro-nonterminal">$data_value_ty</span>(v <span class="kw">as _</span>))) } )*
+            <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>()
+        }
+    };
+    ( pair <span class="macro-nonterminal">$op</span>:ident(<span class="macro-nonterminal">$arg1</span>:expr, <span class="macro-nonterminal">$arg2</span>:expr); [ $( <span class="macro-nonterminal">$data_value_ty</span>:ident ),* ]; [ $( <span class="macro-nonterminal">$op_type</span>:ty ),* ] ) =&gt; {
         <span class="kw">match </span>(<span class="macro-nonterminal">$arg1</span>, <span class="macro-nonterminal">$arg2</span>) {
             $( (DataValue::<span class="macro-nonterminal">$data_value_ty</span>(a), DataValue::<span class="macro-nonterminal">$data_value_ty</span>(b)) =&gt; {
-                <span class="kw">let </span>(f, s) = a.<span class="macro-nonterminal">$op</span>(<span class="kw-2">*</span>b);
-                <span class="prelude-val">Ok</span>((DataValue::<span class="macro-nonterminal">$data_value_ty</span>(f), s))
+                <span class="kw">let </span>(f, s) = (<span class="kw-2">*</span>a <span class="kw">as </span><span class="macro-nonterminal">$op_type</span>).<span class="macro-nonterminal">$op</span>(<span class="kw-2">*</span>b <span class="kw">as </span><span class="macro-nonterminal">$op_type</span>);
+                <span class="prelude-val">Ok</span>((DataValue::<span class="macro-nonterminal">$data_value_ty</span>(f <span class="kw">as _</span>), s))
             } )*
             <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>()
         }
@@ -973,9 +1021,15 @@
             <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>()
         }
     };
-    ( <span class="macro-nonterminal">$op</span>:tt(<span class="macro-nonterminal">$arg1</span>:expr, <span class="macro-nonterminal">$arg2</span>:expr); [ $( <span class="macro-nonterminal">$data_value_ty</span>:ident ),* ]; rhs: <span class="macro-nonterminal">$rhs</span>:tt ) =&gt; {
+    ( <span class="macro-nonterminal">$op</span>:tt(<span class="macro-nonterminal">$arg1</span>:expr, <span class="macro-nonterminal">$arg2</span>:expr); [ $( <span class="macro-nonterminal">$data_value_ty</span>:ident ),* ]; [ $( <span class="macro-nonterminal">$op_type</span>:ty ),* ] ) =&gt; {
         <span class="kw">match </span>(<span class="macro-nonterminal">$arg1</span>, <span class="macro-nonterminal">$arg2</span>) {
-            $( (DataValue::<span class="macro-nonterminal">$data_value_ty</span>(a), DataValue::<span class="macro-nonterminal">$rhs</span>(b)) =&gt; { <span class="prelude-val">Ok</span>(DataValue::<span class="macro-nonterminal">$data_value_ty</span>(a.<span class="macro-nonterminal">$op</span>(<span class="kw-2">*</span>b))) } )*
+            $( (DataValue::<span class="macro-nonterminal">$data_value_ty</span>(a), DataValue::<span class="macro-nonterminal">$data_value_ty</span>(b)) =&gt; { <span class="prelude-val">Ok</span>(DataValue::<span class="macro-nonterminal">$data_value_ty</span>(((<span class="kw-2">*</span>a <span class="kw">as </span><span class="macro-nonterminal">$op_type</span>) <span class="macro-nonterminal">$op </span>(<span class="kw-2">*</span>b <span class="kw">as </span><span class="macro-nonterminal">$op_type</span>)) <span class="kw">as _</span>)) } )*
+            <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>()
+        }
+    };
+    ( <span class="macro-nonterminal">$op</span>:tt(<span class="macro-nonterminal">$arg1</span>:expr, <span class="macro-nonterminal">$arg2</span>:expr); [ $( <span class="macro-nonterminal">$data_value_ty</span>:ident ),* ]; [ $( <span class="macro-nonterminal">$a_type</span>:ty ),* ]; rhs: <span class="macro-nonterminal">$rhs</span>:tt,<span class="macro-nonterminal">$rhs_type</span>:ty ) =&gt; {
+        <span class="kw">match </span>(<span class="macro-nonterminal">$arg1</span>, <span class="macro-nonterminal">$arg2</span>) {
+            $( (DataValue::<span class="macro-nonterminal">$data_value_ty</span>(a), DataValue::<span class="macro-nonterminal">$rhs</span>(b)) =&gt; { <span class="prelude-val">Ok</span>(DataValue::<span class="macro-nonterminal">$data_value_ty</span>((<span class="kw-2">*</span>a <span class="kw">as </span><span class="macro-nonterminal">$a_type</span>).<span class="macro-nonterminal">$op</span>(<span class="kw-2">*</span>b <span class="kw">as </span><span class="macro-nonterminal">$rhs_type</span>) <span class="kw">as _</span>)) } )*
             <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>()
         }
     };
@@ -1022,18 +1076,24 @@
         }
     }
 
-    <span class="kw">fn </span>into_int(<span class="self">self</span>) -&gt; ValueResult&lt;i128&gt; {
+    <span class="kw">fn </span>into_int_signed(<span class="self">self</span>) -&gt; ValueResult&lt;i128&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             DataValue::I8(n) =&gt; <span class="prelude-val">Ok</span>(n <span class="kw">as </span>i128),
             DataValue::I16(n) =&gt; <span class="prelude-val">Ok</span>(n <span class="kw">as </span>i128),
             DataValue::I32(n) =&gt; <span class="prelude-val">Ok</span>(n <span class="kw">as </span>i128),
             DataValue::I64(n) =&gt; <span class="prelude-val">Ok</span>(n <span class="kw">as </span>i128),
             DataValue::I128(n) =&gt; <span class="prelude-val">Ok</span>(n),
-            DataValue::U8(n) =&gt; <span class="prelude-val">Ok</span>(n <span class="kw">as </span>i128),
-            DataValue::U16(n) =&gt; <span class="prelude-val">Ok</span>(n <span class="kw">as </span>i128),
-            DataValue::U32(n) =&gt; <span class="prelude-val">Ok</span>(n <span class="kw">as </span>i128),
-            DataValue::U64(n) =&gt; <span class="prelude-val">Ok</span>(n <span class="kw">as </span>i128),
-            DataValue::U128(n) =&gt; <span class="prelude-val">Ok</span>(n <span class="kw">as </span>i128),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ValueError::InvalidType(ValueTypeClass::Integer, <span class="self">self</span>.ty())),
+        }
+    }
+
+    <span class="kw">fn </span>into_int_unsigned(<span class="self">self</span>) -&gt; ValueResult&lt;u128&gt; {
+        <span class="kw">match </span><span class="self">self </span>{
+            DataValue::I8(n) =&gt; <span class="prelude-val">Ok</span>(n <span class="kw">as </span>u8 <span class="kw">as </span>u128),
+            DataValue::I16(n) =&gt; <span class="prelude-val">Ok</span>(n <span class="kw">as </span>u16 <span class="kw">as </span>u128),
+            DataValue::I32(n) =&gt; <span class="prelude-val">Ok</span>(n <span class="kw">as </span>u32 <span class="kw">as </span>u128),
+            DataValue::I64(n) =&gt; <span class="prelude-val">Ok</span>(n <span class="kw">as </span>u64 <span class="kw">as </span>u128),
+            DataValue::I128(n) =&gt; <span class="prelude-val">Ok</span>(n <span class="kw">as </span>u128),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ValueError::InvalidType(ValueTypeClass::Integer, <span class="self">self</span>.ty())),
         }
     }
@@ -1135,7 +1195,7 @@
             ValueConversionKind::Exact(ty) =&gt; <span class="kw">match </span>(<span class="self">self</span>, ty) {
                 <span class="comment">// TODO a lot to do here: from bmask to ireduce to bitcast...
                 </span>(val, ty) <span class="kw">if </span>val.ty().is_int() &amp;&amp; ty.is_int() =&gt; {
-                    DataValue::from_integer(val.into_int()<span class="question-mark">?</span>, ty)<span class="question-mark">?
+                    DataValue::from_integer(val.into_int_signed()<span class="question-mark">?</span>, ty)<span class="question-mark">?
                 </span>}
                 (DataValue::I32(n), types::F32) =&gt; DataValue::F32(f32::from_bits(n <span class="kw">as </span>u32).into()),
                 (DataValue::I64(n), types::F64) =&gt; DataValue::F64(f64::from_bits(n <span class="kw">as </span>u64).into()),
@@ -1154,7 +1214,7 @@
                 );
 
                 <span class="kw">let </span>mask = (<span class="number">1 </span>&lt;&lt; (ty.bytes() * <span class="number">8</span>)) - <span class="number">1i128</span>;
-                <span class="kw">let </span>truncated = <span class="self">self</span>.into_int()<span class="question-mark">? </span>&amp; mask;
+                <span class="kw">let </span>truncated = <span class="self">self</span>.into_int_signed()<span class="question-mark">? </span>&amp; mask;
                 <span class="self">Self</span>::from_integer(truncated, ty)<span class="question-mark">?
             </span>}
             ValueConversionKind::ExtractUpper(ty) =&gt; {
@@ -1169,88 +1229,44 @@
                 <span class="kw">let </span>mask = (<span class="number">1 </span>&lt;&lt; (ty.bytes() * <span class="number">8</span>)) - <span class="number">1i128</span>;
                 <span class="kw">let </span>shifted_mask = mask &lt;&lt; shift_amt;
 
-                <span class="kw">let </span>extracted = (<span class="self">self</span>.into_int()<span class="question-mark">? </span>&amp; shifted_mask) &gt;&gt; shift_amt;
+                <span class="kw">let </span>extracted = (<span class="self">self</span>.into_int_signed()<span class="question-mark">? </span>&amp; shifted_mask) &gt;&gt; shift_amt;
                 <span class="self">Self</span>::from_integer(extracted, ty)<span class="question-mark">?
             </span>}
             ValueConversionKind::SignExtend(ty) =&gt; <span class="kw">match </span>(<span class="self">self</span>, ty) {
-                (DataValue::U8(n), types::I16) =&gt; DataValue::U16(n <span class="kw">as </span>u16),
-                (DataValue::U8(n), types::I32) =&gt; DataValue::U32(n <span class="kw">as </span>u32),
-                (DataValue::U8(n), types::I64) =&gt; DataValue::U64(n <span class="kw">as </span>u64),
-                (DataValue::U8(n), types::I128) =&gt; DataValue::U128(n <span class="kw">as </span>u128),
                 (DataValue::I8(n), types::I16) =&gt; DataValue::I16(n <span class="kw">as </span>i16),
                 (DataValue::I8(n), types::I32) =&gt; DataValue::I32(n <span class="kw">as </span>i32),
                 (DataValue::I8(n), types::I64) =&gt; DataValue::I64(n <span class="kw">as </span>i64),
                 (DataValue::I8(n), types::I128) =&gt; DataValue::I128(n <span class="kw">as </span>i128),
-                (DataValue::U16(n), types::I32) =&gt; DataValue::U32(n <span class="kw">as </span>u32),
-                (DataValue::U16(n), types::I64) =&gt; DataValue::U64(n <span class="kw">as </span>u64),
-                (DataValue::U16(n), types::I128) =&gt; DataValue::U128(n <span class="kw">as </span>u128),
                 (DataValue::I16(n), types::I32) =&gt; DataValue::I32(n <span class="kw">as </span>i32),
                 (DataValue::I16(n), types::I64) =&gt; DataValue::I64(n <span class="kw">as </span>i64),
                 (DataValue::I16(n), types::I128) =&gt; DataValue::I128(n <span class="kw">as </span>i128),
-                (DataValue::U32(n), types::I64) =&gt; DataValue::U64(n <span class="kw">as </span>u64),
-                (DataValue::U32(n), types::I128) =&gt; DataValue::U128(n <span class="kw">as </span>u128),
                 (DataValue::I32(n), types::I64) =&gt; DataValue::I64(n <span class="kw">as </span>i64),
                 (DataValue::I32(n), types::I128) =&gt; DataValue::I128(n <span class="kw">as </span>i128),
-                (DataValue::U64(n), types::I128) =&gt; DataValue::U128(n <span class="kw">as </span>u128),
                 (DataValue::I64(n), types::I128) =&gt; DataValue::I128(n <span class="kw">as </span>i128),
                 (dv, <span class="kw">_</span>) =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;conversion: {} -&gt; {:?}&quot;</span>, dv.ty(), kind),
             },
             ValueConversionKind::ZeroExtend(ty) =&gt; <span class="kw">match </span>(<span class="self">self</span>, ty) {
-                (DataValue::U8(n), types::I16) =&gt; DataValue::U16(n <span class="kw">as </span>u16),
-                (DataValue::U8(n), types::I32) =&gt; DataValue::U32(n <span class="kw">as </span>u32),
-                (DataValue::U8(n), types::I64) =&gt; DataValue::U64(n <span class="kw">as </span>u64),
-                (DataValue::U8(n), types::I128) =&gt; DataValue::U128(n <span class="kw">as </span>u128),
                 (DataValue::I8(n), types::I16) =&gt; DataValue::I16(n <span class="kw">as </span>u8 <span class="kw">as </span>i16),
                 (DataValue::I8(n), types::I32) =&gt; DataValue::I32(n <span class="kw">as </span>u8 <span class="kw">as </span>i32),
                 (DataValue::I8(n), types::I64) =&gt; DataValue::I64(n <span class="kw">as </span>u8 <span class="kw">as </span>i64),
                 (DataValue::I8(n), types::I128) =&gt; DataValue::I128(n <span class="kw">as </span>u8 <span class="kw">as </span>i128),
-                (DataValue::U16(n), types::I32) =&gt; DataValue::U32(n <span class="kw">as </span>u32),
-                (DataValue::U16(n), types::I64) =&gt; DataValue::U64(n <span class="kw">as </span>u64),
-                (DataValue::U16(n), types::I128) =&gt; DataValue::U128(n <span class="kw">as </span>u128),
                 (DataValue::I16(n), types::I32) =&gt; DataValue::I32(n <span class="kw">as </span>u16 <span class="kw">as </span>i32),
                 (DataValue::I16(n), types::I64) =&gt; DataValue::I64(n <span class="kw">as </span>u16 <span class="kw">as </span>i64),
                 (DataValue::I16(n), types::I128) =&gt; DataValue::I128(n <span class="kw">as </span>u16 <span class="kw">as </span>i128),
-                (DataValue::U32(n), types::I64) =&gt; DataValue::U64(n <span class="kw">as </span>u64),
-                (DataValue::U32(n), types::I128) =&gt; DataValue::U128(n <span class="kw">as </span>u128),
                 (DataValue::I32(n), types::I64) =&gt; DataValue::I64(n <span class="kw">as </span>u32 <span class="kw">as </span>i64),
                 (DataValue::I32(n), types::I128) =&gt; DataValue::I128(n <span class="kw">as </span>u32 <span class="kw">as </span>i128),
-                (DataValue::U64(n), types::I128) =&gt; DataValue::U128(n <span class="kw">as </span>u128),
                 (DataValue::I64(n), types::I128) =&gt; DataValue::I128(n <span class="kw">as </span>u64 <span class="kw">as </span>i128),
                 (from, to) <span class="kw">if </span>from.ty() == to =&gt; from,
                 (dv, <span class="kw">_</span>) =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;conversion: {} -&gt; {:?}&quot;</span>, dv.ty(), kind),
-            },
-            ValueConversionKind::ToUnsigned =&gt; <span class="kw">match </span><span class="self">self </span>{
-                DataValue::I8(n) =&gt; DataValue::U8(n <span class="kw">as </span>u8),
-                DataValue::I16(n) =&gt; DataValue::U16(n <span class="kw">as </span>u16),
-                DataValue::I32(n) =&gt; DataValue::U32(n <span class="kw">as </span>u32),
-                DataValue::I64(n) =&gt; DataValue::U64(n <span class="kw">as </span>u64),
-                DataValue::I128(n) =&gt; DataValue::U128(n <span class="kw">as </span>u128),
-                DataValue::U8(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
-                DataValue::U16(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
-                DataValue::U32(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
-                DataValue::U64(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
-                DataValue::U128(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
-                <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;conversion: {} -&gt; {:?}&quot;</span>, <span class="self">self</span>.ty(), kind),
-            },
-            ValueConversionKind::ToSigned =&gt; <span class="kw">match </span><span class="self">self </span>{
-                DataValue::U8(n) =&gt; DataValue::I8(n <span class="kw">as </span>i8),
-                DataValue::U16(n) =&gt; DataValue::I16(n <span class="kw">as </span>i16),
-                DataValue::U32(n) =&gt; DataValue::I32(n <span class="kw">as </span>i32),
-                DataValue::U64(n) =&gt; DataValue::I64(n <span class="kw">as </span>i64),
-                DataValue::U128(n) =&gt; DataValue::I128(n <span class="kw">as </span>i128),
-                DataValue::I8(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
-                DataValue::I16(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
-                DataValue::I32(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
-                DataValue::I64(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
-                DataValue::I128(<span class="kw">_</span>) =&gt; <span class="self">self</span>,
-                <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;conversion: {} -&gt; {:?}&quot;</span>, <span class="self">self</span>.ty(), kind),
             },
             ValueConversionKind::RoundNearestEven(ty) =&gt; <span class="kw">match </span>(<span class="self">self</span>, ty) {
                 (DataValue::F64(n), types::F32) =&gt; DataValue::F32(Ieee32::from(n.as_f64() <span class="kw">as </span>f32)),
                 (s, <span class="kw">_</span>) =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;conversion: {} -&gt; {:?}&quot;</span>, s.ty(), kind),
             },
             ValueConversionKind::ToBoolean =&gt; <span class="kw">match </span><span class="self">self</span>.ty() {
-                ty <span class="kw">if </span>ty.is_int() =&gt; DataValue::I8(<span class="kw">if </span><span class="self">self</span>.into_int()<span class="question-mark">? </span>!= <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>}),
+                ty <span class="kw">if </span>ty.is_int() =&gt; {
+                    DataValue::I8(<span class="kw">if </span><span class="self">self</span>.into_int_signed()<span class="question-mark">? </span>!= <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>})
+                }
                 ty =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;conversion: {} -&gt; {:?}&quot;</span>, ty, kind),
             },
             ValueConversionKind::Mask(ty) =&gt; {
@@ -1285,7 +1301,17 @@
         }
     }
 
-    <span class="kw">fn </span>max(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">fn </span>umax(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>lhs = <span class="self">self</span>.clone().into_int_unsigned()<span class="question-mark">?</span>;
+        <span class="kw">let </span>rhs = other.clone().into_int_unsigned()<span class="question-mark">?</span>;
+        <span class="kw">if </span>lhs &gt; rhs {
+            <span class="prelude-val">Ok</span>(<span class="self">self</span>)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Ok</span>(other)
+        }
+    }
+
+    <span class="kw">fn </span>smax(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
         <span class="kw">if </span><span class="self">self </span>&gt; other {
             <span class="prelude-val">Ok</span>(<span class="self">self</span>)
         } <span class="kw">else </span>{
@@ -1293,7 +1319,17 @@
         }
     }
 
-    <span class="kw">fn </span>min(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">fn </span>umin(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>lhs = <span class="self">self</span>.clone().into_int_unsigned()<span class="question-mark">?</span>;
+        <span class="kw">let </span>rhs = other.clone().into_int_unsigned()<span class="question-mark">?</span>;
+        <span class="kw">if </span>lhs &lt; rhs {
+            <span class="prelude-val">Ok</span>(<span class="self">self</span>)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Ok</span>(other)
+        }
+    }
+
+    <span class="kw">fn </span>smin(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
         <span class="kw">if </span><span class="self">self </span>&lt; other {
             <span class="prelude-val">Ok</span>(<span class="self">self</span>)
         } <span class="kw">else </span>{
@@ -1309,7 +1345,7 @@
         <span class="kw">if </span><span class="self">self</span>.is_float() {
             <span class="macro">binary_match!</span>(+(<span class="self">self</span>, other); [F32, F64])
         } <span class="kw">else </span>{
-            <span class="macro">binary_match!</span>(wrapping_add(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128])
+            <span class="macro">binary_match!</span>(wrapping_add(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128])
         }
     }
 
@@ -1329,12 +1365,12 @@
         }
     }
 
-    <span class="kw">fn </span>div(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">fn </span>sdiv(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
         <span class="kw">if </span><span class="self">self</span>.is_float() {
             <span class="kw">return </span><span class="macro">binary_match!</span>(/(<span class="self">self</span>, other); [F32, F64]);
         }
 
-        <span class="kw">let </span>denominator = other.clone().into_int()<span class="question-mark">?</span>;
+        <span class="kw">let </span>denominator = other.clone().into_int_signed()<span class="question-mark">?</span>;
 
         <span class="comment">// Check if we are dividing INT_MIN / -1. This causes an integer overflow trap.
         </span><span class="kw">let </span>min = DataValueExt::int(<span class="number">1i128 </span>&lt;&lt; (<span class="self">self</span>.ty().bits() - <span class="number">1</span>), <span class="self">self</span>.ty())<span class="question-mark">?</span>;
@@ -1346,11 +1382,25 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(ValueError::IntegerDivisionByZero);
         }
 
-        <span class="macro">binary_match!</span>(/(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128])
+        <span class="macro">binary_match!</span>(/(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128])
     }
 
-    <span class="kw">fn </span>rem(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>denominator = other.clone().into_int()<span class="question-mark">?</span>;
+    <span class="kw">fn </span>udiv(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">if </span><span class="self">self</span>.is_float() {
+            <span class="kw">return </span><span class="macro">binary_match!</span>(/(<span class="self">self</span>, other); [F32, F64]);
+        }
+
+        <span class="kw">let </span>denominator = other.clone().into_int_unsigned()<span class="question-mark">?</span>;
+
+        <span class="kw">if </span>denominator == <span class="number">0 </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ValueError::IntegerDivisionByZero);
+        }
+
+        <span class="macro">binary_match!</span>(/(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128]; [u8, u16, u32, u64, u128])
+    }
+
+    <span class="kw">fn </span>srem(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>denominator = other.clone().into_int_signed()<span class="question-mark">?</span>;
 
         <span class="comment">// Check if we are dividing INT_MIN / -1. This causes an integer overflow trap.
         </span><span class="kw">let </span>min = DataValueExt::int(<span class="number">1i128 </span>&lt;&lt; (<span class="self">self</span>.ty().bits() - <span class="number">1</span>), <span class="self">self</span>.ty())<span class="question-mark">?</span>;
@@ -1362,7 +1412,17 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(ValueError::IntegerDivisionByZero);
         }
 
-        <span class="macro">binary_match!</span>(%(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128])
+        <span class="macro">binary_match!</span>(%(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128])
+    }
+
+    <span class="kw">fn </span>urem(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>denominator = other.clone().into_int_unsigned()<span class="question-mark">?</span>;
+
+        <span class="kw">if </span>denominator == <span class="number">0 </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ValueError::IntegerDivisionByZero);
+        }
+
+        <span class="macro">binary_match!</span>(%(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128]; [u8, u16, u32, u64, u128])
     }
 
     <span class="kw">fn </span>sqrt(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
@@ -1407,20 +1467,36 @@
         <span class="macro">unary_match!</span>(abs(<span class="kw-2">&amp;</span><span class="self">self</span>); [F32, F64])
     }
 
-    <span class="kw">fn </span>checked_add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;&gt; {
-        <span class="macro">binary_match!</span>(option checked_add(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128])
+    <span class="kw">fn </span>sadd_checked(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;&gt; {
+        <span class="macro">binary_match!</span>(option checked_add(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128]; [i8, i16, i32, i64, i128])
     }
 
-    <span class="kw">fn </span>overflowing_add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt; {
-        <span class="macro">binary_match!</span>(pair overflowing_add(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128])
+    <span class="kw">fn </span>uadd_checked(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;&gt; {
+        <span class="macro">binary_match!</span>(option checked_add(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128]; [u8, u16, u32, u64, u128])
     }
 
-    <span class="kw">fn </span>overflowing_sub(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt; {
-        <span class="macro">binary_match!</span>(pair overflowing_sub(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128])
+    <span class="kw">fn </span>sadd_overflow(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt; {
+        <span class="macro">binary_match!</span>(pair overflowing_add(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128]; [i8, i16, i32, i64, i128])
     }
 
-    <span class="kw">fn </span>overflowing_mul(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt; {
-        <span class="macro">binary_match!</span>(pair overflowing_mul(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128])
+    <span class="kw">fn </span>uadd_overflow(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt; {
+        <span class="macro">binary_match!</span>(pair overflowing_add(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128]; [u8, u16, u32, u64, u128])
+    }
+
+    <span class="kw">fn </span>ssub_overflow(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt; {
+        <span class="macro">binary_match!</span>(pair overflowing_sub(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128]; [i8, i16, i32, i64, i128])
+    }
+
+    <span class="kw">fn </span>usub_overflow(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt; {
+        <span class="macro">binary_match!</span>(pair overflowing_sub(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128]; [u8, u16, u32, u64, u128])
+    }
+
+    <span class="kw">fn </span>smul_overflow(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt; {
+        <span class="macro">binary_match!</span>(pair overflowing_mul(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128]; [i8, i16, i32, i64, i128])
+    }
+
+    <span class="kw">fn </span>umul_overflow(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;(<span class="self">Self</span>, bool)&gt; {
+        <span class="macro">binary_match!</span>(pair overflowing_mul(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128]; [u8, u16, u32, u64, u128])
     }
 
     <span class="kw">fn </span>neg(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
@@ -1447,47 +1523,45 @@
         <span class="macro">unary_match!</span>(round_ties_even(<span class="kw-2">&amp;</span><span class="self">self</span>); [F32, F64])
     }
 
-    <span class="kw">fn </span>add_sat(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="macro">binary_match!</span>(saturating_add(<span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128])
+    <span class="kw">fn </span>sadd_sat(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
+        <span class="macro">binary_match!</span>(saturating_add(<span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128])
     }
 
-    <span class="kw">fn </span>sub_sat(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="macro">binary_match!</span>(saturating_sub(<span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128])
+    <span class="kw">fn </span>uadd_sat(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
+        <span class="macro">binary_match!</span>(saturating_add(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128]; [u8, u16, u32, u64, u128])
+    }
+
+    <span class="kw">fn </span>ssub_sat(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
+        <span class="macro">binary_match!</span>(saturating_sub(<span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128])
+    }
+
+    <span class="kw">fn </span>usub_sat(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
+        <span class="macro">binary_match!</span>(saturating_sub(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other); [I8, I16, I32, I64, I128]; [u8, u16, u32, u64, u128])
     }
 
     <span class="kw">fn </span>shl(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>amt = other
-            .convert(ValueConversionKind::Exact(types::I32))<span class="question-mark">?
-            </span>.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-        <span class="macro">binary_match!</span>(wrapping_shl(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>amt); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128]; rhs: U32)
+        <span class="kw">let </span>amt = other.convert(ValueConversionKind::Exact(types::I32))<span class="question-mark">?</span>;
+        <span class="macro">binary_match!</span>(wrapping_shl(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>amt); [I8, I16, I32, I64, I128]; [i8, i16, i32, i64, i128]; rhs: I32,u32)
     }
 
     <span class="kw">fn </span>ushr(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>amt = other
-            .convert(ValueConversionKind::Exact(types::I32))<span class="question-mark">?
-            </span>.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-        <span class="macro">binary_match!</span>(wrapping_shr(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>amt); [U8, U16, U32, U64, U128]; rhs: U32)
+        <span class="kw">let </span>amt = other.convert(ValueConversionKind::Exact(types::I32))<span class="question-mark">?</span>;
+        <span class="macro">binary_match!</span>(wrapping_shr(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>amt); [I8, I16, I32, I64, I128]; [u8, u16, u32, u64, u128]; rhs: I32,u32)
     }
 
-    <span class="kw">fn </span>ishr(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>amt = other
-            .convert(ValueConversionKind::Exact(types::I32))<span class="question-mark">?
-            </span>.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-        <span class="macro">binary_match!</span>(wrapping_shr(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>amt); [I8, I16, I32, I64, I128]; rhs: U32)
+    <span class="kw">fn </span>sshr(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>amt = other.convert(ValueConversionKind::Exact(types::I32))<span class="question-mark">?</span>;
+        <span class="macro">binary_match!</span>(wrapping_shr(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>amt); [I8, I16, I32, I64, I128]; [i8, i16, i32, i64, i128]; rhs: I32,u32)
     }
 
     <span class="kw">fn </span>rotl(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>amt = other
-            .convert(ValueConversionKind::Exact(types::I32))<span class="question-mark">?
-            </span>.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-        <span class="macro">binary_match!</span>(rotate_left(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>amt); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128]; rhs: U32)
+        <span class="kw">let </span>amt = other.convert(ValueConversionKind::Exact(types::I32))<span class="question-mark">?</span>;
+        <span class="macro">binary_match!</span>(rotate_left(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>amt); [I8, I16, I32, I64, I128]; [i8, i16, i32, i64, i128]; rhs: I32,u32)
     }
 
     <span class="kw">fn </span>rotr(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>amt = other
-            .convert(ValueConversionKind::Exact(types::I32))<span class="question-mark">?
-            </span>.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-        <span class="macro">binary_match!</span>(rotate_right(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>amt); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128]; rhs: U32)
+        <span class="kw">let </span>amt = other.convert(ValueConversionKind::Exact(types::I32))<span class="question-mark">?</span>;
+        <span class="macro">binary_match!</span>(rotate_right(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>amt); [I8, I16, I32, I64, I128]; [i8, i16, i32, i64, i128]; rhs: I32,u32)
     }
 
     <span class="kw">fn </span>and(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
@@ -1523,27 +1597,27 @@
     }
 
     <span class="kw">fn </span>count_ones(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="macro">unary_match!</span>(count_ones(<span class="kw-2">&amp;</span><span class="self">self</span>); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128]; [i8, i16, i32, i64, i128, u8, u16, u32, u64, u128])
+        <span class="macro">unary_match!</span>(count_ones(<span class="kw-2">&amp;</span><span class="self">self</span>); [I8, I16, I32, I64, I128]; [i8, i16, i32, i64, i128])
     }
 
     <span class="kw">fn </span>leading_ones(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="macro">unary_match!</span>(leading_ones(<span class="kw-2">&amp;</span><span class="self">self</span>); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128]; [i8, i16, i32, i64, i128, u8, u16, u32, u64, u128])
+        <span class="macro">unary_match!</span>(leading_ones(<span class="kw-2">&amp;</span><span class="self">self</span>); [I8, I16, I32, I64, I128]; [i8, i16, i32, i64, i128])
     }
 
     <span class="kw">fn </span>leading_zeros(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="macro">unary_match!</span>(leading_zeros(<span class="kw-2">&amp;</span><span class="self">self</span>); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128]; [i8, i16, i32, i64, i128, u8, u16, u32, u64, u128])
+        <span class="macro">unary_match!</span>(leading_zeros(<span class="kw-2">&amp;</span><span class="self">self</span>); [I8, I16, I32, I64, I128]; [i8, i16, i32, i64, i128])
     }
 
     <span class="kw">fn </span>trailing_zeros(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="macro">unary_match!</span>(trailing_zeros(<span class="kw-2">&amp;</span><span class="self">self</span>); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128]; [i8, i16, i32, i64, i128, u8, u16, u32, u64, u128])
+        <span class="macro">unary_match!</span>(trailing_zeros(<span class="kw-2">&amp;</span><span class="self">self</span>); [I8, I16, I32, I64, I128]; [i8, i16, i32, i64, i128])
     }
 
     <span class="kw">fn </span>reverse_bits(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="macro">unary_match!</span>(reverse_bits(<span class="kw-2">&amp;</span><span class="self">self</span>); [I8, I16, I32, I64, I128, U8, U16, U32, U64, U128])
+        <span class="macro">unary_match!</span>(reverse_bits(<span class="kw-2">&amp;</span><span class="self">self</span>); [I8, I16, I32, I64, I128])
     }
 
     <span class="kw">fn </span>swap_bytes(<span class="self">self</span>) -&gt; ValueResult&lt;<span class="self">Self</span>&gt; {
-        <span class="macro">unary_match!</span>(swap_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>); [I16, I32, I64, I128, U16, U32, U64, U128])
+        <span class="macro">unary_match!</span>(swap_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>); [I16, I32, I64, I128])
     }
 }
 </code></pre></div>

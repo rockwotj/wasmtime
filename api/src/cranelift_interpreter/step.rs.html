@@ -1594,91 +1594,6 @@
 <a href="#1594" id="1594">1594</a>
 <a href="#1595" id="1595">1595</a>
 <a href="#1596" id="1596">1596</a>
-<a href="#1597" id="1597">1597</a>
-<a href="#1598" id="1598">1598</a>
-<a href="#1599" id="1599">1599</a>
-<a href="#1600" id="1600">1600</a>
-<a href="#1601" id="1601">1601</a>
-<a href="#1602" id="1602">1602</a>
-<a href="#1603" id="1603">1603</a>
-<a href="#1604" id="1604">1604</a>
-<a href="#1605" id="1605">1605</a>
-<a href="#1606" id="1606">1606</a>
-<a href="#1607" id="1607">1607</a>
-<a href="#1608" id="1608">1608</a>
-<a href="#1609" id="1609">1609</a>
-<a href="#1610" id="1610">1610</a>
-<a href="#1611" id="1611">1611</a>
-<a href="#1612" id="1612">1612</a>
-<a href="#1613" id="1613">1613</a>
-<a href="#1614" id="1614">1614</a>
-<a href="#1615" id="1615">1615</a>
-<a href="#1616" id="1616">1616</a>
-<a href="#1617" id="1617">1617</a>
-<a href="#1618" id="1618">1618</a>
-<a href="#1619" id="1619">1619</a>
-<a href="#1620" id="1620">1620</a>
-<a href="#1621" id="1621">1621</a>
-<a href="#1622" id="1622">1622</a>
-<a href="#1623" id="1623">1623</a>
-<a href="#1624" id="1624">1624</a>
-<a href="#1625" id="1625">1625</a>
-<a href="#1626" id="1626">1626</a>
-<a href="#1627" id="1627">1627</a>
-<a href="#1628" id="1628">1628</a>
-<a href="#1629" id="1629">1629</a>
-<a href="#1630" id="1630">1630</a>
-<a href="#1631" id="1631">1631</a>
-<a href="#1632" id="1632">1632</a>
-<a href="#1633" id="1633">1633</a>
-<a href="#1634" id="1634">1634</a>
-<a href="#1635" id="1635">1635</a>
-<a href="#1636" id="1636">1636</a>
-<a href="#1637" id="1637">1637</a>
-<a href="#1638" id="1638">1638</a>
-<a href="#1639" id="1639">1639</a>
-<a href="#1640" id="1640">1640</a>
-<a href="#1641" id="1641">1641</a>
-<a href="#1642" id="1642">1642</a>
-<a href="#1643" id="1643">1643</a>
-<a href="#1644" id="1644">1644</a>
-<a href="#1645" id="1645">1645</a>
-<a href="#1646" id="1646">1646</a>
-<a href="#1647" id="1647">1647</a>
-<a href="#1648" id="1648">1648</a>
-<a href="#1649" id="1649">1649</a>
-<a href="#1650" id="1650">1650</a>
-<a href="#1651" id="1651">1651</a>
-<a href="#1652" id="1652">1652</a>
-<a href="#1653" id="1653">1653</a>
-<a href="#1654" id="1654">1654</a>
-<a href="#1655" id="1655">1655</a>
-<a href="#1656" id="1656">1656</a>
-<a href="#1657" id="1657">1657</a>
-<a href="#1658" id="1658">1658</a>
-<a href="#1659" id="1659">1659</a>
-<a href="#1660" id="1660">1660</a>
-<a href="#1661" id="1661">1661</a>
-<a href="#1662" id="1662">1662</a>
-<a href="#1663" id="1663">1663</a>
-<a href="#1664" id="1664">1664</a>
-<a href="#1665" id="1665">1665</a>
-<a href="#1666" id="1666">1666</a>
-<a href="#1667" id="1667">1667</a>
-<a href="#1668" id="1668">1668</a>
-<a href="#1669" id="1669">1669</a>
-<a href="#1670" id="1670">1670</a>
-<a href="#1671" id="1671">1671</a>
-<a href="#1672" id="1672">1672</a>
-<a href="#1673" id="1673">1673</a>
-<a href="#1674" id="1674">1674</a>
-<a href="#1675" id="1675">1675</a>
-<a href="#1676" id="1676">1676</a>
-<a href="#1677" id="1677">1677</a>
-<a href="#1678" id="1678">1678</a>
-<a href="#1679" id="1679">1679</a>
-<a href="#1680" id="1680">1680</a>
-<a href="#1681" id="1681">1681</a>
 </pre><pre class="rust"><code><span class="doccomment">//! The [step] function interprets a single Cranelift instruction given its [State] and
 //! [InstructionContext].
 </span><span class="kw">use </span><span class="kw">crate</span>::address::{Address, AddressSize};
@@ -1716,12 +1631,12 @@
 }
 
 <span class="comment">// Helper for summing a sequence of values.
-</span><span class="kw">fn </span>sum(head: DataValue, tail: SmallVec&lt;[DataValue; <span class="number">1</span>]&gt;) -&gt; ValueResult&lt;i128&gt; {
+</span><span class="kw">fn </span>sum_unsigned(head: DataValue, tail: SmallVec&lt;[DataValue; <span class="number">1</span>]&gt;) -&gt; ValueResult&lt;u128&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>acc = head;
     <span class="kw">for </span>t <span class="kw">in </span>tail {
         acc = DataValueExt::add(acc, t)<span class="question-mark">?</span>;
     }
-    acc.into_int()
+    acc.into_int_unsigned()
 }
 
 <span class="doccomment">/// Interpret a single Cranelift instruction. Note that program traps and interpreter errors are
@@ -1869,7 +1784,7 @@
                 .map(|v| v.convert(ValueConversionKind::ZeroExtend(addr_ty)))
                 .collect::&lt;ValueResult&lt;SmallVec&lt;[DataValue; <span class="number">1</span>]&gt;&gt;&gt;()<span class="question-mark">?</span>;
 
-            <span class="prelude-val">Ok</span>(sum(imm, args)<span class="question-mark">? </span><span class="kw">as </span>u64)
+            <span class="prelude-val">Ok</span>(sum_unsigned(imm, args)<span class="question-mark">? </span><span class="kw">as </span>u64)
         };
 
     <span class="comment">// Interpret a unary instruction with the given `op`, assigning the resulting value to the
@@ -1877,7 +1792,7 @@
     </span><span class="kw">let </span>unary =
         |op: <span class="kw">fn</span>(DataValue) -&gt; ValueResult&lt;DataValue&gt;, arg: DataValue| -&gt; ValueResult&lt;ControlFlow&gt; {
             <span class="kw">let </span>ctrl_ty = inst_context.controlling_type().unwrap();
-            <span class="kw">let </span>res = unary_arith(arg, ctrl_ty, op, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
+            <span class="kw">let </span>res = unary_arith(arg, ctrl_ty, op)<span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(assign(res))
         };
 
@@ -1888,20 +1803,7 @@
                   right: DataValue|
      -&gt; ValueResult&lt;ControlFlow&gt; {
         <span class="kw">let </span>ctrl_ty = inst_context.controlling_type().unwrap();
-        <span class="kw">let </span>res = binary_arith(left, right, ctrl_ty, op, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(assign(res))
-    };
-
-    <span class="comment">// Same as `binary_unsigned`, but converts the values to their unsigned form before the
-    // operation and back to signed form afterwards. Since Cranelift types have no notion of
-    // signedness, this enables operations that depend on sign.
-    </span><span class="kw">let </span>binary_unsigned = |op: <span class="kw">fn</span>(DataValue, DataValue) -&gt; ValueResult&lt;DataValue&gt;,
-                           left: DataValue,
-                           right: DataValue|
-     -&gt; ValueResult&lt;ControlFlow&gt; {
-        <span class="kw">let </span>ctrl_ty = inst_context.controlling_type().unwrap();
-        <span class="kw">let </span>res = binary_arith(left, right, ctrl_ty, op, <span class="bool-val">true</span>)
-            .and_then(|v| v.convert(ValueConversionKind::ToSigned))<span class="question-mark">?</span>;
+        <span class="kw">let </span>res = binary_arith(left, right, ctrl_ty, op)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(assign(res))
     };
 
@@ -1911,20 +1813,7 @@
                            right: DataValue|
      -&gt; ValueResult&lt;ControlFlow&gt; {
         <span class="kw">let </span>ctrl_ty = inst_context.controlling_type().unwrap();
-        <span class="kw">let </span>res = binary_arith(left, right, ctrl_ty, op, <span class="bool-val">false</span>);
-        assign_or_trap(res)
-    };
-
-    <span class="comment">// Same as `binary_can_trap`, but converts the values to their unsigned form before the
-    // operation and back to signed form afterwards. Since Cranelift types have no notion of
-    // signedness, this enables operations that depend on sign.
-    </span><span class="kw">let </span>binary_unsigned_can_trap = |op: <span class="kw">fn</span>(DataValue, DataValue) -&gt; ValueResult&lt;DataValue&gt;,
-                                    left: DataValue,
-                                    right: DataValue|
-     -&gt; ValueResult&lt;ControlFlow&gt; {
-        <span class="kw">let </span>ctrl_ty = inst_context.controlling_type().unwrap();
-        <span class="kw">let </span>res = binary_arith(left, right, ctrl_ty, op, <span class="bool-val">true</span>)
-            .and_then(|v| v.convert(ValueConversionKind::ToSigned));
+        <span class="kw">let </span>res = binary_arith(left, right, ctrl_ty, op);
         assign_or_trap(res)
     };
 
@@ -2045,7 +1934,7 @@
                 <span class="kw">let </span>jt_data = <span class="kw-2">&amp;</span>state.get_current_function().stencil.dfg.jump_tables[table];
 
                 <span class="comment">// Convert to usize to remove negative indexes from the following operations
-                </span><span class="kw">let </span>jump_target = usize::try_from(arg(<span class="number">0</span>).into_int()<span class="question-mark">?</span>)
+                </span><span class="kw">let </span>jump_target = usize::try_from(arg(<span class="number">0</span>).into_int_unsigned()<span class="question-mark">?</span>)
                     .ok()
                     .and_then(|i| jt_data.as_slice().get(i))
                     .copied()
@@ -2100,7 +1989,7 @@
         </span>}
         Opcode::CallIndirect | Opcode::ReturnCallIndirect =&gt; {
             <span class="kw">let </span>args = args();
-            <span class="kw">let </span>addr_dv = DataValue::U64(arg(<span class="number">0</span>).into_int()<span class="question-mark">? </span><span class="kw">as </span>u64);
+            <span class="kw">let </span>addr_dv = DataValue::I64(arg(<span class="number">0</span>).into_int_unsigned()<span class="question-mark">? </span><span class="kw">as </span>i64);
             <span class="kw">let </span>addr = Address::try_from(addr_dv.clone()).map_err(StepError::MemoryError)<span class="question-mark">?</span>;
 
             <span class="kw">let </span>func = state
@@ -2211,7 +2100,7 @@
         Opcode::StackLoad =&gt; {
             <span class="kw">let </span>load_ty = inst_context.controlling_type().unwrap();
             <span class="kw">let </span>slot = inst.stack_slot().unwrap();
-            <span class="kw">let </span>offset = sum(imm(), args())<span class="question-mark">? </span><span class="kw">as </span>u64;
+            <span class="kw">let </span>offset = sum_unsigned(imm(), args())<span class="question-mark">? </span><span class="kw">as </span>u64;
             <span class="kw">let </span>mem_flags = MemFlags::new();
             assign_or_memtrap({
                 state
@@ -2222,7 +2111,7 @@
         Opcode::StackStore =&gt; {
             <span class="kw">let </span>arg = arg(<span class="number">0</span>);
             <span class="kw">let </span>slot = inst.stack_slot().unwrap();
-            <span class="kw">let </span>offset = sum(imm(), args_range(<span class="number">1</span>..)<span class="question-mark">?</span>)<span class="question-mark">? </span><span class="kw">as </span>u64;
+            <span class="kw">let </span>offset = sum_unsigned(imm(), args_range(<span class="number">1</span>..)<span class="question-mark">?</span>)<span class="question-mark">? </span><span class="kw">as </span>u64;
             <span class="kw">let </span>mem_flags = MemFlags::new();
             continue_or_memtrap({
                 state
@@ -2233,7 +2122,7 @@
         Opcode::StackAddr =&gt; {
             <span class="kw">let </span>load_ty = inst_context.controlling_type().unwrap();
             <span class="kw">let </span>slot = inst.stack_slot().unwrap();
-            <span class="kw">let </span>offset = sum(imm(), args())<span class="question-mark">? </span><span class="kw">as </span>u64;
+            <span class="kw">let </span>offset = sum_unsigned(imm(), args())<span class="question-mark">? </span><span class="kw">as </span>u64;
             assign_or_memtrap({
                 AddressSize::try_from(load_ty).and_then(|addr_size| {
                     <span class="kw">let </span>addr = state.stack_address(addr_size, slot, offset)<span class="question-mark">?</span>;
@@ -2280,7 +2169,7 @@
                 <span class="macro">unreachable!</span>()
             }
         }
-        Opcode::Iconst =&gt; assign(DataValueExt::int(imm().into_int()<span class="question-mark">?</span>, ctrl_ty)<span class="question-mark">?</span>),
+        Opcode::Iconst =&gt; assign(DataValueExt::int(imm().into_int_signed()<span class="question-mark">?</span>, ctrl_ty)<span class="question-mark">?</span>),
         Opcode::F32const =&gt; assign(imm()),
         Opcode::F64const =&gt; assign(imm()),
         Opcode::Vconst =&gt; assign(imm()),
@@ -2300,7 +2189,7 @@
                 <span class="kw">let </span>icmp = icmp(ctrl_ty, IntCC::SignedGreaterThan, <span class="kw-2">&amp;</span>arg(<span class="number">1</span>), <span class="kw-2">&amp;</span>arg(<span class="number">0</span>))<span class="question-mark">?</span>;
                 assign(bitselect(icmp, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>)
             } <span class="kw">else </span>{
-                choose(arg(<span class="number">1</span>) &gt; arg(<span class="number">0</span>), arg(<span class="number">0</span>), arg(<span class="number">1</span>))
+                assign(arg(<span class="number">0</span>).smin(arg(<span class="number">1</span>))<span class="question-mark">?</span>)
             }
         }
         Opcode::Umin =&gt; {
@@ -2308,12 +2197,7 @@
                 <span class="kw">let </span>icmp = icmp(ctrl_ty, IntCC::UnsignedGreaterThan, <span class="kw-2">&amp;</span>arg(<span class="number">1</span>), <span class="kw-2">&amp;</span>arg(<span class="number">0</span>))<span class="question-mark">?</span>;
                 assign(bitselect(icmp, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>)
             } <span class="kw">else </span>{
-                choose(
-                    arg(<span class="number">1</span>).convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?
-                        </span>&gt; arg(<span class="number">0</span>).convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>,
-                    arg(<span class="number">0</span>),
-                    arg(<span class="number">1</span>),
-                )
+                assign(arg(<span class="number">0</span>).umin(arg(<span class="number">1</span>))<span class="question-mark">?</span>)
             }
         }
         Opcode::Smax =&gt; {
@@ -2321,7 +2205,7 @@
                 <span class="kw">let </span>icmp = icmp(ctrl_ty, IntCC::SignedGreaterThan, <span class="kw-2">&amp;</span>arg(<span class="number">0</span>), <span class="kw-2">&amp;</span>arg(<span class="number">1</span>))<span class="question-mark">?</span>;
                 assign(bitselect(icmp, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>)
             } <span class="kw">else </span>{
-                choose(arg(<span class="number">0</span>) &gt; arg(<span class="number">1</span>), arg(<span class="number">0</span>), arg(<span class="number">1</span>))
+                assign(arg(<span class="number">0</span>).smax(arg(<span class="number">1</span>))<span class="question-mark">?</span>)
             }
         }
         Opcode::Umax =&gt; {
@@ -2329,12 +2213,7 @@
                 <span class="kw">let </span>icmp = icmp(ctrl_ty, IntCC::UnsignedGreaterThan, <span class="kw-2">&amp;</span>arg(<span class="number">0</span>), <span class="kw-2">&amp;</span>arg(<span class="number">1</span>))<span class="question-mark">?</span>;
                 assign(bitselect(icmp, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>)
             } <span class="kw">else </span>{
-                choose(
-                    arg(<span class="number">0</span>).convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?
-                        </span>&gt; arg(<span class="number">1</span>).convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>,
-                    arg(<span class="number">0</span>),
-                    arg(<span class="number">1</span>),
-                )
+                assign(arg(<span class="number">0</span>).umax(arg(<span class="number">1</span>))<span class="question-mark">?</span>)
             }
         }
         Opcode::AvgRound =&gt; {
@@ -2342,37 +2221,33 @@
             <span class="kw">let </span>one = DataValueExt::int(<span class="number">1</span>, arg(<span class="number">0</span>).ty())<span class="question-mark">?</span>;
             <span class="kw">let </span>inc = DataValueExt::add(sum, one)<span class="question-mark">?</span>;
             <span class="kw">let </span>two = DataValueExt::int(<span class="number">2</span>, arg(<span class="number">0</span>).ty())<span class="question-mark">?</span>;
-            binary(DataValueExt::div, inc, two)<span class="question-mark">?
+            binary(DataValueExt::udiv, inc, two)<span class="question-mark">?
         </span>}
         Opcode::Iadd =&gt; binary(DataValueExt::add, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
         Opcode::UaddSat =&gt; assign(binary_arith(
             arg(<span class="number">0</span>),
             arg(<span class="number">1</span>),
             ctrl_ty,
-            DataValueExt::add_sat,
-            <span class="bool-val">true</span>,
+            DataValueExt::uadd_sat,
         )<span class="question-mark">?</span>),
         Opcode::SaddSat =&gt; assign(binary_arith(
             arg(<span class="number">0</span>),
             arg(<span class="number">1</span>),
             ctrl_ty,
-            DataValueExt::add_sat,
-            <span class="bool-val">false</span>,
+            DataValueExt::sadd_sat,
         )<span class="question-mark">?</span>),
         Opcode::Isub =&gt; binary(DataValueExt::sub, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
         Opcode::UsubSat =&gt; assign(binary_arith(
             arg(<span class="number">0</span>),
             arg(<span class="number">1</span>),
             ctrl_ty,
-            DataValueExt::sub_sat,
-            <span class="bool-val">true</span>,
+            DataValueExt::usub_sat,
         )<span class="question-mark">?</span>),
         Opcode::SsubSat =&gt; assign(binary_arith(
             arg(<span class="number">0</span>),
             arg(<span class="number">1</span>),
             ctrl_ty,
-            DataValueExt::sub_sat,
-            <span class="bool-val">false</span>,
+            DataValueExt::ssub_sat,
         )<span class="question-mark">?</span>),
         Opcode::Ineg =&gt; binary(DataValueExt::sub, DataValueExt::int(<span class="number">0</span>, ctrl_ty)<span class="question-mark">?</span>, arg(<span class="number">0</span>))<span class="question-mark">?</span>,
         Opcode::Iabs =&gt; {
@@ -2385,7 +2260,7 @@
                     <span class="kw">if </span>lane == min_val {
                         <span class="prelude-val">Ok</span>(min_val.clone())
                     } <span class="kw">else </span>{
-                        DataValueExt::int(lane.into_int()<span class="question-mark">?</span>.abs(), ctrl_ty.lane_type())
+                        DataValueExt::int(lane.into_int_signed()<span class="question-mark">?</span>.abs(), ctrl_ty.lane_type())
                     }
                 })
                 .collect::&lt;ValueResult&lt;SimdVec&lt;DataValue&gt;&gt;&gt;()<span class="question-mark">?</span>;
@@ -2422,57 +2297,39 @@
 
             assign(vectorizelanes(<span class="kw-2">&amp;</span>res, ctrl_ty)<span class="question-mark">?</span>)
         }
-        Opcode::Udiv =&gt; binary_unsigned_can_trap(DataValueExt::div, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
-        Opcode::Sdiv =&gt; binary_can_trap(DataValueExt::div, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
-        Opcode::Urem =&gt; binary_unsigned_can_trap(DataValueExt::rem, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
-        Opcode::Srem =&gt; binary_can_trap(DataValueExt::rem, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
+        Opcode::Udiv =&gt; binary_can_trap(DataValueExt::udiv, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
+        Opcode::Sdiv =&gt; binary_can_trap(DataValueExt::sdiv, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
+        Opcode::Urem =&gt; binary_can_trap(DataValueExt::urem, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
+        Opcode::Srem =&gt; binary_can_trap(DataValueExt::srem, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
         Opcode::IaddImm =&gt; binary(DataValueExt::add, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::ImulImm =&gt; binary(DataValueExt::mul, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
-        Opcode::UdivImm =&gt; binary_unsigned_can_trap(DataValueExt::div, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
-        Opcode::SdivImm =&gt; binary_can_trap(DataValueExt::div, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
-        Opcode::UremImm =&gt; binary_unsigned_can_trap(DataValueExt::rem, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
-        Opcode::SremImm =&gt; binary_can_trap(DataValueExt::rem, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
+        Opcode::UdivImm =&gt; binary_can_trap(DataValueExt::udiv, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
+        Opcode::SdivImm =&gt; binary_can_trap(DataValueExt::sdiv, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
+        Opcode::UremImm =&gt; binary_can_trap(DataValueExt::urem, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
+        Opcode::SremImm =&gt; binary_can_trap(DataValueExt::srem, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::IrsubImm =&gt; binary(DataValueExt::sub, imm_as_ctrl_ty()<span class="question-mark">?</span>, arg(<span class="number">0</span>))<span class="question-mark">?</span>,
         Opcode::UaddOverflow =&gt; {
-            <span class="kw">let </span>lhs = arg(<span class="number">0</span>).convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-            <span class="kw">let </span>rhs = arg(<span class="number">1</span>).convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-            <span class="kw">let </span>(<span class="kw-2">mut </span>sum, carry) = lhs.overflowing_add(rhs)<span class="question-mark">?</span>;
-            sum = sum.convert(ValueConversionKind::ToSigned)<span class="question-mark">?</span>;
+            <span class="kw">let </span>(sum, carry) = arg(<span class="number">0</span>).uadd_overflow(arg(<span class="number">1</span>))<span class="question-mark">?</span>;
             assign_multiple(<span class="kw-2">&amp;</span>[sum, DataValueExt::bool(carry, <span class="bool-val">false</span>, types::I8)<span class="question-mark">?</span>])
         }
         Opcode::SaddOverflow =&gt; {
-            <span class="kw">let </span>ty = arg(<span class="number">0</span>).ty();
-            <span class="kw">let </span>lhs = arg(<span class="number">0</span>).convert(ValueConversionKind::ToSigned)<span class="question-mark">?</span>;
-            <span class="kw">let </span>rhs = arg(<span class="number">1</span>).convert(ValueConversionKind::ToSigned)<span class="question-mark">?</span>;
-            <span class="kw">let </span>(sum, carry) = lhs.overflowing_add(rhs)<span class="question-mark">?</span>;
+            <span class="kw">let </span>(sum, carry) = arg(<span class="number">0</span>).sadd_overflow(arg(<span class="number">1</span>))<span class="question-mark">?</span>;
             assign_multiple(<span class="kw-2">&amp;</span>[sum, DataValueExt::bool(carry, <span class="bool-val">false</span>, types::I8)<span class="question-mark">?</span>])
         }
         Opcode::UsubOverflow =&gt; {
-            <span class="kw">let </span>lhs = arg(<span class="number">0</span>).convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-            <span class="kw">let </span>rhs = arg(<span class="number">1</span>).convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-            <span class="kw">let </span>(<span class="kw-2">mut </span>sum, carry) = lhs.overflowing_sub(rhs)<span class="question-mark">?</span>;
-            sum = sum.convert(ValueConversionKind::ToSigned)<span class="question-mark">?</span>;
+            <span class="kw">let </span>(sum, carry) = arg(<span class="number">0</span>).usub_overflow(arg(<span class="number">1</span>))<span class="question-mark">?</span>;
             assign_multiple(<span class="kw-2">&amp;</span>[sum, DataValueExt::bool(carry, <span class="bool-val">false</span>, types::I8)<span class="question-mark">?</span>])
         }
         Opcode::SsubOverflow =&gt; {
-            <span class="kw">let </span>ty = arg(<span class="number">0</span>).ty();
-            <span class="kw">let </span>lhs = arg(<span class="number">0</span>).convert(ValueConversionKind::ToSigned)<span class="question-mark">?</span>;
-            <span class="kw">let </span>rhs = arg(<span class="number">1</span>).convert(ValueConversionKind::ToSigned)<span class="question-mark">?</span>;
-            <span class="kw">let </span>(sum, carry) = lhs.overflowing_sub(rhs)<span class="question-mark">?</span>;
+            <span class="kw">let </span>(sum, carry) = arg(<span class="number">0</span>).ssub_overflow(arg(<span class="number">1</span>))<span class="question-mark">?</span>;
             assign_multiple(<span class="kw-2">&amp;</span>[sum, DataValueExt::bool(carry, <span class="bool-val">false</span>, types::I8)<span class="question-mark">?</span>])
         }
         Opcode::UmulOverflow =&gt; {
-            <span class="kw">let </span>lhs = arg(<span class="number">0</span>).convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-            <span class="kw">let </span>rhs = arg(<span class="number">1</span>).convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-            <span class="kw">let </span>(<span class="kw-2">mut </span>sum, carry) = lhs.overflowing_mul(rhs)<span class="question-mark">?</span>;
-            sum = sum.convert(ValueConversionKind::ToSigned)<span class="question-mark">?</span>;
+            <span class="kw">let </span>(sum, carry) = arg(<span class="number">0</span>).umul_overflow(arg(<span class="number">1</span>))<span class="question-mark">?</span>;
             assign_multiple(<span class="kw-2">&amp;</span>[sum, DataValueExt::bool(carry, <span class="bool-val">false</span>, types::I8)<span class="question-mark">?</span>])
         }
         Opcode::SmulOverflow =&gt; {
-            <span class="kw">let </span>ty = arg(<span class="number">0</span>).ty();
-            <span class="kw">let </span>lhs = arg(<span class="number">0</span>).convert(ValueConversionKind::ToSigned)<span class="question-mark">?</span>;
-            <span class="kw">let </span>rhs = arg(<span class="number">1</span>).convert(ValueConversionKind::ToSigned)<span class="question-mark">?</span>;
-            <span class="kw">let </span>(sum, carry) = lhs.overflowing_mul(rhs)<span class="question-mark">?</span>;
+            <span class="kw">let </span>(sum, carry) = arg(<span class="number">0</span>).smul_overflow(arg(<span class="number">1</span>))<span class="question-mark">?</span>;
             assign_multiple(<span class="kw-2">&amp;</span>[sum, DataValueExt::bool(carry, <span class="bool-val">false</span>, types::I8)<span class="question-mark">?</span>])
         }
         Opcode::IaddCin =&gt; choose(
@@ -2485,12 +2342,12 @@
         ),
         Opcode::IaddCarry =&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>sum = DataValueExt::add(arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>;
-            <span class="kw">let </span><span class="kw-2">mut </span>carry = arg(<span class="number">0</span>).checked_add(arg(<span class="number">1</span>))<span class="question-mark">?</span>.is_none();
+            <span class="kw">let </span><span class="kw-2">mut </span>carry = arg(<span class="number">0</span>).sadd_checked(arg(<span class="number">1</span>))<span class="question-mark">?</span>.is_none();
 
             <span class="kw">if </span>DataValueExt::into_bool(arg(<span class="number">2</span>))<span class="question-mark">? </span>{
                 carry |= sum
                     .clone()
-                    .checked_add(DataValueExt::int(<span class="number">1</span>, ctrl_ty)<span class="question-mark">?</span>)<span class="question-mark">?
+                    .sadd_checked(DataValueExt::int(<span class="number">1</span>, ctrl_ty)<span class="question-mark">?</span>)<span class="question-mark">?
                     </span>.is_none();
                 sum = DataValueExt::add(sum, DataValueExt::int(<span class="number">1</span>, ctrl_ty)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
             }
@@ -2539,11 +2396,11 @@
         Opcode::RotlImm =&gt; binary(DataValueExt::rotl, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::RotrImm =&gt; binary(DataValueExt::rotr, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::Ishl =&gt; binary(DataValueExt::shl, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
-        Opcode::Ushr =&gt; binary_unsigned(DataValueExt::ushr, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
-        Opcode::Sshr =&gt; binary(DataValueExt::ishr, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
+        Opcode::Ushr =&gt; binary(DataValueExt::ushr, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
+        Opcode::Sshr =&gt; binary(DataValueExt::sshr, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
         Opcode::IshlImm =&gt; binary(DataValueExt::shl, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
-        Opcode::UshrImm =&gt; binary_unsigned(DataValueExt::ushr, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
-        Opcode::SshrImm =&gt; binary(DataValueExt::ishr, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
+        Opcode::UshrImm =&gt; binary(DataValueExt::ushr, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
+        Opcode::SshrImm =&gt; binary(DataValueExt::sshr, arg(<span class="number">0</span>), imm_as_ctrl_ty()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
         Opcode::Bitrev =&gt; unary(DataValueExt::reverse_bits, arg(<span class="number">0</span>))<span class="question-mark">?</span>,
         Opcode::Bswap =&gt; unary(DataValueExt::swap_bytes, arg(<span class="number">0</span>))<span class="question-mark">?</span>,
         Opcode::Clz =&gt; unary(DataValueExt::leading_zeros, arg(<span class="number">0</span>))<span class="question-mark">?</span>,
@@ -2591,7 +2448,7 @@
         Opcode::Fadd =&gt; binary(DataValueExt::add, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
         Opcode::Fsub =&gt; binary(DataValueExt::sub, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
         Opcode::Fmul =&gt; binary(DataValueExt::mul, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
-        Opcode::Fdiv =&gt; binary(DataValueExt::div, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
+        Opcode::Fdiv =&gt; binary(DataValueExt::sdiv, arg(<span class="number">0</span>), arg(<span class="number">1</span>))<span class="question-mark">?</span>,
         Opcode::Sqrt =&gt; unary(DataValueExt::sqrt, arg(<span class="number">0</span>))<span class="question-mark">?</span>,
         Opcode::Fma =&gt; {
             <span class="kw">let </span>arg0 = extractlanes(<span class="kw-2">&amp;</span>arg(<span class="number">0</span>), ctrl_ty)<span class="question-mark">?</span>;
@@ -2616,24 +2473,24 @@
             (<span class="kw">_</span>, b) <span class="kw">if </span>b.is_nan()<span class="question-mark">? </span>=&gt; b,
             (a, b) <span class="kw">if </span>a.is_zero()<span class="question-mark">? </span>&amp;&amp; b.is_zero()<span class="question-mark">? </span>&amp;&amp; a.is_negative()<span class="question-mark">? </span>=&gt; a,
             (a, b) <span class="kw">if </span>a.is_zero()<span class="question-mark">? </span>&amp;&amp; b.is_zero()<span class="question-mark">? </span>&amp;&amp; b.is_negative()<span class="question-mark">? </span>=&gt; b,
-            (a, b) =&gt; a.min(b)<span class="question-mark">?</span>,
+            (a, b) =&gt; a.smin(b)<span class="question-mark">?</span>,
         }),
         Opcode::FminPseudo =&gt; assign(<span class="kw">match </span>(arg(<span class="number">0</span>), arg(<span class="number">1</span>)) {
             (a, b) <span class="kw">if </span>a.is_nan()<span class="question-mark">? </span>|| b.is_nan()<span class="question-mark">? </span>=&gt; a,
             (a, b) <span class="kw">if </span>a.is_zero()<span class="question-mark">? </span>&amp;&amp; b.is_zero()<span class="question-mark">? </span>=&gt; a,
-            (a, b) =&gt; a.min(b)<span class="question-mark">?</span>,
+            (a, b) =&gt; a.smin(b)<span class="question-mark">?</span>,
         }),
         Opcode::Fmax =&gt; assign(<span class="kw">match </span>(arg(<span class="number">0</span>), arg(<span class="number">1</span>)) {
             (a, <span class="kw">_</span>) <span class="kw">if </span>a.is_nan()<span class="question-mark">? </span>=&gt; a,
             (<span class="kw">_</span>, b) <span class="kw">if </span>b.is_nan()<span class="question-mark">? </span>=&gt; b,
             (a, b) <span class="kw">if </span>a.is_zero()<span class="question-mark">? </span>&amp;&amp; b.is_zero()<span class="question-mark">? </span>&amp;&amp; a.is_negative()<span class="question-mark">? </span>=&gt; b,
             (a, b) <span class="kw">if </span>a.is_zero()<span class="question-mark">? </span>&amp;&amp; b.is_zero()<span class="question-mark">? </span>&amp;&amp; b.is_negative()<span class="question-mark">? </span>=&gt; a,
-            (a, b) =&gt; a.max(b)<span class="question-mark">?</span>,
+            (a, b) =&gt; a.smax(b)<span class="question-mark">?</span>,
         }),
         Opcode::FmaxPseudo =&gt; assign(<span class="kw">match </span>(arg(<span class="number">0</span>), arg(<span class="number">1</span>)) {
             (a, b) <span class="kw">if </span>a.is_nan()<span class="question-mark">? </span>|| b.is_nan()<span class="question-mark">? </span>=&gt; a,
             (a, b) <span class="kw">if </span>a.is_zero()<span class="question-mark">? </span>&amp;&amp; b.is_zero()<span class="question-mark">? </span>=&gt; a,
-            (a, b) =&gt; a.max(b)<span class="question-mark">?</span>,
+            (a, b) =&gt; a.smax(b)<span class="question-mark">?</span>,
         }),
         Opcode::Ceil =&gt; unary(DataValueExt::ceil, arg(<span class="number">0</span>))<span class="question-mark">?</span>,
         Opcode::Floor =&gt; unary(DataValueExt::floor, arg(<span class="number">0</span>))<span class="question-mark">?</span>,
@@ -2663,22 +2520,17 @@
             <span class="kw">let </span>arg1 = extractlanes(<span class="kw-2">&amp;</span>arg(<span class="number">1</span>), ctrl_ty)<span class="question-mark">?</span>;
             <span class="kw">let </span>new_type = ctrl_ty.split_lanes().unwrap();
             <span class="kw">let </span>(min, max) = new_type.bounds(inst.opcode() == Opcode::Snarrow);
-            <span class="kw">let </span><span class="kw-2">mut </span>min: DataValue = DataValueExt::int(min <span class="kw">as </span>i128, ctrl_ty.lane_type())<span class="question-mark">?</span>;
-            <span class="kw">let </span><span class="kw-2">mut </span>max: DataValue = DataValueExt::int(max <span class="kw">as </span>i128, ctrl_ty.lane_type())<span class="question-mark">?</span>;
-            <span class="kw">if </span>inst.opcode() == Opcode::Uunarrow {
-                min = min.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-                max = max.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-            }
+            <span class="kw">let </span>min: DataValue = DataValueExt::int(min <span class="kw">as </span>i128, ctrl_ty.lane_type())<span class="question-mark">?</span>;
+            <span class="kw">let </span>max: DataValue = DataValueExt::int(max <span class="kw">as </span>i128, ctrl_ty.lane_type())<span class="question-mark">?</span>;
             <span class="kw">let </span>narrow = |<span class="kw-2">mut </span>lane: DataValue| -&gt; ValueResult&lt;DataValue&gt; {
                 <span class="kw">if </span>inst.opcode() == Opcode::Uunarrow {
-                    lane = lane.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
+                    lane = DataValueExt::umax(lane, min.clone())<span class="question-mark">?</span>;
+                    lane = DataValueExt::umin(lane, max.clone())<span class="question-mark">?</span>;
+                } <span class="kw">else </span>{
+                    lane = DataValueExt::smax(lane, min.clone())<span class="question-mark">?</span>;
+                    lane = DataValueExt::smin(lane, max.clone())<span class="question-mark">?</span>;
                 }
-                lane = DataValueExt::max(lane, min.clone())<span class="question-mark">?</span>;
-                lane = DataValueExt::min(lane, max.clone())<span class="question-mark">?</span>;
                 lane = lane.convert(ValueConversionKind::Truncate(new_type.lane_type()))<span class="question-mark">?</span>;
-                <span class="kw">if </span>inst.opcode() == Opcode::Unarrow || inst.opcode() == Opcode::Uunarrow {
-                    lane = lane.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-                }
                 <span class="prelude-val">Ok</span>(lane)
             };
             <span class="kw">let </span>new_vec = arg0
@@ -2746,13 +2598,13 @@
             assign(vectorizelanes(<span class="kw-2">&amp;</span>new_vector, ctrl_ty)<span class="question-mark">?</span>)
         }
         Opcode::Insertlane =&gt; {
-            <span class="kw">let </span>idx = imm().into_int()<span class="question-mark">? </span><span class="kw">as </span>usize;
+            <span class="kw">let </span>idx = imm().into_int_unsigned()<span class="question-mark">? </span><span class="kw">as </span>usize;
             <span class="kw">let </span><span class="kw-2">mut </span>vector = extractlanes(<span class="kw-2">&amp;</span>arg(<span class="number">0</span>), ctrl_ty)<span class="question-mark">?</span>;
             vector[idx] = arg(<span class="number">1</span>);
             assign(vectorizelanes(<span class="kw-2">&amp;</span>vector, ctrl_ty)<span class="question-mark">?</span>)
         }
         Opcode::Extractlane =&gt; {
-            <span class="kw">let </span>idx = imm().into_int()<span class="question-mark">? </span><span class="kw">as </span>usize;
+            <span class="kw">let </span>idx = imm().into_int_unsigned()<span class="question-mark">? </span><span class="kw">as </span>usize;
             <span class="kw">let </span>lanes = extractlanes(<span class="kw-2">&amp;</span>arg(<span class="number">0</span>), ctrl_ty)<span class="question-mark">?</span>;
             assign(lanes[idx].clone())
         }
@@ -2761,12 +2613,12 @@
             // must be retrieved via `inst_context`.
             </span><span class="kw">let </span>vector_type = inst_context.type_of(inst_context.args()[<span class="number">0</span>]).unwrap();
             <span class="kw">let </span>a = extractlanes(<span class="kw-2">&amp;</span>arg(<span class="number">0</span>), vector_type)<span class="question-mark">?</span>;
-            <span class="kw">let </span><span class="kw-2">mut </span>result: i128 = <span class="number">0</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>result: u128 = <span class="number">0</span>;
             <span class="kw">for </span>(i, val) <span class="kw">in </span>a.into_iter().enumerate() {
-                <span class="kw">let </span>val = val.reverse_bits()<span class="question-mark">?</span>.into_int()<span class="question-mark">?</span>; <span class="comment">// MSB -&gt; LSB
+                <span class="kw">let </span>val = val.reverse_bits()<span class="question-mark">?</span>.into_int_unsigned()<span class="question-mark">?</span>; <span class="comment">// MSB -&gt; LSB
                 </span>result |= (val &amp; <span class="number">1</span>) &lt;&lt; i;
             }
-            assign(DataValueExt::int(result, ctrl_ty)<span class="question-mark">?</span>)
+            assign(DataValueExt::int(result <span class="kw">as </span>i128, ctrl_ty)<span class="question-mark">?</span>)
         }
         Opcode::VanyTrue =&gt; {
             <span class="kw">let </span>lane_ty = ctrl_ty.lane_type();
@@ -2868,14 +2720,19 @@
                 inst_context.type_of(inst_context.args()[<span class="number">0</span>]).unwrap(),
             )<span class="question-mark">?</span>;
             <span class="kw">let </span>bits = |x: DataValue| -&gt; ValueResult&lt;u64&gt; {
-                <span class="kw">let </span>x = <span class="kw">if </span>inst.opcode() == Opcode::FcvtFromUint {
-                    x.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?
-                </span>} <span class="kw">else </span>{
-                    x
-                };
                 <span class="prelude-val">Ok</span>(<span class="kw">match </span>ctrl_ty.lane_type() {
-                    types::F32 =&gt; (x.into_int()<span class="question-mark">? </span><span class="kw">as </span>f32).to_bits() <span class="kw">as </span>u64,
-                    types::F64 =&gt; (x.into_int()<span class="question-mark">? </span><span class="kw">as </span>f64).to_bits(),
+                    types::F32 =&gt; (<span class="kw">if </span>inst.opcode() == Opcode::FcvtFromUint {
+                        x.into_int_unsigned()<span class="question-mark">? </span><span class="kw">as </span>f32
+                    } <span class="kw">else </span>{
+                        x.into_int_signed()<span class="question-mark">? </span><span class="kw">as </span>f32
+                    })
+                    .to_bits() <span class="kw">as </span>u64,
+                    types::F64 =&gt; (<span class="kw">if </span>inst.opcode() == Opcode::FcvtFromUint {
+                        x.into_int_unsigned()<span class="question-mark">? </span><span class="kw">as </span>f64
+                    } <span class="kw">else </span>{
+                        x.into_int_signed()<span class="question-mark">? </span><span class="kw">as </span>f64
+                    })
+                    .to_bits(),
                     <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;unexpected conversion to {:?}&quot;</span>, ctrl_ty.lane_type()),
                 })
             };
@@ -2896,8 +2753,10 @@
                     .map(|x| {
                         DataValue::float(
                             <span class="kw">match </span>ctrl_ty.lane_type() {
-                                types::F32 =&gt; (x.to_owned().into_int()<span class="question-mark">? </span><span class="kw">as </span>f32).to_bits() <span class="kw">as </span>u64,
-                                types::F64 =&gt; (x.to_owned().into_int()<span class="question-mark">? </span><span class="kw">as </span>f64).to_bits(),
+                                types::F32 =&gt; {
+                                    (x.to_owned().into_int_signed()<span class="question-mark">? </span><span class="kw">as </span>f32).to_bits() <span class="kw">as </span>u64
+                                }
+                                types::F64 =&gt; (x.to_owned().into_int_signed()<span class="question-mark">? </span><span class="kw">as </span>f64).to_bits(),
                                 <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;unexpected promotion to {:?}&quot;</span>, ctrl_ty),
                             },
                             ctrl_ty.lane_type(),
@@ -2950,7 +2809,7 @@
         Opcode::AtomicRmw =&gt; {
             <span class="kw">let </span>op = inst.atomic_rmw_op().unwrap();
             <span class="kw">let </span>val = arg(<span class="number">1</span>);
-            <span class="kw">let </span>addr = arg(<span class="number">0</span>).into_int()<span class="question-mark">? </span><span class="kw">as </span>u64;
+            <span class="kw">let </span>addr = arg(<span class="number">0</span>).into_int_unsigned()<span class="question-mark">? </span><span class="kw">as </span>u64;
             <span class="kw">let </span>mem_flags = inst.memflags().expect(<span class="string">&quot;instruction to have memory flags&quot;</span>);
             <span class="kw">let </span>loaded = Address::try_from(addr)
                 .and_then(|addr| state.checked_load(addr, ctrl_ty, mem_flags));
@@ -2967,25 +2826,17 @@
                 AtomicRmwOp::Or =&gt; DataValueExt::or(prev_val, val),
                 AtomicRmwOp::Xor =&gt; DataValueExt::xor(prev_val, val),
                 AtomicRmwOp::Nand =&gt; DataValueExt::and(prev_val, val).and_then(DataValue::not),
-                AtomicRmwOp::Smax =&gt; DataValueExt::max(prev_val, val),
-                AtomicRmwOp::Smin =&gt; DataValueExt::min(prev_val, val),
-                AtomicRmwOp::Umax =&gt; DataValueExt::max(
-                    DataValueExt::convert(val, ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>,
-                    DataValueExt::convert(prev_val, ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>,
-                )
-                .and_then(|v| DataValueExt::convert(v, ValueConversionKind::ToSigned)),
-                AtomicRmwOp::Umin =&gt; DataValueExt::min(
-                    DataValueExt::convert(val, ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>,
-                    DataValueExt::convert(prev_val, ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>,
-                )
-                .and_then(|v| DataValueExt::convert(v, ValueConversionKind::ToSigned)),
+                AtomicRmwOp::Smax =&gt; DataValueExt::smax(prev_val, val),
+                AtomicRmwOp::Smin =&gt; DataValueExt::smin(prev_val, val),
+                AtomicRmwOp::Umax =&gt; DataValueExt::umax(val, prev_val),
+                AtomicRmwOp::Umin =&gt; DataValueExt::umin(val, prev_val),
             }<span class="question-mark">?</span>;
             <span class="kw">let </span>stored = Address::try_from(addr)
                 .and_then(|addr| state.checked_store(addr, replace, mem_flags));
             assign_or_memtrap(stored.map(|<span class="kw">_</span>| prev_val_to_assign))
         }
         Opcode::AtomicCas =&gt; {
-            <span class="kw">let </span>addr = arg(<span class="number">0</span>).into_int()<span class="question-mark">? </span><span class="kw">as </span>u64;
+            <span class="kw">let </span>addr = arg(<span class="number">0</span>).into_int_unsigned()<span class="question-mark">? </span><span class="kw">as </span>u64;
             <span class="kw">let </span>mem_flags = inst.memflags().expect(<span class="string">&quot;instruction to have memory flags&quot;</span>);
             <span class="kw">let </span>loaded = Address::try_from(addr)
                 .and_then(|addr| state.checked_load(addr, ctrl_ty, mem_flags));
@@ -3006,7 +2857,7 @@
         }
         Opcode::AtomicLoad =&gt; {
             <span class="kw">let </span>load_ty = inst_context.controlling_type().unwrap();
-            <span class="kw">let </span>addr = arg(<span class="number">0</span>).into_int()<span class="question-mark">? </span><span class="kw">as </span>u64;
+            <span class="kw">let </span>addr = arg(<span class="number">0</span>).into_int_unsigned()<span class="question-mark">? </span><span class="kw">as </span>u64;
             <span class="kw">let </span>mem_flags = inst.memflags().expect(<span class="string">&quot;instruction to have memory flags&quot;</span>);
             <span class="comment">// We are doing a regular load here, this isn&#39;t actually thread safe.
             </span>assign_or_memtrap(
@@ -3016,7 +2867,7 @@
         }
         Opcode::AtomicStore =&gt; {
             <span class="kw">let </span>val = arg(<span class="number">0</span>);
-            <span class="kw">let </span>addr = arg(<span class="number">1</span>).into_int()<span class="question-mark">? </span><span class="kw">as </span>u64;
+            <span class="kw">let </span>addr = arg(<span class="number">1</span>).into_int_unsigned()<span class="question-mark">? </span><span class="kw">as </span>u64;
             <span class="kw">let </span>mem_flags = inst.memflags().expect(<span class="string">&quot;instruction to have memory flags&quot;</span>);
             <span class="comment">// We are doing a regular store here, this isn&#39;t actually thread safe.
             </span>continue_or_memtrap(
@@ -3040,16 +2891,16 @@
                 .into_iter()
                 .zip(arg1.into_iter())
                 .map(|(x, y)| {
-                    <span class="kw">let </span>x = x.into_int()<span class="question-mark">?</span>;
-                    <span class="kw">let </span>y = y.into_int()<span class="question-mark">?</span>;
+                    <span class="kw">let </span>x = x.into_int_signed()<span class="question-mark">?</span>;
+                    <span class="kw">let </span>y = y.into_int_signed()<span class="question-mark">?</span>;
                     <span class="comment">// temporarily double width of the value to avoid overflow.
                     </span><span class="kw">let </span>z: DataValue = DataValueExt::int(
                         (x * y + (<span class="number">1 </span>&lt;&lt; (lane_type.bits() - <span class="number">2</span>))) &gt;&gt; (lane_type.bits() - <span class="number">1</span>),
                         double_width,
                     )<span class="question-mark">?</span>;
                     <span class="comment">// check bounds, saturate, and truncate to correct width.
-                    </span><span class="kw">let </span>z = DataValueExt::min(z, max.clone())<span class="question-mark">?</span>;
-                    <span class="kw">let </span>z = DataValueExt::max(z, min.clone())<span class="question-mark">?</span>;
+                    </span><span class="kw">let </span>z = DataValueExt::smin(z, max.clone())<span class="question-mark">?</span>;
+                    <span class="kw">let </span>z = DataValueExt::smax(z, min.clone())<span class="question-mark">?</span>;
                     <span class="kw">let </span>z = z.convert(ValueConversionKind::Truncate(lane_type))<span class="question-mark">?</span>;
                     <span class="prelude-val">Ok</span>(z)
                 })
@@ -3142,20 +2993,16 @@
                 IntCC::SignedLessThan =&gt; left &lt; right,
                 IntCC::SignedLessThanOrEqual =&gt; left &lt;= right,
                 IntCC::UnsignedGreaterThan =&gt; {
-                    left.clone().convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?
-                        </span>&gt; right.clone().convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?
+                    left.clone().into_int_unsigned()<span class="question-mark">? </span>&gt; right.clone().into_int_unsigned()<span class="question-mark">?
                 </span>}
                 IntCC::UnsignedGreaterThanOrEqual =&gt; {
-                    left.clone().convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?
-                        </span>&gt;= right.clone().convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?
+                    left.clone().into_int_unsigned()<span class="question-mark">? </span>&gt;= right.clone().into_int_unsigned()<span class="question-mark">?
                 </span>}
                 IntCC::UnsignedLessThan =&gt; {
-                    left.clone().convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?
-                        </span>&lt; right.clone().convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?
+                    left.clone().into_int_unsigned()<span class="question-mark">? </span>&lt; right.clone().into_int_unsigned()<span class="question-mark">?
                 </span>}
                 IntCC::UnsignedLessThanOrEqual =&gt; {
-                    left.clone().convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?
-                        </span>&lt;= right.clone().convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?
+                    left.clone().into_int_unsigned()<span class="question-mark">? </span>&lt;= right.clone().into_int_unsigned()<span class="question-mark">?
                 </span>}
             },
             ctrl_ty.is_vector(),
@@ -3260,7 +3107,7 @@
         <span class="kw">let </span>lane_val: i128 = val
             .clone()
             .convert(ValueConversionKind::Exact(lane_type.as_int()))<span class="question-mark">?
-            </span>.into_int()<span class="question-mark">?</span>;
+            </span>.into_int_unsigned()<span class="question-mark">? </span><span class="kw">as </span>i128;
 
         <span class="kw">for </span>j <span class="kw">in </span><span class="number">0</span>..iterations {
             result[(i * iterations) + j] = (lane_val &gt;&gt; (<span class="number">8 </span>* j)) <span class="kw">as </span>u8;
@@ -3278,12 +3125,7 @@
 }
 
 <span class="doccomment">/// Performs the supplied unary arithmetic `op` on a Value, either Vector or Scalar.
-</span><span class="kw">fn </span>unary_arith&lt;F&gt;(
-    x: DataValue,
-    vector_type: types::Type,
-    op: F,
-    unsigned: bool,
-) -&gt; ValueResult&lt;DataValue&gt;
+</span><span class="kw">fn </span>unary_arith&lt;F&gt;(x: DataValue, vector_type: types::Type, op: F) -&gt; ValueResult&lt;DataValue&gt;
 <span class="kw">where
     </span>F: Fn(DataValue) -&gt; ValueResult&lt;DataValue&gt;,
 {
@@ -3291,12 +3133,7 @@
 
     <span class="kw">let </span>result = arg
         .into_iter()
-        .map(|<span class="kw-2">mut </span>arg| {
-            <span class="kw">if </span>unsigned {
-                arg = arg.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-            }
-            <span class="prelude-val">Ok</span>(op(arg)<span class="question-mark">?</span>)
-        })
+        .map(|arg| <span class="prelude-val">Ok</span>(op(arg)<span class="question-mark">?</span>))
         .collect::&lt;ValueResult&lt;SimdVec&lt;DataValue&gt;&gt;&gt;()<span class="question-mark">?</span>;
 
     vectorizelanes(<span class="kw-2">&amp;</span>result, vector_type)
@@ -3308,7 +3145,6 @@
     y: DataValue,
     vector_type: types::Type,
     op: F,
-    unsigned: bool,
 ) -&gt; ValueResult&lt;DataValue&gt;
 <span class="kw">where
     </span>F: Fn(DataValue, DataValue) -&gt; ValueResult&lt;DataValue&gt;,
@@ -3319,13 +3155,7 @@
     <span class="kw">let </span>result = arg0
         .into_iter()
         .zip(arg1)
-        .map(|(<span class="kw-2">mut </span>lhs, <span class="kw-2">mut </span>rhs)| {
-            <span class="kw">if </span>unsigned {
-                lhs = lhs.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-                rhs = rhs.convert(ValueConversionKind::ToUnsigned)<span class="question-mark">?</span>;
-            }
-            <span class="prelude-val">Ok</span>(op(lhs, rhs)<span class="question-mark">?</span>)
-        })
+        .map(|(lhs, rhs)| <span class="prelude-val">Ok</span>(op(lhs, rhs)<span class="question-mark">?</span>))
         .collect::&lt;ValueResult&lt;SimdVec&lt;DataValue&gt;&gt;&gt;()<span class="question-mark">?</span>;
 
     vectorizelanes(<span class="kw-2">&amp;</span>result, vector_type)

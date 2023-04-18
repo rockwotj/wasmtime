@@ -384,49 +384,6 @@
 <a href="#384" id="384">384</a>
 <a href="#385" id="385">385</a>
 <a href="#386" id="386">386</a>
-<a href="#387" id="387">387</a>
-<a href="#388" id="388">388</a>
-<a href="#389" id="389">389</a>
-<a href="#390" id="390">390</a>
-<a href="#391" id="391">391</a>
-<a href="#392" id="392">392</a>
-<a href="#393" id="393">393</a>
-<a href="#394" id="394">394</a>
-<a href="#395" id="395">395</a>
-<a href="#396" id="396">396</a>
-<a href="#397" id="397">397</a>
-<a href="#398" id="398">398</a>
-<a href="#399" id="399">399</a>
-<a href="#400" id="400">400</a>
-<a href="#401" id="401">401</a>
-<a href="#402" id="402">402</a>
-<a href="#403" id="403">403</a>
-<a href="#404" id="404">404</a>
-<a href="#405" id="405">405</a>
-<a href="#406" id="406">406</a>
-<a href="#407" id="407">407</a>
-<a href="#408" id="408">408</a>
-<a href="#409" id="409">409</a>
-<a href="#410" id="410">410</a>
-<a href="#411" id="411">411</a>
-<a href="#412" id="412">412</a>
-<a href="#413" id="413">413</a>
-<a href="#414" id="414">414</a>
-<a href="#415" id="415">415</a>
-<a href="#416" id="416">416</a>
-<a href="#417" id="417">417</a>
-<a href="#418" id="418">418</a>
-<a href="#419" id="419">419</a>
-<a href="#420" id="420">420</a>
-<a href="#421" id="421">421</a>
-<a href="#422" id="422">422</a>
-<a href="#423" id="423">423</a>
-<a href="#424" id="424">424</a>
-<a href="#425" id="425">425</a>
-<a href="#426" id="426">426</a>
-<a href="#427" id="427">427</a>
-<a href="#428" id="428">428</a>
-<a href="#429" id="429">429</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module gives users to instantiate values that Cranelift understands. These values are used,
 //! for example, during interpretation and for wrapping immediates.
 </span><span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64, Offset32};
@@ -446,11 +403,6 @@
     I32(i32),
     I64(i64),
     I128(i128),
-    U8(u8),
-    U16(u16),
-    U32(u32),
-    U64(u64),
-    U128(u128),
     F32(Ieee32),
     F64(Ieee64),
     V128([u8; <span class="number">16</span>]),
@@ -471,16 +423,6 @@
             (I64(<span class="kw">_</span>), <span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
             (I128(l), I128(r)) =&gt; l == r,
             (I128(<span class="kw">_</span>), <span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
-            (U8(l), U8(r)) =&gt; l == r,
-            (U8(<span class="kw">_</span>), <span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
-            (U16(l), U16(r)) =&gt; l == r,
-            (U16(<span class="kw">_</span>), <span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
-            (U32(l), U32(r)) =&gt; l == r,
-            (U32(<span class="kw">_</span>), <span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
-            (U64(l), U64(r)) =&gt; l == r,
-            (U64(<span class="kw">_</span>), <span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
-            (U128(l), U128(r)) =&gt; l == r,
-            (U128(<span class="kw">_</span>), <span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
             (F32(l), F32(r)) =&gt; l.as_f32() == r.as_f32(),
             (F32(<span class="kw">_</span>), <span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
             (F64(l), F64(r)) =&gt; l.as_f64() == r.as_f64(),
@@ -510,11 +452,11 @@
     <span class="doccomment">/// Return the Cranelift IR [Type] for this [DataValue].
     </span><span class="kw">pub fn </span>ty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Type {
         <span class="kw">match </span><span class="self">self </span>{
-            DataValue::I8(<span class="kw">_</span>) | DataValue::U8(<span class="kw">_</span>) =&gt; types::I8,
-            DataValue::I16(<span class="kw">_</span>) | DataValue::U16(<span class="kw">_</span>) =&gt; types::I16,
-            DataValue::I32(<span class="kw">_</span>) | DataValue::U32(<span class="kw">_</span>) =&gt; types::I32,
-            DataValue::I64(<span class="kw">_</span>) | DataValue::U64(<span class="kw">_</span>) =&gt; types::I64,
-            DataValue::I128(<span class="kw">_</span>) | DataValue::U128(<span class="kw">_</span>) =&gt; types::I128,
+            DataValue::I8(<span class="kw">_</span>) =&gt; types::I8,
+            DataValue::I16(<span class="kw">_</span>) =&gt; types::I16,
+            DataValue::I32(<span class="kw">_</span>) =&gt; types::I32,
+            DataValue::I64(<span class="kw">_</span>) =&gt; types::I64,
+            DataValue::I128(<span class="kw">_</span>) =&gt; types::I128,
             DataValue::F32(<span class="kw">_</span>) =&gt; types::F32,
             DataValue::F64(<span class="kw">_</span>) =&gt; types::F64,
             DataValue::V128(<span class="kw">_</span>) =&gt; types::I8X16, <span class="comment">// A default type.
@@ -537,11 +479,6 @@
             DataValue::I32(i) =&gt; DataValue::I32(i.swap_bytes()),
             DataValue::I64(i) =&gt; DataValue::I64(i.swap_bytes()),
             DataValue::I128(i) =&gt; DataValue::I128(i.swap_bytes()),
-            DataValue::U8(i) =&gt; DataValue::U8(i.swap_bytes()),
-            DataValue::U16(i) =&gt; DataValue::U16(i.swap_bytes()),
-            DataValue::U32(i) =&gt; DataValue::U32(i.swap_bytes()),
-            DataValue::U64(i) =&gt; DataValue::U64(i.swap_bytes()),
-            DataValue::U128(i) =&gt; DataValue::U128(i.swap_bytes()),
             DataValue::F32(f) =&gt; DataValue::F32(Ieee32::with_bits(f.bits().swap_bytes())),
             DataValue::F64(f) =&gt; DataValue::F64(Ieee64::with_bits(f.bits().swap_bytes())),
             DataValue::V128(<span class="kw-2">mut </span>v) =&gt; {
@@ -589,7 +526,6 @@
             DataValue::F64(f) =&gt; dst[..<span class="number">8</span>].copy_from_slice(<span class="kw-2">&amp;</span>f.bits().to_ne_bytes()[..]),
             DataValue::V128(v) =&gt; dst[..<span class="number">16</span>].copy_from_slice(<span class="kw-2">&amp;</span>v[..]),
             DataValue::V64(v) =&gt; dst[..<span class="number">8</span>].copy_from_slice(<span class="kw-2">&amp;</span>v[..]),
-            <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(),
         };
     }
 
@@ -687,18 +623,6 @@
             </span>(DataValue::F32(a), DataValue::F32(b)) =&gt; a.bits() == b.bits(),
             (DataValue::F64(a), DataValue::F64(b)) =&gt; a.bits() == b.bits(),
 
-            <span class="comment">// when testing for bitwise equality, the sign information does not matter
-            </span>(DataValue::I8(a), DataValue::U8(b)) =&gt; <span class="kw-2">*</span>a <span class="kw">as </span>u8 == <span class="kw-2">*</span>b,
-            (DataValue::U8(a), DataValue::I8(b)) =&gt; <span class="kw-2">*</span>a == <span class="kw-2">*</span>b <span class="kw">as </span>u8,
-            (DataValue::I16(a), DataValue::U16(b)) =&gt; <span class="kw-2">*</span>a <span class="kw">as </span>u16 == <span class="kw-2">*</span>b,
-            (DataValue::U16(a), DataValue::I16(b)) =&gt; <span class="kw-2">*</span>a == <span class="kw-2">*</span>b <span class="kw">as </span>u16,
-            (DataValue::I32(a), DataValue::U32(b)) =&gt; <span class="kw-2">*</span>a <span class="kw">as </span>u32 == <span class="kw-2">*</span>b,
-            (DataValue::U32(a), DataValue::I32(b)) =&gt; <span class="kw-2">*</span>a == <span class="kw-2">*</span>b <span class="kw">as </span>u32,
-            (DataValue::I64(a), DataValue::U64(b)) =&gt; <span class="kw-2">*</span>a <span class="kw">as </span>u64 == <span class="kw-2">*</span>b,
-            (DataValue::U64(a), DataValue::I64(b)) =&gt; <span class="kw-2">*</span>a == <span class="kw-2">*</span>b <span class="kw">as </span>u64,
-            (DataValue::I128(a), DataValue::U128(b)) =&gt; <span class="kw-2">*</span>a <span class="kw">as </span>u128 == <span class="kw-2">*</span>b,
-            (DataValue::U128(a), DataValue::I128(b)) =&gt; <span class="kw-2">*</span>a == <span class="kw-2">*</span>b <span class="kw">as </span>u128,
-
             <span class="comment">// We don&#39;t need to worry about F32x4 / F64x2 Since we compare V128 which is already the
             // raw bytes anyway
             </span>(a, b) =&gt; a == b,
@@ -768,11 +692,6 @@
 <span class="macro">build_conversion_impl!</span>(i32, I32, I32);
 <span class="macro">build_conversion_impl!</span>(i64, I64, I64);
 <span class="macro">build_conversion_impl!</span>(i128, I128, I128);
-<span class="macro">build_conversion_impl!</span>(u8, U8, I8);
-<span class="macro">build_conversion_impl!</span>(u16, U16, I16);
-<span class="macro">build_conversion_impl!</span>(u32, U32, I32);
-<span class="macro">build_conversion_impl!</span>(u64, U64, I64);
-<span class="macro">build_conversion_impl!</span>(u128, U128, I128);
 <span class="macro">build_conversion_impl!</span>(Ieee32, F32, F32);
 <span class="macro">build_conversion_impl!</span>(Ieee64, F64, F64);
 <span class="macro">build_conversion_impl!</span>([u8; <span class="number">16</span>], V128, I8X16);
@@ -791,11 +710,6 @@
             DataValue::I32(dv) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, dv),
             DataValue::I64(dv) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, dv),
             DataValue::I128(dv) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, dv),
-            DataValue::U8(dv) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, dv),
-            DataValue::U16(dv) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, dv),
-            DataValue::U32(dv) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, dv),
-            DataValue::U64(dv) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, dv),
-            DataValue::U128(dv) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, dv),
             <span class="comment">// The Ieee* wrappers here print the expected syntax.
             </span>DataValue::F32(dv) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, dv),
             DataValue::F64(dv) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, dv),

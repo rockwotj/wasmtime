@@ -311,8 +311,6 @@
 <a href="#311" id="311">311</a>
 <a href="#312" id="312">312</a>
 <a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Virtual Addressing Scheme for the Interpreter
 //!
 //! The interpreter uses virtual memory addresses for its memory operations. These addresses
@@ -500,9 +498,7 @@
 
     <span class="kw">fn </span>try_from(value: DataValue) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="kw">let </span>addr = <span class="kw">match </span>value {
-            DataValue::U32(v) =&gt; v <span class="kw">as </span>u64,
             DataValue::I32(v) =&gt; v <span class="kw">as </span>u32 <span class="kw">as </span>u64,
-            DataValue::U64(v) =&gt; v,
             DataValue::I64(v) =&gt; v <span class="kw">as </span>u64,
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(MemoryError::InvalidAddress(value));
@@ -510,8 +506,8 @@
         };
 
         <span class="kw">let </span>size = <span class="kw">match </span>value {
-            DataValue::U32(<span class="kw">_</span>) | DataValue::I32(<span class="kw">_</span>) =&gt; AddressSize::_32,
-            DataValue::U64(<span class="kw">_</span>) | DataValue::I64(<span class="kw">_</span>) =&gt; AddressSize::_64,
+            DataValue::I32(<span class="kw">_</span>) =&gt; AddressSize::_32,
+            DataValue::I64(<span class="kw">_</span>) =&gt; AddressSize::_64,
             <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
         };
 
@@ -532,9 +528,9 @@
 
     <span class="kw">fn </span>try_from(value: u64) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="kw">let </span>dv = <span class="kw">if </span>value &gt; u32::MAX <span class="kw">as </span>u64 {
-            DataValue::U64(value)
+            DataValue::I64(value <span class="kw">as </span>i64)
         } <span class="kw">else </span>{
-            DataValue::U32(value <span class="kw">as </span>u32)
+            DataValue::I32(value <span class="kw">as </span>i32)
         };
 
         Address::try_from(dv)
