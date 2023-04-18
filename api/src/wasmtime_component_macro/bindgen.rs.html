@@ -290,6 +290,30 @@
 <a href="#290" id="290">290</a>
 <a href="#291" id="291">291</a>
 <a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
 </pre><pre class="rust"><code><span class="kw">use </span>proc_macro2::{Span, TokenStream};
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::path::{Path, PathBuf};
@@ -330,17 +354,13 @@
     <span class="prelude-val">Ok</span>(contents)
 }
 
-<span class="kw">enum </span>Source {
-    Path(String),
-    Inline(String),
-}
-
 <span class="kw">impl </span>Parse <span class="kw">for </span>Config {
     <span class="kw">fn </span>parse(input: ParseStream&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>call_site = Span::call_site();
         <span class="kw">let </span><span class="kw-2">mut </span>opts = Opts::default();
-        <span class="kw">let </span><span class="kw-2">mut </span>source = <span class="prelude-val">None</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>world = <span class="prelude-val">None</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>inline = <span class="prelude-val">None</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>path = <span class="prelude-val">None</span>;
 
         <span class="kw">if </span>input.peek(token::Brace) {
             <span class="kw">let </span>content;
@@ -349,10 +369,10 @@
             <span class="kw">for </span>field <span class="kw">in </span>fields.into_pairs() {
                 <span class="kw">match </span>field.into_value() {
                     Opt::Path(s) =&gt; {
-                        <span class="kw">if </span>source.is_some() {
-                            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(s.span(), <span class="string">&quot;cannot specify second source&quot;</span>));
+                        <span class="kw">if </span>path.is_some() {
+                            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(s.span(), <span class="string">&quot;cannot specify second path&quot;</span>));
                         }
-                        source = <span class="prelude-val">Some</span>(Source::Path(s.value()));
+                        path = <span class="prelude-val">Some</span>(s.value());
                     }
                     Opt::World(s) =&gt; {
                         <span class="kw">if </span>world.is_some() {
@@ -361,23 +381,29 @@
                         world = <span class="prelude-val">Some</span>(s.value());
                     }
                     Opt::Inline(s) =&gt; {
-                        <span class="kw">if </span>source.is_some() {
+                        <span class="kw">if </span>inline.is_some() {
                             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(s.span(), <span class="string">&quot;cannot specify second source&quot;</span>));
                         }
-                        source = <span class="prelude-val">Some</span>(Source::Inline(s.value()));
+                        inline = <span class="prelude-val">Some</span>(s.value());
                     }
                     Opt::Tracing(val) =&gt; opts.tracing = val,
                     Opt::Async(val) =&gt; opts.async_ = val,
                     Opt::TrappableErrorType(val) =&gt; opts.trappable_error_type = val,
                     Opt::DuplicateIfNecessary(val) =&gt; opts.duplicate_if_necessary = val,
                     Opt::Interfaces(s) =&gt; {
-                        <span class="kw">if </span>source.is_some() {
+                        <span class="kw">if </span>inline.is_some() {
                             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(s.span(), <span class="string">&quot;cannot specify a second source&quot;</span>));
                         }
-                        source = <span class="prelude-val">Some</span>(Source::Inline(<span class="macro">format!</span>(
-                            <span class="string">&quot;default world interfaces {{ {} }}&quot;</span>,
-                            s.value()
-                        )));
+                        inline = <span class="prelude-val">Some</span>(<span class="macro">format!</span>(<span class="string">&quot;default world interfaces {{ {} }}&quot;</span>, s.value()));
+
+                        <span class="kw">if </span>world.is_some() {
+                            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(
+                                s.span(),
+                                <span class="string">&quot;cannot specify a world with `interfaces`&quot;</span>,
+                            ));
+                        }
+                        world = <span class="prelude-val">Some</span>(<span class="string">&quot;macro-input.interfaces&quot;</span>.to_string());
+
                         opts.only_interfaces = <span class="bool-val">true</span>;
                     }
                     Opt::With(val) =&gt; opts.with.extend(val),
@@ -386,11 +412,12 @@
         } <span class="kw">else </span>{
             world = input.parse::&lt;<span class="prelude-ty">Option</span>&lt;syn::LitStr&gt;&gt;()<span class="question-mark">?</span>.map(|s| s.value());
             <span class="kw">if </span>input.parse::&lt;<span class="prelude-ty">Option</span>&lt;syn::token::In&gt;&gt;()<span class="question-mark">?</span>.is_some() {
-                source = <span class="prelude-val">Some</span>(Source::Path(input.parse::&lt;syn::LitStr&gt;()<span class="question-mark">?</span>.value()));
+                path = <span class="prelude-val">Some</span>(input.parse::&lt;syn::LitStr&gt;()<span class="question-mark">?</span>.value());
             }
         }
-        <span class="kw">let </span>(resolve, pkg, files) =
-            parse_source(<span class="kw-2">&amp;</span>source).map_err(|err| Error::new(call_site, <span class="macro">format!</span>(<span class="string">&quot;{err:?}&quot;</span>)))<span class="question-mark">?</span>;
+        <span class="kw">let </span>(resolve, pkg, files) = parse_source(<span class="kw-2">&amp;</span>path, <span class="kw-2">&amp;</span>inline)
+            .map_err(|err| Error::new(call_site, <span class="macro">format!</span>(<span class="string">&quot;{err:?}&quot;</span>)))<span class="question-mark">?</span>;
+
         <span class="kw">let </span>world = resolve
             .select_world(pkg, world.as_deref())
             .map_err(|e| Error::new(call_site, <span class="macro">format!</span>(<span class="string">&quot;{e:?}&quot;</span>)))<span class="question-mark">?</span>;
@@ -403,11 +430,15 @@
     }
 }
 
-<span class="kw">fn </span>parse_source(source: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;Source&gt;) -&gt; anyhow::Result&lt;(Resolve, PackageId, Vec&lt;PathBuf&gt;)&gt; {
+<span class="kw">fn </span>parse_source(
+    path: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;String&gt;,
+    inline: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;String&gt;,
+) -&gt; anyhow::Result&lt;(Resolve, PackageId, Vec&lt;PathBuf&gt;)&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>resolve = Resolve::default();
     <span class="kw">let </span><span class="kw-2">mut </span>files = Vec::new();
     <span class="kw">let </span>root = PathBuf::from(std::env::var(<span class="string">&quot;CARGO_MANIFEST_DIR&quot;</span>).unwrap());
-    <span class="kw">let </span><span class="kw-2">mut </span>parse = |path: <span class="kw-2">&amp;</span>Path| -&gt; anyhow::Result&lt;<span class="kw">_</span>&gt; {
+
+    <span class="kw">let </span><span class="kw-2">mut </span>parse = |resolve: <span class="kw-2">&amp;mut </span>Resolve, path: <span class="kw-2">&amp;</span>Path| -&gt; anyhow::Result&lt;<span class="kw">_</span>&gt; {
         <span class="kw">if </span>path.is_dir() {
             <span class="kw">let </span>(pkg, sources) = resolve.push_dir(path)<span class="question-mark">?</span>;
             files = sources;
@@ -418,14 +449,31 @@
             resolve.push(pkg, <span class="kw-2">&amp;</span>Default::default())
         }
     };
-    <span class="kw">let </span>pkg = <span class="kw">match </span>source {
-        <span class="prelude-val">Some</span>(Source::Inline(s)) =&gt; resolve.push(
-            UnresolvedPackage::parse(<span class="string">&quot;macro-input&quot;</span>.as_ref(), s)<span class="question-mark">?</span>,
-            <span class="kw-2">&amp;</span>Default::default(),
-        )<span class="question-mark">?</span>,
-        <span class="prelude-val">Some</span>(Source::Path(s)) =&gt; parse(<span class="kw-2">&amp;</span>root.join(s))<span class="question-mark">?</span>,
-        <span class="prelude-val">None </span>=&gt; parse(<span class="kw-2">&amp;</span>root.join(<span class="string">&quot;wit&quot;</span>))<span class="question-mark">?</span>,
-    };
+
+    <span class="kw">let </span>path_pkg = <span class="kw">if let </span><span class="prelude-val">Some</span>(path) = path {
+        <span class="prelude-val">Some</span>(parse(<span class="kw-2">&amp;mut </span>resolve, <span class="kw-2">&amp;</span>root.join(<span class="kw-2">&amp;</span>path))<span class="question-mark">?</span>)
+    } <span class="kw">else </span>{
+        <span class="prelude-val">None
+    </span>};
+
+    <span class="kw">let </span>inline_pkg = <span class="kw">if let </span><span class="prelude-val">Some</span>(inline) = inline {
+        <span class="kw">let </span>deps = resolve
+            .packages
+            .iter()
+            .map(|(id, p)| (p.name.clone(), id))
+            .collect();
+
+        <span class="prelude-val">Some</span>(resolve.push(
+            UnresolvedPackage::parse(<span class="string">&quot;macro-input&quot;</span>.as_ref(), <span class="kw-2">&amp;</span>inline)<span class="question-mark">?</span>,
+            <span class="kw-2">&amp;</span>deps,
+        )<span class="question-mark">?</span>)
+    } <span class="kw">else </span>{
+        <span class="prelude-val">None
+    </span>};
+
+    <span class="kw">let </span>pkg = inline_pkg
+        .or(path_pkg)
+        .map_or_else(|| parse(<span class="kw-2">&amp;mut </span>resolve, <span class="kw-2">&amp;</span>root.join(<span class="string">&quot;wit&quot;</span>)), <span class="prelude-val">Ok</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>((resolve, pkg, files))
 }
