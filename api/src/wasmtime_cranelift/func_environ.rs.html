@@ -3759,7 +3759,7 @@
             .trapz(funcref_ptr, ir::TrapCode::IndirectCallToNull);
 
         <span class="comment">// Dereference the funcref pointer to get the function address.
-        </span><span class="kw">let </span>mem_flags = ir::MemFlags::trusted();
+        </span><span class="kw">let </span>mem_flags = ir::MemFlags::trusted().with_readonly();
         <span class="kw">let </span>func_addr = builder.ins().load(
             pointer_type,
             mem_flags,
@@ -3795,7 +3795,7 @@
                     .load(sig_id_type, mem_flags, signatures, offset);
 
                 <span class="comment">// Load the callee ID.
-                </span><span class="kw">let </span>mem_flags = ir::MemFlags::trusted();
+                </span><span class="kw">let </span>mem_flags = ir::MemFlags::trusted().with_readonly();
                 <span class="kw">let </span>callee_sig_id = builder.ins().load(
                     sig_id_type,
                     mem_flags,
@@ -3867,7 +3867,7 @@
         <span class="kw">let </span>vmctx = <span class="self">self</span>.vmctx(<span class="kw-2">&amp;mut </span>pos.func);
         <span class="kw">let </span>base = pos.ins().global_value(pointer_type, vmctx);
 
-        <span class="kw">let </span>mem_flags = ir::MemFlags::trusted();
+        <span class="kw">let </span>mem_flags = ir::MemFlags::trusted().with_readonly();
 
         <span class="comment">// Load the callee address.
         </span><span class="kw">let </span>body_offset =
