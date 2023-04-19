@@ -469,12 +469,6 @@
 <a href="#469" id="469">469</a>
 <a href="#470" id="470">470</a>
 <a href="#471" id="471">471</a>
-<a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
-<a href="#474" id="474">474</a>
-<a href="#475" id="475">475</a>
-<a href="#476" id="476">476</a>
-<a href="#477" id="477">477</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for riscv64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -591,18 +585,18 @@
         });
     }
     <span class="kw">fn </span>load_ra(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Reg {
+        <span class="kw">let </span>tmp = <span class="self">self</span>.temp_writable_reg(I64);
         <span class="kw">if </span><span class="self">self</span>.backend.flags.preserve_frame_pointers() {
-            <span class="kw">let </span>tmp = <span class="self">self</span>.temp_writable_reg(I64);
             <span class="self">self</span>.emit(<span class="kw-2">&amp;</span>MInst::Load {
                 rd: tmp,
                 op: LoadOP::Ld,
                 flags: MemFlags::trusted(),
                 from: AMode::FPOffset(<span class="number">8</span>, I64),
             });
-            tmp.to_reg()
         } <span class="kw">else </span>{
-            <span class="self">self</span>.gen_move2(link_reg(), I64, I64)
+            <span class="self">self</span>.emit(<span class="kw-2">&amp;</span>gen_move(tmp, I64, link_reg(), I64));
         }
+        tmp.to_reg()
     }
     <span class="kw">fn </span>int_zero_reg(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type) -&gt; ValueRegs {
         <span class="macro">assert!</span>(ty.is_int(), <span class="string">&quot;{:?}&quot;</span>, ty);
@@ -855,12 +849,6 @@
     }
     <span class="kw">fn </span>atomic_amo(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; AMO {
         AMO::SeqCst
-    }
-
-    <span class="kw">fn </span>gen_move2(<span class="kw-2">&amp;mut </span><span class="self">self</span>, r: Reg, ity: Type, oty: Type) -&gt; Reg {
-        <span class="kw">let </span>tmp = <span class="self">self</span>.temp_writable_reg(oty);
-        <span class="self">self</span>.emit(<span class="kw-2">&amp;</span>gen_move(tmp, oty, r, ity));
-        tmp.to_reg()
     }
 
     <span class="kw">fn </span>lower_br_table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: Reg, targets: <span class="kw-2">&amp;</span>VecMachLabel) -&gt; Unit {
