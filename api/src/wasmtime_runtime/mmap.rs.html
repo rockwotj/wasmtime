@@ -642,7 +642,7 @@
                     <span class="number">0</span>,
                     <span class="number">0</span>,
                     len,
-                );
+                ) <span class="kw">as </span><span class="kw-2">*mut </span>std::ffi::c_void;
                 <span class="kw">let </span>err = io::Error::last_os_error();
                 CloseHandle(mapping);
                 <span class="kw">if </span>ptr.is_null() {
@@ -997,7 +997,7 @@
                 <span class="kw">let </span>r = <span class="kw">unsafe </span>{ VirtualFree(<span class="self">self</span>.ptr <span class="kw">as </span><span class="kw-2">*mut </span>c_void, <span class="number">0</span>, MEM_RELEASE) };
                 <span class="macro">assert_ne!</span>(r, <span class="number">0</span>);
             } <span class="kw">else </span>{
-                <span class="kw">let </span>r = <span class="kw">unsafe </span>{ UnmapViewOfFile(<span class="self">self</span>.ptr <span class="kw">as </span><span class="kw-2">*mut </span>c_void) };
+                <span class="kw">let </span>r = <span class="kw">unsafe </span>{ UnmapViewOfFile(<span class="self">self</span>.ptr <span class="kw">as </span>MEMORYMAPPEDVIEW_HANDLE) };
                 <span class="macro">assert_ne!</span>(r, <span class="number">0</span>);
             }
         }

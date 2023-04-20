@@ -1898,7 +1898,7 @@
 <span class="attr">#[cfg(windows)]
 </span><span class="kw">fn </span>lookup_with_dlsym(name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">*const </span>u8&gt; {
     <span class="kw">use </span>std::os::windows::io::RawHandle;
-    <span class="kw">use </span>windows_sys::Win32::Foundation::HINSTANCE;
+    <span class="kw">use </span>windows_sys::Win32::Foundation::HMODULE;
     <span class="kw">use </span>windows_sys::Win32::System::LibraryLoader;
 
     <span class="kw">const </span>UCRTBASE: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;ucrtbase.dll\0&quot;</span>;
@@ -1915,7 +1915,7 @@
         ];
 
         <span class="kw">for </span>handle <span class="kw">in </span><span class="kw-2">&amp;</span>handles {
-            <span class="kw">let </span>addr = LibraryLoader::GetProcAddress(<span class="kw-2">*</span>handle <span class="kw">as </span>HINSTANCE, c_str_ptr.cast());
+            <span class="kw">let </span>addr = LibraryLoader::GetProcAddress(<span class="kw-2">*</span>handle <span class="kw">as </span>HMODULE, c_str_ptr.cast());
             <span class="kw">match </span>addr {
                 <span class="prelude-val">None </span>=&gt; <span class="kw">continue</span>,
                 <span class="prelude-val">Some</span>(addr) =&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(addr <span class="kw">as </span><span class="kw-2">*const </span>u8),
