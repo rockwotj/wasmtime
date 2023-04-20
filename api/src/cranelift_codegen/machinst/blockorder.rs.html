@@ -452,6 +452,7 @@
 <a href="#452" id="452">452</a>
 <a href="#453" id="453">453</a>
 <a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Computation of basic block order in emitted code.
 //!
 //! This module handles the translation from CLIF BBs to VCode BBs.
@@ -642,14 +643,10 @@
         <span class="comment">// Step 2: walk the postorder from the domtree in reverse to produce our desired node
         // lowering order, identifying critical edges to split along the way.
 
-        </span><span class="kw">let </span><span class="kw-2">mut </span>lb_to_bindex = FxHashMap::default();
-        <span class="kw">let </span><span class="kw-2">mut </span>lowered_order = Vec::new();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>lowered_order = Vec::new();
 
         <span class="kw">for </span><span class="kw-2">&amp;</span>block <span class="kw">in </span>domtree.cfg_postorder().iter().rev() {
-            <span class="kw">let </span>lb = LoweredBlock::Orig { block };
-            <span class="kw">let </span>bindex = BlockIndex::new(lowered_order.len());
-            lb_to_bindex.insert(lb.clone(), bindex);
-            lowered_order.push(lb);
+            lowered_order.push(LoweredBlock::Orig { block });
 
             <span class="kw">if </span>block_out_count[block] &gt; <span class="number">1 </span>{
                 <span class="kw">let </span>range = block_succ_range[block].clone();
@@ -663,13 +660,18 @@
                             succ,
                             succ_idx: succ_ix <span class="kw">as </span>u32,
                         };
-                        <span class="kw">let </span>bindex = BlockIndex::new(lowered_order.len());
-                        lb_to_bindex.insert(<span class="kw-2">*</span>lb, bindex);
                         lowered_order.push(<span class="kw-2">*</span>lb);
                     }
                 }
             }
         }
+
+        <span class="kw">let </span>lb_to_bindex = FxHashMap::from_iter(
+            lowered_order
+                .iter()
+                .enumerate()
+                .map(|(i, <span class="kw-2">&amp;</span>lb)| (lb, BlockIndex::new(i))),
+        );
 
         <span class="comment">// Step 3: build the successor tables given the lowering order. We can&#39;t perform this step
         // during the creation of `lowering_order`, as we need `lb_to_bindex` to be fully populated
