@@ -1891,84 +1891,6 @@
 <a href="#1891" id="1891">1891</a>
 <a href="#1892" id="1892">1892</a>
 <a href="#1893" id="1893">1893</a>
-<a href="#1894" id="1894">1894</a>
-<a href="#1895" id="1895">1895</a>
-<a href="#1896" id="1896">1896</a>
-<a href="#1897" id="1897">1897</a>
-<a href="#1898" id="1898">1898</a>
-<a href="#1899" id="1899">1899</a>
-<a href="#1900" id="1900">1900</a>
-<a href="#1901" id="1901">1901</a>
-<a href="#1902" id="1902">1902</a>
-<a href="#1903" id="1903">1903</a>
-<a href="#1904" id="1904">1904</a>
-<a href="#1905" id="1905">1905</a>
-<a href="#1906" id="1906">1906</a>
-<a href="#1907" id="1907">1907</a>
-<a href="#1908" id="1908">1908</a>
-<a href="#1909" id="1909">1909</a>
-<a href="#1910" id="1910">1910</a>
-<a href="#1911" id="1911">1911</a>
-<a href="#1912" id="1912">1912</a>
-<a href="#1913" id="1913">1913</a>
-<a href="#1914" id="1914">1914</a>
-<a href="#1915" id="1915">1915</a>
-<a href="#1916" id="1916">1916</a>
-<a href="#1917" id="1917">1917</a>
-<a href="#1918" id="1918">1918</a>
-<a href="#1919" id="1919">1919</a>
-<a href="#1920" id="1920">1920</a>
-<a href="#1921" id="1921">1921</a>
-<a href="#1922" id="1922">1922</a>
-<a href="#1923" id="1923">1923</a>
-<a href="#1924" id="1924">1924</a>
-<a href="#1925" id="1925">1925</a>
-<a href="#1926" id="1926">1926</a>
-<a href="#1927" id="1927">1927</a>
-<a href="#1928" id="1928">1928</a>
-<a href="#1929" id="1929">1929</a>
-<a href="#1930" id="1930">1930</a>
-<a href="#1931" id="1931">1931</a>
-<a href="#1932" id="1932">1932</a>
-<a href="#1933" id="1933">1933</a>
-<a href="#1934" id="1934">1934</a>
-<a href="#1935" id="1935">1935</a>
-<a href="#1936" id="1936">1936</a>
-<a href="#1937" id="1937">1937</a>
-<a href="#1938" id="1938">1938</a>
-<a href="#1939" id="1939">1939</a>
-<a href="#1940" id="1940">1940</a>
-<a href="#1941" id="1941">1941</a>
-<a href="#1942" id="1942">1942</a>
-<a href="#1943" id="1943">1943</a>
-<a href="#1944" id="1944">1944</a>
-<a href="#1945" id="1945">1945</a>
-<a href="#1946" id="1946">1946</a>
-<a href="#1947" id="1947">1947</a>
-<a href="#1948" id="1948">1948</a>
-<a href="#1949" id="1949">1949</a>
-<a href="#1950" id="1950">1950</a>
-<a href="#1951" id="1951">1951</a>
-<a href="#1952" id="1952">1952</a>
-<a href="#1953" id="1953">1953</a>
-<a href="#1954" id="1954">1954</a>
-<a href="#1955" id="1955">1955</a>
-<a href="#1956" id="1956">1956</a>
-<a href="#1957" id="1957">1957</a>
-<a href="#1958" id="1958">1958</a>
-<a href="#1959" id="1959">1959</a>
-<a href="#1960" id="1960">1960</a>
-<a href="#1961" id="1961">1961</a>
-<a href="#1962" id="1962">1962</a>
-<a href="#1963" id="1963">1963</a>
-<a href="#1964" id="1964">1964</a>
-<a href="#1965" id="1965">1965</a>
-<a href="#1966" id="1966">1966</a>
-<a href="#1967" id="1967">1967</a>
-<a href="#1968" id="1968">1968</a>
-<a href="#1969" id="1969">1969</a>
-<a href="#1970" id="1970">1970</a>
-<a href="#1971" id="1971">1971</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA definitions: instruction arguments.
 
 </span><span class="comment">// Some variants are never constructed, but we still want them as options in the future.
@@ -3639,55 +3561,6 @@
     }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>VType {
-    vma: bool,
-    vta: bool,
-    vsew: Vsew,
-    valmul: Vlmul,
-}
-
-<span class="kw">impl </span>VType {
-    <span class="kw">fn </span>as_u32(<span class="self">self</span>) -&gt; u32 {
-        <span class="self">self</span>.valmul.as_u32()
-            | <span class="self">self</span>.vsew.as_u32() &lt;&lt; <span class="number">3
-            </span>| <span class="kw">if </span><span class="self">self</span>.vta { <span class="number">1 </span>&lt;&lt; <span class="number">7 </span>} <span class="kw">else </span>{ <span class="number">0 </span>}
-            | <span class="kw">if </span><span class="self">self</span>.vma { <span class="number">1 </span>&lt;&lt; <span class="number">8 </span>} <span class="kw">else </span>{ <span class="number">0 </span>}
-    }
-
-    <span class="kw">const fn </span>vill_bit() -&gt; u64 {
-        <span class="number">1 </span>&lt;&lt; <span class="number">63
-    </span>}
-}
-
-<span class="kw">enum </span>Vlmul {
-    vlmul_1_div_8 = <span class="number">0b101</span>,
-    vlmul_1_div_4 = <span class="number">0b110</span>,
-    vlmul_1_div_2 = <span class="number">0b111</span>,
-    vlmul_1 = <span class="number">0b000</span>,
-    vlmul_2 = <span class="number">0b001</span>,
-    vlmul_4 = <span class="number">0b010</span>,
-    vlmul_8 = <span class="number">0b011</span>,
-}
-
-<span class="kw">impl </span>Vlmul {
-    <span class="kw">fn </span>as_u32(<span class="self">self</span>) -&gt; u32 {
-        <span class="self">self </span><span class="kw">as </span>u32
-    }
-}
-
-<span class="kw">enum </span>Vsew {
-    sew_8 = <span class="number">0b000</span>,
-    sew_16 = <span class="number">0b001</span>,
-    sew_32 = <span class="number">0b010</span>,
-    sew_64 = <span class="number">0b011</span>,
-}
-
-<span class="kw">impl </span>Vsew {
-    <span class="kw">fn </span>as_u32(<span class="self">self</span>) -&gt; u32 {
-        <span class="self">self </span><span class="kw">as </span>u32
-    }
-}
-
 <span class="kw">impl </span>CsrOP {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>op_name(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
         <span class="kw">match </span><span class="self">self </span>{
@@ -3725,37 +3598,8 @@
         <span class="kw">if </span><span class="self">self</span>.need_rs() {
             reg_to_gpr_num(rs.unwrap())
         } <span class="kw">else </span>{
-            zimm.unwrap().as_u32()
+            zimm.unwrap().bits()
         }
-    }
-}
-
-<span class="kw">enum </span>Vxrm {
-    <span class="comment">// round-to-nearest-up (add +0.5 LSB)
-    </span>rnu = <span class="number">0b00</span>,
-    <span class="comment">// round-to-nearest-even
-    </span>rne = <span class="number">0b01</span>,
-    <span class="comment">//round-down (truncate)
-    </span>rdn = <span class="number">0b10</span>,
-    <span class="comment">// round-to-odd (OR bits into LSB, aka &quot;jam&quot;)
-    </span>rod = <span class="number">0b11</span>,
-}
-
-<span class="kw">impl </span>Vxrm {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>as_u32(<span class="self">self</span>) -&gt; u32 {
-        <span class="self">self </span><span class="kw">as </span>u32
-    }
-}
-
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Vcsr {
-    xvrm: Vxrm,
-    <span class="comment">// Fixed-point accrued saturation flag
-    </span>vxsat: bool,
-}
-
-<span class="kw">impl </span>Vcsr {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>as_u32(<span class="self">self</span>) -&gt; u32 {
-        <span class="kw">return if </span><span class="self">self</span>.vxsat { <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>} | <span class="self">self</span>.xvrm.as_u32();
     }
 }
 

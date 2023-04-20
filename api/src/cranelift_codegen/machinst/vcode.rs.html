@@ -1592,6 +1592,11 @@
 <a href="#1592" id="1592">1592</a>
 <a href="#1593" id="1593">1593</a>
 <a href="#1594" id="1594">1594</a>
+<a href="#1595" id="1595">1595</a>
+<a href="#1596" id="1596">1596</a>
+<a href="#1597" id="1597">1597</a>
+<a href="#1598" id="1598">1598</a>
+<a href="#1599" id="1599">1599</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This implements the VCode container: a CFG of Insts that have been lowered.
 //!
 //! VCode is virtual-register code. An instruction in VCode is almost a machine
@@ -2437,7 +2442,12 @@
 
         <span class="kw">for </span>(block_order_idx, <span class="kw-2">&amp;</span>block) <span class="kw">in </span>final_order.iter().enumerate() {
             <span class="macro">trace!</span>(<span class="string">&quot;emitting block {:?}&quot;</span>, block);
-            <span class="kw">let </span>new_offset = I::align_basic_block(buffer.cur_offset());
+
+            <span class="comment">// Call the new block hook for state
+            </span>state.on_new_block();
+
+            <span class="comment">// Emit NOPs to align the block.
+            </span><span class="kw">let </span>new_offset = I::align_basic_block(buffer.cur_offset());
             <span class="kw">while </span>new_offset &gt; buffer.cur_offset() {
                 <span class="comment">// Pad with NOPs up to the aligned block offset.
                 </span><span class="kw">let </span>nop = I::gen_nop((new_offset - buffer.cur_offset()) <span class="kw">as </span>usize);

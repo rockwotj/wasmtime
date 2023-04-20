@@ -469,6 +469,15 @@
 <a href="#469" id="469">469</a>
 <a href="#470" id="470">470</a>
 <a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for riscv64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -754,6 +763,10 @@
         ValueRegs::two(shamt, len_sub_shamt)
     }
 
+    <span class="kw">fn </span>has_v(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.backend.isa_flags.has_v()
+    }
+
     <span class="kw">fn </span>has_zbkb(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.backend.isa_flags.has_zbkb()
     }
@@ -898,6 +911,11 @@
             rs1,
             rs2,
         }
+    }
+
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>vstate_from_type(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type) -&gt; VState {
+        VState::from_type(ty)
     }
 }
 
