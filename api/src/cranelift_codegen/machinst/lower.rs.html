@@ -1364,9 +1364,6 @@
 <a href="#1364" id="1364">1364</a>
 <a href="#1365" id="1365">1365</a>
 <a href="#1366" id="1366">1366</a>
-<a href="#1367" id="1367">1367</a>
-<a href="#1368" id="1368">1368</a>
-<a href="#1369" id="1369">1369</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module implements lowering (instruction selection) from Cranelift IR
 //! to machine instructions with virtual registers. This is *almost* the final
 //! machine code, except for register allocation.
@@ -1746,12 +1743,27 @@
             }
         }
 
-        <span class="comment">// Make a sret register, if one is needed.
+        <span class="comment">// Find the sret register, if it&#39;s used.
         </span><span class="kw">let </span><span class="kw-2">mut </span>sret_reg = <span class="prelude-val">None</span>;
-        <span class="kw">for </span>ret <span class="kw">in </span><span class="kw-2">&amp;</span>vcode.abi().signature().returns.clone() {
+        <span class="kw">for </span>ret <span class="kw">in </span>vcode.abi().signature().returns.iter() {
             <span class="kw">if </span>ret.purpose == ArgumentPurpose::StructReturn {
-                <span class="macro">assert!</span>(sret_reg.is_none());
-                sret_reg = <span class="prelude-val">Some</span>(vregs.alloc(ret.value_type)<span class="question-mark">?</span>);
+                <span class="kw">let </span>entry_bb = f.stencil.layout.entry_block().unwrap();
+                <span class="kw">for </span>(<span class="kw-2">&amp;</span>param, sig_param) <span class="kw">in </span>f
+                    .dfg
+                    .block_params(entry_bb)
+                    .iter()
+                    .zip(vcode.abi().signature().params.iter())
+                {
+                    <span class="kw">if </span>sig_param.purpose == ArgumentPurpose::StructReturn {
+                        <span class="kw">let </span>regs = value_regs[param];
+                        <span class="macro">assert!</span>(regs.len() == <span class="number">1</span>);
+
+                        <span class="macro">assert!</span>(sret_reg.is_none());
+                        sret_reg = <span class="prelude-val">Some</span>(regs);
+                    }
+                }
+
+                <span class="macro">assert!</span>(sret_reg.is_some());
             }
         }
 
@@ -1944,24 +1956,6 @@
                     .into_iter()
                 {
                     <span class="self">self</span>.emit(insn);
-                }
-                <span class="kw">if </span><span class="self">self</span>.abi().signature().params[i].purpose == ArgumentPurpose::StructReturn {
-                    <span class="macro">assert!</span>(regs.len() == <span class="number">1</span>);
-                    <span class="kw">let </span>ty = <span class="self">self</span>.abi().signature().params[i].value_type;
-                    <span class="comment">// The ABI implementation must have ensured that a StructReturn
-                    // arg is present in the return values.
-                    </span><span class="macro">assert!</span>(<span class="self">self
-                        </span>.abi()
-                        .signature()
-                        .returns
-                        .iter()
-                        .position(|ret| ret.purpose == ArgumentPurpose::StructReturn)
-                        .is_some());
-                    <span class="self">self</span>.emit(I::gen_move(
-                        Writable::from_reg(<span class="self">self</span>.sret_reg.unwrap().regs()[<span class="number">0</span>]),
-                        regs.regs()[<span class="number">0</span>].to_reg(),
-                        ty,
-                    ));
                 }
             }
             <span class="kw">if let </span><span class="prelude-val">Some</span>(insn) = <span class="self">self
