@@ -965,18 +965,31 @@
 <a href="#965" id="965">965</a>
 <a href="#966" id="966">966</a>
 <a href="#967" id="967">967</a>
+<a href="#968" id="968">968</a>
+<a href="#969" id="969">969</a>
+<a href="#970" id="970">970</a>
+<a href="#971" id="971">971</a>
+<a href="#972" id="972">972</a>
+<a href="#973" id="973">973</a>
+<a href="#974" id="974">974</a>
+<a href="#975" id="975">975</a>
+<a href="#976" id="976">976</a>
+<a href="#977" id="977">977</a>
+<a href="#978" id="978">978</a>
+<a href="#979" id="979">979</a>
+<a href="#980" id="980">980</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines `JITModule`.
 
 </span><span class="kw">use crate</span>::{compiled_blob::CompiledBlob, memory::BranchProtection, memory::Memory};
+<span class="kw">use </span>cranelift_codegen::binemit::Reloc;
 <span class="kw">use </span>cranelift_codegen::isa::{OwnedTargetIsa, TargetIsa};
 <span class="kw">use </span>cranelift_codegen::settings::Configurable;
 <span class="kw">use </span>cranelift_codegen::{<span class="self">self</span>, ir, settings, MachReloc};
-<span class="kw">use </span>cranelift_codegen::{binemit::Reloc, CodegenError};
 <span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>cranelift_entity::SecondaryMap;
 <span class="kw">use </span>cranelift_module::{
-    DataDescription, DataId, FuncId, Init, Linkage, Module, ModuleCompiledFunction,
-    ModuleDeclarations, ModuleError, ModuleExtName, ModuleReloc, ModuleResult,
+    DataDescription, DataId, FuncId, Init, Linkage, Module, ModuleDeclarations, ModuleError,
+    ModuleExtName, ModuleReloc, ModuleResult,
 };
 <span class="kw">use </span>log::info;
 <span class="kw">use </span>std::cell::RefCell;
@@ -1239,7 +1252,10 @@
         <span class="self">self</span>.record_function_for_perf(
             plt_entry.as_ptr().cast(),
             std::mem::size_of::&lt;[u8; <span class="number">16</span>]&gt;(),
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}@plt&quot;</span>, <span class="self">self</span>.declarations.get_function_decl(id).name),
+            <span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                <span class="string">&quot;{}@plt&quot;</span>,
+                <span class="self">self</span>.declarations.get_function_decl(id).linkage_name(id)
+            ),
         );
         <span class="self">self</span>.function_plt_entries[id] = <span class="prelude-val">Some</span>(plt_entry);
     }
@@ -1290,6 +1306,9 @@
                         }
                     }
                 };
+                <span class="kw">let </span>name = name
+                    .as_ref()
+                    .expect(<span class="string">&quot;anonymous symbol must be defined locally&quot;</span>);
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(ptr) = <span class="self">self</span>.lookup_symbol(name) {
                     ptr
                 } <span class="kw">else if </span>linkage == Linkage::Preemptible {
@@ -1521,13 +1540,15 @@
         <span class="macro">assert!</span>(<span class="self">self</span>.hotswap_enabled, <span class="string">&quot;Hotswap support is not enabled&quot;</span>);
         <span class="kw">let </span>decl = <span class="self">self</span>.declarations.get_function_decl(func_id);
         <span class="kw">if </span>!decl.linkage.is_definable() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::InvalidImportDefinition(decl.name.clone()));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::InvalidImportDefinition(
+                decl.linkage_name(func_id).into_owned(),
+            ));
         }
 
         <span class="kw">if </span><span class="self">self</span>.compiled_functions[func_id].is_none() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::Backend(<span class="macro">anyhow::anyhow!</span>(
                 <span class="string">&quot;Tried to redefine not yet defined function {}&quot;</span>,
-                decl.name
+                decl.linkage_name(func_id),
             )));
         }
 
@@ -1614,15 +1635,19 @@
         id: FuncId,
         ctx: <span class="kw-2">&amp;mut </span>cranelift_codegen::Context,
         ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
-    ) -&gt; ModuleResult&lt;ModuleCompiledFunction&gt; {
+    ) -&gt; ModuleResult&lt;()&gt; {
         <span class="macro">info!</span>(<span class="string">&quot;defining function {}: {}&quot;</span>, id, ctx.func.display());
         <span class="kw">let </span>decl = <span class="self">self</span>.declarations.get_function_decl(id);
         <span class="kw">if </span>!decl.linkage.is_definable() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::InvalidImportDefinition(decl.name.clone()));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::InvalidImportDefinition(
+                decl.linkage_name(id).into_owned(),
+            ));
         }
 
         <span class="kw">if </span>!<span class="self">self</span>.compiled_functions[id].is_none() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::DuplicateDefinition(decl.name.to_owned()));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::DuplicateDefinition(
+                decl.linkage_name(id).into_owned(),
+            ));
         }
 
         <span class="kw">if </span><span class="self">self</span>.hotswap_enabled {
@@ -1645,9 +1670,7 @@
         <span class="kw">let </span>alignment = res.alignment <span class="kw">as </span>u64;
         <span class="kw">let </span>compiled_code = ctx.compiled_code().unwrap();
 
-        <span class="kw">let </span>code_size = compiled_code.code_info().total_size;
-
-        <span class="kw">let </span>size = code_size <span class="kw">as </span>usize;
+        <span class="kw">let </span>size = compiled_code.code_info().total_size <span class="kw">as </span>usize;
         <span class="kw">let </span>align = alignment
             .max(<span class="self">self</span>.isa.function_alignment() <span class="kw">as </span>u64)
             .max(<span class="self">self</span>.isa.symbol_alignment());
@@ -1672,7 +1695,7 @@
             .map(|reloc| ModuleReloc::from_mach_reloc(reloc, <span class="kw-2">&amp;</span>ctx.func))
             .collect();
 
-        <span class="self">self</span>.record_function_for_perf(ptr, size, <span class="kw-2">&amp;</span>decl.name);
+        <span class="self">self</span>.record_function_for_perf(ptr, size, <span class="kw-2">&amp;</span>decl.linkage_name(id));
         <span class="self">self</span>.compiled_functions[id] = <span class="prelude-val">Some</span>(CompiledBlob { ptr, size, relocs });
 
         <span class="kw">if </span><span class="self">self</span>.isa.flags().is_pic() {
@@ -1706,7 +1729,7 @@
             <span class="self">self</span>.functions_to_finalize.push(id);
         }
 
-        <span class="prelude-val">Ok</span>(ModuleCompiledFunction { size: code_size })
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn </span>define_function_bytes(
@@ -1716,20 +1739,19 @@
         alignment: u64,
         bytes: <span class="kw-2">&amp;</span>[u8],
         relocs: <span class="kw-2">&amp;</span>[MachReloc],
-    ) -&gt; ModuleResult&lt;ModuleCompiledFunction&gt; {
+    ) -&gt; ModuleResult&lt;()&gt; {
         <span class="macro">info!</span>(<span class="string">&quot;defining function {} with bytes&quot;</span>, id);
-        <span class="kw">let </span>total_size: u32 = <span class="kw">match </span>bytes.len().try_into() {
-            <span class="prelude-val">Ok</span>(total_size) =&gt; total_size,
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(CodegenError::CodeTooLarge)<span class="question-mark">?</span>,
-        };
-
         <span class="kw">let </span>decl = <span class="self">self</span>.declarations.get_function_decl(id);
         <span class="kw">if </span>!decl.linkage.is_definable() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::InvalidImportDefinition(decl.name.clone()));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::InvalidImportDefinition(
+                decl.linkage_name(id).into_owned(),
+            ));
         }
 
         <span class="kw">if </span>!<span class="self">self</span>.compiled_functions[id].is_none() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::DuplicateDefinition(decl.name.to_owned()));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::DuplicateDefinition(
+                decl.linkage_name(id).into_owned(),
+            ));
         }
 
         <span class="kw">let </span>size = bytes.len();
@@ -1749,7 +1771,7 @@
             ptr::copy_nonoverlapping(bytes.as_ptr(), ptr, size);
         }
 
-        <span class="self">self</span>.record_function_for_perf(ptr, size, <span class="kw-2">&amp;</span>decl.name);
+        <span class="self">self</span>.record_function_for_perf(ptr, size, <span class="kw-2">&amp;</span>decl.linkage_name(id));
         <span class="self">self</span>.compiled_functions[id] = <span class="prelude-val">Some</span>(CompiledBlob {
             ptr,
             size,
@@ -1779,17 +1801,21 @@
             <span class="self">self</span>.functions_to_finalize.push(id);
         }
 
-        <span class="prelude-val">Ok</span>(ModuleCompiledFunction { size: total_size })
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn </span>define_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: DataId, data: <span class="kw-2">&amp;</span>DataDescription) -&gt; ModuleResult&lt;()&gt; {
         <span class="kw">let </span>decl = <span class="self">self</span>.declarations.get_data_decl(id);
         <span class="kw">if </span>!decl.linkage.is_definable() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::InvalidImportDefinition(decl.name.clone()));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::InvalidImportDefinition(
+                decl.linkage_name(id).into_owned(),
+            ));
         }
 
         <span class="kw">if </span>!<span class="self">self</span>.compiled_data_objects[id].is_none() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::DuplicateDefinition(decl.name.to_owned()));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::DuplicateDefinition(
+                decl.linkage_name(id).into_owned(),
+            ));
         }
 
         <span class="macro">assert!</span>(!decl.tls, <span class="string">&quot;JIT doesn&#39;t yet support TLS&quot;</span>);

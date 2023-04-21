@@ -516,7 +516,7 @@
 
 <span class="doccomment">/// A version marker used to ensure that serialized clif ir is never deserialized with a
 /// different version of Cranelift.
-</span><span class="attr">#[derive(Copy, Clone, Debug, PartialEq, Hash)]
+</span><span class="attr">#[derive(Default, Copy, Clone, Debug, PartialEq, Hash)]
 </span><span class="kw">pub struct </span>VersionMarker;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;enable-serde&quot;</span>)]

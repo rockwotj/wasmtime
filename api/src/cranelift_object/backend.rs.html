@@ -852,27 +852,17 @@
 <a href="#852" id="852">852</a>
 <a href="#853" id="853">853</a>
 <a href="#854" id="854">854</a>
-<a href="#855" id="855">855</a>
-<a href="#856" id="856">856</a>
-<a href="#857" id="857">857</a>
-<a href="#858" id="858">858</a>
-<a href="#859" id="859">859</a>
-<a href="#860" id="860">860</a>
-<a href="#861" id="861">861</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines `ObjectModule`.
 
 </span><span class="kw">use </span>anyhow::anyhow;
+<span class="kw">use </span>cranelift_codegen::binemit::{Addend, CodeOffset, Reloc};
 <span class="kw">use </span>cranelift_codegen::entity::SecondaryMap;
 <span class="kw">use </span>cranelift_codegen::isa::{OwnedTargetIsa, TargetIsa};
 <span class="kw">use </span>cranelift_codegen::{<span class="self">self</span>, ir, MachReloc};
-<span class="kw">use </span>cranelift_codegen::{
-    binemit::{Addend, CodeOffset, Reloc},
-    CodegenError,
-};
 <span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>cranelift_module::{
-    DataDescription, DataId, FuncId, Init, Linkage, Module, ModuleCompiledFunction,
-    ModuleDeclarations, ModuleError, ModuleExtName, ModuleReloc, ModuleResult,
+    DataDescription, DataId, FuncId, Init, Linkage, Module, ModuleDeclarations, ModuleError,
+    ModuleExtName, ModuleReloc, ModuleResult,
 };
 <span class="kw">use </span>log::info;
 <span class="kw">use </span>object::write::{
@@ -882,7 +872,6 @@
     RelocationEncoding, RelocationKind, SectionKind, SymbolFlags, SymbolKind, SymbolScope,
 };
 <span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::convert::TryInto;
 <span class="kw">use </span>std::mem;
 <span class="kw">use </span>target_lexicon::PointerWidth;
 
@@ -996,8 +985,6 @@
     libcall_names: Box&lt;<span class="kw">dyn </span>Fn(ir::LibCall) -&gt; String + Send + Sync&gt;,
     known_symbols: HashMap&lt;ir::KnownSymbol, SymbolId&gt;,
     per_function_section: bool,
-    anon_func_number: u64,
-    anon_data_number: u64,
 }
 
 <span class="kw">impl </span>ObjectModule {
@@ -1017,8 +1004,6 @@
             libcall_names: builder.libcall_names,
             known_symbols: HashMap::new(),
             per_function_section: builder.per_function_section,
-            anon_func_number: <span class="number">0</span>,
-            anon_data_number: <span class="number">0</span>,
         }
     }
 }
@@ -1080,16 +1065,15 @@
     }
 
     <span class="kw">fn </span>declare_anonymous_function(<span class="kw-2">&amp;mut </span><span class="self">self</span>, signature: <span class="kw-2">&amp;</span>ir::Signature) -&gt; ModuleResult&lt;FuncId&gt; {
-        <span class="comment">// Symbols starting with .L are completely omitted from the symbol table after linking.
-        // Using hexadecimal instead of decimal for slightly smaller symbol names and often slightly
-        // faster linking.
-        </span><span class="kw">let </span>name = <span class="macro">format!</span>(<span class="string">&quot;.Lfn{:x}&quot;</span>, <span class="self">self</span>.anon_func_number);
-        <span class="self">self</span>.anon_func_number += <span class="number">1</span>;
-
         <span class="kw">let </span>id = <span class="self">self</span>.declarations.declare_anonymous_function(signature)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>symbol_id = <span class="self">self</span>.object.add_symbol(Symbol {
-            name: name.as_bytes().to_vec(),
+            name: <span class="self">self
+                </span>.declarations
+                .get_function_decl(id)
+                .linkage_name(id)
+                .into_owned()
+                .into_bytes(),
             value: <span class="number">0</span>,
             size: <span class="number">0</span>,
             kind: SymbolKind::Text,
@@ -1148,12 +1132,6 @@
     }
 
     <span class="kw">fn </span>declare_anonymous_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, writable: bool, tls: bool) -&gt; ModuleResult&lt;DataId&gt; {
-        <span class="comment">// Symbols starting with .L are completely omitted from the symbol table after linking.
-        // Using hexadecimal instead of decimal for slightly smaller symbol names and often slightly
-        // faster linking.
-        </span><span class="kw">let </span>name = <span class="macro">format!</span>(<span class="string">&quot;.Ldata{:x}&quot;</span>, <span class="self">self</span>.anon_data_number);
-        <span class="self">self</span>.anon_data_number += <span class="number">1</span>;
-
         <span class="kw">let </span>id = <span class="self">self</span>.declarations.declare_anonymous_data(writable, tls)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>kind = <span class="kw">if </span>tls {
@@ -1163,7 +1141,12 @@
         };
 
         <span class="kw">let </span>symbol_id = <span class="self">self</span>.object.add_symbol(Symbol {
-            name: name.as_bytes().to_vec(),
+            name: <span class="self">self
+                </span>.declarations
+                .get_data_decl(id)
+                .linkage_name(id)
+                .into_owned()
+                .into_bytes(),
             value: <span class="number">0</span>,
             size: <span class="number">0</span>,
             kind,
@@ -1182,7 +1165,7 @@
         func_id: FuncId,
         ctx: <span class="kw-2">&amp;mut </span>cranelift_codegen::Context,
         ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
-    ) -&gt; ModuleResult&lt;ModuleCompiledFunction&gt; {
+    ) -&gt; ModuleResult&lt;()&gt; {
         <span class="macro">info!</span>(<span class="string">&quot;defining function {}: {}&quot;</span>, func_id, ctx.func.display());
         <span class="kw">let </span><span class="kw-2">mut </span>code: Vec&lt;u8&gt; = Vec::new();
 
@@ -1205,21 +1188,20 @@
         alignment: u64,
         bytes: <span class="kw-2">&amp;</span>[u8],
         relocs: <span class="kw-2">&amp;</span>[MachReloc],
-    ) -&gt; ModuleResult&lt;ModuleCompiledFunction&gt; {
+    ) -&gt; ModuleResult&lt;()&gt; {
         <span class="macro">info!</span>(<span class="string">&quot;defining function {} with bytes&quot;</span>, func_id);
-        <span class="kw">let </span>total_size: u32 = <span class="kw">match </span>bytes.len().try_into() {
-            <span class="prelude-val">Ok</span>(total_size) =&gt; total_size,
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(CodegenError::CodeTooLarge)<span class="question-mark">?</span>,
-        };
-
         <span class="kw">let </span>decl = <span class="self">self</span>.declarations.get_function_decl(func_id);
         <span class="kw">if </span>!decl.linkage.is_definable() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::InvalidImportDefinition(decl.name.clone()));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::InvalidImportDefinition(
+                decl.linkage_name(func_id).into_owned(),
+            ));
         }
 
         <span class="kw">let </span><span class="kw-2">&amp;mut </span>(symbol, <span class="kw-2">ref mut </span>defined) = <span class="self">self</span>.functions[func_id].as_mut().unwrap();
         <span class="kw">if </span><span class="kw-2">*</span>defined {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::DuplicateDefinition(decl.name.clone()));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::DuplicateDefinition(
+                decl.linkage_name(func_id).into_owned(),
+            ));
         }
         <span class="kw-2">*</span>defined = <span class="bool-val">true</span>;
 
@@ -1252,18 +1234,22 @@
             });
         }
 
-        <span class="prelude-val">Ok</span>(ModuleCompiledFunction { size: total_size })
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn </span>define_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data_id: DataId, data: <span class="kw-2">&amp;</span>DataDescription) -&gt; ModuleResult&lt;()&gt; {
         <span class="kw">let </span>decl = <span class="self">self</span>.declarations.get_data_decl(data_id);
         <span class="kw">if </span>!decl.linkage.is_definable() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::InvalidImportDefinition(decl.name.clone()));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::InvalidImportDefinition(
+                decl.linkage_name(data_id).into_owned(),
+            ));
         }
 
         <span class="kw">let </span><span class="kw-2">&amp;mut </span>(symbol, <span class="kw-2">ref mut </span>defined) = <span class="self">self</span>.data_objects[data_id].as_mut().unwrap();
         <span class="kw">if </span><span class="kw-2">*</span>defined {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::DuplicateDefinition(decl.name.clone()));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ModuleError::DuplicateDefinition(
+                decl.linkage_name(data_id).into_owned(),
+            ));
         }
         <span class="kw-2">*</span>defined = <span class="bool-val">true</span>;
 

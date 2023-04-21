@@ -223,6 +223,8 @@
 <a href="#223" id="223">223</a>
 <a href="#224" id="224">224</a>
 <a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Defines `DataContext`.
 
 </span><span class="kw">use </span>cranelift_codegen::binemit::{Addend, CodeOffset, Reloc};
@@ -238,6 +240,7 @@
 
 <span class="doccomment">/// This specifies how data is to be initialized.
 </span><span class="attr">#[derive(Clone, PartialEq, Eq, Debug)]
+#[cfg_attr(feature = <span class="string">&quot;enable-serde&quot;</span>, derive(serde::Serialize, serde::Deserialize))]
 </span><span class="kw">pub enum </span>Init {
     <span class="doccomment">/// This indicates that no initialization has been specified yet.
     </span>Uninitialized,
@@ -266,6 +269,7 @@
 
 <span class="doccomment">/// A description of a data object.
 </span><span class="attr">#[derive(Clone, Debug)]
+#[cfg_attr(feature = <span class="string">&quot;enable-serde&quot;</span>, derive(serde::Serialize, serde::Deserialize))]
 </span><span class="kw">pub struct </span>DataDescription {
     <span class="doccomment">/// How the data should be initialized.
     </span><span class="kw">pub </span>init: Init,
