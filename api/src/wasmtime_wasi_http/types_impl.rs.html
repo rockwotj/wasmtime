@@ -279,8 +279,15 @@
 <a href="#279" id="279">279</a>
 <a href="#280" id="280">280</a>
 <a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::poll::Pollable;
-<span class="kw">use crate</span>::r#struct::ActiveRequest;
+<span class="kw">use crate</span>::r#struct::{ActiveRequest, Stream};
 <span class="kw">use </span><span class="kw">crate</span>::types::{
     Error, Fields, FutureIncomingResponse, Headers, IncomingRequest, IncomingResponse,
     IncomingStream, Method, OutgoingRequest, OutgoingResponse, OutgoingStream, ResponseOutparam,
@@ -288,7 +295,7 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::WasiHttp;
 <span class="kw">use </span>anyhow::{anyhow, bail};
-<span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::collections::{hash_map::Entry, HashMap};
 
 <span class="kw">impl </span><span class="kw">crate</span>::types::Host <span class="kw">for </span>WasiHttp {
     <span class="kw">fn </span>drop_fields(<span class="kw-2">&amp;mut </span><span class="self">self</span>, fields: Fields) -&gt; wasmtime::Result&lt;()&gt; {
@@ -404,7 +411,10 @@
         <span class="macro">bail!</span>(<span class="string">&quot;unimplemented: drop_incoming_request&quot;</span>)
     }
     <span class="kw">fn </span>drop_outgoing_request(<span class="kw-2">&amp;mut </span><span class="self">self</span>, request: OutgoingRequest) -&gt; wasmtime::Result&lt;()&gt; {
-        <span class="self">self</span>.requests.remove(<span class="kw-2">&amp;</span>request);
+        <span class="kw">if let </span>Entry::Occupied(e) = <span class="self">self</span>.requests.entry(request) {
+            <span class="kw">let </span>r = e.remove();
+            <span class="self">self</span>.streams.remove(<span class="kw-2">&amp;</span>r.body);
+        }
         <span class="prelude-val">Ok</span>(())
     }
     <span class="kw">fn </span>incoming_request_method(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _request: IncomingRequest) -&gt; wasmtime::Result&lt;Method&gt; {
@@ -473,6 +483,7 @@
         <span class="kw">if </span>req.body == <span class="number">0 </span>{
             req.body = <span class="self">self</span>.streams_id_base;
             <span class="self">self</span>.streams_id_base = <span class="self">self</span>.streams_id_base + <span class="number">1</span>;
+            <span class="self">self</span>.streams.insert(req.body, Stream::default());
         }
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(req.body))
     }
@@ -487,7 +498,10 @@
         <span class="macro">bail!</span>(<span class="string">&quot;unimplemented: set_response_outparam&quot;</span>)
     }
     <span class="kw">fn </span>drop_incoming_response(<span class="kw-2">&amp;mut </span><span class="self">self</span>, response: IncomingResponse) -&gt; wasmtime::Result&lt;()&gt; {
-        <span class="self">self</span>.responses.remove(<span class="kw-2">&amp;</span>response);
+        <span class="kw">if let </span>Entry::Occupied(e) = <span class="self">self</span>.responses.entry(response) {
+            <span class="kw">let </span>r = e.remove();
+            <span class="self">self</span>.streams.remove(<span class="kw-2">&amp;</span>r.body);
+        }
         <span class="prelude-val">Ok</span>(())
     }
     <span class="kw">fn </span>drop_outgoing_response(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _response: OutgoingResponse) -&gt; wasmtime::Result&lt;()&gt; {

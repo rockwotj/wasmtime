@@ -115,11 +115,20 @@
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
 <a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::poll::Pollable;
 <span class="kw">use </span><span class="kw">crate</span>::streams::{InputStream, OutputStream, StreamError};
 <span class="kw">use </span><span class="kw">crate</span>::WasiHttp;
 <span class="kw">use </span>anyhow::{anyhow, bail};
-<span class="kw">use </span>bytes::BufMut;
 <span class="kw">use </span>std::vec::Vec;
 
 <span class="kw">impl </span><span class="kw">crate</span>::streams::Host <span class="kw">for </span>WasiHttp {
@@ -128,10 +137,14 @@
         stream: InputStream,
         len: u64,
     ) -&gt; wasmtime::Result&lt;<span class="prelude-ty">Result</span>&lt;(Vec&lt;u8&gt;, bool), StreamError&gt;&gt; {
-        <span class="kw">let </span>s = <span class="self">self
+        <span class="kw">let </span>st = <span class="self">self
             </span>.streams
             .get_mut(<span class="kw-2">&amp;</span>stream)
             .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;stream not found: {stream}&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">if </span>st.closed {
+            <span class="macro">bail!</span>(<span class="string">&quot;stream is dropped!&quot;</span>);
+        }
+        <span class="kw">let </span>s = <span class="kw-2">&amp;mut </span>st.data;
         <span class="kw">if </span>len == <span class="number">0 </span>{
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>((bytes::Bytes::new().to_vec(), s.len() &gt; <span class="number">0</span>)))
         } <span class="kw">else if </span>s.len() &gt; len.try_into()<span class="question-mark">? </span>{
@@ -148,10 +161,14 @@
         stream: InputStream,
         len: u64,
     ) -&gt; wasmtime::Result&lt;<span class="prelude-ty">Result</span>&lt;(u64, bool), StreamError&gt;&gt; {
-        <span class="kw">let </span>s = <span class="self">self
+        <span class="kw">let </span>st = <span class="self">self
             </span>.streams
             .get_mut(<span class="kw-2">&amp;</span>stream)
             .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;stream not found: {stream}&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">if </span>st.closed {
+            <span class="macro">bail!</span>(<span class="string">&quot;stream is dropped!&quot;</span>);
+        }
+        <span class="kw">let </span>s = <span class="kw-2">&amp;mut </span>st.data;
         <span class="kw">if </span>len == <span class="number">0 </span>{
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>((<span class="number">0</span>, s.len() &gt; <span class="number">0</span>)))
         } <span class="kw">else if </span>s.len() &gt; len.try_into()<span class="question-mark">? </span>{
@@ -169,7 +186,11 @@
     }
 
     <span class="kw">fn </span>drop_input_stream(<span class="kw-2">&amp;mut </span><span class="self">self</span>, stream: InputStream) -&gt; wasmtime::Result&lt;()&gt; {
-        <span class="self">self</span>.streams.remove(<span class="kw-2">&amp;</span>stream);
+        <span class="kw">let </span>st = <span class="self">self
+            </span>.streams
+            .get_mut(<span class="kw-2">&amp;</span>stream)
+            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;stream not found: {stream}&quot;</span>))<span class="question-mark">?</span>;
+        st.closed = <span class="bool-val">true</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -178,18 +199,13 @@
         this: OutputStream,
         buf: Vec&lt;u8&gt;,
     ) -&gt; wasmtime::Result&lt;<span class="prelude-ty">Result</span>&lt;u64, StreamError&gt;&gt; {
-        <span class="kw">match </span><span class="self">self</span>.streams.get(<span class="kw-2">&amp;</span>this) {
-            <span class="prelude-val">Some</span>(data) =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>new = bytes::BytesMut::with_capacity(data.len() + buf.len());
-                new.put(data.clone());
-                new.put(bytes::Bytes::from(buf.clone()));
-                <span class="self">self</span>.streams.insert(this, new.freeze());
-            }
-            <span class="prelude-val">None </span>=&gt; {
-                <span class="self">self</span>.streams.insert(this, bytes::Bytes::from(buf.clone()));
-            }
+        <span class="kw">let </span>len = buf.len();
+        <span class="kw">let </span>st = <span class="self">self</span>.streams.entry(this).or_default();
+        <span class="kw">if </span>st.closed {
+            <span class="macro">bail!</span>(<span class="string">&quot;cannot write to closed stream&quot;</span>);
         }
-        <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(buf.len().try_into()<span class="question-mark">?</span>))
+        st.data.extend_from_slice(buf.as_slice());
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(len.try_into()<span class="question-mark">?</span>))
     }
 
     <span class="kw">fn </span>write_zeroes(
@@ -228,7 +244,11 @@
     }
 
     <span class="kw">fn </span>drop_output_stream(<span class="kw-2">&amp;mut </span><span class="self">self</span>, stream: OutputStream) -&gt; wasmtime::Result&lt;()&gt; {
-        <span class="self">self</span>.streams.remove(<span class="kw-2">&amp;</span>stream);
+        <span class="kw">let </span>st = <span class="self">self
+            </span>.streams
+            .get_mut(<span class="kw-2">&amp;</span>stream)
+            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;stream not found: {stream}&quot;</span>))<span class="question-mark">?</span>;
+        st.closed = <span class="bool-val">true</span>;
         <span class="prelude-val">Ok</span>(())
     }
 }
