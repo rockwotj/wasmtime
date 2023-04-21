@@ -243,15 +243,17 @@
 <a href="#243" id="243">243</a>
 <a href="#244" id="244">244</a>
 <a href="#245" id="245">245</a>
-<a href="#246" id="246">246</a>
-<a href="#247" id="247">247</a>
-<a href="#248" id="248">248</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::file::{FdFlags, FileCaps, FileType, Filestat, OFlags, WasiFile};
 <span class="kw">use crate</span>::{Error, ErrorExt, SystemTimeSpec};
 <span class="kw">use </span>bitflags::bitflags;
 <span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::path::PathBuf;
 <span class="kw">use </span>std::sync::{Arc, RwLock};
+
+<span class="kw">pub enum </span>OpenResult {
+    File(Box&lt;<span class="kw">dyn </span>WasiFile&gt;),
+    Dir(Box&lt;<span class="kw">dyn </span>WasiDir&gt;),
+}
 
 <span class="attr">#[wiggle::async_trait]
 </span><span class="kw">pub trait </span>WasiDir: Send + Sync {
@@ -265,15 +267,7 @@
         _read: bool,
         _write: bool,
         _fdflags: FdFlags,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>WasiFile&gt;, Error&gt; {
-        <span class="prelude-val">Err</span>(Error::not_supported())
-    }
-
-    <span class="kw">async fn </span>open_dir(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        _symlink_follow: bool,
-        _path: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>WasiDir&gt;, Error&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;OpenResult, Error&gt; {
         <span class="prelude-val">Err</span>(Error::not_supported())
     }
 

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Dir"]};
+window.SIDEBAR_ITEMS = {"enum":["OpenResult"],"struct":["Dir"]};

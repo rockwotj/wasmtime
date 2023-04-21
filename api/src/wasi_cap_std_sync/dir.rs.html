@@ -440,21 +440,50 @@
 <a href="#440" id="440">440</a>
 <a href="#441" id="441">441</a>
 <a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
+<a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
+<a href="#461" id="461">461</a>
+<a href="#462" id="462">462</a>
+<a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::file::{filetype_from, File};
-<span class="kw">use </span>cap_fs_ext::{DirEntryExt, DirExt, MetadataExt, SystemTimeSpec};
+<span class="kw">use </span>cap_fs_ext::{DirEntryExt, DirExt, MetadataExt, OpenOptionsMaybeDirExt, SystemTimeSpec};
+<span class="kw">use </span>cap_std::fs;
 <span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::path::{Path, PathBuf};
 <span class="kw">use </span>system_interface::fs::GetSetFdFlags;
 <span class="kw">use </span>wasi_common::{
     dir::{ReaddirCursor, ReaddirEntity, WasiDir},
-    file::{FdFlags, FileType, Filestat, OFlags, WasiFile},
+    file::{FdFlags, FileType, Filestat, OFlags},
     Error, ErrorExt,
 };
 
-<span class="kw">pub struct </span>Dir(cap_std::fs::Dir);
+<span class="kw">pub struct </span>Dir(fs::Dir);
+
+<span class="kw">pub enum </span>OpenResult {
+    File(File),
+    Dir(Dir),
+}
 
 <span class="kw">impl </span>Dir {
-    <span class="kw">pub fn </span>from_cap_std(dir: cap_std::fs::Dir) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>from_cap_std(dir: fs::Dir) -&gt; <span class="self">Self </span>{
         Dir(dir)
     }
 
@@ -466,10 +495,11 @@
         read: bool,
         write: bool,
         fdflags: FdFlags,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;File, Error&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;OpenResult, Error&gt; {
         <span class="kw">use </span>cap_fs_ext::{FollowSymlinks, OpenOptionsFollowExt};
 
-        <span class="kw">let </span><span class="kw-2">mut </span>opts = cap_std::fs::OpenOptions::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>opts = fs::OpenOptions::new();
+        opts.maybe_dir(<span class="bool-val">true</span>);
 
         <span class="kw">if </span>oflags.contains(OFlags::CREATE | OFlags::EXCLUSIVE) {
             opts.create_new(<span class="bool-val">true</span>);
@@ -513,22 +543,31 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::not_supported().context(<span class="string">&quot;SYNC family of FdFlags&quot;</span>));
         }
 
+        <span class="kw">if </span>oflags.contains(OFlags::DIRECTORY) {
+            <span class="kw">if </span>oflags.contains(OFlags::CREATE)
+                || oflags.contains(OFlags::EXCLUSIVE)
+                || oflags.contains(OFlags::TRUNCATE)
+            {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::invalid_argument().context(<span class="string">&quot;directory oflags&quot;</span>));
+            }
+        }
+
         <span class="kw">let </span><span class="kw-2">mut </span>f = <span class="self">self</span>.<span class="number">0</span>.open_with(Path::new(path), <span class="kw-2">&amp;</span>opts)<span class="question-mark">?</span>;
         <span class="comment">// NONBLOCK does not have an OpenOption either, but we can patch that on with set_fd_flags:
         </span><span class="kw">if </span>fdflags.contains(wasi_common::file::FdFlags::NONBLOCK) {
             <span class="kw">let </span>set_fd_flags = f.new_set_fd_flags(system_interface::fs::FdFlags::NONBLOCK)<span class="question-mark">?</span>;
             f.set_fd_flags(set_fd_flags)<span class="question-mark">?</span>;
         }
-        <span class="prelude-val">Ok</span>(File::from_cap_std(f))
-    }
 
-    <span class="kw">pub fn </span>open_dir_(<span class="kw-2">&amp;</span><span class="self">self</span>, symlink_follow: bool, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
-        <span class="kw">let </span>d = <span class="kw">if </span>symlink_follow {
-            <span class="self">self</span>.<span class="number">0</span>.open_dir(Path::new(path))<span class="question-mark">?
-        </span>} <span class="kw">else </span>{
-            <span class="self">self</span>.<span class="number">0</span>.open_dir_nofollow(Path::new(path))<span class="question-mark">?
-        </span>};
-        <span class="prelude-val">Ok</span>(Dir::from_cap_std(d))
+        <span class="kw">if </span>f.metadata()<span class="question-mark">?</span>.is_dir() {
+            <span class="prelude-val">Ok</span>(OpenResult::Dir(Dir::from_cap_std(fs::Dir::from_std_file(
+                f.into_std(),
+            ))))
+        } <span class="kw">else if </span>oflags.contains(OFlags::DIRECTORY) {
+            <span class="prelude-val">Err</span>(Error::not_dir().context(<span class="string">&quot;expected directory but got file&quot;</span>))
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Ok</span>(OpenResult::File(File::from_cap_std(f)))
+        }
     }
 
     <span class="kw">pub fn </span>rename_(<span class="kw-2">&amp;</span><span class="self">self</span>, src_path: <span class="kw-2">&amp;</span>str, dest_dir: <span class="kw-2">&amp;</span><span class="self">Self</span>, dest_path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
@@ -562,14 +601,12 @@
         read: bool,
         write: bool,
         fdflags: FdFlags,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>WasiFile&gt;, Error&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;wasi_common::dir::OpenResult, Error&gt; {
         <span class="kw">let </span>f = <span class="self">self</span>.open_file_(symlink_follow, path, oflags, read, write, fdflags)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(Box::new(f))
-    }
-
-    <span class="kw">async fn </span>open_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, symlink_follow: bool, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>WasiDir&gt;, Error&gt; {
-        <span class="kw">let </span>d = <span class="self">self</span>.open_dir_(symlink_follow, path)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(Box::new(d))
+        <span class="kw">match </span>f {
+            OpenResult::File(f) =&gt; <span class="prelude-val">Ok</span>(wasi_common::dir::OpenResult::File(Box::new(f))),
+            OpenResult::Dir(d) =&gt; <span class="prelude-val">Ok</span>(wasi_common::dir::OpenResult::Dir(Box::new(d))),
+        }
     }
 
     <span class="kw">async fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
@@ -769,6 +806,7 @@
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span><span class="kw">super</span>::Dir;
     <span class="kw">use </span>cap_std::ambient_authority;
+    <span class="kw">use </span>wasi_common::file::{FdFlags, OFlags};
     <span class="attr">#[test]
     </span><span class="kw">fn </span>scratch_dir() {
         <span class="kw">let </span>tempdir = tempfile::Builder::new()
@@ -778,8 +816,16 @@
         <span class="kw">let </span>preopen_dir = cap_std::fs::Dir::open_ambient_dir(tempdir.path(), ambient_authority())
             .expect(<span class="string">&quot;open ambient temporary dir&quot;</span>);
         <span class="kw">let </span>preopen_dir = Dir::from_cap_std(preopen_dir);
-        run(wasi_common::WasiDir::open_dir(<span class="kw-2">&amp;</span>preopen_dir, <span class="bool-val">false</span>, <span class="string">&quot;.&quot;</span>))
-            .expect(<span class="string">&quot;open the same directory via WasiDir abstraction&quot;</span>);
+        run(wasi_common::WasiDir::open_file(
+            <span class="kw-2">&amp;</span>preopen_dir,
+            <span class="bool-val">false</span>,
+            <span class="string">&quot;.&quot;</span>,
+            OFlags::empty(),
+            <span class="bool-val">false</span>,
+            <span class="bool-val">false</span>,
+            FdFlags::empty(),
+        ))
+        .expect(<span class="string">&quot;open the same directory via WasiDir abstraction&quot;</span>);
     }
 
     <span class="comment">// Readdir does not work on windows, so we won&#39;t test it there.

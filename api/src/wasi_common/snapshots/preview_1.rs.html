@@ -1687,10 +1687,11 @@
 <a href="#1687" id="1687">1687</a>
 <a href="#1688" id="1688">1688</a>
 <a href="#1689" id="1689">1689</a>
-<a href="#1690" id="1690">1690</a>
-<a href="#1691" id="1691">1691</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
-    dir::{DirCaps, DirEntry, DirEntryExt, DirFdStat, ReaddirCursor, ReaddirEntity, TableDirExt},
+    dir::{
+        DirCaps, DirEntry, DirEntryExt, DirFdStat, OpenResult, ReaddirCursor, ReaddirEntity,
+        TableDirExt,
+    },
     file::{
         Advice, FdFlags, FdStat, FileCaps, FileEntry, FileEntryExt, FileType, Filestat, OFlags,
         RiFlags, RoFlags, SdFlags, SiFlags, TableFileExt, WasiFile,
@@ -2438,41 +2439,36 @@
         <span class="kw">let </span>oflags = OFlags::from(<span class="kw-2">&amp;</span>oflags);
         <span class="kw">let </span>fdflags = FdFlags::from(fdflags);
         <span class="kw">let </span>path = path.as_cow()<span class="question-mark">?</span>;
-        <span class="kw">if </span>oflags.contains(OFlags::DIRECTORY) {
-            <span class="kw">if </span>oflags.contains(OFlags::CREATE)
-                || oflags.contains(OFlags::EXCLUSIVE)
-                || oflags.contains(OFlags::TRUNCATE)
-            {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::invalid_argument().context(<span class="string">&quot;directory oflags&quot;</span>));
-            }
-            <span class="kw">let </span>dir_caps = dir_entry.child_dir_caps(DirCaps::from(<span class="kw-2">&amp;</span>fs_rights_base));
-            <span class="kw">let </span>file_caps = dir_entry.child_file_caps(FileCaps::from(<span class="kw-2">&amp;</span>fs_rights_inheriting));
-            <span class="kw">let </span>dir = dir_entry.get_cap(DirCaps::OPEN)<span class="question-mark">?</span>;
-            <span class="kw">let </span>child_dir = dir.open_dir(symlink_follow, path.deref()).<span class="kw">await</span><span class="question-mark">?</span>;
-            drop(dir);
-            <span class="kw">let </span>fd = table.push(Arc::new(DirEntry::new(
-                dir_caps, file_caps, <span class="prelude-val">None</span>, child_dir,
-            )))<span class="question-mark">?</span>;
-            <span class="prelude-val">Ok</span>(types::Fd::from(fd))
-        } <span class="kw">else </span>{
-            <span class="kw">let </span><span class="kw-2">mut </span>required_caps = DirCaps::OPEN;
-            <span class="kw">if </span>oflags.contains(OFlags::CREATE) {
-                required_caps = required_caps | DirCaps::CREATE_FILE;
-            }
 
-            <span class="kw">let </span>file_caps = dir_entry.child_file_caps(FileCaps::from(<span class="kw-2">&amp;</span>fs_rights_base));
-            <span class="kw">let </span>dir = dir_entry.get_cap(required_caps)<span class="question-mark">?</span>;
-            <span class="kw">let </span>read = file_caps.contains(FileCaps::READ);
-            <span class="kw">let </span>write = file_caps.contains(FileCaps::WRITE)
-                || file_caps.contains(FileCaps::ALLOCATE)
-                || file_caps.contains(FileCaps::FILESTAT_SET_SIZE);
-            <span class="kw">let </span>file = dir
-                .open_file(symlink_follow, path.deref(), oflags, read, write, fdflags)
-                .<span class="kw">await</span><span class="question-mark">?</span>;
-            drop(dir);
-            <span class="kw">let </span>fd = table.push(Arc::new(FileEntry::new(file_caps, file)))<span class="question-mark">?</span>;
-            <span class="prelude-val">Ok</span>(types::Fd::from(fd))
+        <span class="kw">let </span><span class="kw-2">mut </span>required_caps = DirCaps::OPEN;
+        <span class="kw">if </span>oflags.contains(OFlags::CREATE) {
+            required_caps = required_caps | DirCaps::CREATE_FILE;
         }
+
+        <span class="kw">let </span>dir_dir_caps = dir_entry.child_dir_caps(DirCaps::from(<span class="kw-2">&amp;</span>fs_rights_base));
+        <span class="kw">let </span>dir_file_caps = dir_entry.child_file_caps(FileCaps::from(<span class="kw-2">&amp;</span>fs_rights_inheriting));
+        <span class="kw">let </span>file_caps = dir_entry.child_file_caps(FileCaps::from(<span class="kw-2">&amp;</span>fs_rights_base));
+
+        <span class="kw">let </span>dir = dir_entry.get_cap(required_caps)<span class="question-mark">?</span>;
+        <span class="kw">let </span>read = file_caps.contains(FileCaps::READ);
+        <span class="kw">let </span>write = file_caps.contains(FileCaps::WRITE)
+            || file_caps.contains(FileCaps::ALLOCATE)
+            || file_caps.contains(FileCaps::FILESTAT_SET_SIZE);
+        <span class="kw">let </span>file = dir
+            .open_file(symlink_follow, path.deref(), oflags, read, write, fdflags)
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        drop(dir);
+
+        <span class="kw">let </span>fd = <span class="kw">match </span>file {
+            OpenResult::File(file) =&gt; table.push(Arc::new(FileEntry::new(file_caps, file)))<span class="question-mark">?</span>,
+            OpenResult::Dir(child_dir) =&gt; table.push(Arc::new(DirEntry::new(
+                dir_dir_caps,
+                dir_file_caps,
+                <span class="prelude-val">None</span>,
+                child_dir,
+            )))<span class="question-mark">?</span>,
+        };
+        <span class="prelude-val">Ok</span>(types::Fd::from(fd))
     }
 
     <span class="kw">async fn </span>path_readlink&lt;<span class="lifetime">&#39;a</span>&gt;(
