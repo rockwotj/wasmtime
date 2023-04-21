@@ -1566,37 +1566,6 @@
 <a href="#1566" id="1566">1566</a>
 <a href="#1567" id="1567">1567</a>
 <a href="#1568" id="1568">1568</a>
-<a href="#1569" id="1569">1569</a>
-<a href="#1570" id="1570">1570</a>
-<a href="#1571" id="1571">1571</a>
-<a href="#1572" id="1572">1572</a>
-<a href="#1573" id="1573">1573</a>
-<a href="#1574" id="1574">1574</a>
-<a href="#1575" id="1575">1575</a>
-<a href="#1576" id="1576">1576</a>
-<a href="#1577" id="1577">1577</a>
-<a href="#1578" id="1578">1578</a>
-<a href="#1579" id="1579">1579</a>
-<a href="#1580" id="1580">1580</a>
-<a href="#1581" id="1581">1581</a>
-<a href="#1582" id="1582">1582</a>
-<a href="#1583" id="1583">1583</a>
-<a href="#1584" id="1584">1584</a>
-<a href="#1585" id="1585">1585</a>
-<a href="#1586" id="1586">1586</a>
-<a href="#1587" id="1587">1587</a>
-<a href="#1588" id="1588">1588</a>
-<a href="#1589" id="1589">1589</a>
-<a href="#1590" id="1590">1590</a>
-<a href="#1591" id="1591">1591</a>
-<a href="#1592" id="1592">1592</a>
-<a href="#1593" id="1593">1593</a>
-<a href="#1594" id="1594">1594</a>
-<a href="#1595" id="1595">1595</a>
-<a href="#1596" id="1596">1596</a>
-<a href="#1597" id="1597">1597</a>
-<a href="#1598" id="1598">1598</a>
-<a href="#1599" id="1599">1599</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This implements the VCode container: a CFG of Insts that have been lowered.
 //!
 //! VCode is virtual-register code. An instruction in VCode is almost a machine
@@ -1680,9 +1649,6 @@
 
     <span class="doccomment">/// Clobbers: a sparse map from instruction indices to clobber masks.
     </span>clobbers: FxHashMap&lt;InsnIndex, PRegSet&gt;,
-
-    <span class="doccomment">/// Move information: for a given InsnIndex, (src, dst) operand pair.
-    </span>is_move: FxHashMap&lt;InsnIndex, (Operand, Operand)&gt;,
 
     <span class="doccomment">/// Source locations for each instruction. (`SourceLoc` is a `u32`, so it is
     /// reasonable to keep one of these per instruction.)
@@ -2180,15 +2146,6 @@
                     <span class="string">&quot;the real register {:?} was used as the destination of a move instruction&quot;</span>,
                     dst.to_reg()
                 );
-
-                <span class="kw">let </span>src = Operand::reg_use(<span class="self">Self</span>::resolve_vreg_alias_impl(vreg_aliases, src.into()));
-                <span class="kw">let </span>dst = Operand::reg_def(<span class="self">Self</span>::resolve_vreg_alias_impl(
-                    vreg_aliases,
-                    dst.to_reg().into(),
-                ));
-
-                <span class="comment">// Note that regalloc2 requires these in (src, dst) order.
-                </span><span class="self">self</span>.vcode.is_move.insert(InsnIndex::new(i), (src, dst));
             }
         }
 
@@ -2251,7 +2208,6 @@
             operands: Vec::with_capacity(<span class="number">30 </span>* n_blocks),
             operand_ranges: Vec::with_capacity(<span class="number">10 </span>* n_blocks),
             clobbers: FxHashMap::default(),
-            is_move: FxHashMap::default(),
             srclocs: Vec::with_capacity(<span class="number">10 </span>* n_blocks),
             entry: BlockIndex::new(<span class="number">0</span>),
             block_ranges: Vec::with_capacity(n_blocks),
@@ -2528,16 +2484,6 @@
                             </span><span class="kw">if </span>!<span class="self">self</span>.block_order.is_cold(block) {
                                 inst_offsets[iix.index()] = buffer.cur_offset();
                             }
-                        }
-
-                        <span class="kw">if </span><span class="self">self</span>.insts[iix.index()].is_move().is_some() {
-                            <span class="comment">// Skip moves in the pre-regalloc program;
-                            // all of these are incorporated by the
-                            // regalloc into its unified move handling
-                            // and they come out the other end, if
-                            // still needed (not elided), as
-                            // regalloc-inserted moves.
-                            </span><span class="kw">continue</span>;
                         }
 
                         <span class="comment">// Update the srcloc at this point in the buffer.
@@ -2884,14 +2830,6 @@
 
     <span class="kw">fn </span>requires_refs_on_stack(<span class="kw-2">&amp;</span><span class="self">self</span>, insn: InsnIndex) -&gt; bool {
         <span class="self">self</span>.insts[insn.index()].is_safepoint()
-    }
-
-    <span class="kw">fn </span>is_move(<span class="kw-2">&amp;</span><span class="self">self</span>, insn: InsnIndex) -&gt; <span class="prelude-ty">Option</span>&lt;(Operand, Operand)&gt; {
-        <span class="kw">let </span>(a, b) = <span class="self">self</span>.is_move.get(<span class="kw-2">&amp;</span>insn)<span class="question-mark">?</span>;
-        <span class="prelude-val">Some</span>((
-            <span class="self">self</span>.assert_operand_not_vreg_alias(<span class="kw-2">*</span>a),
-            <span class="self">self</span>.assert_operand_not_vreg_alias(<span class="kw-2">*</span>b),
-        ))
     }
 
     <span class="kw">fn </span>inst_operands(<span class="kw-2">&amp;</span><span class="self">self</span>, insn: InsnIndex) -&gt; <span class="kw-2">&amp;</span>[Operand] {

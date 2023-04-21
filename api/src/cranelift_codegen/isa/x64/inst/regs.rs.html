@@ -331,6 +331,7 @@
 <a href="#331" id="331">331</a>
 <a href="#332" id="332">332</a>
 <a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Register definitions for regalloc2.
 //!
 //! We define 16 GPRs, with indices equal to the hardware encoding,
@@ -536,6 +537,7 @@
             </span><span class="macro">vec!</span>[],
         ],
         fixed_stack_slots: <span class="macro">vec!</span>[],
+        scratch_by_class: [<span class="prelude-val">None</span>, <span class="prelude-val">None</span>],
     };
 
     <span class="macro">debug_assert_eq!</span>(r15(), pinned_reg());
