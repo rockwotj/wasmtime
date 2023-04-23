@@ -2920,24 +2920,6 @@
 <a href="#2920" id="2920">2920</a>
 <a href="#2921" id="2921">2921</a>
 <a href="#2922" id="2922">2922</a>
-<a href="#2923" id="2923">2923</a>
-<a href="#2924" id="2924">2924</a>
-<a href="#2925" id="2925">2925</a>
-<a href="#2926" id="2926">2926</a>
-<a href="#2927" id="2927">2927</a>
-<a href="#2928" id="2928">2928</a>
-<a href="#2929" id="2929">2929</a>
-<a href="#2930" id="2930">2930</a>
-<a href="#2931" id="2931">2931</a>
-<a href="#2932" id="2932">2932</a>
-<a href="#2933" id="2933">2933</a>
-<a href="#2934" id="2934">2934</a>
-<a href="#2935" id="2935">2935</a>
-<a href="#2936" id="2936">2936</a>
-<a href="#2937" id="2937">2937</a>
-<a href="#2938" id="2938">2938</a>
-<a href="#2939" id="2939">2939</a>
-<a href="#2940" id="2940">2940</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::StackMap;
@@ -3385,7 +3367,6 @@
             | Inst::Select { .. }
             | Inst::AtomicCas { .. }
             | Inst::IntSelect { .. }
-            | Inst::Csr { .. }
             | Inst::Icmp { .. }
             | Inst::SelectReg { .. }
             | Inst::FcvtToInt { .. }
@@ -4601,23 +4582,6 @@
                 </span>sink.bind_label(label_false, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
                 gen_move(<span class="kw-2">&amp;</span>dst, <span class="kw-2">&amp;</span>y, sink, state);
                 sink.bind_label(label_done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
-            }
-            <span class="kw-2">&amp;</span>Inst::Csr {
-                csr_op,
-                rd,
-                rs,
-                imm,
-                csr,
-            } =&gt; {
-                <span class="kw">let </span>rs = rs.map(|r| allocs.next(r));
-                <span class="kw">let </span>rd = allocs.next_writable(rd);
-                <span class="kw">let </span>x = csr_op.op_code()
-                    | reg_to_gpr_num(rd.to_reg()) &lt;&lt; <span class="number">7
-                    </span>| csr_op.funct3() &lt;&lt; <span class="number">12
-                    </span>| csr_op.rs1(rs, imm) &lt;&lt; <span class="number">15
-                    </span>| csr.as_u32() &lt;&lt; <span class="number">20</span>;
-
-                sink.put4(x);
             }
 
             <span class="kw-2">&amp;</span>Inst::SelectReg {
