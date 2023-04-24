@@ -399,11 +399,15 @@
 <a href="#399" id="399">399</a>
 <a href="#400" id="400">400</a>
 <a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Lexer for the ISLE language.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::error::{Error, Errors, Span};
 <span class="kw">use </span>std::borrow::Cow;
-<span class="kw">use </span>std::path::Path;
+<span class="kw">use </span>std::path::{Path, PathBuf};
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">type </span><span class="prelude-ty">Result</span>&lt;T&gt; = std::result::Result&lt;T, Errors&gt;;
@@ -492,21 +496,26 @@
     <span class="kw">where
         </span>P: AsRef&lt;Path&gt;,
     {
+        <span class="kw">let </span><span class="kw-2">mut </span>files = <span class="macro">vec!</span>[];
+        <span class="kw">for </span>f <span class="kw">in </span>file_paths.into_iter() {
+            <span class="kw">let </span>f = f.as_ref().to_path_buf();
+            <span class="kw">let </span>s = std::fs::read_to_string(f.as_path())
+                .map_err(|e| Errors::from_io(e, <span class="macro">format!</span>(<span class="string">&quot;failed to read file: {}&quot;</span>, f.display())))<span class="question-mark">?</span>;
+            files.push((f, s));
+        }
+        <span class="self">Self</span>::from_file_contents(files)
+    }
+
+    <span class="doccomment">/// Create a new lexer from the given files and contents.
+    </span><span class="kw">pub fn </span>from_file_contents(files: Vec&lt;(PathBuf, String)&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Lexer&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>filenames = Vec::&lt;Arc&lt;str&gt;&gt;::new();
         <span class="kw">let </span><span class="kw-2">mut </span>file_texts = Vec::&lt;Arc&lt;str&gt;&gt;::new();
-
-        <span class="kw">for </span>f <span class="kw">in </span>file_paths {
-            <span class="kw">let </span>f = f.as_ref();
-
+        <span class="kw">for </span>(f, content) <span class="kw">in </span>files.iter() {
             filenames.push(f.display().to_string().into());
 
-            <span class="kw">let </span>s = std::fs::read_to_string(f)
-                .map_err(|e| Errors::from_io(e, <span class="macro">format!</span>(<span class="string">&quot;failed to read file: {}&quot;</span>, f.display())))<span class="question-mark">?</span>;
-            file_texts.push(s.into());
+            file_texts.push(content.as_str().into());
         }
-
         <span class="macro">assert!</span>(!filenames.is_empty());
-
         <span class="kw">let </span><span class="kw-2">mut </span>file_starts = <span class="macro">vec!</span>[];
         <span class="kw">let </span><span class="kw-2">mut </span>buf = String::new();
         <span class="kw">for </span>text <span class="kw">in </span><span class="kw-2">&amp;</span>file_texts {
@@ -514,7 +523,6 @@
             buf += text;
             buf += <span class="string">&quot;\n&quot;</span>;
         }
-
         <span class="kw">let </span><span class="kw-2">mut </span>l = Lexer {
             filenames,
             file_texts,

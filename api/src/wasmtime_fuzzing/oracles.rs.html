@@ -855,6 +855,24 @@
 <a href="#855" id="855">855</a>
 <a href="#856" id="856">856</a>
 <a href="#857" id="857">857</a>
+<a href="#858" id="858">858</a>
+<a href="#859" id="859">859</a>
+<a href="#860" id="860">860</a>
+<a href="#861" id="861">861</a>
+<a href="#862" id="862">862</a>
+<a href="#863" id="863">863</a>
+<a href="#864" id="864">864</a>
+<a href="#865" id="865">865</a>
+<a href="#866" id="866">866</a>
+<a href="#867" id="867">867</a>
+<a href="#868" id="868">868</a>
+<a href="#869" id="869">869</a>
+<a href="#870" id="870">870</a>
+<a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
+<a href="#873" id="873">873</a>
+<a href="#874" id="874">874</a>
+<a href="#875" id="875">875</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Oracles.
 //!
 //! Oracles take a test case and determine whether we have a bug. For example,
@@ -940,6 +958,7 @@
     }
 
     <span class="kw">fn </span>alloc(<span class="kw-2">&amp;mut </span><span class="self">self</span>, amt: usize) -&gt; bool {
+        <span class="macro">log::trace!</span>(<span class="string">&quot;alloc {amt:#x} bytes&quot;</span>);
         <span class="kw">match </span><span class="self">self</span>.<span class="number">0</span>.remaining_memory.get().checked_sub(amt) {
             <span class="prelude-val">Some</span>(mem) =&gt; {
                 <span class="self">self</span>.<span class="number">0</span>.remaining_memory.set(mem);
@@ -947,9 +966,14 @@
             </span>}
             <span class="prelude-val">None </span>=&gt; {
                 <span class="self">self</span>.<span class="number">0</span>.oom.set(<span class="bool-val">true</span>);
+                <span class="macro">log::debug!</span>(<span class="string">&quot;OOM hit&quot;</span>);
                 <span class="bool-val">false
             </span>}
         }
+    }
+
+    <span class="kw">fn </span>is_oom(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.<span class="number">0</span>.oom.get()
     }
 }
 
@@ -1155,7 +1179,7 @@
     <span class="comment">// If the instantiation hit OOM for some reason then that&#39;s ok, it&#39;s
     // expected that fuzz-generated programs try to allocate lots of
     // stuff.
-    </span><span class="kw">if </span>store.data().<span class="number">0</span>.oom.get() {
+    </span><span class="kw">if </span>store.data().is_oom() {
         <span class="macro">log::debug!</span>(<span class="string">&quot;failed to instantiate: OOM&quot;</span>);
         <span class="kw">return </span><span class="prelude-val">None</span>;
     }
@@ -1220,6 +1244,16 @@
         </span>.map(|results| results.unwrap());
     <span class="macro">log::debug!</span>(<span class="string">&quot; -&gt; results on {}: {:?}&quot;</span>, rhs.name(), <span class="kw-2">&amp;</span>rhs_results);
 
+    <span class="comment">// If Wasmtime hit its OOM condition, which is possible since it&#39;s set
+    // somewhat low while fuzzing, then don&#39;t return an error but return
+    // `false` indicating that differential fuzzing must stop. There&#39;s no
+    // guarantee the other engine has the same OOM limits as Wasmtime, and
+    // it&#39;s assumed that Wasmtime is configured to have a more conservative
+    // limit than the other engine.
+    </span><span class="kw">if </span>rhs.is_oom() {
+        <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
+    }
+
     <span class="kw">match </span>(lhs_results, rhs_results) {
         <span class="comment">// If the evaluation succeeds, we compare the results.
         </span>(<span class="prelude-val">Ok</span>(lhs_results), <span class="prelude-val">Ok</span>(rhs_results)) =&gt; <span class="macro">assert_eq!</span>(lhs_results, rhs_results),
@@ -1264,6 +1298,8 @@
         <span class="kw">if </span>lhs == rhs {
             <span class="kw">continue</span>;
         }
+        <span class="macro">eprintln!</span>(<span class="string">&quot;differential memory is {} bytes long&quot;</span>, lhs.len());
+        <span class="macro">eprintln!</span>(<span class="string">&quot;wasmtime memory is     {} bytes long&quot;</span>, rhs.len());
         <span class="macro">panic!</span>(<span class="string">&quot;memories have differing values&quot;</span>);
     }
 
