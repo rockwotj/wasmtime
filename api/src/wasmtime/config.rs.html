@@ -3559,7 +3559,7 @@
     }
 
     <span class="attr">#[cfg(compiler)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>build_compiler(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>wasmtime_environ::Compiler&gt;&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>build_compiler(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, Box&lt;<span class="kw">dyn </span>wasmtime_environ::Compiler&gt;)&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>compiler = <span class="kw">match </span><span class="self">self</span>.compiler_config.strategy {
             <span class="attr">#[cfg(feature = <span class="string">&quot;cranelift&quot;</span>)]
             </span>Strategy::Auto =&gt; wasmtime_cranelift::builder(),
@@ -3653,7 +3653,7 @@
             compiler.enable_incremental_compilation(cache_store.clone())<span class="question-mark">?</span>;
         }
 
-        compiler.build()
+        <span class="prelude-val">Ok</span>((<span class="self">self</span>, compiler.build()<span class="question-mark">?</span>))
     }
 
     <span class="doccomment">/// Internal setting for whether adapter modules for components will have
