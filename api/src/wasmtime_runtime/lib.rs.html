@@ -327,7 +327,7 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::trampolines::prepare_host_to_wasm_trampoline;
 <span class="kw">pub use </span><span class="kw">crate</span>::traphandlers::{
     catch_traps, init_traps, raise_lib_trap, raise_user_trap, resume_panic, tls_eager_initialize,
-    Backtrace, SignalHandler, TlsRestore, Trap, TrapReason,
+    Backtrace, Frame, SignalHandler, TlsRestore, Trap, TrapReason,
 };
 <span class="kw">pub use </span><span class="kw">crate</span>::vmcontext::{
     VMCallerCheckedFuncRef, VMContext, VMFunctionBody, VMFunctionImport, VMGlobalDefinition,

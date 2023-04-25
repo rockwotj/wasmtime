@@ -704,7 +704,7 @@
 <span class="kw">use </span>std::ptr;
 <span class="kw">use </span>std::sync::Once;
 
-<span class="kw">pub use </span><span class="self">self</span>::backtrace::Backtrace;
+<span class="kw">pub use </span><span class="self">self</span>::backtrace::{Backtrace, Frame};
 <span class="kw">pub use </span><span class="self">self</span>::tls::{tls_eager_initialize, TlsRestore};
 
 <span class="attr">#[link(name = <span class="string">&quot;wasmtime-helpers&quot;</span>)]
