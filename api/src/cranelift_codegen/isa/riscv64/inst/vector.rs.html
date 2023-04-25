@@ -287,6 +287,21 @@
 <a href="#287" id="287">287</a>
 <a href="#288" id="288">288</a>
 <a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::EmitState;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::lower::isle::generated_code::{
     VecAMode, VecAluOpRRR, VecAvl, VecElementWidth, VecLmul, VecMaskMode, VecTailMode,
@@ -503,27 +518,42 @@
 
 <span class="kw">impl </span>VecAluOpRRR {
     <span class="kw">pub fn </span>opcode(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
-        <span class="kw">match </span><span class="self">self </span>{
-            VecAluOpRRR::Vadd =&gt; <span class="number">0x57</span>,
-        }
-    }
+        <span class="comment">// Vector Opcode
+        </span><span class="number">0x57
+    </span>}
     <span class="kw">pub fn </span>funct3(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
         <span class="kw">match </span><span class="self">self </span>{
-            VecAluOpRRR::Vadd =&gt; <span class="number">0b000</span>,
+            <span class="comment">// OPIVV
+            </span>VecAluOpRRR::Vadd
+            | VecAluOpRRR::Vsub
+            | VecAluOpRRR::Vand
+            | VecAluOpRRR::Vor
+            | VecAluOpRRR::Vxor =&gt; <span class="number">0b000</span>,
+            <span class="comment">// OPIMV
+            </span>VecAluOpRRR::Vmul | VecAluOpRRR::Vmulh | VecAluOpRRR::Vmulhu =&gt; <span class="number">0b010</span>,
         }
     }
     <span class="kw">pub fn </span>funct6(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
-        <span class="kw">match </span><span class="self">self </span>{
+        <span class="comment">// See: https://github.com/riscv/riscv-v-spec/blob/master/inst-table.adoc
+        </span><span class="kw">match </span><span class="self">self </span>{
             VecAluOpRRR::Vadd =&gt; <span class="number">0b000000</span>,
+            VecAluOpRRR::Vsub =&gt; <span class="number">0b000010</span>,
+            VecAluOpRRR::Vmul =&gt; <span class="number">0b100101</span>,
+            VecAluOpRRR::Vmulh =&gt; <span class="number">0b100111</span>,
+            VecAluOpRRR::Vmulhu =&gt; <span class="number">0b100100</span>,
+            VecAluOpRRR::Vand =&gt; <span class="number">0b001001</span>,
+            VecAluOpRRR::Vor =&gt; <span class="number">0b001010</span>,
+            VecAluOpRRR::Vxor =&gt; <span class="number">0b001011</span>,
         }
     }
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>VecAluOpRRR {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="kw">match </span><span class="self">self </span>{
-            VecAluOpRRR::Vadd =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;vadd.vv&quot;</span>),
-        }
+        <span class="kw">let </span><span class="kw-2">mut </span>s = <span class="macro">format!</span>(<span class="string">&quot;{self:?}&quot;</span>);
+        s.make_ascii_lowercase();
+        s.push_str(<span class="string">&quot;.vv&quot;</span>);
+        f.write_str(<span class="kw-2">&amp;</span>s)
     }
 }
 

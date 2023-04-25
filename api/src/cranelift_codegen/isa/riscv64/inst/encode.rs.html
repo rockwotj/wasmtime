@@ -178,7 +178,7 @@
 ) -&gt; u32 {
     <span class="kw">let </span>funct6 = funct6 &amp; <span class="number">0b111111</span>;
     <span class="kw">let </span>vm = vm &amp; <span class="number">0b1</span>;
-    <span class="kw">let </span>funct7 = (funct6 &lt;&lt; <span class="number">6</span>) | vm;
+    <span class="kw">let </span>funct7 = (funct6 &lt;&lt; <span class="number">1</span>) | vm;
     encode_r_type(opcode, vd, funct3, vs1, vs2, funct7)
 }
 
