@@ -100,7 +100,7 @@
     () =&gt; {
         <span class="macro">vec!</span>[]
     };
-    ($(<span class="macro-nonterminal">$x</span>:ident)&amp;&amp;<span class="kw-2">*</span>) =&gt; {
+    ($(<span class="macro-nonterminal">$x</span>:tt)&amp;&amp;<span class="kw-2">*</span>) =&gt; {
         {
             <span class="kw">let </span><span class="kw-2">mut </span>v = Vec::new();
             $(

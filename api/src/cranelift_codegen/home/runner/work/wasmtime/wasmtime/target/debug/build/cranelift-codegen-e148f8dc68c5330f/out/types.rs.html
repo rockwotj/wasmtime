@@ -175,6 +175,24 @@
 <a href="#175" id="175">175</a>
 <a href="#176" id="176">176</a>
 <a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
 </pre><pre class="rust"><code><span class="doccomment">/// An integer type with 8 bits.
 /// WARNING: arithmetic on 8bit integers is incomplete
 </span><span class="kw">pub const </span>I8: Type = Type(<span class="number">0x76</span>);
@@ -207,6 +225,24 @@
 
 <span class="doccomment">/// An opaque reference type with 64 bits.
 </span><span class="kw">pub const </span>R64: Type = Type(<span class="number">0x7f</span>);
+
+<span class="doccomment">/// A SIMD vector with 2 lanes containing a `i8` each.
+</span><span class="kw">pub const </span>I8X2: Type = Type(<span class="number">0x86</span>);
+
+<span class="doccomment">/// A dynamically-scaled SIMD vector with a minimum of 2 lanes containing `i8` bits each.
+</span><span class="kw">pub const </span>I8X2XN: Type = Type(<span class="number">0x106</span>);
+
+<span class="doccomment">/// A SIMD vector with 4 lanes containing a `i8` each.
+</span><span class="kw">pub const </span>I8X4: Type = Type(<span class="number">0x96</span>);
+
+<span class="doccomment">/// A SIMD vector with 2 lanes containing a `i16` each.
+</span><span class="kw">pub const </span>I16X2: Type = Type(<span class="number">0x87</span>);
+
+<span class="doccomment">/// A dynamically-scaled SIMD vector with a minimum of 4 lanes containing `i8` bits each.
+</span><span class="kw">pub const </span>I8X4XN: Type = Type(<span class="number">0x116</span>);
+
+<span class="doccomment">/// A dynamically-scaled SIMD vector with a minimum of 2 lanes containing `i16` bits each.
+</span><span class="kw">pub const </span>I16X2XN: Type = Type(<span class="number">0x107</span>);
 
 <span class="doccomment">/// A SIMD vector with 8 lanes containing a `i8` each.
 </span><span class="kw">pub const </span>I8X8: Type = Type(<span class="number">0xa6</span>);
