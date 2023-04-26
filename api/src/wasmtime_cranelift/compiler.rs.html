@@ -1642,7 +1642,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>cache_store = CraneliftCacheStore(cache_ctx.cache_store.clone());
         <span class="kw">let </span>(compiled_code, from_cache) = context
-            .compile_with_cache(isa, <span class="kw-2">&amp;mut </span>cache_store)
+            .compile_with_cache(isa, <span class="kw-2">&amp;mut </span>cache_store, <span class="kw-2">&amp;mut </span>Default::default())
             .map_err(|error| CompileError::Codegen(pretty_error(<span class="kw-2">&amp;</span>error.func, error.inner)))<span class="question-mark">?</span>;
 
         <span class="kw">if </span>from_cache {
