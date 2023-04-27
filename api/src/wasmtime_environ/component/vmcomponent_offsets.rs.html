@@ -334,9 +334,6 @@
 <a href="#334" id="334">334</a>
 <a href="#335" id="335">335</a>
 <a href="#336" id="336">336</a>
-<a href="#337" id="337">337</a>
-<a href="#338" id="338">338</a>
-<a href="#339" id="339">339</a>
 </pre><pre class="rust"><code><span class="comment">// Currently the `VMComponentContext` allocation by field looks like this:
 //
 // struct VMComponentContext {
@@ -345,13 +342,13 @@
 //      store: *mut dyn Store,
 //      limits: *const VMRuntimeLimits,
 //      flags: [VMGlobalDefinition; component.num_runtime_component_instances],
-//      lowering_anyfuncs: [VMCallerCheckedFuncRef; component.num_lowerings],
-//      always_trap_anyfuncs: [VMCallerCheckedFuncRef; component.num_always_trap],
-//      transcoder_anyfuncs: [VMCallerCheckedFuncRef; component.num_transcoders],
+//      lowering_func_refs: [VMFuncRef; component.num_lowerings],
+//      always_trap_func_refs: [VMFuncRef; component.num_always_trap],
+//      transcoder_func_refs: [VMFuncRef; component.num_transcoders],
 //      lowerings: [VMLowering; component.num_lowerings],
 //      memories: [*mut VMMemoryDefinition; component.num_memories],
-//      reallocs: [*mut VMCallerCheckedFuncRef; component.num_reallocs],
-//      post_returns: [*mut VMCallerCheckedFuncRef; component.num_post_returns],
+//      reallocs: [*mut VMFuncRef; component.num_reallocs],
+//      post_returns: [*mut VMFuncRef; component.num_post_returns],
 // }
 
 </span><span class="kw">use </span><span class="kw">crate</span>::component::{
@@ -396,7 +393,7 @@
     /// least 1).
     </span><span class="kw">pub </span>num_runtime_component_instances: u32,
     <span class="doccomment">/// Number of &quot;always trap&quot; functions which have their
-    /// `VMCallerCheckedFuncRef` stored inline in the `VMComponentContext`.
+    /// `VMFuncRef` stored inline in the `VMComponentContext`.
     </span><span class="kw">pub </span>num_always_trap: u32,
     <span class="doccomment">/// Number of transcoders needed for string conversion.
     </span><span class="kw">pub </span>num_transcoders: u32,
@@ -407,9 +404,9 @@
     store: u32,
     limits: u32,
     flags: u32,
-    lowering_anyfuncs: u32,
-    always_trap_anyfuncs: u32,
-    transcoder_anyfuncs: u32,
+    lowering_func_refs: u32,
+    always_trap_func_refs: u32,
+    transcoder_func_refs: u32,
     lowerings: u32,
     memories: u32,
     reallocs: u32,
@@ -444,9 +441,9 @@
             store: <span class="number">0</span>,
             limits: <span class="number">0</span>,
             flags: <span class="number">0</span>,
-            lowering_anyfuncs: <span class="number">0</span>,
-            always_trap_anyfuncs: <span class="number">0</span>,
-            transcoder_anyfuncs: <span class="number">0</span>,
+            lowering_func_refs: <span class="number">0</span>,
+            always_trap_func_refs: <span class="number">0</span>,
+            transcoder_func_refs: <span class="number">0</span>,
             lowerings: <span class="number">0</span>,
             memories: <span class="number">0</span>,
             reallocs: <span class="number">0</span>,
@@ -487,9 +484,9 @@
             align(<span class="number">16</span>),
             size(flags) = cmul(ret.num_runtime_component_instances, ret.ptr.size_of_vmglobal_definition()),
             align(u32::from(ret.ptr.size())),
-            size(lowering_anyfuncs) = cmul(ret.num_lowerings, ret.ptr.size_of_vmcaller_checked_func_ref()),
-            size(always_trap_anyfuncs) = cmul(ret.num_always_trap, ret.ptr.size_of_vmcaller_checked_func_ref()),
-            size(transcoder_anyfuncs) = cmul(ret.num_transcoders, ret.ptr.size_of_vmcaller_checked_func_ref()),
+            size(lowering_func_refs) = cmul(ret.num_lowerings, ret.ptr.size_of_vm_func_ref()),
+            size(always_trap_func_refs) = cmul(ret.num_always_trap, ret.ptr.size_of_vm_func_ref()),
+            size(transcoder_func_refs) = cmul(ret.num_transcoders, ret.ptr.size_of_vm_func_ref()),
             size(lowerings) = cmul(ret.num_lowerings, ret.ptr.size() * <span class="number">2</span>),
             size(memories) = cmul(ret.num_runtime_memories, ret.ptr.size()),
             size(reallocs) = cmul(ret.num_runtime_reallocs, ret.ptr.size()),
@@ -543,46 +540,43 @@
         <span class="self">self</span>.limits
     }
 
-    <span class="doccomment">/// The offset of the `lowering_anyfuncs` field.
+    <span class="doccomment">/// The offset of the `lowering_func_refs` field.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>lowering_anyfuncs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
-        <span class="self">self</span>.lowering_anyfuncs
+    </span><span class="kw">pub fn </span>lowering_func_refs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
+        <span class="self">self</span>.lowering_func_refs
     }
 
-    <span class="doccomment">/// The offset of `VMCallerCheckedFuncRef` for the `index` specified.
+    <span class="doccomment">/// The offset of `VMFuncRef` for the `index` specified.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>lowering_anyfunc(<span class="kw-2">&amp;</span><span class="self">self</span>, index: LoweredIndex) -&gt; u32 {
+    </span><span class="kw">pub fn </span>lowering_func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>, index: LoweredIndex) -&gt; u32 {
         <span class="macro">assert!</span>(index.as_u32() &lt; <span class="self">self</span>.num_lowerings);
-        <span class="self">self</span>.lowering_anyfuncs()
-            + index.as_u32() * u32::from(<span class="self">self</span>.ptr.size_of_vmcaller_checked_func_ref())
+        <span class="self">self</span>.lowering_func_refs() + index.as_u32() * u32::from(<span class="self">self</span>.ptr.size_of_vm_func_ref())
     }
 
-    <span class="doccomment">/// The offset of the `always_trap_anyfuncs` field.
+    <span class="doccomment">/// The offset of the `always_trap_func_refs` field.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>always_trap_anyfuncs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
-        <span class="self">self</span>.always_trap_anyfuncs
+    </span><span class="kw">pub fn </span>always_trap_func_refs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
+        <span class="self">self</span>.always_trap_func_refs
     }
 
-    <span class="doccomment">/// The offset of `VMCallerCheckedFuncRef` for the `index` specified.
+    <span class="doccomment">/// The offset of `VMFuncRef` for the `index` specified.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>always_trap_anyfunc(<span class="kw-2">&amp;</span><span class="self">self</span>, index: RuntimeAlwaysTrapIndex) -&gt; u32 {
+    </span><span class="kw">pub fn </span>always_trap_func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>, index: RuntimeAlwaysTrapIndex) -&gt; u32 {
         <span class="macro">assert!</span>(index.as_u32() &lt; <span class="self">self</span>.num_always_trap);
-        <span class="self">self</span>.always_trap_anyfuncs()
-            + index.as_u32() * u32::from(<span class="self">self</span>.ptr.size_of_vmcaller_checked_func_ref())
+        <span class="self">self</span>.always_trap_func_refs() + index.as_u32() * u32::from(<span class="self">self</span>.ptr.size_of_vm_func_ref())
     }
 
-    <span class="doccomment">/// The offset of the `transcoder_anyfuncs` field.
+    <span class="doccomment">/// The offset of the `transcoder_func_refs` field.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>transcoder_anyfuncs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
-        <span class="self">self</span>.transcoder_anyfuncs
+    </span><span class="kw">pub fn </span>transcoder_func_refs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
+        <span class="self">self</span>.transcoder_func_refs
     }
 
-    <span class="doccomment">/// The offset of `VMCallerCheckedFuncRef` for the `index` specified.
+    <span class="doccomment">/// The offset of `VMFuncRef` for the `index` specified.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>transcoder_anyfunc(<span class="kw-2">&amp;</span><span class="self">self</span>, index: RuntimeTranscoderIndex) -&gt; u32 {
+    </span><span class="kw">pub fn </span>transcoder_func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>, index: RuntimeTranscoderIndex) -&gt; u32 {
         <span class="macro">assert!</span>(index.as_u32() &lt; <span class="self">self</span>.num_transcoders);
-        <span class="self">self</span>.transcoder_anyfuncs()
-            + index.as_u32() * u32::from(<span class="self">self</span>.ptr.size_of_vmcaller_checked_func_ref())
+        <span class="self">self</span>.transcoder_func_refs() + index.as_u32() * u32::from(<span class="self">self</span>.ptr.size_of_vm_func_ref())
     }
 
     <span class="doccomment">/// The offset of the `lowerings` field.
@@ -648,7 +642,7 @@
         <span class="self">self</span>.reallocs
     }
 
-    <span class="doccomment">/// The offset of the `*mut VMCallerCheckedFuncRef` for the runtime index
+    <span class="doccomment">/// The offset of the `*mut VMFuncRef` for the runtime index
     /// provided.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>runtime_realloc(<span class="kw-2">&amp;</span><span class="self">self</span>, index: RuntimeReallocIndex) -&gt; u32 {
@@ -662,7 +656,7 @@
         <span class="self">self</span>.post_returns
     }
 
-    <span class="doccomment">/// The offset of the `*mut VMCallerCheckedFuncRef` for the runtime index
+    <span class="doccomment">/// The offset of the `*mut VMFuncRef` for the runtime index
     /// provided.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>runtime_post_return(<span class="kw-2">&amp;</span><span class="self">self</span>, index: RuntimePostReturnIndex) -&gt; u32 {

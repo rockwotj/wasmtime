@@ -651,7 +651,7 @@
 
 </span><span class="kw">use </span><span class="kw">crate</span>::externref::VMExternRef;
 <span class="kw">use </span><span class="kw">crate</span>::table::{Table, TableElementType};
-<span class="kw">use </span><span class="kw">crate</span>::vmcontext::{VMCallerCheckedFuncRef, VMContext};
+<span class="kw">use </span><span class="kw">crate</span>::vmcontext::{VMContext, VMFuncRef};
 <span class="kw">use </span><span class="kw">crate</span>::TrapReason;
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>std::mem;
@@ -804,14 +804,14 @@
     vmctx: <span class="kw-2">*mut </span>VMContext,
     table_index: u32,
     delta: u32,
-    <span class="comment">// NB: we don&#39;t know whether this is a pointer to a `VMCallerCheckedFuncRef`
+    <span class="comment">// NB: we don&#39;t know whether this is a pointer to a `VMFuncRef`
     // or is a `VMExternRef` until we look at the table type.
     </span>init_value: <span class="kw-2">*mut </span>u8,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;u32&gt; {
     <span class="kw">let </span>instance = (<span class="kw-2">*</span>vmctx).instance_mut();
     <span class="kw">let </span>table_index = TableIndex::from_u32(table_index);
     <span class="kw">let </span>element = <span class="kw">match </span>instance.table_element_type(table_index) {
-        TableElementType::Func =&gt; (init_value <span class="kw">as </span><span class="kw-2">*mut </span>VMCallerCheckedFuncRef).into(),
+        TableElementType::Func =&gt; (init_value <span class="kw">as </span><span class="kw-2">*mut </span>VMFuncRef).into(),
         TableElementType::Extern =&gt; {
             <span class="kw">let </span>init_value = <span class="kw">if </span>init_value.is_null() {
                 <span class="prelude-val">None
@@ -827,7 +827,7 @@
     })
 }
 
-<span class="kw">use </span>table_grow <span class="kw">as </span>table_grow_funcref;
+<span class="kw">use </span>table_grow <span class="kw">as </span>table_grow_func_ref;
 <span class="kw">use </span>table_grow <span class="kw">as </span>table_grow_externref;
 
 <span class="comment">// Implementation of `table.fill`.
@@ -836,7 +836,7 @@
     table_index: u32,
     dst: u32,
     <span class="comment">// NB: we don&#39;t know whether this is a `VMExternRef` or a pointer to a
-    // `VMCallerCheckedFuncRef` until we look at the table&#39;s element type.
+    // `VMFuncRef` until we look at the table&#39;s element type.
     </span>val: <span class="kw-2">*mut </span>u8,
     len: u32,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Trap&gt; {
@@ -845,7 +845,7 @@
     <span class="kw">let </span>table = <span class="kw-2">&amp;mut *</span>instance.get_table(table_index);
     <span class="kw">match </span>table.element_type() {
         TableElementType::Func =&gt; {
-            <span class="kw">let </span>val = val <span class="kw">as </span><span class="kw-2">*mut </span>VMCallerCheckedFuncRef;
+            <span class="kw">let </span>val = val <span class="kw">as </span><span class="kw-2">*mut </span>VMFuncRef;
             table.fill(dst, val.into(), len)
         }
         TableElementType::Extern =&gt; {
@@ -859,7 +859,7 @@
     }
 }
 
-<span class="kw">use </span>table_fill <span class="kw">as </span>table_fill_funcref;
+<span class="kw">use </span>table_fill <span class="kw">as </span>table_fill_func_ref;
 <span class="kw">use </span>table_fill <span class="kw">as </span>table_fill_externref;
 
 <span class="comment">// Implementation of `table.copy`.
@@ -949,10 +949,10 @@
 <span class="comment">// Implementation of `ref.func`.
 </span><span class="kw">unsafe fn </span>ref_func(vmctx: <span class="kw-2">*mut </span>VMContext, func_index: u32) -&gt; <span class="kw-2">*mut </span>u8 {
     <span class="kw">let </span>instance = (<span class="kw-2">*</span>vmctx).instance_mut();
-    <span class="kw">let </span>anyfunc = instance
-        .get_caller_checked_anyfunc(FuncIndex::from_u32(func_index))
-        .expect(<span class="string">&quot;ref_func: caller_checked_anyfunc should always be available for given func index&quot;</span>);
-    anyfunc <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_
+    <span class="kw">let </span>func_ref = instance
+        .get_func_ref(FuncIndex::from_u32(func_index))
+        .expect(<span class="string">&quot;ref_func: `get_func_ref` should always be available for our given func index&quot;</span>);
+    func_ref <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_
 </span>}
 
 <span class="comment">// Implementation of `data.drop`.
@@ -963,7 +963,7 @@
 }
 
 <span class="comment">// Returns a table entry after lazily initializing it.
-</span><span class="kw">unsafe fn </span>table_get_lazy_init_funcref(
+</span><span class="kw">unsafe fn </span>table_get_lazy_init_func_ref(
     vmctx: <span class="kw-2">*mut </span>VMContext,
     table_index: u32,
     index: u32,

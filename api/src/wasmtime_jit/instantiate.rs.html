@@ -1385,7 +1385,7 @@
     <span class="doccomment">/// Get the Wasm-to-native trampoline for the given signature.
     ///
     /// These trampolines are used for filling in
-    /// `VMCallerCheckedFuncRef::wasm_call` for `Func::wrap`-style host funcrefs
+    /// `VMFuncRef::wasm_call` for `Func::wrap`-style host funcrefs
     /// that don&#39;t have access to a compiler when created.
     </span><span class="kw">pub fn </span>wasm_to_native_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, signature: SignatureIndex) -&gt; <span class="kw-2">&amp;</span>[u8] {
         <span class="kw">let </span>idx = <span class="self">self

@@ -144,7 +144,7 @@
 //!
 //! Keep in sync with `wasmtime_environ::VMHostFuncOffsets`.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::VMCallerCheckedFuncRef;
+</span><span class="kw">use </span><span class="kw">crate</span>::VMFuncRef;
 
 <span class="kw">use </span><span class="kw">super</span>::VMOpaqueContext;
 <span class="kw">use </span>std::any::Any;
@@ -160,7 +160,7 @@
 </span><span class="kw">pub struct </span>VMArrayCallHostFuncContext {
     magic: u32,
     <span class="comment">// _padding: u32, // (on 64-bit systems)
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) funcref: VMCallerCheckedFuncRef,
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) func_ref: VMFuncRef,
     host_state: Box&lt;<span class="kw">dyn </span>Any + Send + Sync&gt;,
 }
 
@@ -177,16 +177,16 @@
     /// The `host_func` must be a pointer to a host (not Wasm) function and it
     /// must be `Send` and `Sync`.
     </span><span class="kw">pub unsafe fn </span>new(
-        funcref: VMCallerCheckedFuncRef,
+        func_ref: VMFuncRef,
         host_state: Box&lt;<span class="kw">dyn </span>Any + Send + Sync&gt;,
     ) -&gt; Box&lt;VMArrayCallHostFuncContext&gt; {
-        <span class="macro">debug_assert!</span>(funcref.vmctx.is_null());
+        <span class="macro">debug_assert!</span>(func_ref.vmctx.is_null());
         <span class="kw">let </span><span class="kw-2">mut </span>ctx = Box::new(VMArrayCallHostFuncContext {
             magic: wasmtime_environ::VM_ARRAY_CALL_HOST_FUNC_MAGIC,
-            funcref,
+            func_ref,
             host_state,
         });
-        ctx.funcref.vmctx = VMOpaqueContext::from_vm_array_call_host_func_context(<span class="kw-2">&amp;mut *</span>ctx);
+        ctx.func_ref.vmctx = VMOpaqueContext::from_vm_array_call_host_func_context(<span class="kw-2">&amp;mut *</span>ctx);
         ctx
     }
 
@@ -196,10 +196,10 @@
         <span class="kw-2">&amp;*</span><span class="self">self</span>.host_state
     }
 
-    <span class="doccomment">/// Get this context&#39;s funcref.
+    <span class="doccomment">/// Get this context&#39;s `VMFuncRef`.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>funcref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMCallerCheckedFuncRef {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.funcref
+    </span><span class="kw">pub fn </span>func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMFuncRef {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.func_ref
     }
 
     <span class="doccomment">/// Helper function to cast between context types using a debug assertion to
@@ -222,7 +222,7 @@
 </span><span class="kw">pub struct </span>VMNativeCallHostFuncContext {
     magic: u32,
     <span class="comment">// _padding: u32, // (on 64-bit systems)
-    </span>funcref: VMCallerCheckedFuncRef,
+    </span>func_ref: VMFuncRef,
     host_state: Box&lt;<span class="kw">dyn </span>Any + Send + Sync&gt;,
 }
 
@@ -231,8 +231,8 @@
     <span class="kw">use </span>memoffset::offset_of;
     <span class="kw">use </span>wasmtime_environ::{HostPtr, PtrSize};
     <span class="macro">assert_eq!</span>(
-        usize::from(HostPtr.vmnative_call_host_func_context_funcref()),
-        <span class="macro">offset_of!</span>(VMNativeCallHostFuncContext, funcref)
+        usize::from(HostPtr.vmnative_call_host_func_context_func_ref()),
+        <span class="macro">offset_of!</span>(VMNativeCallHostFuncContext, func_ref)
     );
 }
 
@@ -249,15 +249,15 @@
     /// The `host_func` must be a pointer to a host (not Wasm) function and it
     /// must be `Send` and `Sync`.
     </span><span class="kw">pub unsafe fn </span>new(
-        funcref: VMCallerCheckedFuncRef,
+        func_ref: VMFuncRef,
         host_state: Box&lt;<span class="kw">dyn </span>Any + Send + Sync&gt;,
     ) -&gt; Box&lt;VMNativeCallHostFuncContext&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>ctx = Box::new(VMNativeCallHostFuncContext {
             magic: wasmtime_environ::VM_NATIVE_CALL_HOST_FUNC_MAGIC,
-            funcref,
+            func_ref,
             host_state,
         });
-        ctx.funcref.vmctx = VMOpaqueContext::from_vm_native_call_host_func_context(<span class="kw-2">&amp;mut *</span>ctx);
+        ctx.func_ref.vmctx = VMOpaqueContext::from_vm_native_call_host_func_context(<span class="kw-2">&amp;mut *</span>ctx);
         ctx
     }
 
@@ -267,10 +267,10 @@
         <span class="kw-2">&amp;*</span><span class="self">self</span>.host_state
     }
 
-    <span class="doccomment">/// Get this context&#39;s funcref.
+    <span class="doccomment">/// Get this context&#39;s `VMFuncRef`.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>funcref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMCallerCheckedFuncRef {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.funcref
+    </span><span class="kw">pub fn </span>func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMFuncRef {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.func_ref
     }
 
     <span class="doccomment">/// Helper function to cast between context types using a debug assertion to

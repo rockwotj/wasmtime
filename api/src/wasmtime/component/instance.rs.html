@@ -854,12 +854,12 @@
             CoreDef::Export(e) =&gt; <span class="self">self</span>.lookup_export(store, e),
             CoreDef::Lowered(idx) =&gt; {
                 wasmtime_runtime::Export::Function(wasmtime_runtime::ExportFunction {
-                    anyfunc: <span class="self">self</span>.state.lowering_anyfunc(<span class="kw-2">*</span>idx),
+                    func_ref: <span class="self">self</span>.state.lowering_func_ref(<span class="kw-2">*</span>idx),
                 })
             }
             CoreDef::AlwaysTrap(idx) =&gt; {
                 wasmtime_runtime::Export::Function(wasmtime_runtime::ExportFunction {
-                    anyfunc: <span class="self">self</span>.state.always_trap_anyfunc(<span class="kw-2">*</span>idx),
+                    func_ref: <span class="self">self</span>.state.always_trap_func_ref(<span class="kw-2">*</span>idx),
                 })
             }
             CoreDef::InstanceFlags(idx) =&gt; {
@@ -874,7 +874,7 @@
             }
             CoreDef::Transcoder(idx) =&gt; {
                 wasmtime_runtime::Export::Function(wasmtime_runtime::ExportFunction {
-                    anyfunc: <span class="self">self</span>.state.transcoder_anyfunc(<span class="kw-2">*</span>idx),
+                    func_ref: <span class="self">self</span>.state.transcoder_func_ref(<span class="kw-2">*</span>idx),
                 })
             }
         }
@@ -1117,21 +1117,21 @@
     }
 
     <span class="kw">fn </span>extract_realloc(<span class="kw-2">&amp;mut </span><span class="self">self</span>, store: <span class="kw-2">&amp;mut </span>StoreOpaque, realloc: <span class="kw-2">&amp;</span>ExtractRealloc) {
-        <span class="kw">let </span>anyfunc = <span class="kw">match </span><span class="self">self</span>.data.lookup_def(store, <span class="kw-2">&amp;</span>realloc.def) {
-            wasmtime_runtime::Export::Function(f) =&gt; f.anyfunc,
+        <span class="kw">let </span>func_ref = <span class="kw">match </span><span class="self">self</span>.data.lookup_def(store, <span class="kw-2">&amp;</span>realloc.def) {
+            wasmtime_runtime::Export::Function(f) =&gt; f.func_ref,
             <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
         };
-        <span class="self">self</span>.data.state.set_runtime_realloc(realloc.index, anyfunc);
+        <span class="self">self</span>.data.state.set_runtime_realloc(realloc.index, func_ref);
     }
 
     <span class="kw">fn </span>extract_post_return(<span class="kw-2">&amp;mut </span><span class="self">self</span>, store: <span class="kw-2">&amp;mut </span>StoreOpaque, post_return: <span class="kw-2">&amp;</span>ExtractPostReturn) {
-        <span class="kw">let </span>anyfunc = <span class="kw">match </span><span class="self">self</span>.data.lookup_def(store, <span class="kw-2">&amp;</span>post_return.def) {
-            wasmtime_runtime::Export::Function(f) =&gt; f.anyfunc,
+        <span class="kw">let </span>func_ref = <span class="kw">match </span><span class="self">self</span>.data.lookup_def(store, <span class="kw-2">&amp;</span>post_return.def) {
+            wasmtime_runtime::Export::Function(f) =&gt; f.func_ref,
             <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
         };
         <span class="self">self</span>.data
             .state
-            .set_runtime_post_return(post_return.index, anyfunc);
+            .set_runtime_post_return(post_return.index, func_ref);
     }
 
     <span class="kw">fn </span>build_imports&lt;<span class="lifetime">&#39;b</span>&gt;(
@@ -1184,7 +1184,7 @@
         </span><span class="kw">if let </span>wasmtime_runtime::Export::Function(f) = <span class="kw-2">&amp;</span>export {
             <span class="kw">match </span>expected {
                 EntityType::Function(expected) =&gt; {
-                    <span class="kw">let </span>actual = <span class="kw">unsafe </span>{ f.anyfunc.as_ref().type_index };
+                    <span class="kw">let </span>actual = <span class="kw">unsafe </span>{ f.func_ref.as_ref().type_index };
                     <span class="macro">assert_eq!</span>(module.signatures().shared_signature(expected), <span class="prelude-val">Some</span>(actual));
                     <span class="kw">return</span>;
                 }

@@ -1038,6 +1038,9 @@
 <a href="#1038" id="1038">1038</a>
 <a href="#1039" id="1039">1039</a>
 <a href="#1040" id="1040">1040</a>
+<a href="#1041" id="1041">1041</a>
+<a href="#1042" id="1042">1042</a>
+<a href="#1043" id="1043">1043</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Data structures for representing decoded wasm modules.
 
 </span><span class="kw">use crate</span>::{ModuleTranslation, PrimaryMap, Tunables, WASM_PAGE_SIZE};
@@ -1851,10 +1854,10 @@
     </span><span class="kw">pub </span>num_imported_globals: usize,
 
     <span class="doccomment">/// Number of functions that &quot;escape&quot; from this module may need to have a
-    /// `VMCallerCheckedFuncRef` constructed for them.
+    /// `VMFuncRef` constructed for them.
     ///
     /// This is also the number of functions in the `functions` array below with
-    /// an `anyfunc` index (and is the maximum anyfunc index).
+    /// an `func_ref` index (and is the maximum func_ref index).
     </span><span class="kw">pub </span>num_escaped_funcs: usize,
 
     <span class="doccomment">/// Types of functions, imported and local.
@@ -2040,7 +2043,7 @@
     </span><span class="kw">pub fn </span>push_function(<span class="kw-2">&amp;mut </span><span class="self">self</span>, signature: SignatureIndex) -&gt; FuncIndex {
         <span class="self">self</span>.functions.push(FunctionType {
             signature,
-            anyfunc: AnyfuncIndex::reserved_value(),
+            func_ref: FuncRefIndex::reserved_value(),
         })
     }
 
@@ -2048,9 +2051,12 @@
     </span><span class="kw">pub fn </span>push_escaped_function(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         signature: SignatureIndex,
-        anyfunc: AnyfuncIndex,
+        func_ref: FuncRefIndex,
     ) -&gt; FuncIndex {
-        <span class="self">self</span>.functions.push(FunctionType { signature, anyfunc })
+        <span class="self">self</span>.functions.push(FunctionType {
+            signature,
+            func_ref,
+        })
     }
 }
 
@@ -2060,9 +2066,9 @@
     <span class="doccomment">/// The type of this function, indexed into the module-wide type tables for
     /// a module compilation.
     </span><span class="kw">pub </span>signature: SignatureIndex,
-    <span class="doccomment">/// The index into the anyfunc table, if present. Note that this is
+    <span class="doccomment">/// The index into the funcref table, if present. Note that this is
     /// `reserved_value()` if the function does not escape from a module.
-    </span><span class="kw">pub </span>anyfunc: AnyfuncIndex,
+    </span><span class="kw">pub </span>func_ref: FuncRefIndex,
 }
 
 <span class="kw">impl </span>FunctionType {
@@ -2070,13 +2076,13 @@
     /// module, meaning that the function is exported, used in `ref.func`, used
     /// in a table, etc.
     </span><span class="kw">pub fn </span>is_escaping(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        !<span class="self">self</span>.anyfunc.is_reserved_value()
+        !<span class="self">self</span>.func_ref.is_reserved_value()
     }
 }
 
-<span class="doccomment">/// Index into the anyfunc table within a VMContext for a function.
+<span class="doccomment">/// Index into the funcref table within a VMContext for a function.
 </span><span class="attr">#[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Debug, Serialize, Deserialize)]
-</span><span class="kw">pub struct </span>AnyfuncIndex(u32);
-<span class="macro">cranelift_entity::entity_impl!</span>(AnyfuncIndex);
+</span><span class="kw">pub struct </span>FuncRefIndex(u32);
+<span class="macro">cranelift_entity::entity_impl!</span>(FuncRefIndex);
 </code></pre></div>
 </section></main></body></html>

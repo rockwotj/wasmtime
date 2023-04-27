@@ -438,7 +438,7 @@
 <span class="kw">use </span>wasmtime_runtime::component::{
     InstanceFlags, VMComponentContext, VMLowering, VMLoweringCallee,
 };
-<span class="kw">use </span>wasmtime_runtime::{VMCallerCheckedFuncRef, VMMemoryDefinition, VMOpaqueContext};
+<span class="kw">use </span>wasmtime_runtime::{VMFuncRef, VMMemoryDefinition, VMOpaqueContext};
 
 <span class="kw">pub struct </span>HostFunc {
     entrypoint: VMLoweringCallee,
@@ -466,7 +466,7 @@
         data: <span class="kw-2">*mut </span>u8,
         flags: InstanceFlags,
         memory: <span class="kw-2">*mut </span>VMMemoryDefinition,
-        realloc: <span class="kw-2">*mut </span>VMCallerCheckedFuncRef,
+        realloc: <span class="kw-2">*mut </span>VMFuncRef,
         string_encoding: StringEncoding,
         storage: <span class="kw-2">*mut </span>ValRaw,
         storage_len: usize,
@@ -573,7 +573,7 @@
     cx: <span class="kw-2">*mut </span>VMOpaqueContext,
     <span class="kw-2">mut </span>flags: InstanceFlags,
     memory: <span class="kw-2">*mut </span>VMMemoryDefinition,
-    realloc: <span class="kw-2">*mut </span>VMCallerCheckedFuncRef,
+    realloc: <span class="kw-2">*mut </span>VMFuncRef,
     string_encoding: StringEncoding,
     storage: <span class="kw-2">&amp;mut </span>[ValRaw],
     closure: F,
@@ -703,7 +703,7 @@
     cx: <span class="kw-2">*mut </span>VMOpaqueContext,
     <span class="kw-2">mut </span>flags: InstanceFlags,
     memory: <span class="kw-2">*mut </span>VMMemoryDefinition,
-    realloc: <span class="kw-2">*mut </span>VMCallerCheckedFuncRef,
+    realloc: <span class="kw-2">*mut </span>VMFuncRef,
     string_encoding: StringEncoding,
     storage: <span class="kw-2">&amp;mut </span>[ValRaw],
     closure: F,
@@ -821,7 +821,7 @@
     data: <span class="kw-2">*mut </span>u8,
     flags: InstanceFlags,
     memory: <span class="kw-2">*mut </span>VMMemoryDefinition,
-    realloc: <span class="kw-2">*mut </span>VMCallerCheckedFuncRef,
+    realloc: <span class="kw-2">*mut </span>VMFuncRef,
     string_encoding: StringEncoding,
     storage: <span class="kw-2">*mut </span>ValRaw,
     storage_len: usize,

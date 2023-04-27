@@ -104,7 +104,7 @@
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::vmcontext::{
-    VMCallerCheckedFuncRef, VMContext, VMGlobalDefinition, VMMemoryDefinition, VMTableDefinition,
+    VMContext, VMFuncRef, VMGlobalDefinition, VMMemoryDefinition, VMTableDefinition,
 };
 <span class="kw">use </span>std::ptr::NonNull;
 <span class="kw">use </span>wasmtime_environ::{DefinedMemoryIndex, Global, MemoryPlan, TablePlan};
@@ -127,11 +127,11 @@
 <span class="doccomment">/// A function export value.
 </span><span class="attr">#[derive(Debug, Clone, Copy)]
 </span><span class="kw">pub struct </span>ExportFunction {
-    <span class="doccomment">/// The `VMCallerCheckedFuncRef` for this exported function.
+    <span class="doccomment">/// The `VMFuncRef` for this exported function.
     ///
     /// Note that exported functions cannot be a null funcref, so this is a
     /// non-null pointer.
-    </span><span class="kw">pub </span>anyfunc: NonNull&lt;VMCallerCheckedFuncRef&gt;,
+    </span><span class="kw">pub </span>func_ref: NonNull&lt;VMFuncRef&gt;,
 }
 
 <span class="comment">// It&#39;s part of the contract of using `ExportFunction` that synchronization

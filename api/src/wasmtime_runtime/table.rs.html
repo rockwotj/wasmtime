@@ -575,7 +575,7 @@
 //!
 //! `Table` is to WebAssembly tables what `LinearMemory` is to WebAssembly linear memories.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::vmcontext::{VMCallerCheckedFuncRef, VMTableDefinition};
+</span><span class="kw">use </span><span class="kw">crate</span>::vmcontext::{VMFuncRef, VMTableDefinition};
 <span class="kw">use crate</span>::{Store, VMExternRef};
 <span class="kw">use </span>anyhow::{bail, format_err, Error, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>std::convert::{TryFrom, TryInto};
@@ -589,7 +589,7 @@
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub enum </span>TableElement {
     <span class="doccomment">/// A `funcref`.
-    </span>FuncRef(<span class="kw-2">*mut </span>VMCallerCheckedFuncRef),
+    </span>FuncRef(<span class="kw-2">*mut </span>VMFuncRef),
     <span class="doccomment">/// An `exrernref`.
     </span>ExternRef(<span class="prelude-ty">Option</span>&lt;VMExternRef&gt;),
     <span class="doccomment">/// An uninitialized funcref value. This should never be exposed
@@ -605,7 +605,7 @@
     Extern,
 }
 
-<span class="comment">// The usage of `*mut VMCallerCheckedFuncRef` is safe w.r.t. thread safety, this
+<span class="comment">// The usage of `*mut VMFuncRef` is safe w.r.t. thread safety, this
 // just relies on thread-safety of `VMExternRef` itself.
 </span><span class="kw">unsafe impl </span>Send <span class="kw">for </span>TableElement <span class="kw">where </span>VMExternRef: Send {}
 <span class="kw">unsafe impl </span>Sync <span class="kw">for </span>TableElement <span class="kw">where </span>VMExternRef: Sync {}
@@ -692,8 +692,8 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;<span class="kw-2">*mut </span>VMCallerCheckedFuncRef&gt; <span class="kw">for </span>TableElement {
-    <span class="kw">fn </span>from(f: <span class="kw-2">*mut </span>VMCallerCheckedFuncRef) -&gt; TableElement {
+<span class="kw">impl </span>From&lt;<span class="kw-2">*mut </span>VMFuncRef&gt; <span class="kw">for </span>TableElement {
+    <span class="kw">fn </span>from(f: <span class="kw-2">*mut </span>VMFuncRef) -&gt; TableElement {
         TableElement::FuncRef(f)
     }
 }
@@ -839,7 +839,7 @@
     </span><span class="kw">pub fn </span>init_funcs(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         dst: u32,
-        items: <span class="kw">impl </span>ExactSizeIterator&lt;Item = <span class="kw-2">*mut </span>VMCallerCheckedFuncRef&gt;,
+        items: <span class="kw">impl </span>ExactSizeIterator&lt;Item = <span class="kw-2">*mut </span>VMFuncRef&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Trap&gt; {
         <span class="macro">assert!</span>(<span class="self">self</span>.element_type() == TableElementType::Func);
 

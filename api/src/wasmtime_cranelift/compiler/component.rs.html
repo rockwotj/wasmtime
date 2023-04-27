@@ -772,7 +772,7 @@
             <span class="prelude-val">None </span>=&gt; builder.ins().iconst(pointer_type, <span class="number">0</span>),
         });
 
-        <span class="comment">// realloc: *mut VMCallerCheckedFuncRef
+        <span class="comment">// realloc: *mut VMFuncRef
         </span>host_sig.params.push(ir::AbiParam::new(pointer_type));
         callee_args.push(<span class="kw">match </span>realloc {
             <span class="prelude-val">Some</span>(idx) =&gt; builder.ins().load(

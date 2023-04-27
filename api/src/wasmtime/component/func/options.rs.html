@@ -240,7 +240,7 @@
 <span class="kw">use </span>anyhow::{bail, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>std::ptr::NonNull;
 <span class="kw">use </span>wasmtime_environ::component::StringEncoding;
-<span class="kw">use </span>wasmtime_runtime::{VMCallerCheckedFuncRef, VMMemoryDefinition};
+<span class="kw">use </span>wasmtime_runtime::{VMFuncRef, VMMemoryDefinition};
 
 <span class="doccomment">/// Runtime representation of canonical ABI options in the component model.
 ///
@@ -267,7 +267,7 @@
     /// function.
     ///
     /// Safely using this pointer has the same restrictions as `memory` above.
-    </span>realloc: <span class="prelude-ty">Option</span>&lt;NonNull&lt;VMCallerCheckedFuncRef&gt;&gt;,
+    </span>realloc: <span class="prelude-ty">Option</span>&lt;NonNull&lt;VMFuncRef&gt;&gt;,
 
     <span class="doccomment">/// The encoding used for strings, if found.
     ///
@@ -294,7 +294,7 @@
     </span><span class="kw">pub unsafe fn </span>new(
         store_id: StoreId,
         memory: <span class="prelude-ty">Option</span>&lt;NonNull&lt;VMMemoryDefinition&gt;&gt;,
-        realloc: <span class="prelude-ty">Option</span>&lt;NonNull&lt;VMCallerCheckedFuncRef&gt;&gt;,
+        realloc: <span class="prelude-ty">Option</span>&lt;NonNull&lt;VMFuncRef&gt;&gt;,
         string_encoding: StringEncoding,
     ) -&gt; Options {
         Options {

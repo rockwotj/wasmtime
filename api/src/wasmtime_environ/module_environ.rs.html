@@ -840,7 +840,7 @@
 <a href="#840" id="840">840</a>
 <a href="#841" id="841">841</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::module::{
-    AnyfuncIndex, Initializer, MemoryInitialization, MemoryInitializer, MemoryPlan, Module,
+    FuncRefIndex, Initializer, MemoryInitialization, MemoryInitializer, MemoryPlan, Module,
     ModuleType, TableInitializer, TablePlan,
 };
 <span class="kw">use crate</span>::{
@@ -1594,12 +1594,12 @@ and for re-adding support for interface types you can see this issue:
 
     <span class="kw">fn </span>flag_func_escaped(<span class="kw-2">&amp;mut </span><span class="self">self</span>, func: FuncIndex) {
         <span class="kw">let </span>ty = <span class="kw-2">&amp;mut </span><span class="self">self</span>.result.module.functions[func];
-        <span class="comment">// If this was already assigned an anyfunc index no need to re-assign it.
+        <span class="comment">// If this was already assigned a funcref index no need to re-assign it.
         </span><span class="kw">if </span>ty.is_escaping() {
             <span class="kw">return</span>;
         }
         <span class="kw">let </span>index = <span class="self">self</span>.result.module.num_escaped_funcs <span class="kw">as </span>u32;
-        ty.anyfunc = AnyfuncIndex::from_u32(index);
+        ty.func_ref = FuncRefIndex::from_u32(index);
         <span class="self">self</span>.result.module.num_escaped_funcs += <span class="number">1</span>;
     }
 

@@ -903,7 +903,6 @@
 <a href="#903" id="903">903</a>
 <a href="#904" id="904">904</a>
 <a href="#905" id="905">905</a>
-<a href="#906" id="906">906</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::linker::{Definition, DefinitionType};
 <span class="kw">use </span><span class="kw">crate</span>::store::{InstanceId, StoreOpaque, Stored};
 <span class="kw">use </span><span class="kw">crate</span>::types::matching;
@@ -917,9 +916,8 @@
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>wasmtime_environ::{EntityType, FuncIndex, GlobalIndex, MemoryIndex, PrimaryMap, TableIndex};
 <span class="kw">use </span>wasmtime_runtime::{
-    Imports, InstanceAllocationRequest, StorePtr, VMCallerCheckedFuncRef, VMContext,
-    VMFunctionImport, VMGlobalImport, VMMemoryImport, VMNativeCallFunction, VMOpaqueContext,
-    VMTableImport,
+    Imports, InstanceAllocationRequest, StorePtr, VMContext, VMFuncRef, VMFunctionImport,
+    VMGlobalImport, VMMemoryImport, VMNativeCallFunction, VMOpaqueContext, VMTableImport,
 };
 
 <span class="doccomment">/// An instantiated WebAssembly module.
@@ -1253,8 +1251,8 @@
                 <span class="kw">let </span>func = mem::transmute::&lt;
                     NonNull&lt;VMNativeCallFunction&gt;,
                     <span class="kw">extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(<span class="kw-2">*mut </span>VMOpaqueContext, <span class="kw-2">*mut </span>VMContext),
-                &gt;(f.anyfunc.as_ref().native_call);
-                func(f.anyfunc.as_ref().vmctx, caller_vmctx)
+                &gt;(f.func_ref.as_ref().native_call);
+                func(f.func_ref.as_ref().vmctx, caller_vmctx)
             })<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
@@ -1500,7 +1498,7 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>push_export(<span class="kw-2">&amp;mut </span><span class="self">self</span>, item: <span class="kw-2">&amp;</span>wasmtime_runtime::Export) {
         <span class="kw">match </span>item {
             wasmtime_runtime::Export::Function(f) =&gt; {
-                <span class="kw">let </span>f = f.anyfunc.as_ref();
+                <span class="kw">let </span>f = f.func_ref.as_ref();
                 <span class="self">self</span>.functions.push(VMFunctionImport {
                     wasm_call: f.wasm_call.unwrap(),
                     native_call: f.native_call,
@@ -1567,9 +1565,9 @@
     /// preallocate space in a `Store` up front for all entries to be inserted.
     </span>host_funcs: usize,
 
-    <span class="doccomment">/// The `VMCallerCheckedFuncRef`s for the functions in `items` that do not
+    <span class="doccomment">/// The `VMFuncRef`s for the functions in `items` that do not
     /// have a `wasm_call` trampoline. We pre-allocate and pre-patch these
-    /// `VMCallerCheckedFuncRef`s so that we don&#39;t have to do it at
+    /// `VMFuncRef`s so that we don&#39;t have to do it at
     /// instantiation time.
     ///
     /// This is an `Arc&lt;[T]&gt;` for the same reason as `items`.
@@ -1582,18 +1580,18 @@
 <span class="kw">mod </span>pre_patched_func_ref {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="kw">pub struct </span>PrePatchedFuncRef(VMCallerCheckedFuncRef);
+    <span class="kw">pub struct </span>PrePatchedFuncRef(VMFuncRef);
 
     <span class="kw">impl </span>PrePatchedFuncRef {
         <span class="doccomment">/// Safety: callers must arrange for the given `func_ref` to be usable
         /// in a `Send + Sync` manner (i.e. its associated `Module` is kept
         /// alive or `Func` is alive and supports these things) and that the
         /// `wasm_call` field is already patched in, if necessary.
-        </span><span class="kw">pub unsafe fn </span>new(func_ref: VMCallerCheckedFuncRef) -&gt; PrePatchedFuncRef {
+        </span><span class="kw">pub unsafe fn </span>new(func_ref: VMFuncRef) -&gt; PrePatchedFuncRef {
             PrePatchedFuncRef(func_ref)
         }
 
-        <span class="kw">pub fn </span>func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMCallerCheckedFuncRef {
+        <span class="kw">pub fn </span>func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMFuncRef {
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0
         </span>}
     }
@@ -1635,15 +1633,15 @@
                 Definition::Extern(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; {}
                 Definition::HostFunc(f) =&gt; {
                     host_funcs += <span class="number">1</span>;
-                    <span class="kw">if </span>f.funcref().wasm_call.is_none() {
-                        <span class="comment">// `f` needs its `VMCallerCheckedFuncRef::wasm_call`
+                    <span class="kw">if </span>f.func_ref().wasm_call.is_none() {
+                        <span class="comment">// `f` needs its `VMFuncRef::wasm_call`
                         // patched with a Wasm-to-native trampoline.
                         </span><span class="macro">debug_assert!</span>(<span class="macro">matches!</span>(f.host_ctx(), <span class="kw">crate</span>::HostContext::Native(<span class="kw">_</span>)));
-                        func_refs.push(PrePatchedFuncRef::new(VMCallerCheckedFuncRef {
+                        func_refs.push(PrePatchedFuncRef::new(VMFuncRef {
                             wasm_call: module
                                 .runtime_info()
                                 .wasm_to_native_trampoline(f.sig_index()),
-                            ..<span class="kw-2">*</span>f.funcref()
+                            ..<span class="kw-2">*</span>f.func_ref()
                         }));
                     }
                 }
@@ -1774,7 +1772,7 @@
             Definition::HostFunc(func) =&gt; <span class="kw">unsafe </span>{
                 func.to_func_store_rooted(
                     store,
-                    <span class="kw">if </span>func.funcref().wasm_call.is_none() {
+                    <span class="kw">if </span>func.func_ref().wasm_call.is_none() {
                         <span class="prelude-val">Some</span>(func_refs.next().unwrap())
                     } <span class="kw">else </span>{
                         <span class="prelude-val">None

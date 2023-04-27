@@ -106,21 +106,18 @@
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
-<a href="#110" id="110">110</a>
-<a href="#111" id="111">111</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{instance::PrePatchedFuncRef, module::ModuleRegistry};
 <span class="kw">use </span>std::{ptr::NonNull, sync::Arc};
-<span class="kw">use </span>wasmtime_runtime::{VMCallerCheckedFuncRef, VMNativeCallHostFuncContext};
+<span class="kw">use </span>wasmtime_runtime::{VMFuncRef, VMNativeCallHostFuncContext};
 
-<span class="doccomment">/// An arena of `VMCallerCheckedFuncRef`s.
+<span class="doccomment">/// An arena of `VMFuncRef`s.
 ///
 /// Allows a store to pin and own funcrefs so that it can patch in trampolines
-/// for `VMCallerCheckedFuncRef`s that are missing a `wasm_call` trampoline and
+/// for `VMFuncRef`s that are missing a `wasm_call` trampoline and
 /// need Wasm to supply it.
 </span><span class="attr">#[derive(Default)]
 </span><span class="kw">pub struct </span>FuncRefs {
-    <span class="doccomment">/// A bump allocation arena where we allocate `VMCallerCheckedFuncRef`s such
+    <span class="doccomment">/// A bump allocation arena where we allocate `VMFuncRef`s such
     /// that they are pinned and owned.
     </span>bump: SendSyncBump,
 
@@ -128,7 +125,7 @@
     /// in.
     </span>with_holes: Vec&lt;UnpatchedFuncRef&gt;,
 
-    <span class="doccomment">/// Pinned `VMCallerCheckedFuncRef`s that had their `wasm_call` field
+    <span class="doccomment">/// Pinned `VMFuncRef`s that had their `wasm_call` field
     /// pre-patched when constructing an `InstancePre`, and which we need to
     /// keep alive for our owning store&#39;s lifetime.
     </span>instance_pre_func_refs: Vec&lt;Arc&lt;[PrePatchedFuncRef]&gt;&gt;,
@@ -155,17 +152,17 @@
 <span class="kw">mod </span>unpatched_func_ref {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="kw">pub struct </span>UnpatchedFuncRef(NonNull&lt;VMCallerCheckedFuncRef&gt;);
+    <span class="kw">pub struct </span>UnpatchedFuncRef(NonNull&lt;VMFuncRef&gt;);
 
     <span class="kw">impl </span>UnpatchedFuncRef {
         <span class="doccomment">/// Safety: Callers must ensure that the given `func_ref` and resulting
         /// wrapped value are used in a `Send + Sync` compatible way.
-        </span><span class="kw">pub unsafe fn </span>new(func_ref: <span class="kw-2">&amp;</span>VMCallerCheckedFuncRef) -&gt; UnpatchedFuncRef {
+        </span><span class="kw">pub unsafe fn </span>new(func_ref: <span class="kw-2">&amp;</span>VMFuncRef) -&gt; UnpatchedFuncRef {
             <span class="macro">debug_assert!</span>(func_ref.wasm_call.is_none());
             UnpatchedFuncRef(NonNull::from(func_ref))
         }
 
-        <span class="kw">pub fn </span>func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NonNull&lt;VMCallerCheckedFuncRef&gt; {
+        <span class="kw">pub fn </span>func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NonNull&lt;VMFuncRef&gt; {
             <span class="self">self</span>.<span class="number">0
         </span>}
     }
@@ -177,17 +174,14 @@
 }
 
 <span class="kw">impl </span>FuncRefs {
-    <span class="doccomment">/// Push the given `VMCallerCheckedFuncRef` into this arena, returning a
+    <span class="doccomment">/// Push the given `VMFuncRef` into this arena, returning a
     /// pinned pointer to it.
     ///
     /// # Safety
     ///
     /// You may only access the return value on the same thread as this
     /// `FuncRefs` and only while the store holding this `FuncRefs` exists.
-    </span><span class="kw">pub unsafe fn </span>push(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        func_ref: VMCallerCheckedFuncRef,
-    ) -&gt; NonNull&lt;VMCallerCheckedFuncRef&gt; {
+    </span><span class="kw">pub unsafe fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, func_ref: VMFuncRef) -&gt; NonNull&lt;VMFuncRef&gt; {
         <span class="macro">debug_assert!</span>(func_ref.wasm_call.is_none());
         <span class="comment">// Debug assert that the vmctx is a `VMNativeCallHostFuncContext` as
         // that is the only kind that can have holes.
@@ -198,7 +192,7 @@
         NonNull::from(func_ref)
     }
 
-    <span class="doccomment">/// Patch any `VMCallerCheckedFuncRef::wasm_call`s that need filling in.
+    <span class="doccomment">/// Patch any `VMFuncRef::wasm_call`s that need filling in.
     </span><span class="kw">pub fn </span>fill(<span class="kw-2">&amp;mut </span><span class="self">self</span>, modules: <span class="kw-2">&amp;</span>ModuleRegistry) {
         <span class="self">self</span>.with_holes.retain_mut(|f| {
             <span class="kw">unsafe </span>{
@@ -215,7 +209,7 @@
         });
     }
 
-    <span class="doccomment">/// Push pre-patched `VMCallerCheckedFuncRef`s from an `InstancePre`.
+    <span class="doccomment">/// Push pre-patched `VMFuncRef`s from an `InstancePre`.
     </span><span class="kw">pub fn </span>push_instance_pre_func_refs(<span class="kw-2">&amp;mut </span><span class="self">self</span>, func_refs: Arc&lt;[PrePatchedFuncRef]&gt;) {
         <span class="self">self</span>.instance_pre_func_refs.push(func_refs);
     }

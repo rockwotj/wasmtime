@@ -804,8 +804,8 @@
             .map(|i| NonNull::new(data.instance().runtime_memory(i)).unwrap());
         <span class="kw">let </span>realloc = options.realloc.map(|i| data.instance().runtime_realloc(i));
         <span class="kw">let </span>post_return = options.post_return.map(|i| {
-            <span class="kw">let </span>anyfunc = data.instance().runtime_post_return(i);
-            ExportFunction { anyfunc }
+            <span class="kw">let </span>func_ref = data.instance().runtime_post_return(i);
+            ExportFunction { func_ref }
         });
         <span class="kw">let </span>component_instance = options.instance;
         <span class="kw">let </span>options = <span class="kw">unsafe </span>{ Options::new(store.id(), memory, realloc, options.string_encoding) };
@@ -1154,7 +1154,7 @@
             // implementations, hence `ComponentType` being an `unsafe` trait.
             </span><span class="kw">crate</span>::Func::call_unchecked_raw(
                 store,
-                export.anyfunc,
+                export.func_ref,
                 space.as_mut_ptr().cast(),
                 mem::size_of_val(space) / mem::size_of::&lt;ValRaw&gt;(),
             )<span class="question-mark">?</span>;
@@ -1301,7 +1301,7 @@
             </span><span class="kw">if let </span><span class="prelude-val">Some</span>(func) = post_return {
                 <span class="kw">crate</span>::Func::call_unchecked_raw(
                     <span class="kw-2">&amp;mut </span>store,
-                    func.anyfunc,
+                    func.func_ref,
                     <span class="kw-2">&amp;</span>post_return_arg <span class="kw">as </span><span class="kw-2">*const </span>ValRaw <span class="kw">as </span><span class="kw-2">*mut </span>ValRaw,
                     <span class="number">1</span>,
                 )<span class="question-mark">?</span>;

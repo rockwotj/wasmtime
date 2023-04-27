@@ -938,7 +938,6 @@
 <a href="#938" id="938">938</a>
 <a href="#939" id="939">939</a>
 <a href="#940" id="940">940</a>
-<a href="#941" id="941">941</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Offsets and sizes of various structs in wasmtime-runtime&#39;s vmcontext
 //! module.
 
@@ -961,11 +960,11 @@
 //      memories: [*mut VMMemoryDefinition; module.num_defined_memories],
 //      owned_memories: [VMMemoryDefinition; module.num_owned_memories],
 //      globals: [VMGlobalDefinition; module.num_defined_globals],
-//      anyfuncs: [VMCallerCheckedFuncRef; module.num_escaped_funcs],
+//      func_refs: [VMFuncRef; module.num_escaped_funcs],
 // }
 
 </span><span class="kw">use crate</span>::{
-    AnyfuncIndex, DefinedGlobalIndex, DefinedMemoryIndex, DefinedTableIndex, FuncIndex,
+    DefinedGlobalIndex, DefinedMemoryIndex, DefinedTableIndex, FuncIndex, FuncRefIndex,
     GlobalIndex, MemoryIndex, Module, TableIndex,
 };
 <span class="kw">use </span>cranelift_entity::packed_option::ReservedValue;
@@ -1009,7 +1008,7 @@
     </span><span class="kw">pub </span>num_owned_memories: u32,
     <span class="doccomment">/// The number of defined globals in the module.
     </span><span class="kw">pub </span>num_defined_globals: u32,
-    <span class="doccomment">/// The number of escaped functions in the module, the size of the anyfuncs
+    <span class="doccomment">/// The number of escaped functions in the module, the size of the func_refs
     /// array.
     </span><span class="kw">pub </span>num_escaped_funcs: u32,
 
@@ -1030,7 +1029,7 @@
     defined_memories: u32,
     owned_memories: u32,
     defined_globals: u32,
-    defined_anyfuncs: u32,
+    defined_func_refs: u32,
     size: u32,
 }
 
@@ -1051,40 +1050,40 @@
     <span class="doccomment">/// The offset of the `native_call` field.
     </span><span class="attr">#[allow(clippy::erasing_op)]
     #[inline]
-    </span><span class="kw">fn </span>vmcaller_checked_func_ref_native_call(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+    </span><span class="kw">fn </span>vm_func_ref_native_call(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
         <span class="number">0 </span>* <span class="self">self</span>.size()
     }
 
     <span class="doccomment">/// The offset of the `array_call` field.
     </span><span class="attr">#[allow(clippy::erasing_op)]
     #[inline]
-    </span><span class="kw">fn </span>vmcaller_checked_func_ref_array_call(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+    </span><span class="kw">fn </span>vm_func_ref_array_call(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
         <span class="number">1 </span>* <span class="self">self</span>.size()
     }
 
     <span class="doccomment">/// The offset of the `wasm_call` field.
     </span><span class="attr">#[allow(clippy::erasing_op)]
     #[inline]
-    </span><span class="kw">fn </span>vmcaller_checked_func_ref_wasm_call(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+    </span><span class="kw">fn </span>vm_func_ref_wasm_call(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
         <span class="number">2 </span>* <span class="self">self</span>.size()
     }
 
     <span class="doccomment">/// The offset of the `type_index` field.
     </span><span class="attr">#[allow(clippy::identity_op)]
     #[inline]
-    </span><span class="kw">fn </span>vmcaller_checked_func_ref_type_index(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+    </span><span class="kw">fn </span>vm_func_ref_type_index(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
         <span class="number">3 </span>* <span class="self">self</span>.size()
     }
 
     <span class="doccomment">/// The offset of the `vmctx` field.
     </span><span class="attr">#[inline]
-    </span><span class="kw">fn </span>vmcaller_checked_func_ref_vmctx(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+    </span><span class="kw">fn </span>vm_func_ref_vmctx(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
         <span class="number">4 </span>* <span class="self">self</span>.size()
     }
 
-    <span class="doccomment">/// Return the size of `VMCallerCheckedFuncRef`.
+    <span class="doccomment">/// Return the size of `VMFuncRef`.
     </span><span class="attr">#[inline]
-    </span><span class="kw">fn </span>size_of_vmcaller_checked_func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+    </span><span class="kw">fn </span>size_of_vm_func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
         <span class="number">5 </span>* <span class="self">self</span>.size()
     }
 
@@ -1162,8 +1161,8 @@
 
     // Offsets within `VMNativeCallHostFuncContext`.
 
-    </span><span class="doccomment">/// Return the offset of `VMNativeCallHostFuncContext::funcref`.
-    </span><span class="kw">fn </span>vmnative_call_host_func_context_funcref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+    </span><span class="doccomment">/// Return the offset of `VMNativeCallHostFuncContext::func_ref`.
+    </span><span class="kw">fn </span>vmnative_call_host_func_context_func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
         u8::try_from(align(
             u32::try_from(std::mem::size_of::&lt;u32&gt;()).unwrap(),
             u32::from(<span class="self">self</span>.size()),
@@ -1210,8 +1209,8 @@
     </span><span class="kw">pub </span>num_owned_memories: u32,
     <span class="doccomment">/// The number of defined globals in the module.
     </span><span class="kw">pub </span>num_defined_globals: u32,
-    <span class="doccomment">/// The number of escaped functions in the module, the size of the funcref
-    /// array.
+    <span class="doccomment">/// The number of escaped functions in the module, the size of the function
+    /// references array.
     </span><span class="kw">pub </span>num_escaped_funcs: u32,
 }
 
@@ -1293,7 +1292,7 @@
         }
 
         <span class="macro">calculate_sizes! </span>{
-            defined_anyfuncs: <span class="string">&quot;module functions&quot;</span>,
+            defined_func_refs: <span class="string">&quot;module functions&quot;</span>,
             defined_globals: <span class="string">&quot;defined globals&quot;</span>,
             owned_memories: <span class="string">&quot;owned memories&quot;</span>,
             defined_memories: <span class="string">&quot;defined memories&quot;</span>,
@@ -1343,7 +1342,7 @@
             defined_memories: <span class="number">0</span>,
             owned_memories: <span class="number">0</span>,
             defined_globals: <span class="number">0</span>,
-            defined_anyfuncs: <span class="number">0</span>,
+            defined_func_refs: <span class="number">0</span>,
             size: <span class="number">0</span>,
         };
 
@@ -1403,9 +1402,9 @@
             align(<span class="number">16</span>),
             size(defined_globals)
                 = cmul(ret.num_defined_globals, ret.ptr.size_of_vmglobal_definition()),
-            size(defined_anyfuncs) = cmul(
+            size(defined_func_refs) = cmul(
                 ret.num_escaped_funcs,
-                ret.ptr.size_of_vmcaller_checked_func_ref(),
+                ret.ptr.size_of_vm_func_ref(),
             ),
         }
 
@@ -1659,10 +1658,10 @@
         <span class="self">self</span>.defined_globals
     }
 
-    <span class="doccomment">/// The offset of the `anyfuncs` array.
+    <span class="doccomment">/// The offset of the `func_refs` array.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>vmctx_anyfuncs_begin(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
-        <span class="self">self</span>.defined_anyfuncs
+    </span><span class="kw">pub fn </span>vmctx_func_refs_begin(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
+        <span class="self">self</span>.defined_func_refs
     }
 
     <span class="doccomment">/// The offset of the builtin functions array.
@@ -1740,14 +1739,13 @@
             + index.as_u32() * u32::from(<span class="self">self</span>.ptr.size_of_vmglobal_definition())
     }
 
-    <span class="doccomment">/// Return the offset to the `VMCallerCheckedFuncRef` for the given function
+    <span class="doccomment">/// Return the offset to the `VMFuncRef` for the given function
     /// index (either imported or defined).
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>vmctx_anyfunc(<span class="kw-2">&amp;</span><span class="self">self</span>, index: AnyfuncIndex) -&gt; u32 {
+    </span><span class="kw">pub fn </span>vmctx_func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>, index: FuncRefIndex) -&gt; u32 {
         <span class="macro">assert!</span>(!index.is_reserved_value());
         <span class="macro">assert!</span>(index.as_u32() &lt; <span class="self">self</span>.num_escaped_funcs);
-        <span class="self">self</span>.vmctx_anyfuncs_begin()
-            + index.as_u32() * u32::from(<span class="self">self</span>.ptr.size_of_vmcaller_checked_func_ref())
+        <span class="self">self</span>.vmctx_func_refs_begin() + index.as_u32() * u32::from(<span class="self">self</span>.ptr.size_of_vm_func_ref())
     }
 
     <span class="doccomment">/// Return the offset to the `wasm_call` field in `*const VMFunctionBody` index `index`.

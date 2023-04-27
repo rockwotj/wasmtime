@@ -56,7 +56,7 @@ calling Wasm callees.</p>
 this module, providing both their index and their in-memory body.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.wasm_to_native_trampoline" class="method"><a class="srclink rightside" href="../src/wasmtime_jit/instantiate.rs.html#604-611">source</a><h4 class="code-header">pub fn <a href="#method.wasm_to_native_trampoline" class="fn">wasm_to_native_trampoline</a>(&amp;self, signature: <a class="struct" href="../wasmtime_types/struct.SignatureIndex.html" title="struct wasmtime_types::SignatureIndex">SignatureIndex</a>) -&gt; &amp;[<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a>] <a href="#" class="tooltip" data-notable-ty="&amp;[u8]">ⓘ</a></h4></section></summary><div class="docblock"><p>Get the Wasm-to-native trampoline for the given signature.</p>
 <p>These trampolines are used for filling in
-<code>VMCallerCheckedFuncRef::wasm_call</code> for <code>Func::wrap</code>-style host funcrefs
+<code>VMFuncRef::wasm_call</code> for <code>Func::wrap</code>-style host funcrefs
 that don’t have access to a compiler when created.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.wasm_to_native_trampolines" class="method"><a class="srclink rightside" href="../src/wasmtime_jit/instantiate.rs.html#615-621">source</a><h4 class="code-header">pub fn <a href="#method.wasm_to_native_trampolines" class="fn">wasm_to_native_trampolines</a>(
     &amp;self

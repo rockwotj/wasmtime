@@ -1901,7 +1901,6 @@
 <a href="#1901" id="1901">1901</a>
 <a href="#1902" id="1902">1902</a>
 <a href="#1903" id="1903">1903</a>
-<a href="#1904" id="1904">1904</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::component::{MAX_FLAT_PARAMS, MAX_FLAT_RESULTS};
 <span class="kw">use crate</span>::{
     EntityType, Global, GlobalInit, ModuleTypes, ModuleTypesBuilder, PrimaryMap, SignatureIndex,
@@ -2085,9 +2084,8 @@
 
     <span class="doccomment">/// Index into the list of transcoders identified during compilation.
     ///
-    /// This is used to index the `VMCallerCheckedFuncRef` slots reserved for
-    /// string encoders which reference linear memories defined within a
-    /// component.
+    /// This is used to index the `VMFuncRef` slots reserved for string encoders
+    /// which reference linear memories defined within a component.
     </span><span class="kw">pub struct </span>RuntimeTranscoderIndex(u32);
 }
 

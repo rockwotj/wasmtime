@@ -2376,9 +2376,6 @@
 <a href="#2376" id="2376">2376</a>
 <a href="#2377" id="2377">2377</a>
 <a href="#2378" id="2378">2378</a>
-<a href="#2379" id="2379">2379</a>
-<a href="#2380" id="2380">2380</a>
-<a href="#2381" id="2381">2381</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::store::{StoreData, StoreOpaque, Stored};
 <span class="kw">use crate</span>::{
     AsContext, AsContextMut, CallHook, Engine, Extern, FuncType, Instance, Module, StoreContext,
@@ -2392,7 +2389,7 @@
 <span class="kw">use </span>std::ptr::{<span class="self">self</span>, NonNull};
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>wasmtime_runtime::{
-    ExportFunction, InstanceHandle, VMArrayCallHostFuncContext, VMCallerCheckedFuncRef, VMContext,
+    ExportFunction, InstanceHandle, VMArrayCallHostFuncContext, VMContext, VMFuncRef,
     VMFunctionImport, VMNativeCallHostFuncContext, VMOpaqueContext, VMSharedSignatureIndex,
 };
 
@@ -2562,13 +2559,13 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>FuncData {
     kind: FuncKind,
 
-    <span class="comment">// A pointer to the in-store `VMCallerCheckedFuncRef` for this function, if
+    <span class="comment">// A pointer to the in-store `VMFuncRef` for this function, if
     // any.
     //
     // When a function is passed to Wasm but doesn&#39;t have a Wasm-to-native
     // trampoline, we have to patch it in. But that requires mutating the
-    // `VMCallerCheckedFuncRef`, and this function could be shared across
-    // threads. So we instead copy and pin the `VMCallerCheckedFuncRef` into
+    // `VMFuncRef`, and this function could be shared across
+    // threads. So we instead copy and pin the `VMFuncRef` into
     // `StoreOpaque::func_refs`, where we can safely patch the field without
     // worrying about synchronization and we hold a pointer to it here so we can
     // reuse it rather than re-copy if it is passed to Wasm again.
@@ -2589,7 +2586,7 @@
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>InStoreFuncRef(NonNull&lt;VMCallerCheckedFuncRef&gt;);
+    </span><span class="kw">pub struct </span>InStoreFuncRef(NonNull&lt;VMFuncRef&gt;);
 
     <span class="kw">impl </span>InStoreFuncRef {
         <span class="doccomment">/// Create a new `InStoreFuncRef`.
@@ -2597,11 +2594,11 @@
         /// Safety: Callers must ensure that the given `func_ref` is pinned
         /// inside a store, and that this resulting `InStoreFuncRef` is only
         /// used in conjuction with that store and on its same thread.
-        </span><span class="kw">pub unsafe fn </span>new(func_ref: NonNull&lt;VMCallerCheckedFuncRef&gt;) -&gt; InStoreFuncRef {
+        </span><span class="kw">pub unsafe fn </span>new(func_ref: NonNull&lt;VMFuncRef&gt;) -&gt; InStoreFuncRef {
             InStoreFuncRef(func_ref)
         }
 
-        <span class="kw">pub fn </span>func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NonNull&lt;VMCallerCheckedFuncRef&gt; {
+        <span class="kw">pub fn </span>func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NonNull&lt;VMFuncRef&gt; {
             <span class="self">self</span>.<span class="number">0
         </span>}
     }
@@ -2915,11 +2912,11 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>from_caller_checked_func_ref(
         store: <span class="kw-2">&amp;mut </span>StoreOpaque,
-        raw: <span class="kw-2">*mut </span>VMCallerCheckedFuncRef,
+        raw: <span class="kw-2">*mut </span>VMFuncRef,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;Func&gt; {
-        <span class="kw">let </span>anyfunc = NonNull::new(raw)<span class="question-mark">?</span>;
-        <span class="macro">debug_assert!</span>(anyfunc.as_ref().type_index != VMSharedSignatureIndex::default());
-        <span class="kw">let </span>export = ExportFunction { anyfunc };
+        <span class="kw">let </span>func_ref = NonNull::new(raw)<span class="question-mark">?</span>;
+        <span class="macro">debug_assert!</span>(func_ref.as_ref().type_index != VMSharedSignatureIndex::default());
+        <span class="kw">let </span>export = ExportFunction { func_ref };
         <span class="prelude-val">Some</span>(Func::from_wasmtime_function(export, store))
     }
 
@@ -3303,10 +3300,10 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>store = store.as_context_mut();
         <span class="kw">let </span>data = <span class="kw-2">&amp;</span>store.<span class="number">0</span>.store_data()[<span class="self">self</span>.<span class="number">0</span>];
-        <span class="kw">let </span>anyfunc = data.export().anyfunc;
+        <span class="kw">let </span>func_ref = data.export().func_ref;
         <span class="self">Self</span>::call_unchecked_raw(
             <span class="kw-2">&amp;mut </span>store,
-            anyfunc,
+            func_ref,
             params_and_returns,
             params_and_returns_capacity,
         )
@@ -3314,14 +3311,14 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>call_unchecked_raw&lt;T&gt;(
         store: <span class="kw-2">&amp;mut </span>StoreContextMut&lt;<span class="lifetime">&#39;_</span>, T&gt;,
-        anyfunc: NonNull&lt;VMCallerCheckedFuncRef&gt;,
+        func_ref: NonNull&lt;VMFuncRef&gt;,
         params_and_returns: <span class="kw-2">*mut </span>ValRaw,
         params_and_returns_capacity: usize,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         invoke_wasm_and_catch_traps(store, |caller| {
-            <span class="kw">let </span>anyfunc = anyfunc.as_ref();
-            (anyfunc.array_call)(
-                anyfunc.vmctx,
+            <span class="kw">let </span>func_ref = func_ref.as_ref();
+            (func_ref.array_call)(
+                func_ref.vmctx,
                 caller.cast::&lt;VMOpaqueContext&gt;(),
                 params_and_returns,
                 params_and_returns_capacity,
@@ -3487,15 +3484,12 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>caller_checked_func_ref(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        store: <span class="kw-2">&amp;mut </span>StoreOpaque,
-    ) -&gt; NonNull&lt;VMCallerCheckedFuncRef&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>caller_checked_func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>, store: <span class="kw-2">&amp;mut </span>StoreOpaque) -&gt; NonNull&lt;VMFuncRef&gt; {
         <span class="kw">let </span>func_data = <span class="kw-2">&amp;mut </span>store.store_data_mut()[<span class="self">self</span>.<span class="number">0</span>];
         <span class="kw">if let </span><span class="prelude-val">Some</span>(in_store) = func_data.in_store_func_ref {
             in_store.func_ref()
         } <span class="kw">else </span>{
-            <span class="kw">let </span>func_ref = func_data.export().anyfunc;
+            <span class="kw">let </span>func_ref = func_data.export().func_ref;
             <span class="kw">unsafe </span>{
                 <span class="kw">if </span>func_ref.as_ref().wasm_call.is_none() {
                     <span class="kw">let </span>func_ref = store.func_refs().push(func_ref.as_ref().clone());
@@ -3535,7 +3529,7 @@
                 </span><span class="kw">if let </span><span class="prelude-val">Some</span>(func_ref) = func_data.in_store_func_ref {
                     func_ref.func_ref()
                 } <span class="kw">else </span>{
-                    func_data.export().anyfunc
+                    func_data.export().func_ref
                 }
             };
             VMFunctionImport {
@@ -4142,7 +4136,7 @@
 /// as an implementation detail of this crate.
 </span><span class="kw">pub trait </span>IntoFunc&lt;T, Params, Results&gt;: Send + Sync + <span class="lifetime">&#39;static </span>{
     <span class="doccomment">/// Convert this function into a `VM{Array,Native}CallHostFuncContext` and
-    /// internal `VMCallerCheckedFuncRef`.
+    /// internal `VMFuncRef`.
     </span><span class="attr">#[doc(hidden)]
     </span><span class="kw">fn </span>into_func(<span class="self">self</span>, engine: <span class="kw-2">&amp;</span>Engine) -&gt; HostContext;
 }
@@ -4334,7 +4328,7 @@
         {
             <span class="kw">fn </span>into_func(<span class="self">self</span>, engine: <span class="kw-2">&amp;</span>Engine) -&gt; HostContext {
                 <span class="doccomment">/// This shim is a regular, non-closure function we can stuff
-                /// inside `VMCallerCheckedFuncRef::native_call`.
+                /// inside `VMFuncRef::native_call`.
                 ///
                 /// It reads the actual callee closure out of
                 /// `VMNativeCallHostFuncContext::host_state`, forwards
@@ -4467,7 +4461,7 @@
 
                 <span class="kw">let </span>ctx = <span class="kw">unsafe </span>{
                     VMNativeCallHostFuncContext::new(
-                        VMCallerCheckedFuncRef {
+                        VMFuncRef {
                             native_call,
                             array_call,
                             wasm_call: <span class="prelude-val">None</span>,
@@ -4613,12 +4607,12 @@
     </span><span class="kw">pub unsafe fn </span>to_func_store_rooted(
         <span class="self">self</span>: <span class="kw-2">&amp;</span>Arc&lt;<span class="self">Self</span>&gt;,
         store: <span class="kw-2">&amp;mut </span>StoreOpaque,
-        rooted_func_ref: <span class="prelude-ty">Option</span>&lt;NonNull&lt;VMCallerCheckedFuncRef&gt;&gt;,
+        rooted_func_ref: <span class="prelude-ty">Option</span>&lt;NonNull&lt;VMFuncRef&gt;&gt;,
     ) -&gt; Func {
         <span class="self">self</span>.validate_store(store);
 
         <span class="kw">if </span>rooted_func_ref.is_some() {
-            <span class="macro">debug_assert!</span>(<span class="self">self</span>.funcref().wasm_call.is_none());
+            <span class="macro">debug_assert!</span>(<span class="self">self</span>.func_ref().wasm_call.is_none());
             <span class="macro">debug_assert!</span>(<span class="macro">matches!</span>(<span class="self">self</span>.ctx, HostContext::Native(<span class="kw">_</span>)));
         }
 
@@ -4646,13 +4640,13 @@
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>sig_index(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; VMSharedSignatureIndex {
-        <span class="self">self</span>.funcref().type_index
+        <span class="self">self</span>.func_ref().type_index
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>funcref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMCallerCheckedFuncRef {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMFuncRef {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.ctx {
-            HostContext::Native(ctx) =&gt; ctx.funcref(),
-            HostContext::Array(ctx) =&gt; ctx.funcref(),
+            HostContext::Native(ctx) =&gt; ctx.func_ref(),
+            HostContext::Array(ctx) =&gt; ctx.func_ref(),
         }
     }
 
@@ -4662,7 +4656,7 @@
 
     <span class="kw">fn </span>export_func(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ExportFunction {
         ExportFunction {
-            anyfunc: NonNull::from(<span class="self">self</span>.funcref()),
+            func_ref: NonNull::from(<span class="self">self</span>.func_ref()),
         }
     }
 }
@@ -4682,7 +4676,7 @@
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>sig_index(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; VMSharedSignatureIndex {
-        <span class="kw">unsafe </span>{ <span class="self">self</span>.export().anyfunc.as_ref().type_index }
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.export().func_ref.as_ref().type_index }
     }
 }
 
@@ -4693,7 +4687,7 @@
             FuncKind::StoreOwned { export, .. } =&gt; <span class="kw-2">*</span>export,
             FuncKind::SharedHost(host) =&gt; host.export_func(),
             FuncKind::RootedHost(rooted) =&gt; ExportFunction {
-                anyfunc: NonNull::from(rooted.func_ref()),
+                func_ref: NonNull::from(rooted.func_ref()),
             },
             FuncKind::Host(host) =&gt; host.export_func(),
         }
@@ -4706,7 +4700,7 @@
 /// `RootedHostFunc` instead of accidentally safely allowing access to its
 /// constructor.
 </span><span class="kw">mod </span>rooted {
-    <span class="kw">use </span>wasmtime_runtime::VMCallerCheckedFuncRef;
+    <span class="kw">use </span>wasmtime_runtime::VMFuncRef;
 
     <span class="kw">use </span><span class="kw">super</span>::HostFunc;
     <span class="kw">use </span>std::ptr::NonNull;
@@ -4719,7 +4713,7 @@
     /// `HostFunc::to_func_store_rooted`.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>RootedHostFunc {
         func: NonNull&lt;HostFunc&gt;,
-        func_ref: <span class="prelude-ty">Option</span>&lt;NonNull&lt;VMCallerCheckedFuncRef&gt;&gt;,
+        func_ref: <span class="prelude-ty">Option</span>&lt;NonNull&lt;VMFuncRef&gt;&gt;,
     }
 
     <span class="comment">// These are required due to the usage of `NonNull` but should be safe
@@ -4737,7 +4731,7 @@
         /// for the liftime of the return value.
         </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>new(
             func: <span class="kw-2">&amp;</span>Arc&lt;HostFunc&gt;,
-            func_ref: <span class="prelude-ty">Option</span>&lt;NonNull&lt;VMCallerCheckedFuncRef&gt;&gt;,
+            func_ref: <span class="prelude-ty">Option</span>&lt;NonNull&lt;VMFuncRef&gt;&gt;,
         ) -&gt; RootedHostFunc {
             RootedHostFunc {
                 func: NonNull::from(<span class="kw-2">&amp;**</span>func),
@@ -4750,12 +4744,12 @@
             </span><span class="kw">unsafe </span>{ <span class="self">self</span>.func.as_ref() }
         }
 
-        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMCallerCheckedFuncRef {
+        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMFuncRef {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(f) = <span class="self">self</span>.func_ref {
                 <span class="comment">// Safety invariants are upheld by the `RootedHostFunc::new` caller.
                 </span><span class="kw">unsafe </span>{ f.as_ref() }
             } <span class="kw">else </span>{
-                <span class="self">self</span>.func().funcref()
+                <span class="self">self</span>.func().func_ref()
             }
         }
     }

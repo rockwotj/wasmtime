@@ -1265,21 +1265,6 @@
 <a href="#1265" id="1265">1265</a>
 <a href="#1266" id="1266">1266</a>
 <a href="#1267" id="1267">1267</a>
-<a href="#1268" id="1268">1268</a>
-<a href="#1269" id="1269">1269</a>
-<a href="#1270" id="1270">1270</a>
-<a href="#1271" id="1271">1271</a>
-<a href="#1272" id="1272">1272</a>
-<a href="#1273" id="1273">1273</a>
-<a href="#1274" id="1274">1274</a>
-<a href="#1275" id="1275">1275</a>
-<a href="#1276" id="1276">1276</a>
-<a href="#1277" id="1277">1277</a>
-<a href="#1278" id="1278">1278</a>
-<a href="#1279" id="1279">1279</a>
-<a href="#1280" id="1280">1280</a>
-<a href="#1281" id="1281">1281</a>
-<a href="#1282" id="1282">1282</a>
 </pre><pre class="rust"><code><span class="doccomment">//! An `Instance` contains all the runtime state used by execution of a
 //! wasm module (except its callstack and register state). An
 //! `InstanceHandle` is a reference-counting handle for an `Instance`.
@@ -1289,9 +1274,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::memory::{Memory, RuntimeMemoryCreator};
 <span class="kw">use </span><span class="kw">crate</span>::table::{Table, TableElement, TableElementType};
 <span class="kw">use </span><span class="kw">crate</span>::vmcontext::{
-    VMBuiltinFunctionsArray, VMCallerCheckedFuncRef, VMContext, VMFunctionImport,
-    VMGlobalDefinition, VMGlobalImport, VMMemoryDefinition, VMMemoryImport, VMOpaqueContext,
-    VMRuntimeLimits, VMTableDefinition, VMTableImport,
+    VMBuiltinFunctionsArray, VMContext, VMFuncRef, VMFunctionImport, VMGlobalDefinition,
+    VMGlobalImport, VMMemoryDefinition, VMMemoryImport, VMOpaqueContext, VMRuntimeLimits,
+    VMTableDefinition, VMTableImport,
 };
 <span class="kw">use crate</span>::{
     ExportFunction, ExportGlobal, ExportMemory, ExportTable, Imports, ModuleRuntimeInfo, Store,
@@ -1622,9 +1607,9 @@
     }
 
     <span class="kw">fn </span>get_exported_func(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: FuncIndex) -&gt; ExportFunction {
-        <span class="kw">let </span>anyfunc = <span class="self">self</span>.get_caller_checked_anyfunc(index).unwrap();
-        <span class="kw">let </span>anyfunc = NonNull::new(anyfunc <span class="kw">as </span><span class="kw-2">*const </span>VMCallerCheckedFuncRef <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>).unwrap();
-        ExportFunction { anyfunc }
+        <span class="kw">let </span>func_ref = <span class="self">self</span>.get_func_ref(index).unwrap();
+        <span class="kw">let </span>func_ref = NonNull::new(func_ref <span class="kw">as </span><span class="kw-2">*const </span>VMFuncRef <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>).unwrap();
+        ExportFunction { func_ref }
     }
 
     <span class="kw">fn </span>get_exported_table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: TableIndex) -&gt; ExportTable {
@@ -1787,29 +1772,24 @@
         Layout::from_size_align(size, align).unwrap()
     }
 
-    <span class="doccomment">/// Construct a new VMCallerCheckedFuncRef for the given function
+    <span class="doccomment">/// Construct a new VMFuncRef for the given function
     /// (imported or defined in this module) and store into the given
     /// location. Used during lazy initialization.
     ///
     /// Note that our current lazy-init scheme actually calls this every
-    /// time the anyfunc pointer is fetched; this turns out to be better
+    /// time the funcref pointer is fetched; this turns out to be better
     /// than tracking state related to whether it&#39;s been initialized
     /// before, because resetting that state on (re)instantiation is
-    /// very expensive if there are many anyfuncs.
-    </span><span class="kw">fn </span>construct_anyfunc(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        index: FuncIndex,
-        sig: SignatureIndex,
-        into: <span class="kw-2">*mut </span>VMCallerCheckedFuncRef,
-    ) {
+    /// very expensive if there are many funcrefs.
+    </span><span class="kw">fn </span>construct_func_ref(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: FuncIndex, sig: SignatureIndex, into: <span class="kw-2">*mut </span>VMFuncRef) {
         <span class="kw">let </span>type_index = <span class="kw">unsafe </span>{
             <span class="kw">let </span>base: <span class="kw-2">*const </span>VMSharedSignatureIndex =
                 <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets().vmctx_signature_ids_array());
             <span class="kw-2">*</span>base.add(sig.index())
         };
 
-        <span class="kw">let </span>funcref = <span class="kw">if let </span><span class="prelude-val">Some</span>(def_index) = <span class="self">self</span>.module().defined_func_index(index) {
-            VMCallerCheckedFuncRef {
+        <span class="kw">let </span>func_ref = <span class="kw">if let </span><span class="prelude-val">Some</span>(def_index) = <span class="self">self</span>.module().defined_func_index(index) {
+            VMFuncRef {
                 native_call: <span class="self">self
                     </span>.runtime_info
                     .native_to_wasm_trampoline(def_index)
@@ -1824,7 +1804,7 @@
             }
         } <span class="kw">else </span>{
             <span class="kw">let </span>import = <span class="self">self</span>.imported_function(index);
-            VMCallerCheckedFuncRef {
+            VMFuncRef {
                 native_call: import.native_call,
                 array_call: import.array_call,
                 wasm_call: <span class="prelude-val">Some</span>(import.wasm_call),
@@ -1836,20 +1816,17 @@
         <span class="comment">// Safety: we have a `&amp;mut self`, so we have exclusive access
         // to this Instance.
         </span><span class="kw">unsafe </span>{
-            std::ptr::write(into, funcref);
+            std::ptr::write(into, func_ref);
         }
     }
 
-    <span class="doccomment">/// Get a `&amp;VMCallerCheckedFuncRef` for the given `FuncIndex`.
+    <span class="doccomment">/// Get a `&amp;VMFuncRef` for the given `FuncIndex`.
     ///
     /// Returns `None` if the index is the reserved index value.
     ///
     /// The returned reference is a stable reference that won&#39;t be moved and can
     /// be passed into JIT code.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_caller_checked_anyfunc(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        index: FuncIndex,
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">*mut </span>VMCallerCheckedFuncRef&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_func_ref(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: FuncIndex) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">*mut </span>VMFuncRef&gt; {
         <span class="kw">if </span>index == FuncIndex::reserved_value() {
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
@@ -1857,9 +1834,9 @@
         <span class="comment">// Safety: we have a `&amp;mut self`, so we have exclusive access
         // to this Instance.
         </span><span class="kw">unsafe </span>{
-            <span class="comment">// For now, we eagerly initialize an anyfunc struct in-place
+            <span class="comment">// For now, we eagerly initialize an funcref struct in-place
             // whenever asked for a reference to it. This is mostly
-            // fine, because in practice each anyfunc is unlikely to be
+            // fine, because in practice each funcref is unlikely to be
             // requested more than a few times: once-ish for funcref
             // tables used for call_indirect (the usual compilation
             // strategy places each function in the table at most once),
@@ -1873,7 +1850,7 @@
             // otherwise see a use-case where this becomes a hotpath,
             // we can reconsider by using some state to track
             // &quot;uninitialized&quot; explicitly, for example by zeroing the
-            // anyfuncs (perhaps together with other
+            // funcrefs (perhaps together with other
             // zeroed-at-instantiate-time state) or using a separate
             // is-initialized bitmap.
             //
@@ -1883,13 +1860,11 @@
             // all!
             </span><span class="kw">let </span>func = <span class="kw-2">&amp;</span><span class="self">self</span>.module().functions[index];
             <span class="kw">let </span>sig = func.signature;
-            <span class="kw">let </span>anyfunc: <span class="kw-2">*mut </span>VMCallerCheckedFuncRef = <span class="self">self
-                </span>.vmctx_plus_offset_mut::&lt;VMCallerCheckedFuncRef&gt;(
-                    <span class="self">self</span>.offsets().vmctx_anyfunc(func.anyfunc),
-                );
-            <span class="self">self</span>.construct_anyfunc(index, sig, anyfunc);
+            <span class="kw">let </span>func_ref: <span class="kw-2">*mut </span>VMFuncRef = <span class="self">self
+                </span>.vmctx_plus_offset_mut::&lt;VMFuncRef&gt;(<span class="self">self</span>.offsets().vmctx_func_ref(func.func_ref));
+            <span class="self">self</span>.construct_func_ref(index, sig, func_ref);
 
-            <span class="prelude-val">Some</span>(anyfunc)
+            <span class="prelude-val">Some</span>(func_ref)
         }
     }
 
@@ -1946,10 +1921,9 @@
             TableElementType::Func =&gt; {
                 table.init_funcs(
                     dst,
-                    elements.iter().map(|idx| {
-                        <span class="self">self</span>.get_caller_checked_anyfunc(<span class="kw-2">*</span>idx)
-                            .unwrap_or(std::ptr::null_mut())
-                    }),
+                    elements
+                        .iter()
+                        .map(|idx| <span class="self">self</span>.get_func_ref(<span class="kw-2">*</span>idx).unwrap_or(std::ptr::null_mut())),
                 )<span class="question-mark">?</span>;
             }
 
@@ -2144,11 +2118,9 @@
                 };
                 <span class="kw">if </span>value.is_uninit() {
                     <span class="kw">let </span>table_init = <span class="kw">match </span><span class="kw-2">&amp;</span>instance.module().table_initialization {
-                        <span class="comment">// We unfortunately can&#39;t borrow `tables`
-                        // outside the loop because we need to call
-                        // `get_caller_checked_anyfunc` (a `&amp;mut`
-                        // method) below; so unwrap it dynamically
-                        // here.
+                        <span class="comment">// We unfortunately can&#39;t borrow `tables` outside the
+                        // loop because we need to call `get_func_ref` (a `&amp;mut`
+                        // method) below; so unwrap it dynamically here.
                         </span>TableInitialization::FuncTable { tables, .. } =&gt; tables,
                         <span class="kw">_ </span>=&gt; <span class="kw">break</span>,
                     }
@@ -2164,11 +2136,11 @@
                     // we&#39;re past its end.
                     </span><span class="kw">let </span>func_index =
                         table_init.and_then(|indices| indices.get(i <span class="kw">as </span>usize).cloned());
-                    <span class="kw">let </span>anyfunc = func_index
-                        .and_then(|func_index| instance.get_caller_checked_anyfunc(func_index))
+                    <span class="kw">let </span>func_ref = func_index
+                        .and_then(|func_index| instance.get_func_ref(func_index))
                         .unwrap_or(std::ptr::null_mut());
 
-                    <span class="kw">let </span>value = TableElement::FuncRef(anyfunc);
+                    <span class="kw">let </span>value = TableElement::FuncRef(func_ref);
 
                     instance.tables[idx]
                         .set(i, value)
@@ -2261,11 +2233,10 @@
             imports.globals.len(),
         );
 
-        <span class="comment">// N.B.: there is no need to initialize the anyfuncs array because
-        // we eagerly construct each element in it whenever asked for a
-        // reference to that element. In other words, there is no state
-        // needed to track the lazy-init, so we don&#39;t need to initialize
-        // any state now.
+        <span class="comment">// N.B.: there is no need to initialize the funcrefs array because we
+        // eagerly construct each element in it whenever asked for a reference
+        // to that element. In other words, there is no state needed to track
+        // the lazy-init, so we don&#39;t need to initialize any state now.
 
         // Initialize the defined tables
         </span><span class="kw">let </span><span class="kw-2">mut </span>ptr = <span class="self">self</span>.vmctx_plus_offset_mut(offsets.vmctx_tables_begin());
@@ -2334,8 +2305,7 @@
                     }
                 }
                 GlobalInit::RefFunc(f) =&gt; {
-                    <span class="kw-2">*</span>(<span class="kw-2">*</span>to).as_anyfunc_mut() = <span class="self">self</span>.get_caller_checked_anyfunc(f).unwrap()
-                        <span class="kw">as </span><span class="kw-2">*const </span>VMCallerCheckedFuncRef;
+                    <span class="kw-2">*</span>(<span class="kw-2">*</span>to).as_func_ref_mut() = <span class="self">self</span>.get_func_ref(f).unwrap() <span class="kw">as </span><span class="kw-2">*const </span>VMFuncRef;
                 }
                 GlobalInit::RefNullConst =&gt; <span class="kw">match </span>global.wasm_ty {
                     <span class="comment">// `VMGlobalDefinition::new()` already zeroed out the bits
