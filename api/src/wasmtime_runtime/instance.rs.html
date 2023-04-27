@@ -1260,6 +1260,14 @@
 <a href="#1260" id="1260">1260</a>
 <a href="#1261" id="1261">1261</a>
 <a href="#1262" id="1262">1262</a>
+<a href="#1263" id="1263">1263</a>
+<a href="#1264" id="1264">1264</a>
+<a href="#1265" id="1265">1265</a>
+<a href="#1266" id="1266">1266</a>
+<a href="#1267" id="1267">1267</a>
+<a href="#1268" id="1268">1268</a>
+<a href="#1269" id="1269">1269</a>
+<a href="#1270" id="1270">1270</a>
 </pre><pre class="rust"><code><span class="doccomment">//! An `Instance` contains all the runtime state used by execution of a
 //! wasm module (except its callstack and register state). An
 //! `InstanceHandle` is a reference-counting handle for an `Instance`.
@@ -1409,8 +1417,14 @@
 
     <span class="doccomment">/// Helper function to access various locations offset from our `*mut
     /// VMContext` object.
-    </span><span class="kw">unsafe fn </span>vmctx_plus_offset&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u32) -&gt; <span class="kw-2">*mut </span>T {
-        (<span class="self">self</span>.vmctx_ptr().cast::&lt;u8&gt;())
+    </span><span class="kw">unsafe fn </span>vmctx_plus_offset&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u32) -&gt; <span class="kw-2">*const </span>T {
+        (<span class="macro">std::ptr::addr_of!</span>(<span class="self">self</span>.vmctx).cast::&lt;u8&gt;())
+            .add(usize::try_from(offset).unwrap())
+            .cast()
+    }
+
+    <span class="kw">unsafe fn </span>vmctx_plus_offset_mut&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, offset: u32) -&gt; <span class="kw-2">*mut </span>T {
+        (<span class="macro">std::ptr::addr_of_mut!</span>(<span class="self">self</span>.vmctx).cast::&lt;u8&gt;())
             .add(usize::try_from(offset).unwrap())
             .cast()
     }
@@ -1445,20 +1459,20 @@
 
     <span class="doccomment">/// Return the indexed `VMTableDefinition`.
     </span><span class="attr">#[allow(dead_code)]
-    </span><span class="kw">fn </span>table(<span class="kw-2">&amp;</span><span class="self">self</span>, index: DefinedTableIndex) -&gt; VMTableDefinition {
+    </span><span class="kw">fn </span>table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: DefinedTableIndex) -&gt; VMTableDefinition {
         <span class="kw">unsafe </span>{ <span class="kw-2">*</span><span class="self">self</span>.table_ptr(index) }
     }
 
     <span class="doccomment">/// Updates the value for a defined table to `VMTableDefinition`.
-    </span><span class="kw">fn </span>set_table(<span class="kw-2">&amp;</span><span class="self">self</span>, index: DefinedTableIndex, table: VMTableDefinition) {
+    </span><span class="kw">fn </span>set_table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: DefinedTableIndex, table: VMTableDefinition) {
         <span class="kw">unsafe </span>{
             <span class="kw-2">*</span><span class="self">self</span>.table_ptr(index) = table;
         }
     }
 
     <span class="doccomment">/// Return the indexed `VMTableDefinition`.
-    </span><span class="kw">fn </span>table_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>, index: DefinedTableIndex) -&gt; <span class="kw-2">*mut </span>VMTableDefinition {
-        <span class="kw">unsafe </span>{ <span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets().vmctx_vmtable_definition(index)) }
+    </span><span class="kw">fn </span>table_ptr(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: DefinedTableIndex) -&gt; <span class="kw-2">*mut </span>VMTableDefinition {
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets().vmctx_vmtable_definition(index)) }
     }
 
     <span class="doccomment">/// Get a locally defined or imported memory.
@@ -1500,13 +1514,13 @@
     }
 
     <span class="doccomment">/// Return the indexed `VMGlobalDefinition`.
-    </span><span class="kw">fn </span>global(<span class="kw-2">&amp;</span><span class="self">self</span>, index: DefinedGlobalIndex) -&gt; <span class="kw-2">&amp;</span>VMGlobalDefinition {
+    </span><span class="kw">fn </span>global(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: DefinedGlobalIndex) -&gt; <span class="kw-2">&amp;</span>VMGlobalDefinition {
         <span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span><span class="self">self</span>.global_ptr(index) }
     }
 
     <span class="doccomment">/// Return the indexed `VMGlobalDefinition`.
-    </span><span class="kw">fn </span>global_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>, index: DefinedGlobalIndex) -&gt; <span class="kw-2">*mut </span>VMGlobalDefinition {
-        <span class="kw">unsafe </span>{ <span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets().vmctx_vmglobal_definition(index)) }
+    </span><span class="kw">fn </span>global_ptr(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: DefinedGlobalIndex) -&gt; <span class="kw-2">*mut </span>VMGlobalDefinition {
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets().vmctx_vmglobal_definition(index)) }
     }
 
     <span class="doccomment">/// Get a raw pointer to the global at the given index regardless whether it
@@ -1514,7 +1528,7 @@
     ///
     /// Panics if the index is out of bound or is the reserved value.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>defined_or_imported_global_ptr(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         index: GlobalIndex,
     ) -&gt; <span class="kw-2">*mut </span>VMGlobalDefinition {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = <span class="self">self</span>.module().defined_global_index(index) {
@@ -1525,18 +1539,18 @@
     }
 
     <span class="doccomment">/// Return a pointer to the interrupts structure
-    </span><span class="kw">pub fn </span>runtime_limits(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut *const </span>VMRuntimeLimits {
-        <span class="kw">unsafe </span>{ <span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets().vmctx_runtime_limits()) }
+    </span><span class="kw">pub fn </span>runtime_limits(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">*mut *const </span>VMRuntimeLimits {
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets().vmctx_runtime_limits()) }
     }
 
     <span class="doccomment">/// Return a pointer to the global epoch counter used by this instance.
-    </span><span class="kw">pub fn </span>epoch_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut *const </span>AtomicU64 {
-        <span class="kw">unsafe </span>{ <span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets().vmctx_epoch_ptr()) }
+    </span><span class="kw">pub fn </span>epoch_ptr(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">*mut *const </span>AtomicU64 {
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets().vmctx_epoch_ptr()) }
     }
 
     <span class="doccomment">/// Return a pointer to the `VMExternRefActivationsTable`.
-    </span><span class="kw">pub fn </span>externref_activations_table(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut *mut </span>VMExternRefActivationsTable {
-        <span class="kw">unsafe </span>{ <span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets().vmctx_externref_activations_table()) }
+    </span><span class="kw">pub fn </span>externref_activations_table(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">*mut *mut </span>VMExternRefActivationsTable {
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets().vmctx_externref_activations_table()) }
     }
 
     <span class="doccomment">/// Gets a pointer to this instance&#39;s `Store` which was originally
@@ -1559,7 +1573,7 @@
 
     <span class="kw">pub unsafe fn </span>set_store(<span class="kw-2">&amp;mut </span><span class="self">self</span>, store: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">*mut </span><span class="kw">dyn </span>Store&gt;) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(store) = store {
-            <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets().vmctx_store()) = store;
+            <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets().vmctx_store()) = store;
             <span class="kw-2">*</span><span class="self">self</span>.runtime_limits() = (<span class="kw-2">*</span>store).vmruntime_limits();
             <span class="kw-2">*</span><span class="self">self</span>.epoch_ptr() = (<span class="kw-2">*</span>store).epoch_ptr();
             <span class="kw-2">*</span><span class="self">self</span>.externref_activations_table() = (<span class="kw-2">*</span>store).externref_activations_table().<span class="number">0</span>;
@@ -1568,7 +1582,7 @@
                 mem::size_of::&lt;<span class="kw-2">*mut </span><span class="kw">dyn </span>Store&gt;(),
                 mem::size_of::&lt;[<span class="kw-2">*mut </span>(); <span class="number">2</span>]&gt;()
             );
-            <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset::&lt;[<span class="kw-2">*mut </span>(); <span class="number">2</span>]&gt;(<span class="self">self</span>.offsets().vmctx_store()) =
+            <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut::&lt;[<span class="kw-2">*mut </span>(); <span class="number">2</span>]&gt;(<span class="self">self</span>.offsets().vmctx_store()) =
                 [ptr::null_mut(), ptr::null_mut()];
 
             <span class="kw-2">*</span><span class="self">self</span>.runtime_limits() = ptr::null_mut();
@@ -1578,7 +1592,7 @@
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>set_callee(<span class="kw-2">&amp;mut </span><span class="self">self</span>, callee: <span class="prelude-ty">Option</span>&lt;NonNull&lt;VMFunctionBody&gt;&gt;) {
-        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets().vmctx_callee()) =
+        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets().vmctx_callee()) =
             callee.map_or(ptr::null_mut(), |c| c.as_ptr());
     }
 
@@ -1664,7 +1678,7 @@
     }
 
     <span class="doccomment">/// Return the table index for the given `VMTableDefinition`.
-    </span><span class="kw">unsafe fn </span>table_index(<span class="kw-2">&amp;</span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>VMTableDefinition) -&gt; DefinedTableIndex {
+    </span><span class="kw">unsafe fn </span>table_index(<span class="kw-2">&amp;mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>VMTableDefinition) -&gt; DefinedTableIndex {
         <span class="kw">let </span>index = DefinedTableIndex::new(
             usize::try_from(
                 (table <span class="kw">as </span><span class="kw-2">*const </span>VMTableDefinition)
@@ -1777,7 +1791,7 @@
     ) {
         <span class="kw">let </span>type_index = <span class="kw">unsafe </span>{
             <span class="kw">let </span>base: <span class="kw-2">*const </span>VMSharedSignatureIndex =
-                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets().vmctx_signature_ids_array());
+                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets().vmctx_signature_ids_array());
             <span class="kw-2">*</span>base.add(sig.index())
         };
 
@@ -1846,7 +1860,7 @@
             </span><span class="kw">let </span>func = <span class="kw-2">&amp;</span><span class="self">self</span>.module().functions[index];
             <span class="kw">let </span>sig = func.signature;
             <span class="kw">let </span>anyfunc: <span class="kw-2">*mut </span>VMCallerCheckedFuncRef = <span class="self">self
-                </span>.vmctx_plus_offset::&lt;VMCallerCheckedFuncRef&gt;(
+                </span>.vmctx_plus_offset_mut::&lt;VMCallerCheckedFuncRef&gt;(
                     <span class="self">self</span>.offsets().vmctx_anyfunc(func.anyfunc),
                 );
             <span class="self">self</span>.construct_anyfunc(index, sig, anyfunc);
@@ -2185,40 +2199,41 @@
     ) {
         <span class="macro">assert!</span>(std::ptr::eq(module, <span class="self">self</span>.module().as_ref()));
 
-        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(offsets.vmctx_magic()) = VMCONTEXT_MAGIC;
+        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(offsets.vmctx_magic()) = VMCONTEXT_MAGIC;
         <span class="self">self</span>.set_callee(<span class="prelude-val">None</span>);
         <span class="self">self</span>.set_store(store.as_raw());
 
         <span class="comment">// Initialize shared signatures
         </span><span class="kw">let </span>signatures = <span class="self">self</span>.runtime_info.signature_ids();
-        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(offsets.vmctx_signature_ids_array()) = signatures.as_ptr();
+        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(offsets.vmctx_signature_ids_array()) = signatures.as_ptr();
 
         <span class="comment">// Initialize the built-in functions
-        </span><span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(offsets.vmctx_builtin_functions()) = <span class="kw-2">&amp;</span>VMBuiltinFunctionsArray::INIT;
+        </span><span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(offsets.vmctx_builtin_functions()) =
+            <span class="kw-2">&amp;</span>VMBuiltinFunctionsArray::INIT;
 
         <span class="comment">// Initialize the imports
         </span><span class="macro">debug_assert_eq!</span>(imports.functions.len(), module.num_imported_funcs);
         ptr::copy_nonoverlapping(
             imports.functions.as_ptr(),
-            <span class="self">self</span>.vmctx_plus_offset(offsets.vmctx_imported_functions_begin()),
+            <span class="self">self</span>.vmctx_plus_offset_mut(offsets.vmctx_imported_functions_begin()),
             imports.functions.len(),
         );
         <span class="macro">debug_assert_eq!</span>(imports.tables.len(), module.num_imported_tables);
         ptr::copy_nonoverlapping(
             imports.tables.as_ptr(),
-            <span class="self">self</span>.vmctx_plus_offset(offsets.vmctx_imported_tables_begin()),
+            <span class="self">self</span>.vmctx_plus_offset_mut(offsets.vmctx_imported_tables_begin()),
             imports.tables.len(),
         );
         <span class="macro">debug_assert_eq!</span>(imports.memories.len(), module.num_imported_memories);
         ptr::copy_nonoverlapping(
             imports.memories.as_ptr(),
-            <span class="self">self</span>.vmctx_plus_offset(offsets.vmctx_imported_memories_begin()),
+            <span class="self">self</span>.vmctx_plus_offset_mut(offsets.vmctx_imported_memories_begin()),
             imports.memories.len(),
         );
         <span class="macro">debug_assert_eq!</span>(imports.globals.len(), module.num_imported_globals);
         ptr::copy_nonoverlapping(
             imports.globals.as_ptr(),
-            <span class="self">self</span>.vmctx_plus_offset(offsets.vmctx_imported_globals_begin()),
+            <span class="self">self</span>.vmctx_plus_offset_mut(offsets.vmctx_imported_globals_begin()),
             imports.globals.len(),
         );
 
@@ -2229,7 +2244,7 @@
         // any state now.
 
         // Initialize the defined tables
-        </span><span class="kw">let </span><span class="kw-2">mut </span>ptr = <span class="self">self</span>.vmctx_plus_offset(offsets.vmctx_tables_begin());
+        </span><span class="kw">let </span><span class="kw-2">mut </span>ptr = <span class="self">self</span>.vmctx_plus_offset_mut(offsets.vmctx_tables_begin());
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..module.table_plans.len() - module.num_imported_tables {
             ptr::write(ptr, <span class="self">self</span>.tables[DefinedTableIndex::new(i)].vmtable());
             ptr = ptr.add(<span class="number">1</span>);
@@ -2240,8 +2255,8 @@
         // time. Entries in `defined_memories` hold a pointer to a definition
         // (all memories) whereas the `owned_memories` hold the actual
         // definitions of memories owned (not shared) in the module.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>ptr = <span class="self">self</span>.vmctx_plus_offset(offsets.vmctx_memories_begin());
-        <span class="kw">let </span><span class="kw-2">mut </span>owned_ptr = <span class="self">self</span>.vmctx_plus_offset(offsets.vmctx_owned_memories_begin());
+        </span><span class="kw">let </span><span class="kw-2">mut </span>ptr = <span class="self">self</span>.vmctx_plus_offset_mut(offsets.vmctx_memories_begin());
+        <span class="kw">let </span><span class="kw-2">mut </span>owned_ptr = <span class="self">self</span>.vmctx_plus_offset_mut(offsets.vmctx_owned_memories_begin());
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..module.memory_plans.len() - module.num_imported_memories {
             <span class="kw">let </span>defined_memory_index = DefinedMemoryIndex::new(i);
             <span class="kw">let </span>memory_index = module.memory_index(defined_memory_index);
@@ -2330,8 +2345,9 @@
 <span class="kw">impl </span>Drop <span class="kw">for </span>Instance {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="comment">// Drop any defined globals
-        </span><span class="kw">for </span>(idx, global) <span class="kw">in </span><span class="self">self</span>.module().globals.iter() {
-            <span class="kw">let </span>idx = <span class="kw">match </span><span class="self">self</span>.module().defined_global_index(idx) {
+        </span><span class="kw">let </span>module = <span class="self">self</span>.module().clone();
+        <span class="kw">for </span>(idx, global) <span class="kw">in </span>module.globals.iter() {
+            <span class="kw">let </span>idx = <span class="kw">match </span>module.defined_global_index(idx) {
                 <span class="prelude-val">Some</span>(idx) =&gt; idx,
                 <span class="prelude-val">None </span>=&gt; <span class="kw">continue</span>,
             };
@@ -2444,8 +2460,8 @@
     }
 
     <span class="doccomment">/// Return the table index for the given `VMTableDefinition` in this instance.
-    </span><span class="kw">pub unsafe fn </span>table_index(<span class="kw-2">&amp;</span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>VMTableDefinition) -&gt; DefinedTableIndex {
-        <span class="self">self</span>.instance().table_index(table)
+    </span><span class="kw">pub unsafe fn </span>table_index(<span class="kw-2">&amp;mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>VMTableDefinition) -&gt; DefinedTableIndex {
+        <span class="self">self</span>.instance_mut().table_index(table)
     }
 
     <span class="doccomment">/// Get a table defined locally within this module.

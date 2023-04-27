@@ -1007,7 +1007,7 @@
 <span class="comment">// Perform a Wasm `global.get` for `externref` globals.
 </span><span class="kw">unsafe fn </span>externref_global_get(vmctx: <span class="kw-2">*mut </span>VMContext, index: u32) -&gt; <span class="kw-2">*mut </span>u8 {
     <span class="kw">let </span>index = GlobalIndex::from_u32(index);
-    <span class="kw">let </span>instance = (<span class="kw-2">*</span>vmctx).instance();
+    <span class="kw">let </span>instance = (<span class="kw-2">*</span>vmctx).instance_mut();
     <span class="kw">let </span>global = instance.defined_or_imported_global_ptr(index);
     <span class="kw">match </span>(<span class="kw-2">*</span>global).as_externref().clone() {
         <span class="prelude-val">None </span>=&gt; ptr::null_mut(),
@@ -1030,7 +1030,7 @@
     };
 
     <span class="kw">let </span>index = GlobalIndex::from_u32(index);
-    <span class="kw">let </span>instance = (<span class="kw-2">*</span>vmctx).instance();
+    <span class="kw">let </span>instance = (<span class="kw-2">*</span>vmctx).instance_mut();
     <span class="kw">let </span>global = instance.defined_or_imported_global_ptr(index);
 
     <span class="comment">// Swap the new `externref` value into the global before we drop the old

@@ -912,7 +912,7 @@
 <span class="kw">where
     </span>F: FnMut(<span class="kw-2">*mut </span>VMContext),
 {
-    <span class="kw">let </span>limits = (<span class="kw-2">*</span>caller).instance().runtime_limits();
+    <span class="kw">let </span>limits = (<span class="kw-2">*</span>caller).instance_mut().runtime_limits();
 
     <span class="kw">let </span>result = CallThreadState::new(signal_handler, capture_backtrace, <span class="kw-2">*</span>limits).with(|cx| {
         wasmtime_setjmp(

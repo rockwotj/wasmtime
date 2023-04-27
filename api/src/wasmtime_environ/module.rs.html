@@ -1036,6 +1036,8 @@
 <a href="#1036" id="1036">1036</a>
 <a href="#1037" id="1037">1037</a>
 <a href="#1038" id="1038">1038</a>
+<a href="#1039" id="1039">1039</a>
+<a href="#1040" id="1040">1040</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Data structures for representing decoded wasm modules.
 
 </span><span class="kw">use crate</span>::{ModuleTranslation, PrimaryMap, Tunables, WASM_PAGE_SIZE};
@@ -1279,8 +1281,9 @@
         }
         <span class="kw">let </span><span class="kw-2">mut </span>idx = <span class="number">0</span>;
         <span class="kw">let </span>ok = <span class="self">self</span>.module.memory_initialization.init_memory(
+            <span class="kw-2">&amp;mut </span>(),
             InitMemory::CompileTime(<span class="kw-2">&amp;</span><span class="self">self</span>.module),
-            <span class="kw-2">&amp;mut </span>|memory, init| {
+            |(), memory, init| {
                 <span class="comment">// Currently `Static` only applies to locally-defined memories,
                 // so if a data segment references an imported memory then
                 // transitioning to a `Static` memory initializer is not
@@ -1563,10 +1566,11 @@
     /// question needs to be deferred to runtime, and at runtime this means
     /// that an invalid initializer has been found and a trap should be
     /// generated.
-    </span><span class="kw">pub fn </span>init_memory(
+    </span><span class="kw">pub fn </span>init_memory&lt;T&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        state: InitMemory&lt;<span class="lifetime">&#39;_</span>&gt;,
-        write: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>FnMut(MemoryIndex, <span class="kw-2">&amp;</span>StaticMemoryInitializer) -&gt; bool,
+        state: <span class="kw-2">&amp;mut </span>T,
+        init: InitMemory&lt;<span class="lifetime">&#39;_</span>, T&gt;,
+        <span class="kw-2">mut </span>write: <span class="kw">impl </span>FnMut(<span class="kw-2">&amp;mut </span>T, MemoryIndex, <span class="kw-2">&amp;</span>StaticMemoryInitializer) -&gt; bool,
     ) -&gt; bool {
         <span class="kw">let </span>initializers = <span class="kw">match </span><span class="self">self </span>{
             <span class="comment">// Fall through below to the segmented memory one-by-one
@@ -1581,7 +1585,7 @@
             </span>MemoryInitialization::Static { map } =&gt; {
                 <span class="kw">for </span>(index, init) <span class="kw">in </span>map {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(init) = init {
-                        <span class="kw">let </span>result = write(index, init);
+                        <span class="kw">let </span>result = write(state, index, init);
                         <span class="kw">if </span>!result {
                             <span class="kw">return </span>result;
                         }
@@ -1605,10 +1609,10 @@
             // (e.g. this is a task happening before instantiation at
             // compile-time).
             </span><span class="kw">let </span>base = <span class="kw">match </span>base {
-                <span class="prelude-val">Some</span>(index) =&gt; <span class="kw">match </span><span class="kw-2">&amp;</span>state {
+                <span class="prelude-val">Some</span>(index) =&gt; <span class="kw">match </span><span class="kw-2">&amp;</span>init {
                     InitMemory::Runtime {
                         get_global_as_u64, ..
-                    } =&gt; get_global_as_u64(index),
+                    } =&gt; get_global_as_u64(state, index),
                     InitMemory::CompileTime(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="bool-val">false</span>,
                 },
                 <span class="prelude-val">None </span>=&gt; <span class="number">0</span>,
@@ -1623,12 +1627,12 @@
                 <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="bool-val">false</span>,
             };
 
-            <span class="kw">let </span>cur_size_in_pages = <span class="kw">match </span><span class="kw-2">&amp;</span>state {
+            <span class="kw">let </span>cur_size_in_pages = <span class="kw">match </span><span class="kw-2">&amp;</span>init {
                 InitMemory::CompileTime(module) =&gt; module.memory_plans[memory_index].memory.minimum,
                 InitMemory::Runtime {
                     memory_size_in_pages,
                     ..
-                } =&gt; memory_size_in_pages(memory_index),
+                } =&gt; memory_size_in_pages(state, memory_index),
             };
 
             <span class="comment">// Note that this `minimum` can overflow if `minimum` is
@@ -1654,7 +1658,7 @@
                 offset: start,
                 data: data.clone(),
             };
-            <span class="kw">let </span>result = write(memory_index, <span class="kw-2">&amp;</span>init);
+            <span class="kw">let </span>result = write(state, memory_index, <span class="kw-2">&amp;</span>init);
             <span class="kw">if </span>!result {
                 <span class="kw">return </span>result;
             }
@@ -1666,7 +1670,7 @@
 
 <span class="doccomment">/// Argument to [`MemoryInitialization::init_memory`] indicating the current
 /// status of the instance.
-</span><span class="kw">pub enum </span>InitMemory&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub enum </span>InitMemory&lt;<span class="lifetime">&#39;a</span>, T&gt; {
     <span class="doccomment">/// This evaluation of memory initializers is happening at compile time.
     /// This means that the current state of memories is whatever their initial
     /// state is, and additionally globals are not available if data segments
@@ -1678,10 +1682,10 @@
     /// instance&#39;s state.
     </span>Runtime {
         <span class="doccomment">/// Returns the size, in wasm pages, of the the memory specified.
-        </span>memory_size_in_pages: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw">dyn </span>Fn(MemoryIndex) -&gt; u64,
+        </span>memory_size_in_pages: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw">dyn </span>Fn(<span class="kw-2">&amp;mut </span>T, MemoryIndex) -&gt; u64,
         <span class="doccomment">/// Returns the value of the global, as a `u64`. Note that this may
         /// involve zero-extending a 32-bit global to a 64-bit number.
-        </span>get_global_as_u64: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw">dyn </span>Fn(GlobalIndex) -&gt; u64,
+        </span>get_global_as_u64: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw">dyn </span>Fn(<span class="kw-2">&amp;mut </span>T, GlobalIndex) -&gt; u64,
     },
 }
 

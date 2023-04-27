@@ -526,14 +526,6 @@
 <a href="#526" id="526">526</a>
 <a href="#527" id="527">527</a>
 <a href="#528" id="528">528</a>
-<a href="#529" id="529">529</a>
-<a href="#530" id="530">530</a>
-<a href="#531" id="531">531</a>
-<a href="#532" id="532">532</a>
-<a href="#533" id="533">533</a>
-<a href="#534" id="534">534</a>
-<a href="#535" id="535">535</a>
-<a href="#536" id="536">536</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::imports::Imports;
 <span class="kw">use </span><span class="kw">crate</span>::instance::{Instance, InstanceHandle, RuntimeMemoryCreator};
 <span class="kw">use </span><span class="kw">crate</span>::memory::{DefaultMemoryCreator, Memory};
@@ -736,16 +728,10 @@
     </span><span class="kw">fn </span>purge_module(<span class="kw-2">&amp;</span><span class="self">self</span>, module: CompiledModuleId);
 }
 
-<span class="kw">fn </span>get_table_init_start(init: <span class="kw-2">&amp;</span>TableInitializer, instance: <span class="kw-2">&amp;</span>Instance) -&gt; <span class="prelude-ty">Result</span>&lt;u32&gt; {
+<span class="kw">fn </span>get_table_init_start(init: <span class="kw-2">&amp;</span>TableInitializer, instance: <span class="kw-2">&amp;mut </span>Instance) -&gt; <span class="prelude-ty">Result</span>&lt;u32&gt; {
     <span class="kw">match </span>init.base {
         <span class="prelude-val">Some</span>(base) =&gt; {
-            <span class="kw">let </span>val = <span class="kw">unsafe </span>{
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(def_index) = instance.module().defined_global_index(base) {
-                    <span class="kw-2">*</span>instance.global(def_index).as_u32()
-                } <span class="kw">else </span>{
-                    <span class="kw-2">*</span>(<span class="kw-2">*</span>instance.imported_global(base).from).as_u32()
-                }
-            };
+            <span class="kw">let </span>val = <span class="kw">unsafe </span>{ <span class="kw-2">*</span>(<span class="kw-2">*</span>instance.defined_or_imported_global_ptr(base)).as_u32() };
 
             init.offset
                 .checked_add(val)
@@ -792,10 +778,11 @@
         TableInitialization::FuncTable { segments, .. }
         | TableInitialization::Segments { segments } =&gt; {
             <span class="kw">for </span>segment <span class="kw">in </span>segments {
+                <span class="kw">let </span>start = get_table_init_start(segment, instance)<span class="question-mark">?</span>;
                 instance.table_init_segment(
                     segment.table_index,
                     <span class="kw-2">&amp;</span>segment.elements,
-                    get_table_init_start(segment, instance)<span class="question-mark">?</span>,
+                    start,
                     <span class="number">0</span>,
                     segment.elements.len() <span class="kw">as </span>u32,
                 )<span class="question-mark">?</span>;
@@ -806,22 +793,18 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">fn </span>get_memory_init_start(init: <span class="kw-2">&amp;</span>MemoryInitializer, instance: <span class="kw-2">&amp;</span>Instance) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
+<span class="kw">fn </span>get_memory_init_start(init: <span class="kw-2">&amp;</span>MemoryInitializer, instance: <span class="kw-2">&amp;mut </span>Instance) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
     <span class="kw">match </span>init.base {
         <span class="prelude-val">Some</span>(base) =&gt; {
             <span class="kw">let </span>mem64 = instance.module().memory_plans[init.memory_index]
                 .memory
                 .memory64;
             <span class="kw">let </span>val = <span class="kw">unsafe </span>{
-                <span class="kw">let </span>global = <span class="kw">if let </span><span class="prelude-val">Some</span>(def_index) = instance.module().defined_global_index(base) {
-                    instance.global(def_index)
-                } <span class="kw">else </span>{
-                    <span class="kw-2">&amp;*</span>instance.imported_global(base).from
-                };
+                <span class="kw">let </span>global = instance.defined_or_imported_global_ptr(base);
                 <span class="kw">if </span>mem64 {
-                    <span class="kw-2">*</span>global.as_u64()
+                    <span class="kw-2">*</span>(<span class="kw-2">*</span>global).as_u64()
                 } <span class="kw">else </span>{
-                    u64::from(<span class="kw-2">*</span>global.as_u32())
+                    u64::from(<span class="kw-2">*</span>(<span class="kw-2">*</span>global).as_u32())
                 }
             };
 
@@ -833,7 +816,10 @@
     }
 }
 
-<span class="kw">fn </span>check_memory_init_bounds(instance: <span class="kw-2">&amp;</span>Instance, initializers: <span class="kw-2">&amp;</span>[MemoryInitializer]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<span class="kw">fn </span>check_memory_init_bounds(
+    instance: <span class="kw-2">&amp;mut </span>Instance,
+    initializers: <span class="kw-2">&amp;</span>[MemoryInitializer],
+) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">for </span>init <span class="kw">in </span>initializers {
         <span class="kw">let </span>memory = instance.get_memory(init.memory_index);
         <span class="kw">let </span>start = get_memory_init_start(init, instance)<span class="question-mark">?</span>;
@@ -855,21 +841,18 @@
 }
 
 <span class="kw">fn </span>initialize_memories(instance: <span class="kw-2">&amp;mut </span>Instance, module: <span class="kw-2">&amp;</span>Module) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-    <span class="kw">let </span>memory_size_in_pages =
-        <span class="kw-2">&amp;</span>|memory| (instance.get_memory(memory).current_length() <span class="kw">as </span>u64) / u64::from(WASM_PAGE_SIZE);
+    <span class="kw">let </span>memory_size_in_pages = <span class="kw-2">&amp;</span>|instance: <span class="kw-2">&amp;mut </span>Instance, memory| {
+        (instance.get_memory(memory).current_length() <span class="kw">as </span>u64) / u64::from(WASM_PAGE_SIZE)
+    };
 
     <span class="comment">// Loads the `global` value and returns it as a `u64`, but sign-extends
     // 32-bit globals which can be used as the base for 32-bit memories.
-    </span><span class="kw">let </span>get_global_as_u64 = <span class="kw-2">&amp;</span>|global| <span class="kw">unsafe </span>{
-        <span class="kw">let </span>def = <span class="kw">if let </span><span class="prelude-val">Some</span>(def_index) = instance.module().defined_global_index(global) {
-            instance.global(def_index)
-        } <span class="kw">else </span>{
-            <span class="kw-2">&amp;*</span>instance.imported_global(global).from
-        };
+    </span><span class="kw">let </span>get_global_as_u64 = <span class="kw-2">&amp;mut </span>|instance: <span class="kw-2">&amp;mut </span>Instance, global| <span class="kw">unsafe </span>{
+        <span class="kw">let </span>def = instance.defined_or_imported_global_ptr(global);
         <span class="kw">if </span>module.globals[global].wasm_ty == WasmType::I64 {
-            <span class="kw-2">*</span>def.as_u64()
+            <span class="kw-2">*</span>(<span class="kw-2">*</span>def).as_u64()
         } <span class="kw">else </span>{
-            u64::from(<span class="kw-2">*</span>def.as_u32())
+            u64::from(<span class="kw-2">*</span>(<span class="kw-2">*</span>def).as_u32())
         }
     };
 
@@ -882,11 +865,12 @@
     // so errors only happen if an out-of-bounds segment is found, in which case
     // a trap is returned.
     </span><span class="kw">let </span>ok = module.memory_initialization.init_memory(
+        instance,
         InitMemory::Runtime {
             memory_size_in_pages,
             get_global_as_u64,
         },
-        <span class="kw-2">&amp;mut </span>|memory_index, init| {
+        |instance, memory_index, init| {
             <span class="comment">// If this initializer applies to a defined memory but that memory
             // doesn&#39;t need initialization, due to something like copy-on-write
             // pre-initializing it via mmap magic, then this initializer can be
@@ -919,7 +903,7 @@
 <span class="kw">fn </span>check_init_bounds(instance: <span class="kw-2">&amp;mut </span>Instance, module: <span class="kw-2">&amp;</span>Module) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     check_table_init_bounds(instance, module)<span class="question-mark">?</span>;
 
-    <span class="kw">match </span><span class="kw-2">&amp;</span>instance.module().memory_initialization {
+    <span class="kw">match </span><span class="kw-2">&amp;</span>module.memory_initialization {
         MemoryInitialization::Segmented(initializers) =&gt; {
             check_memory_init_bounds(instance, initializers)<span class="question-mark">?</span>;
         }
