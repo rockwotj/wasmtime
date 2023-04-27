@@ -37,6 +37,8 @@ var config_8h =
     [ "wasmtime_config_wasm_multi_memory_set", "config_8h.html#a1f310585ed1e1dcff5b11bf888079df7", null ],
     [ "wasmtime_config_wasm_multi_value_set", "config_8h.html#abc61472e863e6f2659359eae806afd0d", null ],
     [ "wasmtime_config_wasm_reference_types_set", "config_8h.html#a92d5d33d2947bcf2822f3a727c18f88c", null ],
+    [ "wasmtime_config_wasm_relaxed_simd_deterministic_set", "config_8h.html#a0d3303fec844f3a063a89b0fe9804dc4", null ],
+    [ "wasmtime_config_wasm_relaxed_simd_set", "config_8h.html#a92d6223366ed78edcc7b94d70ebb48dc", null ],
     [ "wasmtime_config_wasm_simd_set", "config_8h.html#a53352122e7a35889e55dbd538e9c254c", null ],
     [ "wasmtime_config_wasm_threads_set", "config_8h.html#ae2b36bea543bbfdd2d9cee9d38524715", null ]
 ];

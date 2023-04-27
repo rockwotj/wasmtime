@@ -316,8 +316,7 @@ and thus may cause <code>Engine::new</code> fail if the <code>bulk_memory</code>
 enabled for compilation.</p>
 <p>The <a href="https://github.com/webassembly/simd">WebAssembly SIMD proposal</a>. This feature gates items such
 as the <code>v128</code> type and all of its operators being in a module. Note that
-this does not enable the <a href="https://github.com/WebAssembly/relaxed-simd">relaxed simd proposal</a> as that is not
-implemented in Wasmtime at this time.</p>
+this does not enable the <a href="https://github.com/WebAssembly/relaxed-simd">relaxed simd proposal</a>.</p>
 <p>On x86_64 platforms note that enabling this feature requires SSE 4.2 and
 below to be available on the target platform. Compilation will fail if
 the compile target does not include SSE 4.2.</p>

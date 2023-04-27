@@ -2036,7 +2036,6 @@
 <a href="#2036" id="2036">2036</a>
 <a href="#2037" id="2037">2037</a>
 <a href="#2038" id="2038">2038</a>
-<a href="#2039" id="2039">2039</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::memory::MemoryCreator;
 <span class="kw">use </span><span class="kw">crate</span>::trampoline::MemoryCreatorProxy;
 <span class="kw">use </span>anyhow::{bail, <span class="prelude-ty">Result</span>};
@@ -2705,8 +2704,7 @@
     ///
     /// The [WebAssembly SIMD proposal][proposal]. This feature gates items such
     /// as the `v128` type and all of its operators being in a module. Note that
-    /// this does not enable the [relaxed simd proposal] as that is not
-    /// implemented in Wasmtime at this time.
+    /// this does not enable the [relaxed simd proposal].
     ///
     /// On x86_64 platforms note that enabling this feature requires SSE 4.2 and
     /// below to be available on the target platform. Compilation will fail if

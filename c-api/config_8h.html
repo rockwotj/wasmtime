@@ -154,6 +154,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a53352122e7a35889e55dbd538e9c254c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="config_8h.html#a53352122e7a35889e55dbd538e9c254c">wasmtime_config_wasm_simd_set</a> (<a class="el" href="structwasm__config__t.html">wasm_config_t</a> *, bool)</td></tr>
 <tr class="memdesc:a53352122e7a35889e55dbd538e9c254c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures whether the WebAssembly SIMD proposal is enabled.  <a href="config_8h.html#a53352122e7a35889e55dbd538e9c254c">More...</a><br /></td></tr>
 <tr class="separator:a53352122e7a35889e55dbd538e9c254c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92d6223366ed78edcc7b94d70ebb48dc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="config_8h.html#a92d6223366ed78edcc7b94d70ebb48dc">wasmtime_config_wasm_relaxed_simd_set</a> (<a class="el" href="structwasm__config__t.html">wasm_config_t</a> *, bool)</td></tr>
+<tr class="memdesc:a92d6223366ed78edcc7b94d70ebb48dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures whether the WebAssembly relaxed SIMD proposal is enabled.  <a href="config_8h.html#a92d6223366ed78edcc7b94d70ebb48dc">More...</a><br /></td></tr>
+<tr class="separator:a92d6223366ed78edcc7b94d70ebb48dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d3303fec844f3a063a89b0fe9804dc4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="config_8h.html#a0d3303fec844f3a063a89b0fe9804dc4">wasmtime_config_wasm_relaxed_simd_deterministic_set</a> (<a class="el" href="structwasm__config__t.html">wasm_config_t</a> *, bool)</td></tr>
+<tr class="memdesc:a0d3303fec844f3a063a89b0fe9804dc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures whether the WebAssembly relaxed SIMD proposal is in deterministic mode.  <a href="config_8h.html#a0d3303fec844f3a063a89b0fe9804dc4">More...</a><br /></td></tr>
+<tr class="separator:a0d3303fec844f3a063a89b0fe9804dc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a74aa7562ca8ae04b94449378dbf25c92"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="config_8h.html#a74aa7562ca8ae04b94449378dbf25c92">wasmtime_config_wasm_bulk_memory_set</a> (<a class="el" href="structwasm__config__t.html">wasm_config_t</a> *, bool)</td></tr>
 <tr class="memdesc:a74aa7562ca8ae04b94449378dbf25c92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures whether the WebAssembly bulk memory proposal is enabled.  <a href="config_8h.html#a74aa7562ca8ae04b94449378dbf25c92">More...</a><br /></td></tr>
 <tr class="separator:a74aa7562ca8ae04b94449378dbf25c92"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -904,6 +910,68 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Configures whether the WebAssembly reference types proposal is enabled. </p>
+<p >This setting is <code>false</code> by default. </p>
+
+</div>
+</div>
+<a id="a0d3303fec844f3a063a89b0fe9804dc4" name="a0d3303fec844f3a063a89b0fe9804dc4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d3303fec844f3a063a89b0fe9804dc4">&#9670;&nbsp;</a></span>wasmtime_config_wasm_relaxed_simd_deterministic_set()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void wasmtime_config_wasm_relaxed_simd_deterministic_set </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structwasm__config__t.html">wasm_config_t</a> *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Configures whether the WebAssembly relaxed SIMD proposal is in deterministic mode. </p>
+<p >This setting is <code>false</code> by default. </p>
+
+</div>
+</div>
+<a id="a92d6223366ed78edcc7b94d70ebb48dc" name="a92d6223366ed78edcc7b94d70ebb48dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92d6223366ed78edcc7b94d70ebb48dc">&#9670;&nbsp;</a></span>wasmtime_config_wasm_relaxed_simd_set()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void wasmtime_config_wasm_relaxed_simd_set </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structwasm__config__t.html">wasm_config_t</a> *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Configures whether the WebAssembly relaxed SIMD proposal is enabled. </p>
 <p >This setting is <code>false</code> by default. </p>
 
 </div>
