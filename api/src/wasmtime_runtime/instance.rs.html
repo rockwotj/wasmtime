@@ -1268,6 +1268,18 @@
 <a href="#1268" id="1268">1268</a>
 <a href="#1269" id="1269">1269</a>
 <a href="#1270" id="1270">1270</a>
+<a href="#1271" id="1271">1271</a>
+<a href="#1272" id="1272">1272</a>
+<a href="#1273" id="1273">1273</a>
+<a href="#1274" id="1274">1274</a>
+<a href="#1275" id="1275">1275</a>
+<a href="#1276" id="1276">1276</a>
+<a href="#1277" id="1277">1277</a>
+<a href="#1278" id="1278">1278</a>
+<a href="#1279" id="1279">1279</a>
+<a href="#1280" id="1280">1280</a>
+<a href="#1281" id="1281">1281</a>
+<a href="#1282" id="1282">1282</a>
 </pre><pre class="rust"><code><span class="doccomment">//! An `Instance` contains all the runtime state used by execution of a
 //! wasm module (except its callstack and register state). An
 //! `InstanceHandle` is a reference-counting handle for an `Instance`.
@@ -1279,7 +1291,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::vmcontext::{
     VMBuiltinFunctionsArray, VMCallerCheckedFuncRef, VMContext, VMFunctionImport,
     VMGlobalDefinition, VMGlobalImport, VMMemoryDefinition, VMMemoryImport, VMOpaqueContext,
-    VMRuntimeLimits, VMTableDefinition, VMTableImport, VMCONTEXT_MAGIC,
+    VMRuntimeLimits, VMTableDefinition, VMTableImport,
 };
 <span class="kw">use crate</span>::{
     ExportFunction, ExportGlobal, ExportMemory, ExportTable, Imports, ModuleRuntimeInfo, Store,
@@ -1301,7 +1313,7 @@
     packed_option::ReservedValue, DataIndex, DefinedGlobalIndex, DefinedMemoryIndex,
     DefinedTableIndex, ElemIndex, EntityIndex, EntityRef, EntitySet, FuncIndex, GlobalIndex,
     GlobalInit, HostPtr, MemoryIndex, Module, PrimaryMap, SignatureIndex, TableIndex,
-    TableInitialization, Trap, VMOffsets, WasmType,
+    TableInitialization, Trap, VMOffsets, WasmType, VMCONTEXT_MAGIC,
 };
 
 <span class="kw">mod </span>allocator;
@@ -1433,7 +1445,8 @@
         <span class="self">self</span>.runtime_info.module()
     }
 
-    <span class="kw">fn </span>offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMOffsets&lt;HostPtr&gt; {
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMOffsets&lt;HostPtr&gt; {
         <span class="self">self</span>.runtime_info.offsets()
     }
 
@@ -1795,24 +1808,35 @@
             <span class="kw-2">*</span>base.add(sig.index())
         };
 
-        <span class="kw">let </span>(func_ptr, vmctx) = <span class="kw">if let </span><span class="prelude-val">Some</span>(def_index) = <span class="self">self</span>.module().defined_func_index(index) {
-            (
-                <span class="self">self</span>.runtime_info.function(def_index),
-                VMOpaqueContext::from_vmcontext(<span class="self">self</span>.vmctx_ptr()),
-            )
+        <span class="kw">let </span>funcref = <span class="kw">if let </span><span class="prelude-val">Some</span>(def_index) = <span class="self">self</span>.module().defined_func_index(index) {
+            VMCallerCheckedFuncRef {
+                native_call: <span class="self">self
+                    </span>.runtime_info
+                    .native_to_wasm_trampoline(def_index)
+                    .expect(<span class="string">&quot;should have native-to-Wasm trampoline for escaping function&quot;</span>),
+                array_call: <span class="self">self
+                    </span>.runtime_info
+                    .array_to_wasm_trampoline(def_index)
+                    .expect(<span class="string">&quot;should have array-to-Wasm trampoline for escaping function&quot;</span>),
+                wasm_call: <span class="prelude-val">Some</span>(<span class="self">self</span>.runtime_info.function(def_index)),
+                vmctx: VMOpaqueContext::from_vmcontext(<span class="self">self</span>.vmctx_ptr()),
+                type_index,
+            }
         } <span class="kw">else </span>{
             <span class="kw">let </span>import = <span class="self">self</span>.imported_function(index);
-            (import.body.as_ptr(), import.vmctx)
+            VMCallerCheckedFuncRef {
+                native_call: import.native_call,
+                array_call: import.array_call,
+                wasm_call: <span class="prelude-val">Some</span>(import.wasm_call),
+                vmctx: import.vmctx,
+                type_index,
+            }
         };
 
         <span class="comment">// Safety: we have a `&amp;mut self`, so we have exclusive access
         // to this Instance.
         </span><span class="kw">unsafe </span>{
-            <span class="kw-2">*</span>into = VMCallerCheckedFuncRef {
-                vmctx,
-                type_index,
-                func_ptr: NonNull::new(func_ptr).expect(<span class="string">&quot;Non-null function pointer&quot;</span>),
-            };
+            std::ptr::write(into, funcref);
         }
     }
 
@@ -2518,7 +2542,7 @@
     }
 
     <span class="doccomment">/// Performs post-initialization of an instance after its handle has been
-    /// creqtaed and registered with a store.
+    /// created and registered with a store.
     ///
     /// Failure of this function means that the instance still must persist
     /// within the store since failure may indicate partial failure, or some

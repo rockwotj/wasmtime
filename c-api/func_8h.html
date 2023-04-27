@@ -121,9 +121,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a40e120dae88e66151e24e55194dc8dba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="error_8h.html#a6df4cddb88cff2bfdeecf8bba560af2c">wasmtime_error_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="func_8h.html#a40e120dae88e66151e24e55194dc8dba">wasmtime_func_call</a> (<a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *store, const <a class="el" href="extern_8h.html#ac3661fabd7972df1ade869f17de29dc5">wasmtime_func_t</a> *func, const <a class="el" href="val_8h.html#a97038492e2cc547de6c95cf597453353">wasmtime_val_t</a> *args, size_t nargs, <a class="el" href="val_8h.html#a97038492e2cc547de6c95cf597453353">wasmtime_val_t</a> *results, size_t nresults, <a class="el" href="structwasm__trap__t.html">wasm_trap_t</a> **trap)</td></tr>
 <tr class="memdesc:a40e120dae88e66151e24e55194dc8dba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call a WebAssembly function.  <a href="func_8h.html#a40e120dae88e66151e24e55194dc8dba">More...</a><br /></td></tr>
 <tr class="separator:a40e120dae88e66151e24e55194dc8dba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3b54596199641a8647a7cd89f322966f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="error_8h.html#a6df4cddb88cff2bfdeecf8bba560af2c">wasmtime_error_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="func_8h.html#a3b54596199641a8647a7cd89f322966f">wasmtime_func_call_unchecked</a> (<a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *store, const <a class="el" href="extern_8h.html#ac3661fabd7972df1ade869f17de29dc5">wasmtime_func_t</a> *func, <a class="el" href="val_8h.html#a551b6edd7003e8d98ef5d90e54e05c26">wasmtime_val_raw_t</a> *args_and_results, <a class="el" href="structwasm__trap__t.html">wasm_trap_t</a> **trap)</td></tr>
-<tr class="memdesc:a3b54596199641a8647a7cd89f322966f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call a WebAssembly function in an "unchecked" fashion.  <a href="func_8h.html#a3b54596199641a8647a7cd89f322966f">More...</a><br /></td></tr>
-<tr class="separator:a3b54596199641a8647a7cd89f322966f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5345b00edd3fd29a0b57ed1305c60ea1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="error_8h.html#a6df4cddb88cff2bfdeecf8bba560af2c">wasmtime_error_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="func_8h.html#a5345b00edd3fd29a0b57ed1305c60ea1">wasmtime_func_call_unchecked</a> (<a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *store, const <a class="el" href="extern_8h.html#ac3661fabd7972df1ade869f17de29dc5">wasmtime_func_t</a> *func, <a class="el" href="val_8h.html#a551b6edd7003e8d98ef5d90e54e05c26">wasmtime_val_raw_t</a> *args_and_results, size_t args_and_results_len, <a class="el" href="structwasm__trap__t.html">wasm_trap_t</a> **trap)</td></tr>
+<tr class="memdesc:a5345b00edd3fd29a0b57ed1305c60ea1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call a WebAssembly function in an "unchecked" fashion.  <a href="func_8h.html#a5345b00edd3fd29a0b57ed1305c60ea1">More...</a><br /></td></tr>
+<tr class="separator:a5345b00edd3fd29a0b57ed1305c60ea1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abeacae7ee2215736307c0951a77d8833"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="func_8h.html#abeacae7ee2215736307c0951a77d8833">wasmtime_caller_export_get</a> (<a class="el" href="func_8h.html#abad1840db69084f226feec107cc23d5e">wasmtime_caller_t</a> *caller, const char *name, size_t name_len, <a class="el" href="extern_8h.html#a30c0c87bc34364cc5f3c5514a268bc14">wasmtime_extern_t</a> *item)</td></tr>
 <tr class="memdesc:abeacae7ee2215736307c0951a77d8833"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a <a class="el" href="extern_8h.html#a30c0c87bc34364cc5f3c5514a268bc14" title="Convenience alias for wasmtime_extern_t.">wasmtime_extern_t</a> from the caller's context.  <a href="func_8h.html#abeacae7ee2215736307c0951a77d8833">More...</a><br /></td></tr>
 <tr class="separator:abeacae7ee2215736307c0951a77d8833"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -354,8 +354,8 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_func_to_ra
 
 </div>
 </div>
-<a id="a3b54596199641a8647a7cd89f322966f" name="a3b54596199641a8647a7cd89f322966f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3b54596199641a8647a7cd89f322966f">&#9670;&nbsp;</a></span>wasmtime_func_call_unchecked()</h2>
+<a id="a5345b00edd3fd29a0b57ed1305c60ea1" name="a5345b00edd3fd29a0b57ed1305c60ea1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5345b00edd3fd29a0b57ed1305c60ea1">&#9670;&nbsp;</a></span>wasmtime_func_call_unchecked()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -381,6 +381,12 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_func_to_ra
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>args_and_results_len</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype"><a class="el" href="structwasm__trap__t.html">wasm_trap_t</a> **&#160;</td>
           <td class="paramname"><em>trap</em>&#160;</td>
         </tr>
@@ -398,6 +404,7 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_func_to_ra
 <p >Callers must ensure that various correctness variants are upheld when this API is called such as:</p>
 <ul>
 <li>The <code>args_and_results</code> pointer has enough space to hold all the parameters and all the results (but not at the same time).</li>
+<li>The <code>args_and_results_len</code> contains the length of the <code>args_and_results</code> buffer.</li>
 <li>Parameters must all be configured as if they were the correct type.</li>
 <li>Values such as <code>externref</code> and <code>funcref</code> are valid within the store being called.</li>
 </ul>

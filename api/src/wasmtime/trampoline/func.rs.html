@@ -150,6 +150,25 @@
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Support for a calling of an imported function.
 
 </span><span class="kw">use crate</span>::{Engine, FuncType, ValRaw};
@@ -158,7 +177,7 @@
 <span class="kw">use </span>std::ptr::NonNull;
 <span class="kw">use </span>wasmtime_jit::{CodeMemory, ProfilingAgent};
 <span class="kw">use </span>wasmtime_runtime::{
-    VMContext, VMHostFuncContext, VMOpaqueContext, VMSharedSignatureIndex, VMTrampoline,
+    VMArrayCallHostFuncContext, VMCallerCheckedFuncRef, VMContext, VMOpaqueContext,
 };
 
 <span class="kw">struct </span>TrampolineState&lt;F&gt; {
@@ -167,9 +186,16 @@
     </span>code_memory: CodeMemory,
 }
 
-<span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn </span>stub_fn&lt;F&gt;(
+<span class="doccomment">/// Shim to call a host-defined function that uses the array calling convention.
+///
+/// Together with `VMArrayCallHostFuncContext`, this implements the transition
+/// from a raw, non-closure function pointer to a Rust closure that associates
+/// data and function together.
+///
+/// Also shepherds panics and traps across Wasm.
+</span><span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn </span>array_call_shim&lt;F&gt;(
     vmctx: <span class="kw-2">*mut </span>VMOpaqueContext,
-    caller_vmctx: <span class="kw-2">*mut </span>VMContext,
+    caller_vmctx: <span class="kw-2">*mut </span>VMOpaqueContext,
     values_vec: <span class="kw-2">*mut </span>ValRaw,
     values_vec_len: usize,
 ) <span class="kw">where
@@ -189,7 +215,7 @@
     // have any. To prevent leaks we avoid having any local destructors by
     // avoiding local variables.
     </span><span class="kw">let </span>result = panic::catch_unwind(AssertUnwindSafe(|| {
-        <span class="kw">let </span>vmctx = VMHostFuncContext::from_opaque(vmctx);
+        <span class="kw">let </span>vmctx = VMArrayCallHostFuncContext::from_opaque(vmctx);
         <span class="comment">// Double-check ourselves in debug mode, but we control
         // the `Any` here so an unsafe downcast should also
         // work.
@@ -197,7 +223,7 @@
         <span class="macro">debug_assert!</span>(state.is::&lt;TrampolineState&lt;F&gt;&gt;());
         <span class="kw">let </span>state = <span class="kw-2">&amp;*</span>(state <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span><span class="kw-2">*const </span>TrampolineState&lt;F&gt;);
         <span class="kw">let </span>values_vec = std::slice::from_raw_parts_mut(values_vec, values_vec_len);
-        (state.func)(caller_vmctx, values_vec)
+        (state.func)(VMContext::from_opaque(caller_vmctx), values_vec)
     }));
 
     <span class="kw">match </span>result {
@@ -256,22 +282,26 @@
 }
 
 <span class="attr">#[cfg(compiler)]
-</span><span class="kw">pub fn </span>create_function&lt;F&gt;(
+</span><span class="kw">pub fn </span>create_array_call_function&lt;F&gt;(
     ft: <span class="kw-2">&amp;</span>FuncType,
     func: F,
     engine: <span class="kw-2">&amp;</span>Engine,
-) -&gt; <span class="prelude-ty">Result</span>&lt;(Box&lt;VMHostFuncContext&gt;, VMSharedSignatureIndex, VMTrampoline)&gt;
+) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;VMArrayCallHostFuncContext&gt;&gt;
 <span class="kw">where
     </span>F: Fn(<span class="kw-2">*mut </span>VMContext, <span class="kw-2">&amp;mut </span>[ValRaw]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; + Send + Sync + <span class="lifetime">&#39;static</span>,
 {
+    <span class="kw">use </span>std::ptr;
+
     <span class="kw">let </span><span class="kw-2">mut </span>obj = engine
         .compiler()
         .object(wasmtime_environ::ObjectKind::Module)<span class="question-mark">?</span>;
-    <span class="kw">let </span>(t1, t2) = engine.compiler().emit_trampoline_obj(
-        ft.as_wasm_func_type(),
-        stub_fn::&lt;F&gt; <span class="kw">as </span>usize,
-        <span class="kw-2">&amp;mut </span>obj,
-    )<span class="question-mark">?</span>;
+    <span class="kw">let </span>(wasm_call_range, native_call_range) = engine
+        .compiler()
+        .emit_trampolines_for_array_call_host_func(
+            ft.as_wasm_func_type(),
+            array_call_shim::&lt;F&gt; <span class="kw">as </span>usize,
+            <span class="kw-2">&amp;mut </span>obj,
+        )<span class="question-mark">?</span>;
     engine.append_bti(<span class="kw-2">&amp;mut </span>obj);
     <span class="kw">let </span>obj = wasmtime_jit::ObjectBuilder::new(obj, <span class="kw-2">&amp;</span>engine.config().tunables).finish()<span class="question-mark">?</span>;
 
@@ -286,20 +316,28 @@
     // we know their start/length.
 
     </span><span class="kw">let </span>text = code_memory.text();
-    <span class="kw">let </span>host_trampoline = text[t1.start <span class="kw">as </span>usize..][..t1.length <span class="kw">as </span>usize].as_ptr();
-    <span class="kw">let </span>wasm_trampoline = text[t2.start <span class="kw">as </span>usize..].as_ptr() <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>;
-    <span class="kw">let </span>wasm_trampoline = NonNull::new(wasm_trampoline).unwrap();
+
+    <span class="kw">let </span>array_call = array_call_shim::&lt;F&gt;;
+
+    <span class="kw">let </span>wasm_call = text[wasm_call_range.start <span class="kw">as </span>usize..].as_ptr() <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>;
+    <span class="kw">let </span>wasm_call = <span class="prelude-val">Some</span>(NonNull::new(wasm_call).unwrap());
+
+    <span class="kw">let </span>native_call = text[native_call_range.start <span class="kw">as </span>usize..].as_ptr() <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>;
+    <span class="kw">let </span>native_call = NonNull::new(native_call).unwrap();
 
     <span class="kw">let </span>sig = engine.signatures().register(ft.as_wasm_func_type());
 
     <span class="kw">unsafe </span>{
-        <span class="kw">let </span>ctx = VMHostFuncContext::new(
-            wasm_trampoline,
-            sig,
+        <span class="prelude-val">Ok</span>(VMArrayCallHostFuncContext::new(
+            VMCallerCheckedFuncRef {
+                array_call,
+                wasm_call,
+                native_call,
+                type_index: sig,
+                vmctx: ptr::null_mut(),
+            },
             Box::new(TrampolineState { func, code_memory }),
-        );
-        <span class="kw">let </span>host_trampoline = std::mem::transmute::&lt;<span class="kw-2">*const </span>u8, VMTrampoline&gt;(host_trampoline);
-        <span class="prelude-val">Ok</span>((ctx, sig, host_trampoline))
+        ))
     }
 }
 </code></pre></div>

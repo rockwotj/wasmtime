@@ -1477,15 +1477,6 @@
 <a href="#1477" id="1477">1477</a>
 <a href="#1478" id="1478">1478</a>
 <a href="#1479" id="1479">1479</a>
-<a href="#1480" id="1480">1480</a>
-<a href="#1481" id="1481">1481</a>
-<a href="#1482" id="1482">1482</a>
-<a href="#1483" id="1483">1483</a>
-<a href="#1484" id="1484">1484</a>
-<a href="#1485" id="1485">1485</a>
-<a href="#1486" id="1486">1486</a>
-<a href="#1487" id="1487">1487</a>
-<a href="#1488" id="1488">1488</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::func::HostFunc;
 <span class="kw">use </span><span class="kw">crate</span>::instance::InstancePre;
 <span class="kw">use </span><span class="kw">crate</span>::store::StoreOpaque;
@@ -2824,15 +2815,6 @@
         <span class="kw">match </span><span class="self">self </span>{
             Definition::Extern(e, <span class="kw">_</span>) =&gt; e.clone(),
             Definition::HostFunc(func) =&gt; func.to_func(store).into(),
-        }
-    }
-
-    <span class="doccomment">/// Note the unsafety here is due to calling
-    /// `HostFunc::to_func_store_rooted`.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>to_extern_store_rooted(<span class="kw-2">&amp;</span><span class="self">self</span>, store: <span class="kw-2">&amp;mut </span>StoreOpaque) -&gt; Extern {
-        <span class="kw">match </span><span class="self">self </span>{
-            Definition::Extern(e, <span class="kw">_</span>) =&gt; e.clone(),
-            Definition::HostFunc(func) =&gt; func.to_func_store_rooted(store).into(),
         }
     }
 

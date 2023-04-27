@@ -637,19 +637,16 @@
 <a href="#637" id="637">637</a>
 <a href="#638" id="638">638</a>
 <a href="#639" id="639">639</a>
-<a href="#640" id="640">640</a>
-<a href="#641" id="641">641</a>
-<a href="#642" id="642">642</a>
-<a href="#643" id="643">643</a>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{invoke_wasm_and_catch_traps, HostAbi};
 <span class="kw">use </span><span class="kw">crate</span>::store::{AutoAssertNoGc, StoreOpaque};
 <span class="kw">use crate</span>::{AsContextMut, ExternRef, Func, FuncType, StoreContextMut, ValRaw, ValType};
 <span class="kw">use </span>anyhow::{bail, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>std::marker;
 <span class="kw">use </span>std::mem::{<span class="self">self</span>, MaybeUninit};
-<span class="kw">use </span>std::ptr;
+<span class="kw">use </span>std::ptr::{<span class="self">self</span>, NonNull};
 <span class="kw">use </span>wasmtime_runtime::{
-    VMCallerCheckedFuncRef, VMContext, VMFunctionBody, VMOpaqueContext, VMSharedSignatureIndex,
+    VMCallerCheckedFuncRef, VMContext, VMNativeCallFunction, VMOpaqueContext,
+    VMSharedSignatureIndex,
 };
 
 <span class="doccomment">/// A statically typed WebAssembly function.
@@ -727,7 +724,7 @@
             !store.<span class="number">0</span>.async_support(),
             <span class="string">&quot;must use `call_async` with async stores&quot;
         </span>);
-        <span class="kw">let </span>func = <span class="self">self</span>.func.caller_checked_anyfunc(store.<span class="number">0</span>);
+        <span class="kw">let </span>func = <span class="self">self</span>.func.caller_checked_func_ref(store.<span class="number">0</span>);
         <span class="kw">unsafe </span>{ <span class="self">Self</span>::call_raw(<span class="kw-2">&amp;mut </span>store, func, params) }
     }
 
@@ -765,7 +762,7 @@
         </span>);
         store
             .on_fiber(|store| {
-                <span class="kw">let </span>func = <span class="self">self</span>.func.caller_checked_anyfunc(store.<span class="number">0</span>);
+                <span class="kw">let </span>func = <span class="self">self</span>.func.caller_checked_func_ref(store.<span class="number">0</span>);
                 <span class="kw">unsafe </span>{ <span class="self">Self</span>::call_raw(store, func, params) }
             })
             .<span class="kw">await</span><span class="question-mark">?
@@ -820,12 +817,8 @@
         <span class="kw">let </span>result = invoke_wasm_and_catch_traps(store, |caller| {
             <span class="kw">let </span>(anyfunc, ret, params, returned) = <span class="kw-2">&amp;mut </span>captures;
             <span class="kw">let </span>anyfunc = anyfunc.as_ref();
-            <span class="kw">let </span>result = Params::invoke::&lt;Results&gt;(
-                anyfunc.func_ptr.as_ptr(),
-                anyfunc.vmctx,
-                caller,
-                <span class="kw-2">*</span>params,
-            );
+            <span class="kw">let </span>result =
+                Params::invoke::&lt;Results&gt;(anyfunc.native_call, anyfunc.vmctx, caller, <span class="kw-2">*</span>params);
             ptr::write(ret.as_mut_ptr(), result);
             <span class="kw-2">*</span>returned = <span class="bool-val">true
         </span>});
@@ -1086,7 +1079,7 @@
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>into_abi(<span class="self">self</span>, store: <span class="kw-2">&amp;mut </span>StoreOpaque) -&gt; <span class="self">Self</span>::Abi {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(f) = <span class="self">self </span>{
-            f.caller_checked_anyfunc(store).as_ptr()
+            f.caller_checked_func_ref(store).as_ptr()
         } <span class="kw">else </span>{
             ptr::null_mut()
         }
@@ -1094,7 +1087,7 @@
 
     <span class="attr">#[inline]
     </span><span class="kw">unsafe fn </span>from_abi(abi: <span class="self">Self</span>::Abi, store: <span class="kw-2">&amp;mut </span>StoreOpaque) -&gt; <span class="self">Self </span>{
-        Func::from_caller_checked_anyfunc(store, abi)
+        Func::from_caller_checked_func_ref(store, abi)
     }
 }
 
@@ -1118,7 +1111,7 @@
 
     <span class="attr">#[doc(hidden)]
     </span><span class="kw">unsafe fn </span>invoke&lt;R: WasmResults&gt;(
-        func: <span class="kw-2">*const </span>VMFunctionBody,
+        func: NonNull&lt;VMNativeCallFunction&gt;,
         vmctx1: <span class="kw-2">*mut </span>VMOpaqueContext,
         vmctx2: <span class="kw-2">*mut </span>VMContext,
         abi: <span class="self">Self</span>::Abi,
@@ -1148,7 +1141,7 @@
     }
 
     <span class="kw">unsafe fn </span>invoke&lt;R: WasmResults&gt;(
-        func: <span class="kw-2">*const </span>VMFunctionBody,
+        func: NonNull&lt;VMNativeCallFunction&gt;,
         vmctx1: <span class="kw-2">*mut </span>VMOpaqueContext,
         vmctx2: <span class="kw-2">*mut </span>VMContext,
         abi: <span class="self">Self</span>::Abi,
@@ -1208,13 +1201,13 @@
             }
 
             <span class="kw">unsafe fn </span>invoke&lt;R: WasmResults&gt;(
-                func: <span class="kw-2">*const </span>VMFunctionBody,
+                func: NonNull&lt;VMNativeCallFunction&gt;,
                 vmctx1: <span class="kw-2">*mut </span>VMOpaqueContext,
                 vmctx2: <span class="kw-2">*mut </span>VMContext,
                 abi: <span class="self">Self</span>::Abi,
             ) -&gt; R::ResultAbi {
                 <span class="kw">let </span>fnptr = mem::transmute::&lt;
-                    <span class="kw-2">*const </span>VMFunctionBody,
+                    NonNull&lt;VMNativeCallFunction&gt;,
                     <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(
                         <span class="kw-2">*mut </span>VMOpaqueContext,
                         <span class="kw-2">*mut </span>VMContext,
@@ -1231,7 +1224,6 @@
                 // Upon returning `R::call` will convert all the returns back
                 // into `R`.
                 </span>&lt;R::ResultAbi <span class="kw">as </span>HostAbi&gt;::call(|retptr| {
-                    <span class="kw">let </span>fnptr = wasmtime_runtime::prepare_host_to_wasm_trampoline(vmctx2, fnptr);
                     fnptr(vmctx1, vmctx2, $(<span class="macro-nonterminal">$t</span>,)* retptr)
                 })
             }

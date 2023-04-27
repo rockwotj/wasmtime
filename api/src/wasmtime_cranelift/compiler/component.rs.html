@@ -535,6 +535,104 @@
 <a href="#535" id="535">535</a>
 <a href="#536" id="536">536</a>
 <a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
+<a href="#626" id="626">626</a>
+<a href="#627" id="627">627</a>
+<a href="#628" id="628">628</a>
+<a href="#629" id="629">629</a>
+<a href="#630" id="630">630</a>
+<a href="#631" id="631">631</a>
+<a href="#632" id="632">632</a>
+<a href="#633" id="633">633</a>
+<a href="#634" id="634">634</a>
+<a href="#635" id="635">635</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Compilation support for the component model.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::compiler::{Compiler, CompilerContext};
@@ -544,19 +642,26 @@
 <span class="kw">use </span>cranelift_frontend::FunctionBuilder;
 <span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>wasmtime_environ::component::{
-    CanonicalOptions, Component, ComponentCompiler, ComponentTypes, FixedEncoding, LowerImport,
-    RuntimeMemoryIndex, Transcode, Transcoder, VMComponentOffsets,
+    AllCallFunc, CanonicalOptions, Component, ComponentCompiler, ComponentTypes, FixedEncoding,
+    LowerImport, RuntimeMemoryIndex, Transcode, Transcoder, VMComponentOffsets,
 };
 <span class="kw">use </span>wasmtime_environ::{PtrSize, WasmFuncType};
 
-<span class="kw">impl </span>ComponentCompiler <span class="kw">for </span>Compiler {
-    <span class="kw">fn </span>compile_lowered_trampoline(
+<span class="kw">enum </span>Abi {
+    Wasm,
+    Native,
+    Array,
+}
+
+<span class="kw">impl </span>Compiler {
+    <span class="kw">fn </span>compile_lowered_trampoline_for_abi(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         component: <span class="kw-2">&amp;</span>Component,
         lowering: <span class="kw-2">&amp;</span>LowerImport,
         types: <span class="kw-2">&amp;</span>ComponentTypes,
+        abi: Abi,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;&gt; {
-        <span class="kw">let </span>ty = <span class="kw-2">&amp;</span>types[lowering.canonical_abi];
+        <span class="kw">let </span>wasm_func_ty = <span class="kw-2">&amp;</span>types[lowering.canonical_abi];
         <span class="kw">let </span>isa = <span class="kw-2">&amp;*</span><span class="self">self</span>.isa;
         <span class="kw">let </span>pointer_type = isa.pointer_type();
         <span class="kw">let </span>offsets = VMComponentOffsets::new(isa.pointer_bytes(), component);
@@ -570,20 +675,55 @@
 
         context.func = ir::Function::with_name_signature(
             ir::UserFuncName::user(<span class="number">0</span>, <span class="number">0</span>),
-            <span class="kw">crate</span>::indirect_signature(isa, ty),
+            <span class="kw">match </span>abi {
+                Abi::Wasm =&gt; <span class="kw">crate</span>::wasm_call_signature(isa, wasm_func_ty),
+                Abi::Native =&gt; <span class="kw">crate</span>::native_call_signature(isa, wasm_func_ty),
+                Abi::Array =&gt; <span class="kw">crate</span>::array_call_signature(isa),
+            },
         );
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = FunctionBuilder::new(<span class="kw-2">&amp;mut </span>context.func, func_translator.context());
         <span class="kw">let </span>block0 = builder.create_block();
+        builder.append_block_params_for_function_params(block0);
+        builder.switch_to_block(block0);
+        builder.seal_block(block0);
 
         <span class="comment">// Start off by spilling all the wasm arguments into a stack slot to be
         // passed to the host function.
-        </span><span class="kw">let </span>(values_vec_ptr_val, values_vec_len) =
-            <span class="self">self</span>.wasm_to_host_spill_args(ty, <span class="kw-2">&amp;mut </span>builder, block0);
+        </span><span class="kw">let </span>(values_vec_ptr, values_vec_len) = <span class="kw">match </span>abi {
+            Abi::Wasm | Abi::Native =&gt; {
+                <span class="kw">let </span>(ptr, len) =
+                    <span class="self">self</span>.allocate_stack_array_and_spill_args(wasm_func_ty, <span class="kw-2">&amp;mut </span>builder, block0);
+                <span class="kw">let </span>len = builder.ins().iconst(pointer_type, i64::from(len));
+                (ptr, len)
+            }
+            Abi::Array =&gt; {
+                <span class="kw">let </span>params = builder.func.dfg.block_params(block0);
+                (params[<span class="number">2</span>], params[<span class="number">3</span>])
+            }
+        };
         <span class="kw">let </span>vmctx = builder.func.dfg.block_params(block0)[<span class="number">0</span>];
 
-        <span class="comment">// Save the exit FP and return address for stack walking purposes.
-        </span><span class="self">self</span>.save_last_wasm_fp_and_pc(<span class="kw-2">&amp;mut </span>builder, <span class="kw-2">&amp;</span>offsets, vmctx);
+        <span class="comment">// If we are crossing the Wasm-to-native boundary, we need to save the
+        // exit FP and return address for stack walking purposes. However, we
+        // always debug assert that our vmctx is a component context, regardless
+        // whether we are actually crossing that boundary because it should
+        // always hold.
+        </span><span class="kw">super</span>::debug_assert_vmctx_kind(
+            isa,
+            <span class="kw-2">&amp;mut </span>builder,
+            vmctx,
+            wasmtime_environ::component::VMCOMPONENT_MAGIC,
+        );
+        <span class="kw">if let </span>Abi::Wasm = abi {
+            <span class="kw">let </span>limits = builder.ins().load(
+                pointer_type,
+                MemFlags::trusted(),
+                vmctx,
+                i32::try_from(offsets.limits()).unwrap(),
+            );
+            <span class="kw">super</span>::save_last_wasm_exit_fp_and_pc(<span class="kw-2">&amp;mut </span>builder, pointer_type, <span class="kw-2">&amp;</span>offsets.ptr, limits);
+        }
 
         <span class="comment">// Below this will incrementally build both the signature of the host
         // function we&#39;re calling as well as the list of arguments since the
@@ -659,15 +799,11 @@
 
         <span class="comment">// storage: *mut ValRaw
         </span>host_sig.params.push(ir::AbiParam::new(pointer_type));
-        callee_args.push(values_vec_ptr_val);
+        callee_args.push(values_vec_ptr);
 
         <span class="comment">// storage_len: usize
         </span>host_sig.params.push(ir::AbiParam::new(pointer_type));
-        callee_args.push(
-            builder
-                .ins()
-                .iconst(pointer_type, i64::from(values_vec_len)),
-        );
+        callee_args.push(values_vec_len);
 
         <span class="comment">// Load host function pointer from the vmcontext and then call that
         // indirect function pointer with the list of arguments.
@@ -680,9 +816,23 @@
         <span class="kw">let </span>host_sig = builder.import_signature(host_sig);
         builder.ins().call_indirect(host_sig, host_fn, <span class="kw-2">&amp;</span>callee_args);
 
-        <span class="comment">// After the host function has returned the results are loaded from
-        // `values_vec_ptr_val` and then returned.
-        </span><span class="self">self</span>.wasm_to_host_load_results(ty, builder, values_vec_ptr_val);
+        <span class="kw">match </span>abi {
+            Abi::Wasm | Abi::Native =&gt; {
+                <span class="comment">// After the host function has returned the results are loaded from
+                // `values_vec_ptr` and then returned.
+                </span><span class="kw">let </span>results = <span class="self">self</span>.load_values_from_array(
+                    wasm_func_ty.returns(),
+                    <span class="kw-2">&amp;mut </span>builder,
+                    values_vec_ptr,
+                    values_vec_len,
+                );
+                builder.ins().return_(<span class="kw-2">&amp;</span>results);
+            }
+            Abi::Array =&gt; {
+                builder.ins().return_(<span class="kw-2">&amp;</span>[]);
+            }
+        }
+        builder.finalize();
 
         <span class="kw">let </span>func: CompiledFunction =
             <span class="self">self</span>.finish_trampoline(<span class="kw-2">&amp;mut </span>context, incremental_cache_ctx.as_mut(), isa)<span class="question-mark">?</span>;
@@ -695,7 +845,11 @@
         <span class="prelude-val">Ok</span>(Box::new(func))
     }
 
-    <span class="kw">fn </span>compile_always_trap(<span class="kw-2">&amp;</span><span class="self">self</span>, ty: <span class="kw-2">&amp;</span>WasmFuncType) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;&gt; {
+    <span class="kw">fn </span>compile_always_trap_for_abi(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        ty: <span class="kw-2">&amp;</span>WasmFuncType,
+        abi: Abi,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;&gt; {
         <span class="kw">let </span>isa = <span class="kw-2">&amp;*</span><span class="self">self</span>.isa;
         <span class="kw">let </span>CompilerContext {
             <span class="kw-2">mut </span>func_translator,
@@ -705,7 +859,11 @@
         } = <span class="self">self</span>.take_context();
         context.func = ir::Function::with_name_signature(
             ir::UserFuncName::user(<span class="number">0</span>, <span class="number">0</span>),
-            <span class="kw">crate</span>::indirect_signature(isa, ty),
+            <span class="kw">match </span>abi {
+                Abi::Wasm =&gt; <span class="kw">crate</span>::wasm_call_signature(isa, ty),
+                Abi::Native =&gt; <span class="kw">crate</span>::native_call_signature(isa, ty),
+                Abi::Array =&gt; <span class="kw">crate</span>::array_call_signature(isa),
+            },
         );
         <span class="kw">let </span><span class="kw-2">mut </span>builder = FunctionBuilder::new(<span class="kw-2">&amp;mut </span>context.func, func_translator.context());
         <span class="kw">let </span>block0 = builder.create_block();
@@ -728,11 +886,12 @@
         <span class="prelude-val">Ok</span>(Box::new(func))
     }
 
-    <span class="kw">fn </span>compile_transcoder(
+    <span class="kw">fn </span>compile_transcoder_for_abi(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         component: <span class="kw-2">&amp;</span>Component,
         transcoder: <span class="kw-2">&amp;</span>Transcoder,
         types: <span class="kw-2">&amp;</span>ComponentTypes,
+        abi: Abi,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;&gt; {
         <span class="kw">let </span>ty = <span class="kw-2">&amp;</span>types[transcoder.signature];
         <span class="kw">let </span>isa = <span class="kw-2">&amp;*</span><span class="self">self</span>.isa;
@@ -747,7 +906,11 @@
 
         context.func = ir::Function::with_name_signature(
             ir::UserFuncName::user(<span class="number">0</span>, <span class="number">0</span>),
-            <span class="kw">crate</span>::indirect_signature(isa, ty),
+            <span class="kw">match </span>abi {
+                Abi::Wasm =&gt; <span class="kw">crate</span>::wasm_call_signature(isa, ty),
+                Abi::Native =&gt; <span class="kw">crate</span>::native_call_signature(isa, ty),
+                Abi::Array =&gt; <span class="kw">crate</span>::array_call_signature(isa),
+            },
         );
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = FunctionBuilder::new(<span class="kw-2">&amp;mut </span>context.func, func_translator.context());
@@ -756,8 +919,20 @@
         builder.switch_to_block(block0);
         builder.seal_block(block0);
 
-        <span class="self">self</span>.translate_transcode(builder, <span class="kw-2">&amp;</span>offsets, transcoder, block0);
+        <span class="kw">match </span>abi {
+            Abi::Wasm =&gt; {
+                <span class="self">self</span>.translate_transcode(<span class="kw-2">&amp;mut </span>builder, <span class="kw-2">&amp;</span>offsets, transcoder, block0);
+            }
+            <span class="comment">// Transcoders can only actually be called by Wasm, so let&#39;s assert
+            // that here.
+            </span>Abi::Native | Abi::Array =&gt; {
+                builder
+                    .ins()
+                    .trap(ir::TrapCode::User(<span class="kw">crate</span>::DEBUG_ASSERT_TRAP_CODE));
+            }
+        }
 
+        builder.finalize();
         <span class="kw">let </span>func: CompiledFunction =
             <span class="self">self</span>.finish_trampoline(<span class="kw-2">&amp;mut </span>context, incremental_cache_ctx.as_mut(), isa)<span class="question-mark">?</span>;
         <span class="self">self</span>.save_context(CompilerContext {
@@ -770,54 +945,71 @@
     }
 }
 
-<span class="kw">impl </span>Compiler {
-    <span class="kw">fn </span>save_last_wasm_fp_and_pc(
+<span class="kw">impl </span>ComponentCompiler <span class="kw">for </span>Compiler {
+    <span class="kw">fn </span>compile_lowered_trampoline(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        builder: <span class="kw-2">&amp;mut </span>FunctionBuilder&lt;<span class="lifetime">&#39;_</span>&gt;,
-        offsets: <span class="kw-2">&amp;</span>VMComponentOffsets&lt;u8&gt;,
-        vmctx: ir::Value,
-    ) {
-        <span class="kw">let </span>pointer_type = <span class="self">self</span>.isa.pointer_type();
-        <span class="comment">// First we need to get the `VMRuntimeLimits`.
-        </span><span class="kw">let </span>limits = builder.ins().load(
-            pointer_type,
-            MemFlags::trusted(),
-            vmctx,
-            i32::try_from(offsets.limits()).unwrap(),
-        );
-        <span class="comment">// Then save the exit Wasm FP to the limits. We dereference the current
-        // FP to get the previous FP because the current FP is the trampoline&#39;s
-        // FP, and we want the Wasm function&#39;s FP, which is the caller of this
-        // trampoline.
-        </span><span class="kw">let </span>trampoline_fp = builder.ins().get_frame_pointer(pointer_type);
-        <span class="kw">let </span>wasm_fp = builder.ins().load(
-            pointer_type,
-            MemFlags::trusted(),
-            trampoline_fp,
-            <span class="comment">// The FP always points to the next older FP for all supported
-            // targets. See assertion in
-            // `crates/runtime/src/traphandlers/backtrace.rs`.
-            </span><span class="number">0</span>,
-        );
-        builder.ins().store(
-            MemFlags::trusted(),
-            wasm_fp,
-            limits,
-            offsets.ptr.vmruntime_limits_last_wasm_exit_fp(),
-        );
-        <span class="comment">// Finally save the Wasm return address to the limits.
-        </span><span class="kw">let </span>wasm_pc = builder.ins().get_return_address(pointer_type);
-        builder.ins().store(
-            MemFlags::trusted(),
-            wasm_pc,
-            limits,
-            offsets.ptr.vmruntime_limits_last_wasm_exit_pc(),
-        );
+        component: <span class="kw-2">&amp;</span>Component,
+        lowering: <span class="kw-2">&amp;</span>LowerImport,
+        types: <span class="kw-2">&amp;</span>ComponentTypes,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;AllCallFunc&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;&gt;&gt; {
+        <span class="prelude-val">Ok</span>(AllCallFunc {
+            wasm_call: <span class="self">self</span>.compile_lowered_trampoline_for_abi(
+                component,
+                lowering,
+                types,
+                Abi::Wasm,
+            )<span class="question-mark">?</span>,
+            array_call: <span class="self">self</span>.compile_lowered_trampoline_for_abi(
+                component,
+                lowering,
+                types,
+                Abi::Array,
+            )<span class="question-mark">?</span>,
+            native_call: <span class="self">self</span>.compile_lowered_trampoline_for_abi(
+                component,
+                lowering,
+                types,
+                Abi::Native,
+            )<span class="question-mark">?</span>,
+        })
     }
 
+    <span class="kw">fn </span>compile_always_trap(<span class="kw-2">&amp;</span><span class="self">self</span>, ty: <span class="kw-2">&amp;</span>WasmFuncType) -&gt; <span class="prelude-ty">Result</span>&lt;AllCallFunc&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;&gt;&gt; {
+        <span class="prelude-val">Ok</span>(AllCallFunc {
+            wasm_call: <span class="self">self</span>.compile_always_trap_for_abi(ty, Abi::Wasm)<span class="question-mark">?</span>,
+            array_call: <span class="self">self</span>.compile_always_trap_for_abi(ty, Abi::Array)<span class="question-mark">?</span>,
+            native_call: <span class="self">self</span>.compile_always_trap_for_abi(ty, Abi::Native)<span class="question-mark">?</span>,
+        })
+    }
+
+    <span class="kw">fn </span>compile_transcoder(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        component: <span class="kw-2">&amp;</span>Component,
+        transcoder: <span class="kw-2">&amp;</span>Transcoder,
+        types: <span class="kw-2">&amp;</span>ComponentTypes,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;AllCallFunc&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;&gt;&gt; {
+        <span class="prelude-val">Ok</span>(AllCallFunc {
+            wasm_call: <span class="self">self</span>.compile_transcoder_for_abi(component, transcoder, types, Abi::Wasm)<span class="question-mark">?</span>,
+            array_call: <span class="self">self</span>.compile_transcoder_for_abi(
+                component,
+                transcoder,
+                types,
+                Abi::Array,
+            )<span class="question-mark">?</span>,
+            native_call: <span class="self">self</span>.compile_transcoder_for_abi(
+                component,
+                transcoder,
+                types,
+                Abi::Native,
+            )<span class="question-mark">?</span>,
+        })
+    }
+}
+
+<span class="kw">impl </span>Compiler {
     <span class="kw">fn </span>translate_transcode(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="kw-2">mut </span>builder: FunctionBuilder&lt;<span class="lifetime">&#39;_</span>&gt;,
+        builder: <span class="kw-2">&amp;mut </span>FunctionBuilder&lt;<span class="lifetime">&#39;_</span>&gt;,
         offsets: <span class="kw-2">&amp;</span>VMComponentOffsets&lt;u8&gt;,
         transcoder: <span class="kw-2">&amp;</span>Transcoder,
         block: ir::Block,
@@ -827,7 +1019,13 @@
 
         <span class="comment">// Save the exit FP and return address for stack walking purposes. This
         // is used when an invalid encoding is encountered and a trap is raised.
-        </span><span class="self">self</span>.save_last_wasm_fp_and_pc(<span class="kw-2">&amp;mut </span>builder, <span class="kw-2">&amp;</span>offsets, vmctx);
+        </span><span class="kw">let </span>limits = builder.ins().load(
+            pointer_type,
+            MemFlags::trusted(),
+            vmctx,
+            i32::try_from(offsets.limits()).unwrap(),
+        );
+        <span class="kw">super</span>::save_last_wasm_exit_fp_and_pc(builder, pointer_type, <span class="kw-2">&amp;</span>offsets.ptr, limits);
 
         <span class="comment">// Determine the static signature of the host libcall for this transcode
         // operation and additionally calculate the static offset within the
@@ -866,9 +1064,8 @@
         );
 
         <span class="comment">// Load the base pointers for the from/to linear memories.
-        </span><span class="kw">let </span>from_base =
-            <span class="self">self</span>.load_runtime_memory_base(<span class="kw-2">&amp;mut </span>builder, vmctx, offsets, transcoder.from);
-        <span class="kw">let </span>to_base = <span class="self">self</span>.load_runtime_memory_base(<span class="kw-2">&amp;mut </span>builder, vmctx, offsets, transcoder.to);
+        </span><span class="kw">let </span>from_base = <span class="self">self</span>.load_runtime_memory_base(builder, vmctx, offsets, transcoder.from);
+        <span class="kw">let </span>to_base = <span class="self">self</span>.load_runtime_memory_base(builder, vmctx, offsets, transcoder.to);
 
         <span class="comment">// Helper function to cast a core wasm input to a host pointer type
         // which will go into the host libcall.
@@ -916,24 +1113,24 @@
             | Transcode::Utf8ToLatin1
             | Transcode::Utf16ToLatin1
             | Transcode::Utf8ToUtf16 =&gt; {
-                args.push(ptr_param(<span class="kw-2">&amp;mut </span>builder, <span class="number">0</span>, from64, from_base));
-                args.push(len_param(<span class="kw-2">&amp;mut </span>builder, <span class="number">1</span>, from64));
-                args.push(ptr_param(<span class="kw-2">&amp;mut </span>builder, <span class="number">2</span>, to64, to_base));
+                args.push(ptr_param(builder, <span class="number">0</span>, from64, from_base));
+                args.push(len_param(builder, <span class="number">1</span>, from64));
+                args.push(ptr_param(builder, <span class="number">2</span>, to64, to_base));
             }
 
             Transcode::Utf16ToUtf8 | Transcode::Latin1ToUtf8 =&gt; {
-                args.push(ptr_param(<span class="kw-2">&amp;mut </span>builder, <span class="number">0</span>, from64, from_base));
-                args.push(len_param(<span class="kw-2">&amp;mut </span>builder, <span class="number">1</span>, from64));
-                args.push(ptr_param(<span class="kw-2">&amp;mut </span>builder, <span class="number">2</span>, to64, to_base));
-                args.push(len_param(<span class="kw-2">&amp;mut </span>builder, <span class="number">3</span>, to64));
+                args.push(ptr_param(builder, <span class="number">0</span>, from64, from_base));
+                args.push(len_param(builder, <span class="number">1</span>, from64));
+                args.push(ptr_param(builder, <span class="number">2</span>, to64, to_base));
+                args.push(len_param(builder, <span class="number">3</span>, to64));
             }
 
             Transcode::Utf8ToCompactUtf16 | Transcode::Utf16ToCompactUtf16 =&gt; {
-                args.push(ptr_param(<span class="kw-2">&amp;mut </span>builder, <span class="number">0</span>, from64, from_base));
-                args.push(len_param(<span class="kw-2">&amp;mut </span>builder, <span class="number">1</span>, from64));
-                args.push(ptr_param(<span class="kw-2">&amp;mut </span>builder, <span class="number">2</span>, to64, to_base));
-                args.push(len_param(<span class="kw-2">&amp;mut </span>builder, <span class="number">3</span>, to64));
-                args.push(len_param(<span class="kw-2">&amp;mut </span>builder, <span class="number">4</span>, to64));
+                args.push(ptr_param(builder, <span class="number">0</span>, from64, from_base));
+                args.push(len_param(builder, <span class="number">1</span>, from64));
+                args.push(ptr_param(builder, <span class="number">2</span>, to64, to_base));
+                args.push(len_param(builder, <span class="number">3</span>, to64));
+                args.push(len_param(builder, <span class="number">4</span>, to64));
             }
         };
         <span class="kw">let </span>call = builder.ins().call_indirect(sig, transcode_libcall, <span class="kw-2">&amp;</span>args);
@@ -963,20 +1160,19 @@
             | Transcode::Utf16ToCompactProbablyUtf16
             | Transcode::Utf8ToCompactUtf16
             | Transcode::Utf16ToCompactUtf16 =&gt; {
-                raw_results.push(cast_from_pointer(<span class="kw-2">&amp;mut </span>builder, results[<span class="number">0</span>], to64));
+                raw_results.push(cast_from_pointer(builder, results[<span class="number">0</span>], to64));
             }
 
             Transcode::Latin1ToUtf8
             | Transcode::Utf16ToUtf8
             | Transcode::Utf8ToLatin1
             | Transcode::Utf16ToLatin1 =&gt; {
-                raw_results.push(cast_from_pointer(<span class="kw-2">&amp;mut </span>builder, results[<span class="number">0</span>], from64));
-                raw_results.push(cast_from_pointer(<span class="kw-2">&amp;mut </span>builder, results[<span class="number">1</span>], to64));
+                raw_results.push(cast_from_pointer(builder, results[<span class="number">0</span>], from64));
+                raw_results.push(cast_from_pointer(builder, results[<span class="number">1</span>], to64));
             }
         };
 
         builder.ins().return_(<span class="kw-2">&amp;</span>raw_results);
-        builder.finalize();
     }
 
     <span class="kw">fn </span>load_runtime_memory_base(

@@ -307,20 +307,6 @@
 <a href="#307" id="307">307</a>
 <a href="#308" id="308">308</a>
 <a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a>
-<a href="#316" id="316">316</a>
-<a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a>
-<a href="#319" id="319">319</a>
-<a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Memory management for executable code.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::subslice_range;
@@ -328,14 +314,12 @@
 <span class="kw">use </span>anyhow::{anyhow, bail, Context, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>object::read::{File, Object, ObjectSection};
 <span class="kw">use </span>object::ObjectSymbol;
-<span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::mem::ManuallyDrop;
 <span class="kw">use </span>std::ops::Range;
 <span class="kw">use </span>wasmtime_environ::obj;
-<span class="kw">use </span>wasmtime_environ::FunctionLoc;
 <span class="kw">use </span>wasmtime_jit_icache_coherence <span class="kw">as </span>icache_coherence;
 <span class="kw">use </span>wasmtime_runtime::libcalls;
-<span class="kw">use </span>wasmtime_runtime::{MmapVec, VMTrampoline};
+<span class="kw">use </span>wasmtime_runtime::MmapVec;
 
 <span class="doccomment">/// Management of executable memory within a `MmapVec`
 ///
@@ -519,18 +503,6 @@
     /// slice if it wasn&#39;t found.
     </span><span class="kw">pub fn </span>trap_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.mmap[<span class="self">self</span>.trap_data.clone()]
-    }
-
-    <span class="doccomment">/// Returns a `VMTrampoline` function pointer for the given function in the
-    /// text section.
-    ///
-    /// # Unsafety
-    ///
-    /// This function is unsafe as there&#39;s no guarantee that the returned
-    /// function pointer is valid.
-    </span><span class="kw">pub unsafe fn </span>vmtrampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, loc: FunctionLoc) -&gt; VMTrampoline {
-        <span class="kw">let </span>ptr = <span class="self">self</span>.text()[loc.start <span class="kw">as </span>usize..][..loc.length <span class="kw">as </span>usize].as_ptr();
-        mem::transmute::&lt;<span class="kw-2">*const </span>u8, VMTrampoline&gt;(ptr)
     }
 
     <span class="doccomment">/// Publishes the internal ELF image to be ready for execution.

@@ -18,17 +18,6 @@
 <a href="#18" id="18">18</a>
 <a href="#19" id="19">19</a>
 <a href="#20" id="20">20</a>
-<a href="#21" id="21">21</a>
-<a href="#22" id="22">22</a>
-<a href="#23" id="23">23</a>
-<a href="#24" id="24">24</a>
-<a href="#25" id="25">25</a>
-<a href="#26" id="26">26</a>
-<a href="#27" id="27">27</a>
-<a href="#28" id="28">28</a>
-<a href="#29" id="29">29</a>
-<a href="#30" id="30">30</a>
-<a href="#31" id="31">31</a>
 </pre><pre class="rust"><code><span class="kw">pub unsafe fn </span>get_next_older_pc_from_fp(fp: usize) -&gt; usize {
     <span class="comment">// The calling convention always pushes the return pointer (aka the PC of
     // the next older frame) just before this frame.
@@ -38,23 +27,12 @@
 <span class="comment">// And the current frame pointer points to the next older frame pointer.
 </span><span class="kw">pub const </span>NEXT_OLDER_FP_FROM_FP_OFFSET: usize = <span class="number">0</span>;
 
-<span class="kw">pub fn </span>reached_entry_sp(fp: usize, first_wasm_sp: usize) -&gt; bool {
-    <span class="comment">// When the FP is just below the SP (because we are in a function prologue
-    // where the `call` pushed the return pointer, but the callee hasn&#39;t pushed
-    // the frame pointer yet) we are done.
-    </span>fp == first_wasm_sp - <span class="number">8
-</span>}
+<span class="kw">pub fn </span>reached_entry_sp(fp: usize, entry_sp: usize) -&gt; bool {
+    fp &gt;= entry_sp
+}
 
 <span class="kw">pub fn </span>assert_entry_sp_is_aligned(sp: usize) {
-    <span class="comment">// The stack pointer should always be aligned to 16 bytes *except* inside
-    // function prologues where the return PC is pushed to the stack but before
-    // the old frame pointer has been saved to the stack via `push rbp`. And
-    // this happens to be exactly where we are inside of our host-to-Wasm
-    // trampoline that records the value of SP when we first enter
-    // Wasm. Therefore, the SP should *always* be 8-byte aligned but *never*
-    // 16-byte aligned.
-    </span><span class="macro">assert_eq!</span>(sp % <span class="number">8</span>, <span class="number">0</span>);
-    <span class="macro">assert_eq!</span>(sp % <span class="number">16</span>, <span class="number">8</span>);
+    <span class="macro">assert_eq!</span>(sp % <span class="number">16</span>, <span class="number">0</span>, <span class="string">&quot;stack should always be aligned to 16&quot;</span>);
 }
 
 <span class="kw">pub fn </span>assert_fp_is_aligned(fp: usize) {

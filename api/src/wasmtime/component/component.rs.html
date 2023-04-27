@@ -517,35 +517,27 @@
 <a href="#517" id="517">517</a>
 <a href="#518" id="518">518</a>
 <a href="#519" id="519">519</a>
-<a href="#520" id="520">520</a>
-<a href="#521" id="521">521</a>
-<a href="#522" id="522">522</a>
-<a href="#523" id="523">523</a>
-<a href="#524" id="524">524</a>
-<a href="#525" id="525">525</a>
-<a href="#526" id="526">526</a>
-<a href="#527" id="527">527</a>
-<a href="#528" id="528">528</a>
-<a href="#529" id="529">529</a>
-<a href="#530" id="530">530</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::code::CodeObject;
+<span class="kw">use </span><span class="kw">crate</span>::module::ModuleFunctionIndices;
 <span class="kw">use </span><span class="kw">crate</span>::signatures::SignatureCollection;
 <span class="kw">use crate</span>::{Engine, Module};
 <span class="kw">use </span>anyhow::{bail, Context, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>serde::{Deserialize, Serialize};
-<span class="kw">use </span>std::collections::{BTreeSet, HashMap};
+<span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::fs;
 <span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::ptr::NonNull;
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>wasmtime_environ::component::{
-    ComponentTypes, GlobalInitializer, LoweredIndex, RuntimeAlwaysTrapIndex,
+    AllCallFunc, ComponentTypes, GlobalInitializer, LoweredIndex, RuntimeAlwaysTrapIndex,
     RuntimeTranscoderIndex, StaticModuleIndex, Translator,
 };
-<span class="kw">use </span>wasmtime_environ::{EntityRef, FunctionLoc, ObjectKind, PrimaryMap, ScopeVec, SignatureIndex};
+<span class="kw">use </span>wasmtime_environ::{FunctionLoc, ObjectKind, PrimaryMap, ScopeVec};
 <span class="kw">use </span>wasmtime_jit::{CodeMemory, CompiledModuleInfo};
-<span class="kw">use </span>wasmtime_runtime::{MmapVec, VMFunctionBody, VMTrampoline};
+<span class="kw">use </span>wasmtime_runtime::{
+    MmapVec, VMArrayCallFunction, VMFunctionBody, VMNativeCallFunction, VMWasmCallFunction,
+};
 
 <span class="doccomment">/// A compiled WebAssembly Component.
 </span><span class="comment">//
@@ -579,10 +571,15 @@
     <span class="doccomment">/// Where lowered function trampolines are located within the `text`
     /// section of `code_memory`.
     ///
-    /// These trampolines are the function pointer within the
-    /// `VMCallerCheckedFuncRef` and will delegate indirectly to a host function
-    /// pointer when called.
-    </span>lowerings: PrimaryMap&lt;LoweredIndex, FunctionLoc&gt;,
+    /// These are the
+    ///
+    /// 1. Wasm-call,
+    /// 2. array-call, and
+    /// 3. native-call
+    ///
+    /// function pointers that end up in a `VMCallerCheckedFuncRef` for each
+    /// lowering.
+    </span>lowerings: PrimaryMap&lt;LoweredIndex, AllCallFunc&lt;FunctionLoc&gt;&gt;,
 
     <span class="doccomment">/// Where the &quot;always trap&quot; functions are located within the `text` section
     /// of `code_memory`.
@@ -591,15 +588,17 @@
     /// functions that are `canon lift`&#39;d then immediately `canon lower`&#39;d. The
     /// `u32` value here is the offset of the trap instruction from the start fo
     /// the function.
-    </span>always_trap: PrimaryMap&lt;RuntimeAlwaysTrapIndex, FunctionLoc&gt;,
+    </span>always_trap: PrimaryMap&lt;RuntimeAlwaysTrapIndex, AllCallFunc&lt;FunctionLoc&gt;&gt;,
 
     <span class="doccomment">/// Where all the cranelift-generated transcode functions are located in the
     /// compiled image of this component.
-    </span>transcoders: PrimaryMap&lt;RuntimeTranscoderIndex, FunctionLoc&gt;,
+    </span>transcoders: PrimaryMap&lt;RuntimeTranscoderIndex, AllCallFunc&lt;FunctionLoc&gt;&gt;,
+}
 
-    <span class="doccomment">/// Extra trampolines other than those contained in static modules
-    /// necessary for this component.
-    </span>trampolines: Vec&lt;(SignatureIndex, FunctionLoc)&gt;,
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>AllCallFuncPointers {
+    <span class="kw">pub </span>wasm_call: NonNull&lt;VMWasmCallFunction&gt;,
+    <span class="kw">pub </span>array_call: VMArrayCallFunction,
+    <span class="kw">pub </span>native_call: NonNull&lt;VMNativeCallFunction&gt;,
 }
 
 <span class="attr">#[derive(Serialize, Deserialize)]
@@ -718,42 +717,26 @@
 
         <span class="comment">// Compile all core wasm modules, in parallel, which will internally
         // compile all their functions in parallel as well.
-        </span><span class="kw">let </span>module_funcs = engine.run_maybe_parallel(modules.values_mut().collect(), |module| {
+        </span><span class="kw">let </span>compilations = engine.run_maybe_parallel(modules.values_mut().collect(), |module| {
             Module::compile_functions(engine, module, types.module_types())
         })<span class="question-mark">?</span>;
 
-        <span class="comment">// Compile all host-to-wasm trampolines where the required set of
-        // trampolines is unioned from all core wasm modules plus what the
-        // component itself needs.
-        </span><span class="kw">let </span>module_trampolines = modules
-            .iter()
-            .flat_map(|(<span class="kw">_</span>, m)| m.exported_signatures.iter().copied())
-            .collect::&lt;BTreeSet&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>trampolines = module_trampolines
-            .iter()
-            .copied()
-            .chain(
-                <span class="comment">// All lowered functions will require a trampoline to be available in
-                // case they&#39;re used when entering wasm. For example a lowered function
-                // could be immediately lifted in which case we&#39;ll need a trampoline to
-                // call that lowered function.
-                //
-                // Most of the time trampolines can come from the core wasm modules
-                // since lifted functions come from core wasm. For these esoteric cases
-                // though we may have to compile trampolines specifically into the
-                // component object as well in case core wasm doesn&#39;t provide the
-                // necessary trampoline.
-                </span>component.initializers.iter().filter_map(|init| <span class="kw">match </span>init {
-                    GlobalInitializer::LowerImport(i) =&gt; <span class="prelude-val">Some</span>(i.canonical_abi),
-                    GlobalInitializer::AlwaysTrap(i) =&gt; <span class="prelude-val">Some</span>(i.canonical_abi),
-                    <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
-                }),
-            )
-            .collect::&lt;BTreeSet&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>compiled_trampolines = engine
-            .run_maybe_parallel(trampolines.iter().cloned().collect(), |i| {
-                compiler.compile_host_to_wasm_trampoline(<span class="kw-2">&amp;</span>types[i])
-            })<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>compiled_funcs = <span class="macro">vec!</span>[];
+        <span class="kw">let </span>wasm_to_native_trampoline_indices = Module::compile_wasm_to_native_trampolines(
+            engine,
+            modules.values().as_slice(),
+            types.module_types(),
+            <span class="kw-2">&amp;mut </span>compiled_funcs,
+        )<span class="question-mark">?</span>;
+
+        <span class="kw">let </span><span class="kw-2">mut </span>indices = <span class="macro">vec!</span>[];
+        <span class="kw">for </span>((i, translation), compilation) <span class="kw">in </span>modules.into_iter().zip(compilations) {
+            <span class="kw">let </span>prefix = <span class="macro">format!</span>(<span class="string">&quot;wasm_{}_&quot;</span>, i.as_u32());
+            indices.push((
+                compiled_funcs.len(),
+                ModuleFunctionIndices::new(translation, compilation, <span class="kw-2">&amp;</span>prefix, <span class="kw-2">&amp;mut </span>compiled_funcs),
+            ));
+        }
 
         <span class="comment">// Compile all transcoders required which adapt from a
         // core-wasm-specific ABI (e.g. 32 or 64-bit) into the host transcoder
@@ -766,11 +749,17 @@
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
             })
             .collect();
-        <span class="kw">let </span>transcoders = engine.run_maybe_parallel(transcoders, |info| {
-            compiler
-                .component_compiler()
-                .compile_transcoder(<span class="kw-2">&amp;</span>component, info, <span class="kw-2">&amp;</span>types)
-        })<span class="question-mark">?</span>;
+        <span class="kw">let </span>transcoder_indices = flatten_all_calls(
+            <span class="kw-2">&amp;mut </span>compiled_funcs,
+            engine.run_maybe_parallel(transcoders, |info| -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>&gt; {
+                <span class="prelude-val">Ok</span>((
+                    info.symbol_name(),
+                    compiler
+                        .component_compiler()
+                        .compile_transcoder(<span class="kw-2">&amp;</span>component, info, <span class="kw-2">&amp;</span>types)<span class="question-mark">?</span>,
+                ))
+            })<span class="question-mark">?</span>,
+        );
 
         <span class="comment">// Compile all &quot;always trap&quot; functions which are small typed shims that
         // exits to solely trap immediately for components.
@@ -782,11 +771,17 @@
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
             })
             .collect();
-        <span class="kw">let </span>always_trap = engine.run_maybe_parallel(always_trap, |info| {
-            compiler
-                .component_compiler()
-                .compile_always_trap(<span class="kw-2">&amp;</span>types[info.canonical_abi])
-        })<span class="question-mark">?</span>;
+        <span class="kw">let </span>always_trap_indices = flatten_all_calls(
+            <span class="kw-2">&amp;mut </span>compiled_funcs,
+            engine.run_maybe_parallel(always_trap, |info| -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>&gt; {
+                <span class="prelude-val">Ok</span>((
+                    info.symbol_name(),
+                    compiler
+                        .component_compiler()
+                        .compile_always_trap(<span class="kw-2">&amp;</span>types[info.canonical_abi])<span class="question-mark">?</span>,
+                ))
+            })<span class="question-mark">?</span>,
+        );
 
         <span class="comment">// Compile all &quot;lowerings&quot; which are adapters that go from core wasm
         // into the host which will process the canonical ABI.
@@ -798,134 +793,60 @@
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
             })
             .collect();
-        <span class="kw">let </span>lowerings = engine.run_maybe_parallel(lowerings, |lowering| {
-            compiler
-                .component_compiler()
-                .compile_lowered_trampoline(<span class="kw-2">&amp;</span>component, lowering, <span class="kw-2">&amp;</span>types)
-        })<span class="question-mark">?</span>;
-
-        <span class="comment">// Collect the results of all of the function-based compilations above
-        // into one large list of functions to get appended into the text
-        // section of the final module.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>funcs = Vec::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>module_func_start_index = Vec::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>func_index_to_module_index = Vec::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>func_infos = Vec::new();
-        <span class="kw">for </span>(i, list) <span class="kw">in </span>module_funcs.into_iter().enumerate() {
-            module_func_start_index.push(func_index_to_module_index.len());
-            <span class="kw">let </span><span class="kw-2">mut </span>infos = Vec::new();
-            <span class="kw">for </span>(j, (info, func)) <span class="kw">in </span>list.into_iter().enumerate() {
-                func_index_to_module_index.push(i);
-                <span class="kw">let </span>name = <span class="macro">format!</span>(<span class="string">&quot;_wasm{i}_function{j}&quot;</span>);
-                funcs.push((name, func));
-                infos.push(info);
-            }
-            func_infos.push(infos);
-        }
-        <span class="kw">for </span>(sig, func) <span class="kw">in </span>trampolines.iter().zip(compiled_trampolines) {
-            <span class="kw">let </span>name = <span class="macro">format!</span>(<span class="string">&quot;_wasm_trampoline{}&quot;</span>, sig.as_u32());
-            funcs.push((name, func));
-        }
-        <span class="kw">let </span>ntranscoders = transcoders.len();
-        <span class="kw">for </span>(i, func) <span class="kw">in </span>transcoders.into_iter().enumerate() {
-            <span class="kw">let </span>name = <span class="macro">format!</span>(<span class="string">&quot;_wasm_component_transcoder{i}&quot;</span>);
-            funcs.push((name, func));
-        }
-        <span class="kw">let </span>nalways_trap = always_trap.len();
-        <span class="kw">for </span>(i, func) <span class="kw">in </span>always_trap.into_iter().enumerate() {
-            <span class="kw">let </span>name = <span class="macro">format!</span>(<span class="string">&quot;_wasm_component_always_trap{i}&quot;</span>);
-            funcs.push((name, func));
-        }
-        <span class="kw">let </span>nlowerings = lowerings.len();
-        <span class="kw">for </span>(i, func) <span class="kw">in </span>lowerings.into_iter().enumerate() {
-            <span class="kw">let </span>name = <span class="macro">format!</span>(<span class="string">&quot;_wasm_component_lowering{i}&quot;</span>);
-            funcs.push((name, func));
-        }
+        <span class="kw">let </span>lowering_indices = flatten_all_calls(
+            <span class="kw-2">&amp;mut </span>compiled_funcs,
+            engine.run_maybe_parallel(lowerings, |lowering| -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>&gt; {
+                <span class="prelude-val">Ok</span>((
+                    lowering.symbol_name(),
+                    compiler
+                        .component_compiler()
+                        .compile_lowered_trampoline(<span class="kw-2">&amp;</span>component, lowering, <span class="kw-2">&amp;</span>types)<span class="question-mark">?</span>,
+                ))
+            })<span class="question-mark">?</span>,
+        );
 
         <span class="kw">let </span><span class="kw-2">mut </span>object = compiler.object(ObjectKind::Component)<span class="question-mark">?</span>;
-        <span class="kw">let </span>locs = compiler.append_code(<span class="kw-2">&amp;mut </span>object, <span class="kw-2">&amp;</span>funcs, tunables, <span class="kw-2">&amp;</span>|i, idx| {
-            <span class="comment">// Map from the `i`th function which is requesting the relocation to
-            // the index in `modules` that the function belongs to. Using that
-            // metadata we can resolve `idx: FuncIndex` to a `DefinedFuncIndex`
-            // to the index of that module&#39;s function that&#39;s being called.
-            //
-            // Note that this will panic if `i` is a function beyond the initial
-            // set of core wasm module functions. That&#39;s intentional, however,
-            // since trampolines and otherwise should not have relocations to
-            // resolve.
-            </span><span class="kw">let </span>module_index = func_index_to_module_index[i];
-            <span class="kw">let </span>defined_index = modules[StaticModuleIndex::new(module_index)]
-                .module
-                .defined_func_index(idx)
-                .unwrap();
-            <span class="comment">// Additionally use the module index to determine where that
-            // module&#39;s list of functions started at to factor in as an offset
-            // as well.
-            </span><span class="kw">let </span>offset = module_func_start_index[module_index];
-            defined_index.index() + offset
-        })<span class="question-mark">?</span>;
+        <span class="kw">let </span>locs = compiler.append_code(
+            <span class="kw-2">&amp;mut </span>object,
+            <span class="kw-2">&amp;</span>compiled_funcs,
+            tunables,
+            <span class="kw-2">&amp;</span>|caller_index, callee_index| {
+                <span class="comment">// Find the index of the module that contains the function we are calling.
+                </span><span class="kw">let </span>module_index = indices.partition_point(|(i, <span class="kw">_</span>)| <span class="kw-2">*</span>i &lt;= caller_index) - <span class="number">1</span>;
+                indices[module_index].<span class="number">1</span>.resolve_reloc(callee_index)
+            },
+        )<span class="question-mark">?</span>;
         engine.append_compiler_info(<span class="kw-2">&amp;mut </span>object);
         engine.append_bti(<span class="kw-2">&amp;mut </span>object);
-
-        <span class="comment">// Disassemble the result of the appending to the text section, where
-        // each function is in the module, into respective maps.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>locs = locs.into_iter().map(|(_sym, loc)| loc);
-        <span class="kw">let </span>funcs = func_infos
-            .into_iter()
-            .map(|infos| {
-                infos
-                    .into_iter()
-                    .zip(<span class="kw-2">&amp;mut </span>locs)
-                    .collect::&lt;PrimaryMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;()
-            })
-            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>signature_to_trampoline = trampolines
-            .iter()
-            .cloned()
-            .zip(<span class="kw-2">&amp;mut </span>locs)
-            .collect::&lt;HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>transcoders = locs
-            .by_ref()
-            .take(ntranscoders)
-            .collect::&lt;PrimaryMap&lt;RuntimeTranscoderIndex, <span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>always_trap = locs
-            .by_ref()
-            .take(nalways_trap)
-            .collect::&lt;PrimaryMap&lt;RuntimeAlwaysTrapIndex, <span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>lowerings = locs
-            .by_ref()
-            .take(nlowerings)
-            .collect::&lt;PrimaryMap&lt;LoweredIndex, <span class="kw">_</span>&gt;&gt;();
-        <span class="macro">assert!</span>(locs.next().is_none());
 
         <span class="comment">// Convert all `ModuleTranslation` instances into `CompiledModuleInfo`
         // through an `ObjectBuilder` here. This is then used to create the
         // final `mmap` which is the final compilation artifact.
         </span><span class="kw">let </span><span class="kw-2">mut </span>builder = wasmtime_jit::ObjectBuilder::new(object, tunables);
         <span class="kw">let </span><span class="kw-2">mut </span>static_modules = PrimaryMap::new();
-        <span class="kw">for </span>((<span class="kw">_</span>, module), funcs) <span class="kw">in </span>modules.into_iter().zip(funcs) {
-            <span class="comment">// Build the list of trampolines for this module from its set of
-            // exported signatures, which is the list of expected trampolines,
-            // from the set of trampolines that were compiled for everything
-            // within this component.
-            </span><span class="kw">let </span>trampolines = module
-                .exported_signatures
-                .iter()
-                .map(|sig| (<span class="kw-2">*</span>sig, signature_to_trampoline[sig]))
-                .collect();
-            <span class="kw">let </span>info = builder.append(module, funcs, trampolines)<span class="question-mark">?</span>;
+        <span class="kw">for </span>(<span class="kw">_</span>, module_indices) <span class="kw">in </span>indices {
+            <span class="kw">let </span>info = module_indices.append_to_object(
+                <span class="kw-2">&amp;</span>locs,
+                <span class="kw-2">&amp;</span>wasm_to_native_trampoline_indices,
+                <span class="kw-2">&amp;mut </span>builder,
+            )<span class="question-mark">?</span>;
             static_modules.push(info);
         }
 
         <span class="kw">let </span>info = CompiledComponentInfo {
-            always_trap,
             component,
-            lowerings,
-            trampolines: trampolines
-                .difference(<span class="kw-2">&amp;</span>module_trampolines)
-                .map(|i| (<span class="kw-2">*</span>i, signature_to_trampoline[i]))
+            always_trap: always_trap_indices
+                .into_iter()
+                .map(|x| x.map(|i| locs[i].<span class="number">1</span>))
                 .collect(),
-            transcoders,
+            lowerings: lowering_indices
+                .into_iter()
+                .map(|x| x.map(|i| locs[i].<span class="number">1</span>))
+                .collect(),
+            transcoders: transcoder_indices
+                .into_iter()
+                .map(|x| x.map(|i| locs[i].<span class="number">1</span>))
+                .collect(),
         };
         <span class="kw">let </span>artifacts = ComponentArtifacts {
             info,
@@ -959,20 +880,8 @@
         <span class="comment">// Create a signature registration with the `Engine` for all trampolines
         // and core wasm types found within this component, both for the
         // component and for all included core wasm modules.
-        </span><span class="kw">let </span>signatures = SignatureCollection::new_for_module(
-            engine.signatures(),
-            types.module_types(),
-            static_modules
-                .iter()
-                .flat_map(|(<span class="kw">_</span>, m)| m.trampolines.iter().copied())
-                .chain(info.trampolines.iter().copied())
-                .map(|(sig, loc)| {
-                    <span class="kw">let </span>trampoline = code_memory.text()[loc.start <span class="kw">as </span>usize..].as_ptr();
-                    (sig, <span class="kw">unsafe </span>{
-                        mem::transmute::&lt;<span class="kw-2">*const </span>u8, VMTrampoline&gt;(trampoline)
-                    })
-                }),
-        );
+        </span><span class="kw">let </span>signatures =
+            SignatureCollection::new_for_module(engine.signatures(), types.module_types());
 
         <span class="comment">// Assemble the `CodeObject` artifact which is shared by all core wasm
         // modules as well as the final component.
@@ -1021,19 +930,55 @@
         <span class="self">self</span>.inner.code.code_memory().text()
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>lowering_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>, index: LoweredIndex) -&gt; NonNull&lt;VMFunctionBody&gt; {
-        <span class="kw">let </span>info = <span class="kw-2">&amp;</span><span class="self">self</span>.inner.info.lowerings[index];
-        <span class="self">self</span>.func(info)
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>lowering_ptrs(<span class="kw-2">&amp;</span><span class="self">self</span>, index: LoweredIndex) -&gt; AllCallFuncPointers {
+        <span class="kw">let </span>AllCallFunc {
+            wasm_call,
+            array_call,
+            native_call,
+        } = <span class="kw-2">&amp;</span><span class="self">self</span>.inner.info.lowerings[index];
+        AllCallFuncPointers {
+            wasm_call: <span class="self">self</span>.func(wasm_call).cast(),
+            array_call: <span class="kw">unsafe </span>{
+                mem::transmute::&lt;NonNull&lt;VMFunctionBody&gt;, VMArrayCallFunction&gt;(
+                    <span class="self">self</span>.func(array_call),
+                )
+            },
+            native_call: <span class="self">self</span>.func(native_call).cast(),
+        }
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>always_trap_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>, index: RuntimeAlwaysTrapIndex) -&gt; NonNull&lt;VMFunctionBody&gt; {
-        <span class="kw">let </span>loc = <span class="kw-2">&amp;</span><span class="self">self</span>.inner.info.always_trap[index];
-        <span class="self">self</span>.func(loc)
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>always_trap_ptrs(<span class="kw-2">&amp;</span><span class="self">self</span>, index: RuntimeAlwaysTrapIndex) -&gt; AllCallFuncPointers {
+        <span class="kw">let </span>AllCallFunc {
+            wasm_call,
+            array_call,
+            native_call,
+        } = <span class="kw-2">&amp;</span><span class="self">self</span>.inner.info.always_trap[index];
+        AllCallFuncPointers {
+            wasm_call: <span class="self">self</span>.func(wasm_call).cast(),
+            array_call: <span class="kw">unsafe </span>{
+                mem::transmute::&lt;NonNull&lt;VMFunctionBody&gt;, VMArrayCallFunction&gt;(
+                    <span class="self">self</span>.func(array_call),
+                )
+            },
+            native_call: <span class="self">self</span>.func(native_call).cast(),
+        }
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>transcoder_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>, index: RuntimeTranscoderIndex) -&gt; NonNull&lt;VMFunctionBody&gt; {
-        <span class="kw">let </span>info = <span class="kw-2">&amp;</span><span class="self">self</span>.inner.info.transcoders[index];
-        <span class="self">self</span>.func(info)
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>transcoder_ptrs(<span class="kw-2">&amp;</span><span class="self">self</span>, index: RuntimeTranscoderIndex) -&gt; AllCallFuncPointers {
+        <span class="kw">let </span>AllCallFunc {
+            wasm_call,
+            array_call,
+            native_call,
+        } = <span class="kw-2">&amp;</span><span class="self">self</span>.inner.info.transcoders[index];
+        AllCallFuncPointers {
+            wasm_call: <span class="self">self</span>.func(wasm_call).cast(),
+            array_call: <span class="kw">unsafe </span>{
+                mem::transmute::&lt;NonNull&lt;VMFunctionBody&gt;, VMArrayCallFunction&gt;(
+                    <span class="self">self</span>.func(array_call),
+                )
+            },
+            native_call: <span class="self">self</span>.func(native_call).cast(),
+        }
     }
 
     <span class="kw">fn </span>func(<span class="kw-2">&amp;</span><span class="self">self</span>, loc: <span class="kw-2">&amp;</span>FunctionLoc) -&gt; NonNull&lt;VMFunctionBody&gt; {
@@ -1057,6 +1002,39 @@
     </span><span class="kw">pub fn </span>serialize(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.code_object().code_memory().mmap().to_vec())
     }
+}
+
+<span class="doccomment">/// Flatten a list of grouped `AllCallFunc&lt;Box&lt;dyn Any + Send&gt;&gt;` into the flat
+/// list of all compiled functions.
+</span><span class="kw">fn </span>flatten_all_calls(
+    compiled_funcs: <span class="kw-2">&amp;mut </span>Vec&lt;(String, Box&lt;<span class="kw">dyn </span>Any + Send&gt;)&gt;,
+    all_calls: Vec&lt;(String, AllCallFunc&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;&gt;)&gt;,
+) -&gt; Vec&lt;AllCallFunc&lt;usize&gt;&gt; {
+    compiled_funcs.reserve(<span class="number">3 </span>* all_calls.len());
+
+    all_calls
+        .into_iter()
+        .map(
+            |(
+                prefix,
+                AllCallFunc {
+                    wasm_call,
+                    array_call,
+                    native_call,
+                },
+            )| {
+                <span class="kw">let </span>i = compiled_funcs.len();
+                compiled_funcs.push((<span class="macro">format!</span>(<span class="string">&quot;{prefix}_wasm_call&quot;</span>), wasm_call));
+                compiled_funcs.push((<span class="macro">format!</span>(<span class="string">&quot;{prefix}_array_call&quot;</span>), array_call));
+                compiled_funcs.push((<span class="macro">format!</span>(<span class="string">&quot;{prefix}_native_call&quot;</span>), native_call));
+                AllCallFunc {
+                    wasm_call: i + <span class="number">0</span>,
+                    array_call: i + <span class="number">1</span>,
+                    native_call: i + <span class="number">2</span>,
+                }
+            },
+        )
+        .collect()
 }
 </code></pre></div>
 </section></main></body></html>

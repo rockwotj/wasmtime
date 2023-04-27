@@ -342,7 +342,7 @@ var searchData=
   ['wasmtime_5fframe_5ffunc_5fname_339',['wasmtime_frame_func_name',['../trap_8h.html#aa04796738cbeaf73e9ab19c4e3b98180',1,'trap.h']]],
   ['wasmtime_5fframe_5fmodule_5fname_340',['wasmtime_frame_module_name',['../trap_8h.html#a619bc68f00680f408826c429bfb26aba',1,'trap.h']]],
   ['wasmtime_5ffunc_5fcall_341',['wasmtime_func_call',['../func_8h.html#a40e120dae88e66151e24e55194dc8dba',1,'func.h']]],
-  ['wasmtime_5ffunc_5fcall_5funchecked_342',['wasmtime_func_call_unchecked',['../func_8h.html#a3b54596199641a8647a7cd89f322966f',1,'func.h']]],
+  ['wasmtime_5ffunc_5fcall_5funchecked_342',['wasmtime_func_call_unchecked',['../func_8h.html#a5345b00edd3fd29a0b57ed1305c60ea1',1,'func.h']]],
   ['wasmtime_5ffunc_5ffrom_5fraw_343',['wasmtime_func_from_raw',['../func_8h.html#a5934b1cb99ac0e3e601be386cb566527',1,'func.h']]],
   ['wasmtime_5ffunc_5fnew_344',['wasmtime_func_new',['../func_8h.html#a7b9dd547669d807c226857f2613c8ff5',1,'func.h']]],
   ['wasmtime_5ffunc_5fnew_5funchecked_345',['wasmtime_func_new_unchecked',['../func_8h.html#ae4de5e8a5fe28d952339fc33396527a9',1,'func.h']]],

@@ -654,6 +654,47 @@
 <a href="#654" id="654">654</a>
 <a href="#655" id="655">655</a>
 <a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
+<a href="#670" id="670">670</a>
+<a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
+<a href="#673" id="673">673</a>
+<a href="#674" id="674">674</a>
+<a href="#675" id="675">675</a>
+<a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
+<a href="#678" id="678">678</a>
+<a href="#679" id="679">679</a>
+<a href="#680" id="680">680</a>
+<a href="#681" id="681">681</a>
+<a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
+<a href="#686" id="686">686</a>
+<a href="#687" id="687">687</a>
+<a href="#688" id="688">688</a>
+<a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
+<a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Runtime support for the component model in Wasmtime
 //!
 //! Currently this runtime support includes a `VMComponentContext` which is
@@ -663,8 +704,8 @@
 //! cranelift-compiled adapters, will use this `VMComponentContext` as well.
 
 </span><span class="kw">use crate</span>::{
-    Store, VMCallerCheckedFuncRef, VMFunctionBody, VMGlobalDefinition, VMMemoryDefinition,
-    VMOpaqueContext, VMSharedSignatureIndex, ValRaw,
+    Store, VMArrayCallFunction, VMCallerCheckedFuncRef, VMGlobalDefinition, VMMemoryDefinition,
+    VMNativeCallFunction, VMOpaqueContext, VMSharedSignatureIndex, VMWasmCallFunction, ValRaw,
 };
 <span class="kw">use </span>memoffset::offset_of;
 <span class="kw">use </span>std::alloc::{<span class="self">self</span>, Layout};
@@ -924,7 +965,10 @@
 
     <span class="kw">unsafe fn </span>anyfunc(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u32) -&gt; NonNull&lt;VMCallerCheckedFuncRef&gt; {
         <span class="kw">let </span>ret = <span class="self">self</span>.vmctx_plus_offset::&lt;VMCallerCheckedFuncRef&gt;(offset);
-        <span class="macro">debug_assert!</span>((<span class="kw-2">*</span>ret).func_ptr.as_ptr() <span class="kw">as </span>usize != INVALID_PTR);
+        <span class="macro">debug_assert!</span>(
+            mem::transmute::&lt;<span class="prelude-ty">Option</span>&lt;NonNull&lt;VMWasmCallFunction&gt;&gt;, usize&gt;((<span class="kw-2">*</span>ret).wasm_call)
+                != INVALID_PTR
+        );
         <span class="macro">debug_assert!</span>((<span class="kw-2">*</span>ret).vmctx <span class="kw">as </span>usize != INVALID_PTR);
         NonNull::new(ret).unwrap()
     }
@@ -977,18 +1021,18 @@
     /// * `idx` - the index that&#39;s being configured
     /// * `lowering` - the host-related closure information to get invoked when
     ///   the lowering is called.
-    /// * `anyfunc_func_ptr` - the cranelift-compiled trampoline which will
-    ///   read the `VMComponentContext` and invoke `lowering` provided. This
-    ///   function pointer will be passed to wasm if wasm needs to instantiate
-    ///   something.
-    /// * `anyfunc_type_index` - the signature index for the core wasm type
+    /// * `{wasm,native,array}_call` - the cranelift-compiled trampolines which will
+    ///   read the `VMComponentContext` and invoke `lowering` provided.
+    /// * `type_index` - the signature index for the core wasm type
     ///   registered within the engine already.
     </span><span class="kw">pub fn </span>set_lowering(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         idx: LoweredIndex,
         lowering: VMLowering,
-        anyfunc_func_ptr: NonNull&lt;VMFunctionBody&gt;,
-        anyfunc_type_index: VMSharedSignatureIndex,
+        wasm_call: NonNull&lt;VMWasmCallFunction&gt;,
+        native_call: NonNull&lt;VMNativeCallFunction&gt;,
+        array_call: VMArrayCallFunction,
+        type_index: VMSharedSignatureIndex,
     ) {
         <span class="kw">unsafe </span>{
             <span class="macro">debug_assert!</span>(
@@ -1000,8 +1044,10 @@
             <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets.lowering(idx)) = lowering;
             <span class="self">self</span>.set_anyfunc(
                 <span class="self">self</span>.offsets.lowering_anyfunc(idx),
-                anyfunc_func_ptr,
-                anyfunc_type_index,
+                wasm_call,
+                native_call,
+                array_call,
+                type_index,
             );
         }
     }
@@ -1010,34 +1056,58 @@
     </span><span class="kw">pub fn </span>set_always_trap(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         idx: RuntimeAlwaysTrapIndex,
-        func_ptr: NonNull&lt;VMFunctionBody&gt;,
+        wasm_call: NonNull&lt;VMWasmCallFunction&gt;,
+        native_call: NonNull&lt;VMNativeCallFunction&gt;,
+        array_call: VMArrayCallFunction,
         type_index: VMSharedSignatureIndex,
     ) {
-        <span class="kw">unsafe </span>{ <span class="self">self</span>.set_anyfunc(<span class="self">self</span>.offsets.always_trap_anyfunc(idx), func_ptr, type_index) }
+        <span class="kw">unsafe </span>{
+            <span class="self">self</span>.set_anyfunc(
+                <span class="self">self</span>.offsets.always_trap_anyfunc(idx),
+                wasm_call,
+                native_call,
+                array_call,
+                type_index,
+            );
+        }
     }
 
     <span class="doccomment">/// Same as `set_lowering` but for the transcoder functions.
     </span><span class="kw">pub fn </span>set_transcoder(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         idx: RuntimeTranscoderIndex,
-        func_ptr: NonNull&lt;VMFunctionBody&gt;,
+        wasm_call: NonNull&lt;VMWasmCallFunction&gt;,
+        native_call: NonNull&lt;VMNativeCallFunction&gt;,
+        array_call: VMArrayCallFunction,
         type_index: VMSharedSignatureIndex,
     ) {
-        <span class="kw">unsafe </span>{ <span class="self">self</span>.set_anyfunc(<span class="self">self</span>.offsets.transcoder_anyfunc(idx), func_ptr, type_index) }
+        <span class="kw">unsafe </span>{
+            <span class="self">self</span>.set_anyfunc(
+                <span class="self">self</span>.offsets.transcoder_anyfunc(idx),
+                wasm_call,
+                native_call,
+                array_call,
+                type_index,
+            );
+        }
     }
 
     <span class="kw">unsafe fn </span>set_anyfunc(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         offset: u32,
-        func_ptr: NonNull&lt;VMFunctionBody&gt;,
+        wasm_call: NonNull&lt;VMWasmCallFunction&gt;,
+        native_call: NonNull&lt;VMNativeCallFunction&gt;,
+        array_call: VMArrayCallFunction,
         type_index: VMSharedSignatureIndex,
     ) {
         <span class="macro">debug_assert!</span>(<span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset::&lt;usize&gt;(offset) == INVALID_PTR);
-        <span class="kw">let </span>vmctx = <span class="self">self</span>.vmctx();
+        <span class="kw">let </span>vmctx = VMOpaqueContext::from_vmcomponent(<span class="self">self</span>.vmctx());
         <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(offset) = VMCallerCheckedFuncRef {
-            func_ptr,
+            wasm_call: <span class="prelude-val">Some</span>(wasm_call),
+            native_call,
+            array_call,
             type_index,
-            vmctx: VMOpaqueContext::from_vmcomponent(vmctx),
+            vmctx,
         };
     }
 
@@ -1185,12 +1255,20 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         idx: LoweredIndex,
         lowering: VMLowering,
-        anyfunc_func_ptr: NonNull&lt;VMFunctionBody&gt;,
-        anyfunc_type_index: VMSharedSignatureIndex,
+        wasm_call: NonNull&lt;VMWasmCallFunction&gt;,
+        native_call: NonNull&lt;VMNativeCallFunction&gt;,
+        array_call: VMArrayCallFunction,
+        type_index: VMSharedSignatureIndex,
     ) {
         <span class="kw">unsafe </span>{
-            <span class="self">self</span>.instance_mut()
-                .set_lowering(idx, lowering, anyfunc_func_ptr, anyfunc_type_index)
+            <span class="self">self</span>.instance_mut().set_lowering(
+                idx,
+                lowering,
+                wasm_call,
+                native_call,
+                array_call,
+                type_index,
+            )
         }
     }
 
@@ -1198,12 +1276,14 @@
     </span><span class="kw">pub fn </span>set_always_trap(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         idx: RuntimeAlwaysTrapIndex,
-        func_ptr: NonNull&lt;VMFunctionBody&gt;,
+        wasm_call: NonNull&lt;VMWasmCallFunction&gt;,
+        native_call: NonNull&lt;VMNativeCallFunction&gt;,
+        array_call: VMArrayCallFunction,
         type_index: VMSharedSignatureIndex,
     ) {
         <span class="kw">unsafe </span>{
             <span class="self">self</span>.instance_mut()
-                .set_always_trap(idx, func_ptr, type_index)
+                .set_always_trap(idx, wasm_call, native_call, array_call, type_index)
         }
     }
 
@@ -1211,12 +1291,14 @@
     </span><span class="kw">pub fn </span>set_transcoder(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         idx: RuntimeTranscoderIndex,
-        func_ptr: NonNull&lt;VMFunctionBody&gt;,
+        wasm_call: NonNull&lt;VMWasmCallFunction&gt;,
+        native_call: NonNull&lt;VMNativeCallFunction&gt;,
+        array_call: VMArrayCallFunction,
         type_index: VMSharedSignatureIndex,
     ) {
         <span class="kw">unsafe </span>{
             <span class="self">self</span>.instance_mut()
-                .set_transcoder(idx, func_ptr, type_index)
+                .set_transcoder(idx, wasm_call, native_call, array_call, type_index)
         }
     }
 }

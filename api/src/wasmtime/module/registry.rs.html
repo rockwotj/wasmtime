@@ -302,6 +302,22 @@
 <a href="#302" id="302">302</a>
 <a href="#303" id="303">303</a>
 <a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a registry of modules for a store.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::code::CodeObject;
@@ -312,10 +328,11 @@
 <span class="kw">use </span>std::collections::btree_map::Entry;
 <span class="kw">use </span>std::{
     collections::BTreeMap,
+    ptr::NonNull,
     sync::{Arc, RwLock},
 };
 <span class="kw">use </span>wasmtime_jit::CodeMemory;
-<span class="kw">use </span>wasmtime_runtime::{ModuleInfo, VMCallerCheckedFuncRef, VMTrampoline};
+<span class="kw">use </span>wasmtime_runtime::{ModuleInfo, VMSharedSignatureIndex, VMWasmCallFunction};
 
 <span class="doccomment">/// Used for registering modules with a store.
 ///
@@ -428,12 +445,6 @@
         <span class="macro">assert!</span>(prev.is_none());
     }
 
-    <span class="doccomment">/// Looks up a trampoline from an anyfunc.
-    </span><span class="kw">pub fn </span>lookup_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, anyfunc: <span class="kw-2">&amp;</span>VMCallerCheckedFuncRef) -&gt; <span class="prelude-ty">Option</span>&lt;VMTrampoline&gt; {
-        <span class="kw">let </span>(code, _offset) = <span class="self">self</span>.code(anyfunc.func_ptr.as_ptr() <span class="kw">as </span>usize)<span class="question-mark">?</span>;
-        code.code.signatures().trampoline(anyfunc.type_index)
-    }
-
     <span class="doccomment">/// Fetches trap information about a program counter in a backtrace.
     </span><span class="kw">pub fn </span>lookup_trap_code(<span class="kw-2">&amp;</span><span class="self">self</span>, pc: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Trap&gt; {
         <span class="kw">let </span>(code, offset) = <span class="self">self</span>.code(pc)<span class="question-mark">?</span>;
@@ -453,6 +464,27 @@
         <span class="kw">let </span>info = FrameInfo::new(module, offset)<span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>((info, module))
     }
+
+    <span class="kw">pub fn </span>wasm_to_native_trampoline(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        sig: VMSharedSignatureIndex,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;NonNull&lt;VMWasmCallFunction&gt;&gt; {
+        <span class="comment">// TODO: We are doing a linear search over each module. This is fine for
+        // now because we typically have very few modules per store (almost
+        // always one, in fact). If this linear search ever becomes a
+        // bottleneck, we could avoid it by incrementally and lazily building a
+        // `VMSharedSignatureIndex` to `SignatureIndex` map.
+        //
+        // See also the comment in `ModuleInner::wasm_to_native_trampoline`.
+        </span><span class="kw">for </span>(<span class="kw">_</span>, code) <span class="kw">in </span><span class="self">self</span>.loaded_code.values() {
+            <span class="kw">for </span>module <span class="kw">in </span>code.modules.values() {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(trampoline) = module.runtime_info().wasm_to_native_trampoline(sig) {
+                    <span class="kw">return </span><span class="prelude-val">Some</span>(trampoline);
+                }
+            }
+        }
+        <span class="prelude-val">None
+    </span>}
 }
 
 <span class="kw">impl </span>LoadedCode {

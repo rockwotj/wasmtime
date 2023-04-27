@@ -196,6 +196,35 @@
 <a href="#196" id="196">196</a>
 <a href="#197" id="197">197</a>
 <a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Support for compiling with Cranelift.
 //!
 //! This crate provides an implementation of the `wasmtime_environ::Compiler`
@@ -204,12 +233,10 @@
 </span><span class="kw">use </span>cranelift_codegen::ir;
 <span class="kw">use </span>cranelift_codegen::isa::{unwind::UnwindInfo, CallConv, TargetIsa};
 <span class="kw">use </span>cranelift_entity::PrimaryMap;
-<span class="kw">use </span>cranelift_wasm::{DefinedFuncIndex, FuncIndex, WasmFuncType, WasmType};
+<span class="kw">use </span>cranelift_wasm::{DefinedFuncIndex, WasmFuncType, WasmType};
 <span class="kw">use </span>target_lexicon::{Architecture, CallingConvention};
 <span class="kw">use </span>wasmtime_cranelift_shared::Relocation;
-<span class="kw">use </span>wasmtime_environ::{
-    FilePos, InstructionAddressMap, ModuleTranslation, ModuleTypes, TrapInformation,
-};
+<span class="kw">use </span>wasmtime_environ::{FilePos, InstructionAddressMap, TrapInformation};
 
 <span class="kw">pub use </span>builder::builder;
 
@@ -219,6 +246,9 @@
 <span class="kw">mod </span>func_environ;
 
 <span class="kw">type </span>CompiledFunctions&lt;<span class="lifetime">&#39;a</span>&gt; = PrimaryMap&lt;DefinedFuncIndex, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>CompiledFunction&gt;;
+
+<span class="doccomment">/// Trap code used for debug assertions we emit in our JIT code.
+</span><span class="kw">const </span>DEBUG_ASSERT_TRAP_CODE: u16 = u16::MAX;
 
 <span class="doccomment">/// Compiled function: machine code body, jump table offsets, and unwind information.
 </span><span class="attr">#[derive(Default)]
@@ -320,66 +350,94 @@
     }
 }
 
-<span class="doccomment">/// Returns a cranelift signature suitable to indirectly call the wasm signature
-/// specified by `wasm`.
+<span class="doccomment">/// Get the Cranelift signature with the native calling convention for the given
+/// Wasm function type.
 ///
-/// This will implicitly use the default calling convention for `isa` since to
-/// indirectly call a wasm function it must be possibly exported somehow (e.g.
-/// this assumes the function target to call doesn&#39;t use the &quot;fast&quot; calling
-/// convention).
-</span><span class="kw">fn </span>indirect_signature(isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa, wasm: <span class="kw-2">&amp;</span>WasmFuncType) -&gt; ir::Signature {
+/// This parameters will start with the callee and caller VM contexts, followed
+/// by the translation of each of the Wasm parameter types to native types. The
+/// results are the Wasm result types translated to native types.
+///
+/// The signature uses the wasmtime variant of the target&#39;s default calling
+/// convention. The only difference from the default calling convention is how
+/// multiple results are handled.
+///
+/// When there is only a single result, or zero results, these signatures are
+/// suitable for calling from the host via
+///
+/// ```ignore
+/// unsafe extern &quot;C&quot; fn(
+///     callee_vmctx: *mut VMOpaqueContext,
+///     caller_vmctx: *mut VMOpaqueContext,
+///     // ...wasm parameter types...
+/// ) -&gt; // ...wasm result type...
+/// ```
+///
+/// When there are more than one results, these signatures are suitable for
+/// calling from the host via
+///
+/// ```ignore
+/// unsafe extern &quot;C&quot; fn(
+///     callee_vmctx: *mut VMOpaqueContext,
+///     caller_vmctx: *mut VMOpaqueContext,
+///     // ...wasm parameter types...
+///     retptr: *mut (),
+/// ) -&gt; // ...wasm result type 0...
+/// ```
+///
+/// where the first result is returned directly and the rest via the return
+/// pointer.
+</span><span class="kw">fn </span>native_call_signature(isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa, wasm: <span class="kw-2">&amp;</span>WasmFuncType) -&gt; ir::Signature {
     <span class="kw">let </span><span class="kw-2">mut </span>sig = blank_sig(isa, wasmtime_call_conv(isa));
     push_types(isa, <span class="kw-2">&amp;mut </span>sig, wasm);
-    <span class="kw">return </span>sig;
+    sig
 }
 
-<span class="doccomment">/// Returns the cranelift function signature of the function specified.
+<span class="doccomment">/// Get the Cranelift signature for all array-call functions, that is:
 ///
-/// Note that this will determine the calling convention for the function, and
-/// namely includes an optimization where functions never exported from a module
-/// use a custom theoretically faster calling convention instead of the default.
-</span><span class="kw">fn </span>func_signature(
-    isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa,
-    translation: <span class="kw-2">&amp;</span>ModuleTranslation,
-    types: <span class="kw-2">&amp;</span>ModuleTypes,
-    index: FuncIndex,
-) -&gt; ir::Signature {
-    <span class="kw">let </span>func = <span class="kw-2">&amp;</span>translation.module.functions[index];
-    <span class="kw">let </span>call_conv = <span class="kw">match </span>translation.module.defined_func_index(index) {
-        <span class="comment">// If this is a defined function in the module and it doesn&#39;t escape
-        // then we can optimize this function to use the fastest calling
-        // convention since it&#39;s purely an internal implementation detail of
-        // the module itself.
-        </span><span class="prelude-val">Some</span>(_idx) <span class="kw">if </span>!func.is_escaping() =&gt; {
-            <span class="kw">let </span>on_apple_aarch64 = isa
-                .triple()
-                .default_calling_convention()
-                .unwrap_or(CallingConvention::SystemV)
-                == CallingConvention::AppleAarch64;
+/// ```ignore
+/// unsafe extern &quot;C&quot; fn(
+///     callee_vmctx: *mut VMOpaqueContext,
+///     caller_vmctx: *mut VMOpaqueContext,
+///     values_ptr: *mut ValRaw,
+///     values_len: usize,
+/// )
+/// ```
+///
+/// This signature uses the target&#39;s default calling convention.
+///
+/// Note that regardless of the Wasm function type, the array-call calling
+/// convention always uses that same signature.
+</span><span class="kw">fn </span>array_call_signature(isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa) -&gt; ir::Signature {
+    <span class="kw">let </span><span class="kw-2">mut </span>sig = blank_sig(isa, CallConv::triple_default(isa.triple()));
+    <span class="comment">// The array-call signature has an added parameter for the `values_vec`
+    // input/output buffer in addition to the size of the buffer, in units
+    // of `ValRaw`.
+    </span>sig.params.push(ir::AbiParam::new(isa.pointer_type()));
+    sig.params.push(ir::AbiParam::new(isa.pointer_type()));
+    sig
+}
 
-            <span class="kw">if </span>on_apple_aarch64 {
-                <span class="comment">// FIXME: We need an Apple-specific calling convention, so that
-                // Cranelift&#39;s ABI implementation generates unwinding directives
-                // about pointer authentication usage, so we can&#39;t just use
-                // `CallConv::Fast`.
-                </span>CallConv::WasmtimeAppleAarch64
-            } <span class="kw">else if </span>isa.triple().architecture == Architecture::S390x {
-                <span class="comment">// On S390x we need a Wasmtime calling convention to ensure
-                // we&#39;re using little-endian vector lane order.
-                </span>wasmtime_call_conv(isa)
-            } <span class="kw">else </span>{
-                CallConv::Fast
-            }
-        }
-
-        <span class="comment">// ... otherwise if it&#39;s an imported function or if it&#39;s a possibly
-        // exported function then we use the default ABI wasmtime would
-        // otherwise select.
-        </span><span class="kw">_ </span>=&gt; wasmtime_call_conv(isa),
+<span class="doccomment">/// Get the internal Wasm calling convention signature for the given type.
+</span><span class="kw">fn </span>wasm_call_signature(isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa, wasm_func_ty: <span class="kw-2">&amp;</span>WasmFuncType) -&gt; ir::Signature {
+    <span class="kw">let </span>call_conv = <span class="kw">if </span>isa.triple().default_calling_convention().ok()
+        == <span class="prelude-val">Some</span>(CallingConvention::AppleAarch64)
+    {
+        <span class="comment">// FIXME: We need an Apple-specific calling convention, so that
+        // Cranelift&#39;s ABI implementation generates unwinding directives
+        // about pointer authentication usage, so we can&#39;t just use
+        // `CallConv::Fast`.
+        </span>CallConv::WasmtimeAppleAarch64
+    } <span class="kw">else if </span>isa.triple().architecture == Architecture::S390x {
+        <span class="comment">// On S390x we need a Wasmtime calling convention to ensure
+        // we&#39;re using little-endian vector lane order.
+        </span>wasmtime_call_conv(isa)
+    } <span class="kw">else </span>{
+        CallConv::Fast
     };
+
     <span class="kw">let </span><span class="kw-2">mut </span>sig = blank_sig(isa, call_conv);
-    push_types(isa, <span class="kw-2">&amp;mut </span>sig, <span class="kw-2">&amp;</span>types[func.signature]);
-    <span class="kw">return </span>sig;
+    push_types(isa, <span class="kw-2">&amp;mut </span>sig, wasm_func_ty);
+    sig
 }
 
 <span class="doccomment">/// Returns the reference type to use for the provided wasm type.

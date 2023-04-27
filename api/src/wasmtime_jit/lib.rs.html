@@ -36,6 +36,7 @@
 <a href="#36" id="36">36</a>
 <a href="#37" id="37">37</a>
 <a href="#38" id="38">38</a>
+<a href="#39" id="39">39</a>
 </pre><pre class="rust"><code><span class="doccomment">//! JIT-style runtime for WebAssembly using Cranelift.
 
 </span><span class="attr">#![deny(missing_docs, trivial_numeric_casts, unused_extern_crates)]
@@ -67,7 +68,8 @@
 
 <span class="kw">pub use </span><span class="kw">crate</span>::code_memory::CodeMemory;
 <span class="kw">pub use </span><span class="kw">crate</span>::instantiate::{
-    subslice_range, CompiledModule, CompiledModuleInfo, ObjectBuilder, SymbolizeContext,
+    subslice_range, CompiledFunctionInfo, CompiledModule, CompiledModuleInfo, ObjectBuilder,
+    SymbolizeContext,
 };
 <span class="kw">pub use </span>demangling::<span class="kw-2">*</span>;
 <span class="kw">pub use </span>profiling::<span class="kw-2">*</span>;

@@ -54,10 +54,66 @@
 <a href="#54" id="54">54</a>
 <a href="#55" id="55">55</a>
 <a href="#56" id="56">56</a>
+<a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::component::{Component, ComponentTypes, LowerImport, Transcoder};
 <span class="kw">use </span><span class="kw">crate</span>::WasmFuncType;
 <span class="kw">use </span>anyhow::Result;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>std::any::Any;
+
+<span class="doccomment">/// A triple of related functions/trampolines variants with differing calling
+/// conventions: `{wasm,array,native}_call`.
+///
+/// Generic so we can use this with either the `Box&lt;dyn Any + Send&gt;`s that
+/// implementations of the compiler trait return or with `FunctionLoc`s inside
+/// an object file, for example.
+</span><span class="attr">#[derive(Serialize, Deserialize)]
+</span><span class="kw">pub struct </span>AllCallFunc&lt;T&gt; {
+    <span class="doccomment">/// The function exposing the Wasm calling convention.
+    </span><span class="kw">pub </span>wasm_call: T,
+    <span class="doccomment">/// The function exposing the array calling convention.
+    </span><span class="kw">pub </span>array_call: T,
+    <span class="doccomment">/// The function exposing the native calling convention.
+    </span><span class="kw">pub </span>native_call: T,
+}
+
+<span class="kw">impl</span>&lt;T&gt; AllCallFunc&lt;T&gt; {
+    <span class="doccomment">/// Map an `AllCallFunc&lt;T&gt;` into an `AllCallFunc&lt;U&gt;`.
+    </span><span class="kw">pub fn </span>map&lt;U&gt;(<span class="self">self</span>, <span class="kw-2">mut </span>f: <span class="kw">impl </span>FnMut(T) -&gt; U) -&gt; AllCallFunc&lt;U&gt; {
+        AllCallFunc {
+            wasm_call: f(<span class="self">self</span>.wasm_call),
+            array_call: f(<span class="self">self</span>.array_call),
+            native_call: f(<span class="self">self</span>.native_call),
+        }
+    }
+}
 
 <span class="doccomment">/// Compilation support necessary for components.
 </span><span class="kw">pub trait </span>ComponentCompiler: Send + Sync {
@@ -83,14 +139,14 @@
         component: <span class="kw-2">&amp;</span>Component,
         lowering: <span class="kw-2">&amp;</span>LowerImport,
         types: <span class="kw-2">&amp;</span>ComponentTypes,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;&gt;;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;AllCallFunc&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;&gt;&gt;;
 
     <span class="doccomment">/// Creates a function which will always trap that has the `ty` specified.
     ///
     /// This will create a small trampoline whose only purpose is to generate a
     /// trap at runtime. This is used to implement the degenerate case of a
     /// `canon lift`&#39;d function immediately being `canon lower`&#39;d.
-    </span><span class="kw">fn </span>compile_always_trap(<span class="kw-2">&amp;</span><span class="self">self</span>, ty: <span class="kw-2">&amp;</span>WasmFuncType) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;&gt;;
+    </span><span class="kw">fn </span>compile_always_trap(<span class="kw-2">&amp;</span><span class="self">self</span>, ty: <span class="kw-2">&amp;</span>WasmFuncType) -&gt; <span class="prelude-ty">Result</span>&lt;AllCallFunc&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;&gt;&gt;;
 
     <span class="doccomment">/// Compiles a trampoline to implement string transcoding from adapter
     /// modules.
@@ -108,7 +164,7 @@
         component: <span class="kw-2">&amp;</span>Component,
         transcoder: <span class="kw-2">&amp;</span>Transcoder,
         types: <span class="kw-2">&amp;</span>ComponentTypes,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;&gt;;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;AllCallFunc&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;&gt;&gt;;
 }
 </code></pre></div>
 </section></main></body></html>

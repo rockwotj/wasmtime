@@ -265,12 +265,12 @@
 
     <span class="doccomment">/// Emit the host to wasm trampoline.
     </span><span class="kw">pub fn </span>emit_host_to_wasm(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: <span class="kw-2">&amp;</span>FuncType) {
-        <span class="comment">// The host to wasm trampoline is currently hard coded (see
-        // vmcontext.rs in the wasmtime-runtime crate, VMTrampoline).
-        // The first two parameters are VMContexts (not used at this
-        // time). The third parameter is the function pointer to call.
-        // The fourth parameter is an address to storage space for
-        // both the return value and the arguments to the function.
+        <span class="comment">// The host to wasm trampoline is currently hard coded (see vmcontext.rs
+        // in the wasmtime-runtime crate, `VMArrayCallFunction`).  The first two
+        // parameters are VMContexts (not used at this time). The third
+        // parameter is the function pointer to call.  The fourth parameter is
+        // an address to storage space for both the return value and the
+        // arguments to the function.
         </span><span class="kw">let </span>trampoline_ty = FuncType::new(
             <span class="macro">vec!</span>[ValType::I64, ValType::I64, ValType::I64, ValType::I64],
             <span class="macro">vec!</span>[],

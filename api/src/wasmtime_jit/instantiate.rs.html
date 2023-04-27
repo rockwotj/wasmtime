@@ -696,6 +696,94 @@
 <a href="#696" id="696">696</a>
 <a href="#697" id="697">697</a>
 <a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
+<a href="#717" id="717">717</a>
+<a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
+<a href="#725" id="725">725</a>
+<a href="#726" id="726">726</a>
+<a href="#727" id="727">727</a>
+<a href="#728" id="728">728</a>
+<a href="#729" id="729">729</a>
+<a href="#730" id="730">730</a>
+<a href="#731" id="731">731</a>
+<a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Define the `instantiate` function, which takes a byte array containing an
 //! encoded wasm module and returns a live wasm instance. Also, define
 //! `CompiledModule` to allow compiling and instantiating to be done as separate
@@ -718,10 +806,36 @@
     PrimaryMap, SignatureIndex, StackMapInformation, Tunables, WasmFunctionInfo,
 };
 <span class="kw">use </span>wasmtime_runtime::{
-    CompiledModuleId, CompiledModuleIdAllocator, GdbJitImageRegistration, MmapVec, VMTrampoline,
+    CompiledModuleId, CompiledModuleIdAllocator, GdbJitImageRegistration, MmapVec,
 };
 
-<span class="doccomment">/// Secondary in-memory results of compilation.
+<span class="doccomment">/// Secondary in-memory results of function compilation.
+</span><span class="attr">#[derive(Serialize, Deserialize)]
+</span><span class="kw">pub struct </span>CompiledFunctionInfo {
+    wasm_func_info: WasmFunctionInfo,
+    wasm_func_loc: FunctionLoc,
+    array_to_wasm_trampoline: <span class="prelude-ty">Option</span>&lt;FunctionLoc&gt;,
+    native_to_wasm_trampoline: <span class="prelude-ty">Option</span>&lt;FunctionLoc&gt;,
+}
+
+<span class="kw">impl </span>CompiledFunctionInfo {
+    <span class="doccomment">/// Create a new `CompiledFunctionInfo`.
+    </span><span class="kw">pub fn </span>new(
+        wasm_func_info: WasmFunctionInfo,
+        wasm_func_loc: FunctionLoc,
+        array_to_wasm_trampoline: <span class="prelude-ty">Option</span>&lt;FunctionLoc&gt;,
+        native_to_wasm_trampoline: <span class="prelude-ty">Option</span>&lt;FunctionLoc&gt;,
+    ) -&gt; CompiledFunctionInfo {
+        CompiledFunctionInfo {
+            wasm_func_info,
+            wasm_func_loc,
+            array_to_wasm_trampoline,
+            native_to_wasm_trampoline,
+        }
+    }
+}
+
+<span class="doccomment">/// Secondary in-memory results of module compilation.
 ///
 /// This opaque structure can be optionally passed back to
 /// `CompiledModule::from_artifacts` to avoid decoding extra information there.
@@ -731,14 +845,14 @@
     </span>module: Module,
 
     <span class="doccomment">/// Metadata about each compiled function.
-    </span>funcs: PrimaryMap&lt;DefinedFuncIndex, (WasmFunctionInfo, FunctionLoc)&gt;,
+    </span>funcs: PrimaryMap&lt;DefinedFuncIndex, CompiledFunctionInfo&gt;,
 
     <span class="doccomment">/// Sorted list, by function index, of names we have for this module.
     </span>func_names: Vec&lt;FunctionName&gt;,
 
-    <span class="doccomment">/// The trampolines compiled into the text section and their start/length
-    /// relative to the start of the text section.
-    </span><span class="kw">pub </span>trampolines: Vec&lt;(SignatureIndex, FunctionLoc)&gt;,
+    <span class="doccomment">/// Metadata about wasm-to-native trampolines. Used when exposing a native
+    /// callee (e.g. `Func::wrap`) to a Wasm caller. Sorted by signature index.
+    </span>wasm_to_native_trampolines: Vec&lt;(SignatureIndex, FunctionLoc)&gt;,
 
     <span class="doccomment">/// General compilation metadata.
     </span>meta: Metadata,
@@ -843,17 +957,26 @@
     /// * `funcs` - compilation metadata about functions within the translation
     ///   as well as where the functions are located in the text section.
     ///
-    /// * `trampolines` - list of all trampolines necessary for this module
-    ///   and where they&#39;re located in the text section.
+    /// * `array_to_wasm_trampolines` - list of all trampolines necessary for
+    ///   array callers (e.g. `Func::new`) calling Wasm callees. One for each
+    ///   defined function that escapes. Must be sorted by `DefinedFuncIndex`.
     ///
-    /// Returns the `CompiledModuleInfo` corresopnding to this core wasm module
+    /// * `native_to_wasm_trampolines` - list of all trampolines necessary for
+    ///   native callers (e.g. `Func::wrap`) calling Wasm callees. One for each
+    ///   defined function that escapes. Must be sorted by `DefinedFuncIndex`.
+    ///
+    /// * `wasm_to_native_trampolines` - list of all trampolines necessary for
+    ///   Wasm callers calling native callees (e.g. `Func::wrap`). One for each
+    ///   function signature in the module. Must be sorted by `SignatureIndex`.
+    ///
+    /// Returns the `CompiledModuleInfo` corresponding to this core Wasm module
     /// as a result of this append operation. This is then serialized into the
     /// final artifact by the caller.
     </span><span class="kw">pub fn </span>append(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         translation: ModuleTranslation&lt;<span class="lifetime">&#39;_</span>&gt;,
-        funcs: PrimaryMap&lt;DefinedFuncIndex, (WasmFunctionInfo, FunctionLoc)&gt;,
-        trampolines: Vec&lt;(SignatureIndex, FunctionLoc)&gt;,
+        funcs: PrimaryMap&lt;DefinedFuncIndex, CompiledFunctionInfo&gt;,
+        wasm_to_native_trampolines: Vec&lt;(SignatureIndex, FunctionLoc)&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CompiledModuleInfo&gt; {
         <span class="kw">let </span>ModuleTranslation {
             <span class="kw-2">mut </span>module,
@@ -967,7 +1090,7 @@
         <span class="prelude-val">Ok</span>(CompiledModuleInfo {
             module,
             funcs,
-            trampolines,
+            wasm_to_native_trampolines,
             func_names,
             meta: Metadata {
                 native_debug_info_present: <span class="self">self</span>.tunables.generate_native_debuginfo,
@@ -1085,8 +1208,8 @@
 <span class="doccomment">/// A compiled wasm module, ready to be instantiated.
 </span><span class="kw">pub struct </span>CompiledModule {
     module: Arc&lt;Module&gt;,
-    funcs: PrimaryMap&lt;DefinedFuncIndex, (WasmFunctionInfo, FunctionLoc)&gt;,
-    trampolines: Vec&lt;(SignatureIndex, FunctionLoc)&gt;,
+    funcs: PrimaryMap&lt;DefinedFuncIndex, CompiledFunctionInfo&gt;,
+    wasm_to_native_trampolines: Vec&lt;(SignatureIndex, FunctionLoc)&gt;,
     meta: Metadata,
     code_memory: Arc&lt;CodeMemory&gt;,
     dbg_jit_registration: <span class="prelude-ty">Option</span>&lt;GdbJitImageRegistration&gt;,
@@ -1121,7 +1244,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>ret = <span class="self">Self </span>{
             module: Arc::new(info.module),
             funcs: info.funcs,
-            trampolines: info.trampolines,
+            wasm_to_native_trampolines: info.wasm_to_native_trampolines,
             dbg_jit_registration: <span class="prelude-val">None</span>,
             code_memory,
             meta: info.meta,
@@ -1211,23 +1334,76 @@
     <span class="doccomment">/// Returns the body of the function that `index` points to.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>finished_function(<span class="kw-2">&amp;</span><span class="self">self</span>, index: DefinedFuncIndex) -&gt; <span class="kw-2">&amp;</span>[u8] {
-        <span class="kw">let </span>(<span class="kw">_</span>, loc) = <span class="kw-2">&amp;</span><span class="self">self</span>.funcs[index];
+        <span class="kw">let </span>loc = <span class="self">self</span>.funcs[index].wasm_func_loc;
         <span class="kw-2">&amp;</span><span class="self">self</span>.text()[loc.start <span class="kw">as </span>usize..][..loc.length <span class="kw">as </span>usize]
     }
 
-    <span class="doccomment">/// Returns the per-signature trampolines for this module.
-    </span><span class="kw">pub fn </span>trampolines(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = (SignatureIndex, VMTrampoline, usize)&gt; + <span class="lifetime">&#39;_ </span>{
-        <span class="kw">let </span>text = <span class="self">self</span>.text();
-        <span class="self">self</span>.trampolines.iter().map(<span class="kw">move </span>|(signature, loc)| {
-            (
-                <span class="kw-2">*</span>signature,
-                <span class="kw">unsafe </span>{
-                    <span class="kw">let </span>ptr = <span class="kw-2">&amp;</span>text[loc.start <span class="kw">as </span>usize];
-                    std::mem::transmute::&lt;<span class="kw-2">*const </span>u8, VMTrampoline&gt;(ptr)
-                },
-                loc.length <span class="kw">as </span>usize,
-            )
-        })
+    <span class="doccomment">/// Get the array-to-Wasm trampoline for the function `index` points to.
+    ///
+    /// If the function `index` points to does not escape, then `None` is
+    /// returned.
+    ///
+    /// These trampolines are used for array callers (e.g. `Func::new`)
+    /// calling Wasm callees.
+    </span><span class="kw">pub fn </span>array_to_wasm_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, index: DefinedFuncIndex) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt; {
+        <span class="kw">let </span>loc = <span class="self">self</span>.funcs[index].array_to_wasm_trampoline<span class="question-mark">?</span>;
+        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.text()[loc.start <span class="kw">as </span>usize..][..loc.length <span class="kw">as </span>usize])
+    }
+
+    <span class="doccomment">/// Returns an iterator over all array-to-Wasm trampolines defined within
+    /// this module, providing both their index and their in-memory body.
+    </span><span class="kw">pub fn </span>array_to_wasm_trampolines(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+    ) -&gt; <span class="kw">impl </span>ExactSizeIterator&lt;Item = (DefinedFuncIndex, <span class="kw-2">&amp;</span>[u8])&gt; + <span class="lifetime">&#39;_ </span>{
+        <span class="self">self</span>.funcs
+            .keys()
+            .map(<span class="kw">move </span>|i| (i, <span class="self">self</span>.array_to_wasm_trampoline(i).unwrap()))
+    }
+
+    <span class="doccomment">/// Get the native-to-Wasm trampoline for the function `index` points to.
+    ///
+    /// If the function `index` points to does not escape, then `None` is
+    /// returned.
+    ///
+    /// These trampolines are used for native callers (e.g. `Func::wrap`)
+    /// calling Wasm callees.
+    </span><span class="kw">pub fn </span>native_to_wasm_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, index: DefinedFuncIndex) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt; {
+        <span class="kw">let </span>loc = <span class="self">self</span>.funcs[index].native_to_wasm_trampoline<span class="question-mark">?</span>;
+        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.text()[loc.start <span class="kw">as </span>usize..][..loc.length <span class="kw">as </span>usize])
+    }
+
+    <span class="doccomment">/// Returns an iterator over all native-to-Wasm trampolines defined within
+    /// this module, providing both their index and their in-memory body.
+    </span><span class="kw">pub fn </span>native_to_wasm_trampolines(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+    ) -&gt; <span class="kw">impl </span>ExactSizeIterator&lt;Item = (DefinedFuncIndex, <span class="kw-2">&amp;</span>[u8])&gt; + <span class="lifetime">&#39;_ </span>{
+        <span class="self">self</span>.funcs
+            .keys()
+            .map(<span class="kw">move </span>|i| (i, <span class="self">self</span>.native_to_wasm_trampoline(i).unwrap()))
+    }
+
+    <span class="doccomment">/// Get the Wasm-to-native trampoline for the given signature.
+    ///
+    /// These trampolines are used for filling in
+    /// `VMCallerCheckedFuncRef::wasm_call` for `Func::wrap`-style host funcrefs
+    /// that don&#39;t have access to a compiler when created.
+    </span><span class="kw">pub fn </span>wasm_to_native_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, signature: SignatureIndex) -&gt; <span class="kw-2">&amp;</span>[u8] {
+        <span class="kw">let </span>idx = <span class="self">self
+            </span>.wasm_to_native_trampolines
+            .binary_search_by_key(<span class="kw-2">&amp;</span>signature, |entry| entry.<span class="number">0</span>)
+            .expect(<span class="string">&quot;should have a Wasm-to-native trampline for all signatures&quot;</span>);
+        <span class="kw">let </span>(<span class="kw">_</span>, loc) = <span class="self">self</span>.wasm_to_native_trampolines[idx];
+        <span class="kw-2">&amp;</span><span class="self">self</span>.text()[loc.start <span class="kw">as </span>usize..][..loc.length <span class="kw">as </span>usize]
+    }
+
+    <span class="doccomment">/// Returns an iterator over all native-to-Wasm trampolines defined within
+    /// this module, providing both their index and their in-memory body.
+    </span><span class="kw">pub fn </span>wasm_to_native_trampolines(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+    ) -&gt; <span class="kw">impl </span>ExactSizeIterator&lt;Item = (SignatureIndex, <span class="kw-2">&amp;</span>[u8])&gt; + <span class="lifetime">&#39;_ </span>{
+        <span class="self">self</span>.wasm_to_native_trampolines
+            .iter()
+            .map(<span class="kw">move </span>|(i, <span class="kw">_</span>)| (<span class="kw-2">*</span>i, <span class="self">self</span>.wasm_to_native_trampoline(<span class="kw-2">*</span>i)))
     }
 
     <span class="doccomment">/// Returns the stack map information for all functions defined in this
@@ -1236,9 +1412,11 @@
     /// The iterator returned iterates over the span of the compiled function in
     /// memory with the stack maps associated with those bytes.
     </span><span class="kw">pub fn </span>stack_maps(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = (<span class="kw-2">&amp;</span>[u8], <span class="kw-2">&amp;</span>[StackMapInformation])&gt; {
-        <span class="self">self</span>.finished_functions()
-            .map(|(<span class="kw">_</span>, f)| f)
-            .zip(<span class="self">self</span>.funcs.values().map(|f| <span class="kw-2">&amp;</span>f.<span class="number">0</span>.stack_maps[..]))
+        <span class="self">self</span>.finished_functions().map(|(<span class="kw">_</span>, f)| f).zip(
+            <span class="self">self</span>.funcs
+                .values()
+                .map(|f| <span class="kw-2">&amp;</span>f.wasm_func_info.stack_maps[..]),
+        )
     }
 
     <span class="doccomment">/// Lookups a defined function by a program counter value.
@@ -1248,13 +1426,11 @@
     </span><span class="kw">pub fn </span>func_by_text_offset(<span class="kw-2">&amp;</span><span class="self">self</span>, text_offset: usize) -&gt; <span class="prelude-ty">Option</span>&lt;(DefinedFuncIndex, u32)&gt; {
         <span class="kw">let </span>text_offset = u32::try_from(text_offset).unwrap();
 
-        <span class="kw">let </span>index = <span class="kw">match </span><span class="self">self
-            </span>.funcs
-            .binary_search_values_by_key(<span class="kw-2">&amp;</span>text_offset, |(<span class="kw">_</span>, loc)| {
-                <span class="macro">debug_assert!</span>(loc.length &gt; <span class="number">0</span>);
-                <span class="comment">// Return the inclusive &quot;end&quot; of the function
-                </span>loc.start + loc.length - <span class="number">1
-            </span>}) {
+        <span class="kw">let </span>index = <span class="kw">match </span><span class="self">self</span>.funcs.binary_search_values_by_key(<span class="kw-2">&amp;</span>text_offset, |e| {
+            <span class="macro">debug_assert!</span>(e.wasm_func_loc.length &gt; <span class="number">0</span>);
+            <span class="comment">// Return the inclusive &quot;end&quot; of the function
+            </span>e.wasm_func_loc.start + e.wasm_func_loc.length - <span class="number">1
+        </span>}) {
             <span class="prelude-val">Ok</span>(k) =&gt; {
                 <span class="comment">// Exact match, pc is at the end of this function
                 </span>k
@@ -1267,15 +1443,15 @@
             }
         };
 
-        <span class="kw">let </span>(<span class="kw">_</span>, loc) = <span class="self">self</span>.funcs.get(index)<span class="question-mark">?</span>;
-        <span class="kw">let </span>start = loc.start;
-        <span class="kw">let </span>end = loc.start + loc.length;
+        <span class="kw">let </span>CompiledFunctionInfo { wasm_func_loc, .. } = <span class="self">self</span>.funcs.get(index)<span class="question-mark">?</span>;
+        <span class="kw">let </span>start = wasm_func_loc.start;
+        <span class="kw">let </span>end = wasm_func_loc.start + wasm_func_loc.length;
 
         <span class="kw">if </span>text_offset &lt; start || end &lt; text_offset {
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
 
-        <span class="prelude-val">Some</span>((index, text_offset - loc.start))
+        <span class="prelude-val">Some</span>((index, text_offset - wasm_func_loc.start))
     }
 
     <span class="doccomment">/// Gets the function location information for a given function index.
@@ -1284,8 +1460,8 @@
             </span>.funcs
             .get(index)
             .expect(<span class="string">&quot;defined function should be present&quot;</span>)
-            .<span class="number">1
-    </span>}
+            .wasm_func_loc
+    }
 
     <span class="doccomment">/// Gets the function information for a given function index.
     </span><span class="kw">pub fn </span>wasm_func_info(<span class="kw-2">&amp;</span><span class="self">self</span>, index: DefinedFuncIndex) -&gt; <span class="kw-2">&amp;</span>WasmFunctionInfo {
@@ -1293,8 +1469,8 @@
             </span>.funcs
             .get(index)
             .expect(<span class="string">&quot;defined function should be present&quot;</span>)
-            .<span class="number">0
-    </span>}
+            .wasm_func_info
+    }
 
     <span class="doccomment">/// Creates a new symbolication context which can be used to further
     /// symbolicate stack traces.

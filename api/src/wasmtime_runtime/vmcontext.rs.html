@@ -1173,6 +1173,79 @@
 <a href="#1173" id="1173">1173</a>
 <a href="#1174" id="1174">1174</a>
 <a href="#1175" id="1175">1175</a>
+<a href="#1176" id="1176">1176</a>
+<a href="#1177" id="1177">1177</a>
+<a href="#1178" id="1178">1178</a>
+<a href="#1179" id="1179">1179</a>
+<a href="#1180" id="1180">1180</a>
+<a href="#1181" id="1181">1181</a>
+<a href="#1182" id="1182">1182</a>
+<a href="#1183" id="1183">1183</a>
+<a href="#1184" id="1184">1184</a>
+<a href="#1185" id="1185">1185</a>
+<a href="#1186" id="1186">1186</a>
+<a href="#1187" id="1187">1187</a>
+<a href="#1188" id="1188">1188</a>
+<a href="#1189" id="1189">1189</a>
+<a href="#1190" id="1190">1190</a>
+<a href="#1191" id="1191">1191</a>
+<a href="#1192" id="1192">1192</a>
+<a href="#1193" id="1193">1193</a>
+<a href="#1194" id="1194">1194</a>
+<a href="#1195" id="1195">1195</a>
+<a href="#1196" id="1196">1196</a>
+<a href="#1197" id="1197">1197</a>
+<a href="#1198" id="1198">1198</a>
+<a href="#1199" id="1199">1199</a>
+<a href="#1200" id="1200">1200</a>
+<a href="#1201" id="1201">1201</a>
+<a href="#1202" id="1202">1202</a>
+<a href="#1203" id="1203">1203</a>
+<a href="#1204" id="1204">1204</a>
+<a href="#1205" id="1205">1205</a>
+<a href="#1206" id="1206">1206</a>
+<a href="#1207" id="1207">1207</a>
+<a href="#1208" id="1208">1208</a>
+<a href="#1209" id="1209">1209</a>
+<a href="#1210" id="1210">1210</a>
+<a href="#1211" id="1211">1211</a>
+<a href="#1212" id="1212">1212</a>
+<a href="#1213" id="1213">1213</a>
+<a href="#1214" id="1214">1214</a>
+<a href="#1215" id="1215">1215</a>
+<a href="#1216" id="1216">1216</a>
+<a href="#1217" id="1217">1217</a>
+<a href="#1218" id="1218">1218</a>
+<a href="#1219" id="1219">1219</a>
+<a href="#1220" id="1220">1220</a>
+<a href="#1221" id="1221">1221</a>
+<a href="#1222" id="1222">1222</a>
+<a href="#1223" id="1223">1223</a>
+<a href="#1224" id="1224">1224</a>
+<a href="#1225" id="1225">1225</a>
+<a href="#1226" id="1226">1226</a>
+<a href="#1227" id="1227">1227</a>
+<a href="#1228" id="1228">1228</a>
+<a href="#1229" id="1229">1229</a>
+<a href="#1230" id="1230">1230</a>
+<a href="#1231" id="1231">1231</a>
+<a href="#1232" id="1232">1232</a>
+<a href="#1233" id="1233">1233</a>
+<a href="#1234" id="1234">1234</a>
+<a href="#1235" id="1235">1235</a>
+<a href="#1236" id="1236">1236</a>
+<a href="#1237" id="1237">1237</a>
+<a href="#1238" id="1238">1238</a>
+<a href="#1239" id="1239">1239</a>
+<a href="#1240" id="1240">1240</a>
+<a href="#1241" id="1241">1241</a>
+<a href="#1242" id="1242">1242</a>
+<a href="#1243" id="1243">1243</a>
+<a href="#1244" id="1244">1244</a>
+<a href="#1245" id="1245">1245</a>
+<a href="#1246" id="1246">1246</a>
+<a href="#1247" id="1247">1247</a>
+<a href="#1248" id="1248">1248</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This file declares `VMContext` and several related structs which contain
 //! fields that compiled wasm code accesses directly.
 
@@ -1186,24 +1259,72 @@
 <span class="kw">use </span>std::ptr::NonNull;
 <span class="kw">use </span>std::sync::atomic::{AtomicUsize, Ordering};
 <span class="kw">use </span>std::u32;
-<span class="kw">pub use </span>vm_host_func_context::VMHostFuncContext;
-<span class="kw">use </span>wasmtime_environ::DefinedMemoryIndex;
+<span class="kw">pub use </span>vm_host_func_context::{VMArrayCallHostFuncContext, VMNativeCallHostFuncContext};
+<span class="kw">use </span>wasmtime_environ::{DefinedMemoryIndex, VMCONTEXT_MAGIC};
 
-<span class="kw">pub const </span>VMCONTEXT_MAGIC: u32 = u32::from_le_bytes(<span class="kw-2">*</span><span class="string">b&quot;core&quot;</span>);
+<span class="doccomment">/// A function pointer that exposes the array calling convention.
+///
+/// Regardless of the underlying Wasm function type, all functions using the
+/// array calling convention have the same Rust signature.
+///
+/// Arguments:
+///
+/// * Callee `vmctx` for the function itself.
+///
+/// * Caller&#39;s `vmctx` (so that host functions can access the linear memory of
+///   their Wasm callers).
+///
+/// * A pointer to a buffer of `ValRaw`s where both arguments are passed into
+///   this function, and where results are returned from this function.
+///
+/// * The capacity of the `ValRaw` buffer. Must always be at least
+///   `max(len(wasm_params), len(wasm_results))`.
+</span><span class="kw">pub type </span>VMArrayCallFunction =
+    <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(<span class="kw-2">*mut </span>VMOpaqueContext, <span class="kw-2">*mut </span>VMOpaqueContext, <span class="kw-2">*mut </span>ValRaw, usize);
+
+<span class="doccomment">/// A function pointer that exposes the native calling convention.
+///
+/// Different Wasm function types end up mapping to different Rust function
+/// types, so this isn&#39;t simply a type alias the way that `VMArrayCallFunction`
+/// is.
+///
+/// This is the default calling convention for the target (e.g. System-V or
+/// fast-call) except multiple return values are handled by returning the first
+/// return value in a register and everything else through a return-pointer.
+</span><span class="attr">#[repr(transparent)]
+</span><span class="kw">pub struct </span>VMNativeCallFunction(VMFunctionBody);
+
+<span class="doccomment">/// A function pointer that exposes the Wasm calling convention.
+///
+/// In practice, different Wasm function types end up mapping to different Rust
+/// function types, so this isn&#39;t simply a type alias the way that
+/// `VMArrayCallFunction` is. However, the exact details of the calling
+/// convention are left to the Wasm compiler (e.g. Cranelift or Winch). Runtime
+/// code never does anything with these function pointers except shuffle them
+/// around and pass them back to Wasm.
+</span><span class="attr">#[repr(transparent)]
+</span><span class="kw">pub struct </span>VMWasmCallFunction(VMFunctionBody);
 
 <span class="doccomment">/// An imported function.
 </span><span class="attr">#[derive(Debug, Copy, Clone)]
 #[repr(C)]
 </span><span class="kw">pub struct </span>VMFunctionImport {
-    <span class="doccomment">/// A pointer to the imported function body.
-    </span><span class="kw">pub </span>body: NonNull&lt;VMFunctionBody&gt;,
+    <span class="doccomment">/// Function pointer to use when calling this imported function from Wasm.
+    </span><span class="kw">pub </span>wasm_call: NonNull&lt;VMWasmCallFunction&gt;,
+
+    <span class="doccomment">/// Function pointer to use when calling this imported function from native code.
+    </span><span class="kw">pub </span>native_call: NonNull&lt;VMNativeCallFunction&gt;,
+
+    <span class="doccomment">/// Function pointer to use when calling this imported function with the
+    /// &quot;array&quot; calling convention that `Func::new` et al use.
+    </span><span class="kw">pub </span>array_call: VMArrayCallFunction,
 
     <span class="doccomment">/// The VM state associated with this function.
     ///
-    /// For core wasm instances this will be `*mut VMContext` but for the
-    /// upcoming implementation of the component model this will be something
-    /// else. The actual definition of what this pointer points to depends on
-    /// the definition of `func_ptr` and what compiled it.
+    /// For Wasm functions defined by core wasm instances this will be `*mut
+    /// VMContext`, but for lifted/lowered component model functions this will
+    /// be a `VMComponentContext`, and for a host function it will be a
+    /// `VMHostFuncContext`, etc.
     </span><span class="kw">pub </span>vmctx: <span class="kw-2">*mut </span>VMOpaqueContext,
 }
 
@@ -1228,8 +1349,16 @@
             usize::from(offsets.size_of_vmfunction_import())
         );
         <span class="macro">assert_eq!</span>(
-            <span class="macro">offset_of!</span>(VMFunctionImport, body),
-            usize::from(offsets.vmfunction_import_body())
+            <span class="macro">offset_of!</span>(VMFunctionImport, wasm_call),
+            usize::from(offsets.vmfunction_import_wasm_call())
+        );
+        <span class="macro">assert_eq!</span>(
+            <span class="macro">offset_of!</span>(VMFunctionImport, native_call),
+            usize::from(offsets.vmfunction_import_native_call())
+        );
+        <span class="macro">assert_eq!</span>(
+            <span class="macro">offset_of!</span>(VMFunctionImport, array_call),
+            usize::from(offsets.vmfunction_import_array_call())
         );
         <span class="macro">assert_eq!</span>(
             <span class="macro">offset_of!</span>(VMFunctionImport, vmctx),
@@ -1752,22 +1881,50 @@
     }
 }
 
-<span class="doccomment">/// The VM caller-checked &quot;anyfunc&quot; record, for caller-side signature checking.
-/// It consists of the actual function pointer and a signature id to be checked
-/// by the caller.
+<span class="doccomment">/// The VM caller-checked &quot;funcref&quot; record, for caller-side signature checking.
+///
+/// It consists of function pointer(s), a signature id to be checked by the
+/// caller, and the vmctx closure associated with this function.
 </span><span class="attr">#[derive(Debug, Clone)]
 #[repr(C)]
 </span><span class="kw">pub struct </span>VMCallerCheckedFuncRef {
-    <span class="doccomment">/// Function body.
-    </span><span class="kw">pub </span>func_ptr: NonNull&lt;VMFunctionBody&gt;,
+    <span class="doccomment">/// Function pointer for this funcref if being called via the native calling
+    /// convention.
+    </span><span class="kw">pub </span>native_call: NonNull&lt;VMNativeCallFunction&gt;,
+
+    <span class="doccomment">/// Function pointer for this funcref if being called via the &quot;array&quot;
+    /// calling convention that `Func::new` et al use.
+    </span><span class="kw">pub </span>array_call: VMArrayCallFunction,
+
+    <span class="doccomment">/// Function pointer for this funcref if being called via the calling
+    /// convention we use when compiling Wasm.
+    ///
+    /// Most functions come with a function pointer that we can use when they
+    /// are called from Wasm. The notable exception is when we `Func::wrap` a
+    /// host function, and we don&#39;t have a Wasm compiler on hand to compile a
+    /// Wasm-to-native trampoline for the function. In this case, we leave
+    /// `wasm_call` empty until the function is passed as an import to Wasm (or
+    /// otherwise exposed to Wasm via tables/globals). At this point, we look up
+    /// a Wasm-to-native trampoline for the function in the the Wasm&#39;s compiled
+    /// module and use that fill in `VMFunctionImport::wasm_call`. **However**
+    /// there is no guarantee that the Wasm module has a trampoline for this
+    /// function&#39;s signature. The Wasm module only has trampolines for its
+    /// types, and if this function isn&#39;t of one of those types, then the Wasm
+    /// module will not have a trampoline for it. This is actually okay, because
+    /// it means that the Wasm cannot actually call this function. But it does
+    /// mean that this field needs to be an `Option` even though it is non-null
+    /// the vast vast vast majority of the time.
+    </span><span class="kw">pub </span>wasm_call: <span class="prelude-ty">Option</span>&lt;NonNull&lt;VMWasmCallFunction&gt;&gt;,
+
     <span class="doccomment">/// Function signature id.
     </span><span class="kw">pub </span>type_index: VMSharedSignatureIndex,
+
     <span class="doccomment">/// The VM state associated with this function.
     ///
-    /// For core wasm instances this will be `*mut VMContext` but for the
-    /// upcoming implementation of the component model this will be something
-    /// else. The actual definition of what this pointer points to depends on
-    /// the definition of `func_ptr` and what compiled it.
+    /// The actual definition of what this pointer points to depends on the
+    /// function being referenced: for core Wasm functions, this is a `*mut
+    /// VMContext`, for host functions it is a `*mut VMHostFuncContext`, and for
+    /// component functions it is a `*mut VMComponentContext`.
     </span><span class="kw">pub </span>vmctx: <span class="kw-2">*mut </span>VMOpaqueContext,
     <span class="comment">// If more elements are added here, remember to add offset_of tests below!
 </span>}
@@ -1783,7 +1940,7 @@
     <span class="kw">use </span>wasmtime_environ::{Module, PtrSize, VMOffsets};
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>check_vmcaller_checked_anyfunc_offsets() {
+    </span><span class="kw">fn </span>check_vmcaller_checked_func_ref_offsets() {
         <span class="kw">let </span>module = Module::new();
         <span class="kw">let </span>offsets = VMOffsets::new(size_of::&lt;<span class="kw-2">*mut </span>u8&gt;() <span class="kw">as </span>u8, <span class="kw-2">&amp;</span>module);
         <span class="macro">assert_eq!</span>(
@@ -1791,8 +1948,16 @@
             usize::from(offsets.ptr.size_of_vmcaller_checked_func_ref())
         );
         <span class="macro">assert_eq!</span>(
-            <span class="macro">offset_of!</span>(VMCallerCheckedFuncRef, func_ptr),
-            usize::from(offsets.ptr.vmcaller_checked_func_ref_func_ptr())
+            <span class="macro">offset_of!</span>(VMCallerCheckedFuncRef, native_call),
+            usize::from(offsets.ptr.vmcaller_checked_func_ref_native_call())
+        );
+        <span class="macro">assert_eq!</span>(
+            <span class="macro">offset_of!</span>(VMCallerCheckedFuncRef, array_call),
+            usize::from(offsets.ptr.vmcaller_checked_func_ref_array_call())
+        );
+        <span class="macro">assert_eq!</span>(
+            <span class="macro">offset_of!</span>(VMCallerCheckedFuncRef, wasm_call),
+            usize::from(offsets.ptr.vmcaller_checked_func_ref_wasm_call())
         );
         <span class="macro">assert_eq!</span>(
             <span class="macro">offset_of!</span>(VMCallerCheckedFuncRef, type_index),
@@ -1967,6 +2132,16 @@
     <span class="kw">use </span>memoffset::offset_of;
     <span class="kw">use </span>std::mem::size_of;
     <span class="kw">use </span>wasmtime_environ::{Module, PtrSize, VMOffsets};
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>vmctx_runtime_limits_offset() {
+        <span class="kw">let </span>module = Module::new();
+        <span class="kw">let </span>offsets = VMOffsets::new(size_of::&lt;<span class="kw-2">*mut </span>u8&gt;() <span class="kw">as </span>u8, <span class="kw-2">&amp;</span>module);
+        <span class="macro">assert_eq!</span>(
+            offsets.vmctx_runtime_limits(),
+            offsets.ptr.vmcontext_runtime_limits().into()
+        );
+    }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>field_offsets() {
@@ -2276,45 +2451,6 @@
     }
 }
 
-<span class="doccomment">/// Type definition of the trampoline used to enter WebAssembly from the host.
-///
-/// This function type is what&#39;s generated for the entry trampolines that are
-/// compiled into a WebAssembly module&#39;s image. Note that trampolines are not
-/// always used by Wasmtime since the `TypedFunc` API allows bypassing the
-/// trampoline and directly calling the underlying wasm function (at the time of
-/// this writing).
-///
-/// The trampoline&#39;s arguments here are:
-///
-/// * `*mut VMOpaqueContext` - this a contextual pointer defined within the
-///   context of the receiving function pointer. For now this is always `*mut
-///   VMContext` but with the component model it may be the case that this is a
-///   different type of pointer.
-///
-/// * `*mut VMContext` - this is the &quot;caller&quot; context, which at this time is
-///   always unconditionally core wasm (even in the component model). This
-///   contextual pointer cannot be `NULL` and provides information necessary to
-///   resolve the caller&#39;s context for the `Caller` API in Wasmtime.
-///
-/// * `*const VMFunctionBody` - this is the indirect function pointer which is
-///   the actual target function to invoke. This function uses the System-V ABI
-///   for its argumenst and a semi-custom ABI for the return values (one return
-///   value is returned directly, multiple return values have the first one
-///   returned directly and remaining ones returned indirectly through a
-///   stack pointer). This function pointer may be Cranelift-compiled code or it
-///   may also be a host-compiled trampoline (e.g. when a host function calls a
-///   host function through the `wasmtime::Func` wrapper). The definition of the
-///   first argument of this function depends on what this receiving function
-///   pointer desires.
-///
-/// * `*mut ValRaw` - this is storage space for both arguments and results of
-///   the function. The trampoline will read the arguments from this array to
-///   pass to the function pointer provided. The results are then written to the
-///   array afterwards (both reads and writes start at index 0). It&#39;s the
-///   caller&#39;s responsibility to make sure this array is appropriately sized.
-</span><span class="kw">pub type </span>VMTrampoline =
-    <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(<span class="kw-2">*mut </span>VMOpaqueContext, <span class="kw-2">*mut </span>VMContext, <span class="kw-2">*const </span>VMFunctionBody, <span class="kw-2">*mut </span>ValRaw);
-
 <span class="doccomment">/// An &quot;opaque&quot; version of `VMContext` which must be explicitly casted to a
 /// target context.
 ///
@@ -2344,7 +2480,17 @@
 
     <span class="doccomment">/// Helper function to clearly indicate that casts are desired.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>from_vm_host_func_context(ptr: <span class="kw-2">*mut </span>VMHostFuncContext) -&gt; <span class="kw-2">*mut </span>VMOpaqueContext {
+    </span><span class="kw">pub fn </span>from_vm_array_call_host_func_context(
+        ptr: <span class="kw-2">*mut </span>VMArrayCallHostFuncContext,
+    ) -&gt; <span class="kw-2">*mut </span>VMOpaqueContext {
+        ptr.cast()
+    }
+
+    <span class="doccomment">/// Helper function to clearly indicate that casts are desired.
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>from_vm_native_call_host_func_context(
+        ptr: <span class="kw-2">*mut </span>VMNativeCallHostFuncContext,
+    ) -&gt; <span class="kw-2">*mut </span>VMOpaqueContext {
         ptr.cast()
     }
 }

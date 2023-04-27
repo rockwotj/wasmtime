@@ -74,17 +74,6 @@
 <a href="#74" id="74">74</a>
 <a href="#75" id="75">75</a>
 <a href="#76" id="76">76</a>
-<a href="#77" id="77">77</a>
-<a href="#78" id="78">78</a>
-<a href="#79" id="79">79</a>
-<a href="#80" id="80">80</a>
-<a href="#81" id="81">81</a>
-<a href="#82" id="82">82</a>
-<a href="#83" id="83">83</a>
-<a href="#84" id="84">84</a>
-<a href="#85" id="85">85</a>
-<a href="#86" id="86">86</a>
-<a href="#87" id="87">87</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Utility module to create trampolines in/out WebAssembly module.
 
 </span><span class="kw">mod </span>func;
@@ -92,19 +81,19 @@
 <span class="kw">mod </span>memory;
 <span class="kw">mod </span>table;
 
+<span class="kw">pub use </span><span class="self">self</span>::func::<span class="kw-2">*</span>;
+<span class="kw">pub use </span><span class="self">self</span>::global::<span class="kw-2">*</span>;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>memory::MemoryCreatorProxy;
 
-<span class="kw">pub use </span><span class="self">self</span>::func::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="self">self</span>::global::create_global;
 <span class="kw">use </span><span class="self">self</span>::memory::create_memory;
 <span class="kw">use </span><span class="self">self</span>::table::create_table;
 <span class="kw">use </span><span class="kw">crate</span>::module::BareModuleInfo;
 <span class="kw">use </span><span class="kw">crate</span>::store::{InstanceId, StoreOpaque};
-<span class="kw">use crate</span>::{GlobalType, MemoryType, TableType, Val};
+<span class="kw">use crate</span>::{MemoryType, TableType};
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>wasmtime_environ::{GlobalIndex, MemoryIndex, Module, TableIndex};
+<span class="kw">use </span>wasmtime_environ::{MemoryIndex, Module, TableIndex};
 <span class="kw">use </span>wasmtime_runtime::{
     Imports, InstanceAllocationRequest, InstanceAllocator, OnDemandInstanceAllocator, SharedMemory,
     StorePtr, VMFunctionImport, VMSharedSignatureIndex,
@@ -139,17 +128,6 @@
 
         <span class="prelude-val">Ok</span>(store.add_instance(handle, <span class="bool-val">true</span>))
     }
-}
-
-<span class="kw">pub fn </span>generate_global_export(
-    store: <span class="kw-2">&amp;mut </span>StoreOpaque,
-    gt: <span class="kw-2">&amp;</span>GlobalType,
-    val: Val,
-) -&gt; <span class="prelude-ty">Result</span>&lt;wasmtime_runtime::ExportGlobal&gt; {
-    <span class="kw">let </span>instance = create_global(store, gt, val)<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(store
-        .instance_mut(instance)
-        .get_exported_global(GlobalIndex::from_u32(<span class="number">0</span>)))
 }
 
 <span class="kw">pub fn </span>generate_memory_export(

@@ -231,6 +231,7 @@
 <a href="#231" id="231">231</a>
 <a href="#232" id="232">232</a>
 <a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::obj::ELF_WASMTIME_TRAPS;
 <span class="kw">use </span>object::write::{Object, StandardSegment};
 <span class="kw">use </span>object::{Bytes, LittleEndian, SectionKind, U32Bytes};
@@ -320,7 +321,8 @@
 
     <span class="doccomment">/// Used to indicate that a trap was raised by atomic wait operations on non shared memory.
     </span>AtomicWaitNonSharedMemory,
-    <span class="comment">// if adding a variant here be sure to update the `check!` macro below
+    <span class="comment">//
+    // if adding a variant here be sure to update the `check!` macro below
 </span>}
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Trap {

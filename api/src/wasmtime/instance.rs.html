@@ -825,6 +825,85 @@
 <a href="#825" id="825">825</a>
 <a href="#826" id="826">826</a>
 <a href="#827" id="827">827</a>
+<a href="#828" id="828">828</a>
+<a href="#829" id="829">829</a>
+<a href="#830" id="830">830</a>
+<a href="#831" id="831">831</a>
+<a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
+<a href="#835" id="835">835</a>
+<a href="#836" id="836">836</a>
+<a href="#837" id="837">837</a>
+<a href="#838" id="838">838</a>
+<a href="#839" id="839">839</a>
+<a href="#840" id="840">840</a>
+<a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
+<a href="#853" id="853">853</a>
+<a href="#854" id="854">854</a>
+<a href="#855" id="855">855</a>
+<a href="#856" id="856">856</a>
+<a href="#857" id="857">857</a>
+<a href="#858" id="858">858</a>
+<a href="#859" id="859">859</a>
+<a href="#860" id="860">860</a>
+<a href="#861" id="861">861</a>
+<a href="#862" id="862">862</a>
+<a href="#863" id="863">863</a>
+<a href="#864" id="864">864</a>
+<a href="#865" id="865">865</a>
+<a href="#866" id="866">866</a>
+<a href="#867" id="867">867</a>
+<a href="#868" id="868">868</a>
+<a href="#869" id="869">869</a>
+<a href="#870" id="870">870</a>
+<a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
+<a href="#873" id="873">873</a>
+<a href="#874" id="874">874</a>
+<a href="#875" id="875">875</a>
+<a href="#876" id="876">876</a>
+<a href="#877" id="877">877</a>
+<a href="#878" id="878">878</a>
+<a href="#879" id="879">879</a>
+<a href="#880" id="880">880</a>
+<a href="#881" id="881">881</a>
+<a href="#882" id="882">882</a>
+<a href="#883" id="883">883</a>
+<a href="#884" id="884">884</a>
+<a href="#885" id="885">885</a>
+<a href="#886" id="886">886</a>
+<a href="#887" id="887">887</a>
+<a href="#888" id="888">888</a>
+<a href="#889" id="889">889</a>
+<a href="#890" id="890">890</a>
+<a href="#891" id="891">891</a>
+<a href="#892" id="892">892</a>
+<a href="#893" id="893">893</a>
+<a href="#894" id="894">894</a>
+<a href="#895" id="895">895</a>
+<a href="#896" id="896">896</a>
+<a href="#897" id="897">897</a>
+<a href="#898" id="898">898</a>
+<a href="#899" id="899">899</a>
+<a href="#900" id="900">900</a>
+<a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::linker::{Definition, DefinitionType};
 <span class="kw">use </span><span class="kw">crate</span>::store::{InstanceId, StoreOpaque, Stored};
 <span class="kw">use </span><span class="kw">crate</span>::types::matching;
@@ -834,11 +913,13 @@
 };
 <span class="kw">use </span>anyhow::{anyhow, bail, Context, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>std::mem;
+<span class="kw">use </span>std::ptr::NonNull;
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>wasmtime_environ::{EntityType, FuncIndex, GlobalIndex, MemoryIndex, PrimaryMap, TableIndex};
 <span class="kw">use </span>wasmtime_runtime::{
-    Imports, InstanceAllocationRequest, StorePtr, VMContext, VMFunctionBody, VMFunctionImport,
-    VMGlobalImport, VMMemoryImport, VMOpaqueContext, VMTableImport,
+    Imports, InstanceAllocationRequest, StorePtr, VMCallerCheckedFuncRef, VMContext,
+    VMFunctionImport, VMGlobalImport, VMMemoryImport, VMNativeCallFunction, VMOpaqueContext,
+    VMTableImport,
 };
 
 <span class="doccomment">/// An instantiated WebAssembly module.
@@ -990,7 +1071,7 @@
         })<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>owned_imports = OwnedImports::new(module);
         <span class="kw">for </span>import <span class="kw">in </span>imports {
-            owned_imports.push(import, store);
+            owned_imports.push(import, store, module);
         }
         <span class="prelude-val">Ok</span>(owned_imports)
     }
@@ -1078,6 +1159,7 @@
         <span class="comment">// Register the module just before instantiation to ensure we keep the module
         // properly referenced while in use by the store.
         </span>store.modules_mut().register_module(module);
+        store.fill_func_refs();
 
         <span class="comment">// The first thing we do is issue an instance allocation request
         // to the instance allocator. This, on success, will give us an
@@ -1165,16 +1247,14 @@
         // trap-handling configuration in `store` as well.
         </span><span class="kw">let </span>instance = store.<span class="number">0</span>.instance_mut(id);
         <span class="kw">let </span>f = instance.get_exported_func(start);
-        <span class="kw">let </span>vmctx = instance.vmctx_ptr();
+        <span class="kw">let </span>caller_vmctx = instance.vmctx_ptr();
         <span class="kw">unsafe </span>{
             <span class="kw">super</span>::func::invoke_wasm_and_catch_traps(store, |_default_caller| {
-                <span class="kw">let </span>trampoline = mem::transmute::&lt;
-                    <span class="kw-2">*const </span>VMFunctionBody,
-                    <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(<span class="kw-2">*mut </span>VMOpaqueContext, <span class="kw-2">*mut </span>VMContext),
-                &gt;(f.anyfunc.as_ref().func_ptr.as_ptr());
-                <span class="kw">let </span>trampoline =
-                    wasmtime_runtime::prepare_host_to_wasm_trampoline(vmctx, trampoline);
-                trampoline(f.anyfunc.as_ref().vmctx, vmctx)
+                <span class="kw">let </span>func = mem::transmute::&lt;
+                    NonNull&lt;VMNativeCallFunction&gt;,
+                    <span class="kw">extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(<span class="kw-2">*mut </span>VMOpaqueContext, <span class="kw-2">*mut </span>VMContext),
+                &gt;(f.anyfunc.as_ref().native_call);
+                func(f.anyfunc.as_ref().vmctx, caller_vmctx)
             })<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
@@ -1394,10 +1474,10 @@
         <span class="self">self</span>.globals.clear();
     }
 
-    <span class="kw">fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, item: <span class="kw-2">&amp;</span>Extern, store: <span class="kw-2">&amp;mut </span>StoreOpaque) {
+    <span class="kw">fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, item: <span class="kw-2">&amp;</span>Extern, store: <span class="kw-2">&amp;mut </span>StoreOpaque, module: <span class="kw-2">&amp;</span>Module) {
         <span class="kw">match </span>item {
             Extern::Func(i) =&gt; {
-                <span class="self">self</span>.functions.push(i.vmimport(store));
+                <span class="self">self</span>.functions.push(i.vmimport(store, module));
             }
             Extern::Global(i) =&gt; {
                 <span class="self">self</span>.globals.push(i.vmimport(store));
@@ -1422,7 +1502,9 @@
             wasmtime_runtime::Export::Function(f) =&gt; {
                 <span class="kw">let </span>f = f.anyfunc.as_ref();
                 <span class="self">self</span>.functions.push(VMFunctionImport {
-                    body: f.func_ptr,
+                    wasm_call: f.wasm_call.unwrap(),
+                    native_call: f.native_call,
+                    array_call: f.array_call,
                     vmctx: f.vmctx,
                 });
             }
@@ -1485,7 +1567,40 @@
     /// preallocate space in a `Store` up front for all entries to be inserted.
     </span>host_funcs: usize,
 
+    <span class="doccomment">/// The `VMCallerCheckedFuncRef`s for the functions in `items` that do not
+    /// have a `wasm_call` trampoline. We pre-allocate and pre-patch these
+    /// `VMCallerCheckedFuncRef`s so that we don&#39;t have to do it at
+    /// instantiation time.
+    ///
+    /// This is an `Arc&lt;[T]&gt;` for the same reason as `items`.
+    </span>func_refs: Arc&lt;[PrePatchedFuncRef]&gt;,
+
     _marker: std::marker::PhantomData&lt;<span class="kw">fn</span>() -&gt; T&gt;,
+}
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>pre_patched_func_ref::PrePatchedFuncRef;
+<span class="kw">mod </span>pre_patched_func_ref {
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+
+    <span class="kw">pub struct </span>PrePatchedFuncRef(VMCallerCheckedFuncRef);
+
+    <span class="kw">impl </span>PrePatchedFuncRef {
+        <span class="doccomment">/// Safety: callers must arrange for the given `func_ref` to be usable
+        /// in a `Send + Sync` manner (i.e. its associated `Module` is kept
+        /// alive or `Func` is alive and supports these things) and that the
+        /// `wasm_call` field is already patched in, if necessary.
+        </span><span class="kw">pub unsafe fn </span>new(func_ref: VMCallerCheckedFuncRef) -&gt; PrePatchedFuncRef {
+            PrePatchedFuncRef(func_ref)
+        }
+
+        <span class="kw">pub fn </span>func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMCallerCheckedFuncRef {
+            <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0
+        </span>}
+    }
+
+    <span class="comment">// Safety: This is upheld by `PrePatchedFuncRef::new` callers.
+    </span><span class="kw">unsafe impl</span>&lt;T&gt; Send <span class="kw">for </span>InstancePre&lt;T&gt; {}
+    <span class="kw">unsafe impl</span>&lt;T&gt; Sync <span class="kw">for </span>InstancePre&lt;T&gt; {}
 }
 
 <span class="doccomment">/// InstancePre&#39;s clone does not require T: Clone
@@ -1495,6 +1610,7 @@
             module: <span class="self">self</span>.module.clone(),
             items: <span class="self">self</span>.items.clone(),
             host_funcs: <span class="self">self</span>.host_funcs,
+            func_refs: <span class="self">self</span>.func_refs.clone(),
             _marker: <span class="self">self</span>._marker,
         }
     }
@@ -1512,17 +1628,33 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>new(module: <span class="kw-2">&amp;</span>Module, items: Vec&lt;Definition&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;InstancePre&lt;T&gt;&gt; {
         typecheck(module, <span class="kw-2">&amp;</span>items, |cx, ty, item| cx.definition(ty, <span class="kw-2">&amp;</span>item.ty()))<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>host_funcs = items
-            .iter()
-            .filter(|i| <span class="kw">match </span>i {
-                Definition::HostFunc(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
-                <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-            })
-            .count();
+        <span class="kw">let </span><span class="kw-2">mut </span>func_refs = <span class="macro">vec!</span>[];
+        <span class="kw">let </span><span class="kw-2">mut </span>host_funcs = <span class="number">0</span>;
+        <span class="kw">for </span>item <span class="kw">in </span><span class="kw-2">&amp;</span>items {
+            <span class="kw">match </span>item {
+                Definition::Extern(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; {}
+                Definition::HostFunc(f) =&gt; {
+                    host_funcs += <span class="number">1</span>;
+                    <span class="kw">if </span>f.funcref().wasm_call.is_none() {
+                        <span class="comment">// `f` needs its `VMCallerCheckedFuncRef::wasm_call`
+                        // patched with a Wasm-to-native trampoline.
+                        </span><span class="macro">debug_assert!</span>(<span class="macro">matches!</span>(f.host_ctx(), <span class="kw">crate</span>::HostContext::Native(<span class="kw">_</span>)));
+                        func_refs.push(PrePatchedFuncRef::new(VMCallerCheckedFuncRef {
+                            wasm_call: module
+                                .runtime_info()
+                                .wasm_to_native_trampoline(f.sig_index()),
+                            ..<span class="kw-2">*</span>f.funcref()
+                        }));
+                    }
+                }
+            }
+        }
+
         <span class="prelude-val">Ok</span>(InstancePre {
             module: module.clone(),
             items: items.into(),
             host_funcs,
+            func_refs: func_refs.into(),
             _marker: std::marker::PhantomData,
         })
     }
@@ -1550,8 +1682,13 @@
     /// [`Engine`] than the [`InstancePre`] originally came from.
     </span><span class="kw">pub fn </span>instantiate(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>store: <span class="kw">impl </span>AsContextMut&lt;Data = T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Instance&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>store = store.as_context_mut();
-        <span class="kw">let </span>imports =
-            pre_instantiate_raw(<span class="kw-2">&amp;mut </span>store.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.module, <span class="kw-2">&amp;</span><span class="self">self</span>.items, <span class="self">self</span>.host_funcs)<span class="question-mark">?</span>;
+        <span class="kw">let </span>imports = pre_instantiate_raw(
+            <span class="kw-2">&amp;mut </span>store.<span class="number">0</span>,
+            <span class="kw-2">&amp;</span><span class="self">self</span>.module,
+            <span class="kw-2">&amp;</span><span class="self">self</span>.items,
+            <span class="self">self</span>.host_funcs,
+            <span class="kw-2">&amp;</span><span class="self">self</span>.func_refs,
+        )<span class="question-mark">?</span>;
 
         <span class="comment">// This unsafety should be handled by the type-checking performed by the
         // constructor of `InstancePre` to assert that all the imports we&#39;re passing
@@ -1579,8 +1716,13 @@
         </span>T: Send,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>store = store.as_context_mut();
-        <span class="kw">let </span>imports =
-            pre_instantiate_raw(<span class="kw-2">&amp;mut </span>store.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.module, <span class="kw-2">&amp;</span><span class="self">self</span>.items, <span class="self">self</span>.host_funcs)<span class="question-mark">?</span>;
+        <span class="kw">let </span>imports = pre_instantiate_raw(
+            <span class="kw-2">&amp;mut </span>store.<span class="number">0</span>,
+            <span class="kw-2">&amp;</span><span class="self">self</span>.module,
+            <span class="kw-2">&amp;</span><span class="self">self</span>.items,
+            <span class="self">self</span>.host_funcs,
+            <span class="kw-2">&amp;</span><span class="self">self</span>.func_refs,
+        )<span class="question-mark">?</span>;
 
         <span class="comment">// This unsafety should be handled by the type-checking performed by the
         // constructor of `InstancePre` to assert that all the imports we&#39;re passing
@@ -1600,6 +1742,7 @@
     module: <span class="kw-2">&amp;</span>Module,
     items: <span class="kw-2">&amp;</span>Arc&lt;[Definition]&gt;,
     host_funcs: usize,
+    func_refs: <span class="kw-2">&amp;</span>Arc&lt;[PrePatchedFuncRef]&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;OwnedImports&gt; {
     <span class="kw">if </span>host_funcs &gt; <span class="number">0 </span>{
         <span class="comment">// Any linker-defined function of the `Definition::HostFunc` variant
@@ -1613,8 +1756,10 @@
         // items into the store once. This avoids cloning each individual item
         // below.
         </span>store.push_rooted_funcs(items.clone());
+        store.push_instance_pre_func_refs(func_refs.clone());
     }
 
+    <span class="kw">let </span><span class="kw-2">mut </span>func_refs = func_refs.iter().map(|f| NonNull::from(f.func_ref()));
     <span class="kw">let </span><span class="kw-2">mut </span>imports = OwnedImports::new(module);
     <span class="kw">for </span>import <span class="kw">in </span>items.iter() {
         <span class="kw">if </span>!import.comes_from_same_store(store) {
@@ -1624,8 +1769,21 @@
         // `InstancePre` where the `T` of the original item should match the
         // `T` of the store. Additionally the rooting necessary has happened
         // above.
-        </span><span class="kw">let </span>item = <span class="kw">unsafe </span>{ import.to_extern_store_rooted(store) };
-        imports.push(<span class="kw-2">&amp;</span>item, store);
+        </span><span class="kw">let </span>item = <span class="kw">match </span>import {
+            Definition::Extern(e, <span class="kw">_</span>) =&gt; e.clone(),
+            Definition::HostFunc(func) =&gt; <span class="kw">unsafe </span>{
+                func.to_func_store_rooted(
+                    store,
+                    <span class="kw">if </span>func.funcref().wasm_call.is_none() {
+                        <span class="prelude-val">Some</span>(func_refs.next().unwrap())
+                    } <span class="kw">else </span>{
+                        <span class="prelude-val">None
+                    </span>},
+                )
+                .into()
+            },
+        };
+        imports.push(<span class="kw-2">&amp;</span>item, store, module);
     }
 
     <span class="prelude-val">Ok</span>(imports)

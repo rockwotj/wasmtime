@@ -83,6 +83,25 @@
 <a href="#83" id="83">83</a>
 <a href="#84" id="84">84</a>
 <a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{CompiledModule, ProfilingAgent};
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>std::io::{<span class="self">self</span>, BufWriter, Write};
@@ -139,9 +158,28 @@
         }
 
         <span class="comment">// Note: these are the trampolines into exported functions.
-        </span><span class="kw">for </span>(idx, func, len) <span class="kw">in </span>module.trampolines() {
-            <span class="kw">let </span>(addr, len) = (func <span class="kw">as </span>usize <span class="kw">as </span><span class="kw-2">*const </span>u8, len);
-            <span class="kw">let </span>name = <span class="macro">format!</span>(<span class="string">&quot;wasm::trampoline[{}]&quot;</span>, idx.index());
+        </span><span class="kw">for </span>(name, body) <span class="kw">in </span>module
+            .array_to_wasm_trampolines()
+            .map(|(i, body)| {
+                (
+                    <span class="macro">format!</span>(<span class="string">&quot;wasm::array_to_wasm_trampoline[{}]&quot;</span>, i.index()),
+                    body,
+                )
+            })
+            .chain(module.native_to_wasm_trampolines().map(|(i, body)| {
+                (
+                    <span class="macro">format!</span>(<span class="string">&quot;wasm::native_to_wasm_trampoline[{}]&quot;</span>, i.index()),
+                    body,
+                )
+            }))
+            .chain(module.wasm_to_native_trampolines().map(|(i, body)| {
+                (
+                    <span class="macro">format!</span>(<span class="string">&quot;wasm::wasm_to_native_trampolines[{}]&quot;</span>, i.index()),
+                    body,
+                )
+            }))
+        {
+            <span class="kw">let </span>(addr, len) = (body.as_ptr(), body.len());
             <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">Self</span>::make_line(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;</span>name, addr, len) {
                 <span class="macro">eprintln!</span>(<span class="string">&quot;Error when writing export trampoline info to the perf map file: {err}&quot;</span>);
                 <span class="kw">return</span>;

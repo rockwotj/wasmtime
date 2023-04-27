@@ -130,6 +130,21 @@
 <a href="#130" id="130">130</a>
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Adds support for profiling JIT-ed code using VTune. By default, VTune
 //! support is built in to Wasmtime (configure with the `vtune` feature flag).
 //! To enable it at runtime, use the `--profile=vtune` CLI flag.
@@ -238,16 +253,31 @@
         }
 
         <span class="comment">// Note: these are the trampolines into exported functions.
-        </span><span class="kw">for </span>(idx, func, len) <span class="kw">in </span>module.trampolines() {
-            <span class="kw">let </span>idx = idx.index();
-            <span class="kw">let </span>(addr, len) = (func <span class="kw">as </span>usize <span class="kw">as </span><span class="kw-2">*const </span>u8, len);
-            <span class="kw">let </span>method_name = <span class="macro">format!</span>(<span class="string">&quot;wasm::trampoline[{}]&quot;</span>, idx,);
-            <span class="macro">log::trace!</span>(
-                <span class="string">&quot;new trampoline for exported signature {} @ {:?}\n&quot;</span>,
-                idx,
-                addr
-            );
-            <span class="self">self</span>.notify_code(<span class="kw-2">&amp;</span>module_name, <span class="kw-2">&amp;</span>method_name, addr, len);
+        </span><span class="kw">for </span>(name, body) <span class="kw">in </span>module
+            .array_to_wasm_trampolines()
+            .map(|(i, body)| {
+                (
+                    <span class="macro">format!</span>(<span class="string">&quot;wasm::array_to_wasm_trampoline[{}]&quot;</span>, i.index()),
+                    body,
+                )
+            })
+            .chain(module.native_to_wasm_trampolines().map(|(i, body)| {
+                (
+                    <span class="macro">format!</span>(<span class="string">&quot;wasm::native_to_wasm_trampoline[{}]&quot;</span>, i.index()),
+                    body,
+                )
+            }))
+            .chain(module.wasm_to_native_trampolines().map(|(i, body)| {
+                (
+                    <span class="macro">format!</span>(<span class="string">&quot;wasm::wasm_to_native_trampolines[{}]&quot;</span>, i.index()),
+                    body,
+                )
+            }))
+        {
+            <span class="kw">let </span>addr = body.as_ptr();
+            <span class="kw">let </span>len = body.len();
+            <span class="macro">log::trace!</span>(<span class="string">&quot;new trampoline `{}` @ {:?}\n&quot;</span>, name, addr);
+            <span class="self">self</span>.notify_code(<span class="kw-2">&amp;</span>module_name, <span class="kw-2">&amp;</span>name, addr, len);
         }
     }
 

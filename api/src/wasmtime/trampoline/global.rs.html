@@ -70,95 +70,77 @@
 <a href="#70" id="70">70</a>
 <a href="#71" id="71">71</a>
 <a href="#72" id="72">72</a>
-<a href="#73" id="73">73</a>
-<a href="#74" id="74">74</a>
-<a href="#75" id="75">75</a>
-<a href="#76" id="76">76</a>
-<a href="#77" id="77">77</a>
-<a href="#78" id="78">78</a>
-<a href="#79" id="79">79</a>
-<a href="#80" id="80">80</a>
-<a href="#81" id="81">81</a>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::store::{InstanceId, StoreOpaque};
-<span class="kw">use </span><span class="kw">crate</span>::trampoline::create_handle;
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::store::StoreOpaque;
 <span class="kw">use crate</span>::{GlobalType, Mutability, Val};
-<span class="kw">use </span>anyhow::Result;
-<span class="kw">use </span>wasmtime_environ::{
-    AnyfuncIndex, EntityIndex, Global, GlobalInit, Module, ModuleType, SignatureIndex,
-};
-<span class="kw">use </span>wasmtime_runtime::VMFunctionImport;
+<span class="kw">use </span>std::ptr;
+<span class="kw">use </span>wasmtime_environ::GlobalInit;
+<span class="kw">use </span>wasmtime_runtime::VMGlobalDefinition;
 
-<span class="kw">pub fn </span>create_global(store: <span class="kw-2">&amp;mut </span>StoreOpaque, gt: <span class="kw-2">&amp;</span>GlobalType, val: Val) -&gt; <span class="prelude-ty">Result</span>&lt;InstanceId&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>module = Module::new();
-    <span class="kw">let </span><span class="kw-2">mut </span>func_imports = Vec::new();
-    <span class="kw">let </span><span class="kw-2">mut </span>externref_init = <span class="prelude-val">None</span>;
-    <span class="kw">let </span><span class="kw-2">mut </span>one_signature = <span class="prelude-val">None</span>;
+<span class="attr">#[repr(C)]
+</span><span class="kw">pub struct </span>VMHostGlobalContext {
+    ty: GlobalType,
+    global: VMGlobalDefinition,
+}
 
-    <span class="kw">let </span>global = Global {
-        wasm_ty: gt.content().to_wasm_type(),
-        mutability: <span class="kw">match </span>gt.mutability() {
-            Mutability::Const =&gt; <span class="bool-val">false</span>,
-            Mutability::Var =&gt; <span class="bool-val">true</span>,
-        },
-        initializer: <span class="kw">match </span>val {
-            Val::I32(i) =&gt; GlobalInit::I32Const(i),
-            Val::I64(i) =&gt; GlobalInit::I64Const(i),
-            Val::F32(f) =&gt; GlobalInit::F32Const(f),
-            Val::F64(f) =&gt; GlobalInit::F64Const(f),
-            Val::V128(i) =&gt; GlobalInit::V128Const(i.into()),
-            Val::ExternRef(<span class="prelude-val">None</span>) | Val::FuncRef(<span class="prelude-val">None</span>) =&gt; GlobalInit::RefNullConst,
-            Val::ExternRef(<span class="prelude-val">Some</span>(x)) =&gt; {
-                <span class="comment">// There is no `GlobalInit` variant for using an existing
-                // `externref` that isn&#39;t an import (because Wasm can&#39;t create
-                // an `externref` by itself). Therefore, initialize the global
-                // as null, and then monkey patch it after instantiation below.
-                </span>externref_init = <span class="prelude-val">Some</span>(x);
-                GlobalInit::RefNullConst
+<span class="kw">impl </span>Drop <span class="kw">for </span>VMHostGlobalContext {
+    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">match </span><span class="self">self</span>.ty.content() {
+            <span class="kw">crate</span>::ValType::I32
+            | <span class="kw">crate</span>::ValType::I64
+            | <span class="kw">crate</span>::ValType::F32
+            | <span class="kw">crate</span>::ValType::F64
+            | <span class="kw">crate</span>::ValType::V128
+            | <span class="kw">crate</span>::ValType::FuncRef =&gt; {
+                <span class="comment">// Nothing to drop.
+            </span>}
+            <span class="kw">crate</span>::ValType::ExternRef =&gt; <span class="kw">unsafe </span>{
+                ptr::drop_in_place(<span class="self">self</span>.global.as_externref_mut())
+            },
+        }
+    }
+}
+
+<span class="kw">pub fn </span>generate_global_export(
+    store: <span class="kw-2">&amp;mut </span>StoreOpaque,
+    ty: GlobalType,
+    val: Val,
+) -&gt; wasmtime_runtime::ExportGlobal {
+    <span class="kw">let </span><span class="kw-2">mut </span>ctx = Box::new(VMHostGlobalContext {
+        ty,
+        global: VMGlobalDefinition::new(),
+    });
+
+    <span class="kw">unsafe </span>{
+        <span class="kw">match </span>val {
+            Val::I32(x) =&gt; <span class="kw-2">*</span>ctx.global.as_i32_mut() = x,
+            Val::I64(x) =&gt; <span class="kw-2">*</span>ctx.global.as_i64_mut() = x,
+            Val::F32(x) =&gt; <span class="kw-2">*</span>ctx.global.as_f32_bits_mut() = x,
+            Val::F64(x) =&gt; <span class="kw-2">*</span>ctx.global.as_f64_bits_mut() = x,
+            Val::V128(x) =&gt; <span class="kw-2">*</span>ctx.global.as_u128_mut() = x,
+            Val::FuncRef(f) =&gt; {
+                <span class="kw-2">*</span>ctx.global.as_anyfunc_mut() = f.map_or(ptr::null_mut(), |f| {
+                    f.caller_checked_func_ref(store).as_ptr()
+                })
             }
-            Val::FuncRef(<span class="prelude-val">Some</span>(f)) =&gt; {
-                <span class="comment">// Add a function import to the stub module, and then initialize
-                // our global with a `ref.func` to grab that imported function.
-                </span><span class="kw">let </span>f = f.caller_checked_anyfunc(store);
-                <span class="kw">let </span>f = <span class="kw">unsafe </span>{ f.as_ref() };
-                <span class="kw">let </span>sig_id = SignatureIndex::from_u32(<span class="number">0</span>);
-                one_signature = <span class="prelude-val">Some</span>(f.type_index);
-                module.types.push(ModuleType::Function(sig_id));
-                <span class="kw">let </span>func_index = module.push_escaped_function(sig_id, AnyfuncIndex::from_u32(<span class="number">0</span>));
-                module.num_imported_funcs = <span class="number">1</span>;
-                module.num_escaped_funcs = <span class="number">1</span>;
-                module
-                    .initializers
-                    .push(wasmtime_environ::Initializer::Import {
-                        name: <span class="string">&quot;&quot;</span>.into(),
-                        field: <span class="string">&quot;&quot;</span>.into(),
-                        index: EntityIndex::Function(func_index),
-                    });
-
-                func_imports.push(VMFunctionImport {
-                    body: f.func_ptr,
-                    vmctx: f.vmctx,
-                });
-
-                GlobalInit::RefFunc(func_index)
-            }
-        },
-    };
-
-    <span class="kw">let </span>global_id = module.globals.push(global);
-    module
-        .exports
-        .insert(String::new(), EntityIndex::Global(global_id));
-    <span class="kw">let </span>id = create_handle(module, store, Box::new(()), <span class="kw-2">&amp;</span>func_imports, one_signature)<span class="question-mark">?</span>;
-
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(x) = externref_init {
-        <span class="kw">let </span>instance = store.instance_mut(id);
-        <span class="kw">let </span>g = instance.get_exported_global(global_id);
-        <span class="kw">unsafe </span>{
-            <span class="kw-2">*</span>(<span class="kw-2">*</span>g.definition).as_externref_mut() = <span class="prelude-val">Some</span>(x.inner);
+            Val::ExternRef(x) =&gt; <span class="kw-2">*</span>ctx.global.as_externref_mut() = x.map(|x| x.inner),
         }
     }
 
-    <span class="prelude-val">Ok</span>(id)
+    <span class="kw">let </span>ret = wasmtime_runtime::ExportGlobal {
+        definition: <span class="kw-2">&amp;mut </span>ctx.global <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>,
+        global: wasmtime_environ::Global {
+            wasm_ty: ctx.ty.content().to_wasm_type(),
+            mutability: <span class="kw">match </span>ctx.ty.mutability() {
+                Mutability::Const =&gt; <span class="bool-val">false</span>,
+                Mutability::Var =&gt; <span class="bool-val">true</span>,
+            },
+            <span class="comment">// TODO: This is just a dummy value; nothing should actually read
+            // this. We should probably remove this field from the struct.
+            </span>initializer: GlobalInit::I32Const(<span class="number">0</span>),
+        },
+    };
+    store.host_globals().push(ctx);
+    ret
 }
 </code></pre></div>
 </section></main></body></html>

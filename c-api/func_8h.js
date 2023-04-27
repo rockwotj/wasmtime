@@ -6,7 +6,7 @@ var func_8h =
     [ "wasmtime_caller_context", "func_8h.html#a89b944629663a8e879b1ef9bd9b95c80", null ],
     [ "wasmtime_caller_export_get", "func_8h.html#abeacae7ee2215736307c0951a77d8833", null ],
     [ "wasmtime_func_call", "func_8h.html#a40e120dae88e66151e24e55194dc8dba", null ],
-    [ "wasmtime_func_call_unchecked", "func_8h.html#a3b54596199641a8647a7cd89f322966f", null ],
+    [ "wasmtime_func_call_unchecked", "func_8h.html#a5345b00edd3fd29a0b57ed1305c60ea1", null ],
     [ "wasmtime_func_from_raw", "func_8h.html#a5934b1cb99ac0e3e601be386cb566527", null ],
     [ "wasmtime_func_new", "func_8h.html#a7b9dd547669d807c226857f2613c8ff5", null ],
     [ "wasmtime_func_new_unchecked", "func_8h.html#ae4de5e8a5fe28d952339fc33396527a9", null ],

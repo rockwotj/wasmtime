@@ -1336,6 +1336,23 @@
 <a href="#1336" id="1336">1336</a>
 <a href="#1337" id="1337">1337</a>
 <a href="#1338" id="1338">1338</a>
+<a href="#1339" id="1339">1339</a>
+<a href="#1340" id="1340">1340</a>
+<a href="#1341" id="1341">1341</a>
+<a href="#1342" id="1342">1342</a>
+<a href="#1343" id="1343">1343</a>
+<a href="#1344" id="1344">1344</a>
+<a href="#1345" id="1345">1345</a>
+<a href="#1346" id="1346">1346</a>
+<a href="#1347" id="1347">1347</a>
+<a href="#1348" id="1348">1348</a>
+<a href="#1349" id="1349">1349</a>
+<a href="#1350" id="1350">1350</a>
+<a href="#1351" id="1351">1351</a>
+<a href="#1352" id="1352">1352</a>
+<a href="#1353" id="1353">1353</a>
+<a href="#1354" id="1354">1354</a>
+<a href="#1355" id="1355">1355</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements the pooling instance allocator.
 //!
 //! The pooling instance allocator maps memory in advance
@@ -2278,10 +2295,9 @@
 </span><span class="kw">mod </span>test {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use crate</span>::{
-        CompiledModuleId, Imports, MemoryImage, ModuleRuntimeInfo, StorePtr, VMFunctionBody,
-        VMSharedSignatureIndex,
+        CompiledModuleId, Imports, MemoryImage, ModuleRuntimeInfo, StorePtr, VMSharedSignatureIndex,
     };
-    <span class="kw">use </span>std::sync::Arc;
+    <span class="kw">use </span>std::{ptr::NonNull, sync::Arc};
     <span class="kw">use </span>wasmtime_environ::{DefinedFuncIndex, DefinedMemoryIndex};
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>empty_runtime_info(
@@ -2293,7 +2309,25 @@
             <span class="kw">fn </span>module(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Arc&lt;wasmtime_environ::Module&gt; {
                 <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0
             </span>}
-            <span class="kw">fn </span>function(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: DefinedFuncIndex) -&gt; <span class="kw-2">*mut </span>VMFunctionBody {
+            <span class="kw">fn </span>function(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: DefinedFuncIndex) -&gt; NonNull&lt;<span class="kw">crate</span>::VMWasmCallFunction&gt; {
+                <span class="macro">unimplemented!</span>()
+            }
+            <span class="kw">fn </span>array_to_wasm_trampoline(
+                <span class="kw-2">&amp;</span><span class="self">self</span>,
+                <span class="kw">_</span>: DefinedFuncIndex,
+            ) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::VMArrayCallFunction&gt; {
+                <span class="macro">unimplemented!</span>()
+            }
+            <span class="kw">fn </span>native_to_wasm_trampoline(
+                <span class="kw-2">&amp;</span><span class="self">self</span>,
+                <span class="kw">_</span>: DefinedFuncIndex,
+            ) -&gt; <span class="prelude-ty">Option</span>&lt;std::ptr::NonNull&lt;<span class="kw">crate</span>::VMNativeCallFunction&gt;&gt; {
+                <span class="macro">unimplemented!</span>()
+            }
+            <span class="kw">fn </span>wasm_to_native_trampoline(
+                <span class="kw-2">&amp;</span><span class="self">self</span>,
+                <span class="kw">_</span>: VMSharedSignatureIndex,
+            ) -&gt; <span class="prelude-ty">Option</span>&lt;std::ptr::NonNull&lt;<span class="kw">crate</span>::VMWasmCallFunction&gt;&gt; {
                 <span class="macro">unimplemented!</span>()
             }
             <span class="kw">fn </span>memory_image(
