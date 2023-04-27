@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["OpenResult"],"struct":["DirCaps","DirFdStat","ReaddirCursor","ReaddirEntity"],"trait":["DirEntryExt","WasiDir"]};
+window.SIDEBAR_ITEMS = {"enum":["OpenResult"],"struct":["ReaddirCursor","ReaddirEntity"],"trait":["WasiDir"]};
