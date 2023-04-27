@@ -2162,6 +2162,10 @@
 <a href="#2162" id="2162">2162</a>
 <a href="#2163" id="2163">2163</a>
 <a href="#2164" id="2164">2164</a>
+<a href="#2165" id="2165">2165</a>
+<a href="#2166" id="2166">2166</a>
+<a href="#2167" id="2167">2167</a>
+<a href="#2168" id="2168">2168</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Instruction operand sub-components (aka &quot;parts&quot;): definitions and printing.
 
 </span><span class="kw">use </span><span class="kw">super</span>::regs::{<span class="self">self</span>};
@@ -3280,6 +3284,7 @@
     Ucomiss,
     Ucomisd,
     Unpcklps,
+    Unpckhps,
     Xorps,
     Xorpd,
     Phaddw,
@@ -3332,6 +3337,7 @@
             | SseOpcode::Subss
             | SseOpcode::Ucomiss
             | SseOpcode::Unpcklps
+            | SseOpcode::Unpckhps
             | SseOpcode::Xorps =&gt; SSE,
 
             SseOpcode::Addpd
@@ -3680,6 +3686,7 @@
             SseOpcode::Ucomiss =&gt; <span class="string">&quot;ucomiss&quot;</span>,
             SseOpcode::Ucomisd =&gt; <span class="string">&quot;ucomisd&quot;</span>,
             SseOpcode::Unpcklps =&gt; <span class="string">&quot;unpcklps&quot;</span>,
+            SseOpcode::Unpckhps =&gt; <span class="string">&quot;unpckhps&quot;</span>,
             SseOpcode::Xorps =&gt; <span class="string">&quot;xorps&quot;</span>,
             SseOpcode::Xorpd =&gt; <span class="string">&quot;xorpd&quot;</span>,
             SseOpcode::Phaddw =&gt; <span class="string">&quot;phaddw&quot;</span>,
@@ -3775,6 +3782,7 @@
             | AvxOpcode::Vpunpckhwd
             | AvxOpcode::Vpunpcklwd
             | AvxOpcode::Vunpcklps
+            | AvxOpcode::Vunpckhps
             | AvxOpcode::Vaddps
             | AvxOpcode::Vaddpd
             | AvxOpcode::Vsubps

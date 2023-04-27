@@ -3998,6 +3998,8 @@
 <a href="#3998" id="3998">3998</a>
 <a href="#3999" id="3999">3999</a>
 <a href="#4000" id="4000">4000</a>
+<a href="#4001" id="4001">4001</a>
+<a href="#4002" id="4002">4002</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -6060,6 +6062,7 @@
                 SseOpcode::Subss =&gt; (LegacyPrefixes::_F3, <span class="number">0x0F5C</span>, <span class="number">2</span>),
                 SseOpcode::Subsd =&gt; (LegacyPrefixes::_F2, <span class="number">0x0F5C</span>, <span class="number">2</span>),
                 SseOpcode::Unpcklps =&gt; (LegacyPrefixes::None, <span class="number">0x0F14</span>, <span class="number">2</span>),
+                SseOpcode::Unpckhps =&gt; (LegacyPrefixes::None, <span class="number">0x0F15</span>, <span class="number">2</span>),
                 SseOpcode::Xorps =&gt; (LegacyPrefixes::None, <span class="number">0x0F57</span>, <span class="number">2</span>),
                 SseOpcode::Xorpd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F57</span>, <span class="number">2</span>),
                 SseOpcode::Phaddw =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3801</span>, <span class="number">3</span>),
@@ -6206,6 +6209,7 @@
                 AvxOpcode::Vpunpckhwd =&gt; (LP::_66, OM::_0F, <span class="number">0x69</span>),
                 AvxOpcode::Vpunpcklwd =&gt; (LP::_66, OM::_0F, <span class="number">0x61</span>),
                 AvxOpcode::Vunpcklps =&gt; (LP::None, OM::_0F, <span class="number">0x14</span>),
+                AvxOpcode::Vunpckhps =&gt; (LP::None, OM::_0F, <span class="number">0x15</span>),
                 AvxOpcode::Vaddps =&gt; (LP::None, OM::_0F, <span class="number">0x58</span>),
                 AvxOpcode::Vaddpd =&gt; (LP::_66, OM::_0F, <span class="number">0x58</span>),
                 AvxOpcode::Vsubps =&gt; (LP::None, OM::_0F, <span class="number">0x5C</span>),
