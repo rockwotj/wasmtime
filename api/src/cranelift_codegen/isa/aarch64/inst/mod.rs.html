@@ -2924,6 +2924,14 @@
 <a href="#2924" id="2924">2924</a>
 <a href="#2925" id="2925">2925</a>
 <a href="#2926" id="2926">2926</a>
+<a href="#2927" id="2927">2927</a>
+<a href="#2928" id="2928">2928</a>
+<a href="#2929" id="2929">2929</a>
+<a href="#2930" id="2930">2930</a>
+<a href="#2931" id="2931">2931</a>
+<a href="#2932" id="2932">2932</a>
+<a href="#2933" id="2933">2933</a>
+<a href="#2934" id="2934">2934</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines aarch64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc};
@@ -3881,22 +3889,30 @@
     }
 
     <span class="kw">fn </span>is_included_in_clobbers(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="kw">let </span>(caller_callconv, callee_callconv) = <span class="kw">match </span><span class="self">self </span>{
+            Inst::Args { .. } =&gt; <span class="kw">return </span><span class="bool-val">false</span>,
+            Inst::Call { info } =&gt; (info.caller_callconv, info.callee_callconv),
+            Inst::CallInd { info } =&gt; (info.caller_callconv, info.callee_callconv),
+            <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="bool-val">true</span>,
+        };
+
         <span class="comment">// We exclude call instructions from the clobber-set when they are calls
-        // from caller to callee with the same ABI. Such calls cannot possibly
-        // force any new registers to be saved in the prologue, because anything
-        // that the callee clobbers, the caller is also allowed to clobber. This
-        // both saves work and enables us to more precisely follow the
+        // from caller to callee that both clobber the same register (such as
+        // using the same or similar ABIs). Such calls cannot possibly force any
+        // new registers to be saved in the prologue, because anything that the
+        // callee clobbers, the caller is also allowed to clobber. This both
+        // saves work and enables us to more precisely follow the
         // half-caller-save, half-callee-save SysV ABI for some vector
         // registers.
         //
         // See the note in [crate::isa::aarch64::abi::is_caller_save_reg] for
         // more information on this ABI-implementation hack.
-        </span><span class="kw">match </span><span class="self">self </span>{
-            <span class="kw-2">&amp;</span>Inst::Args { .. } =&gt; <span class="bool-val">false</span>,
-            <span class="kw-2">&amp;</span>Inst::Call { <span class="kw-2">ref </span>info } =&gt; info.caller_callconv != info.callee_callconv,
-            <span class="kw-2">&amp;</span>Inst::CallInd { <span class="kw-2">ref </span>info } =&gt; info.caller_callconv != info.callee_callconv,
-            <span class="kw">_ </span>=&gt; <span class="bool-val">true</span>,
-        }
+        </span><span class="kw">let </span>caller_clobbers = AArch64MachineDeps::get_regs_clobbered_by_call(caller_callconv);
+        <span class="kw">let </span>callee_clobbers = AArch64MachineDeps::get_regs_clobbered_by_call(callee_callconv);
+
+        <span class="kw">let </span><span class="kw-2">mut </span>all_clobbers = caller_clobbers;
+        all_clobbers.union_from(callee_clobbers);
+        all_clobbers != caller_clobbers
     }
 
     <span class="kw">fn </span>is_trap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
