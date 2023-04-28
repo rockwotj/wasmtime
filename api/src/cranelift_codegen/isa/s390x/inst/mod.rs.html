@@ -3399,12 +3399,19 @@
 <a href="#3399" id="3399">3399</a>
 <a href="#3400" id="3400">3400</a>
 <a href="#3401" id="3401">3401</a>
+<a href="#3402" id="3402">3402</a>
+<a href="#3403" id="3403">3403</a>
+<a href="#3404" id="3404">3404</a>
+<a href="#3405" id="3405">3405</a>
+<a href="#3406" id="3406">3406</a>
+<a href="#3407" id="3407">3407</a>
+<a href="#3408" id="3408">3408</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines s390x-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::{types, ExternalName, Opcode, Type};
 <span class="kw">use </span><span class="kw">crate</span>::isa::s390x::abi::S390xMachineDeps;
-<span class="kw">use </span><span class="kw">crate</span>::isa::CallConv;
+<span class="kw">use </span><span class="kw">crate</span>::isa::{CallConv, FunctionAlignment};
 <span class="kw">use </span><span class="kw">crate</span>::machinst::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::{settings, CodegenError, CodegenResult};
 <span class="kw">use </span>alloc::boxed::Box;
@@ -4542,6 +4549,13 @@
 
     <span class="kw">fn </span>gen_dummy_use(reg: Reg) -&gt; Inst {
         Inst::DummyUse { reg }
+    }
+
+    <span class="kw">fn </span>function_alignment() -&gt; FunctionAlignment {
+        FunctionAlignment {
+            minimum: <span class="number">4</span>,
+            preferred: <span class="number">4</span>,
+        }
     }
 }
 

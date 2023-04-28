@@ -191,10 +191,6 @@
 <a href="#191" id="191">191</a>
 <a href="#192" id="192">192</a>
 <a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
 </pre><pre class="rust"><code><span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>cranelift_codegen::{Final, MachBufferFinalized};
 <span class="kw">use </span>object::write::{Object, SymbolId};
@@ -326,7 +322,7 @@
             <span class="kw">let </span>(sym, range) = builder.append_func(
                 <span class="kw-2">&amp;</span>sym,
                 func.data(),
-                <span class="self">self</span>.function_alignment(),
+                <span class="self">self</span>.isa.function_alignment(),
                 <span class="prelude-val">None</span>,
                 <span class="kw-2">&amp;</span>[],
                 |idx| resolve_reloc(i, idx),
@@ -382,10 +378,6 @@
         _funcs: <span class="kw-2">&amp;</span>PrimaryMap&lt;DefinedFuncIndex, (SymbolId, <span class="kw-2">&amp;</span>(<span class="kw">dyn </span>Any + Send))&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="macro">todo!</span>()
-    }
-
-    <span class="kw">fn </span>function_alignment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
-        <span class="self">self</span>.isa.function_alignment()
     }
 
     <span class="kw">fn </span>create_systemv_cie(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;gimli::write::CommonInformationEntry&gt; {

@@ -219,9 +219,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::isa::s390x::settings <span class="kw">as </span>s390x_settings;
 <span class="attr">#[cfg(feature = <span class="string">&quot;unwind&quot;</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::isa::unwind::systemv::RegisterMappingError;
-<span class="kw">use </span><span class="kw">crate</span>::isa::{Builder <span class="kw">as </span>IsaBuilder, TargetIsa};
+<span class="kw">use </span><span class="kw">crate</span>::isa::{Builder <span class="kw">as </span>IsaBuilder, FunctionAlignment, TargetIsa};
 <span class="kw">use </span><span class="kw">crate</span>::machinst::{
-    compile, CompiledCode, CompiledCodeStencil, MachTextSectionBuilder, Reg, SigSet,
+    compile, CompiledCode, CompiledCodeStencil, MachInst, MachTextSectionBuilder, Reg, SigSet,
     TextSectionBuilder, VCode,
 };
 <span class="kw">use </span><span class="kw">crate</span>::result::CodegenResult;
@@ -381,9 +381,9 @@
         Box::new(MachTextSectionBuilder::&lt;inst::Inst&gt;::new(num_funcs))
     }
 
-    <span class="kw">fn </span>function_alignment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
-        <span class="number">4
-    </span>}
+    <span class="kw">fn </span>function_alignment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FunctionAlignment {
+        inst::Inst::function_alignment()
+    }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;disas&quot;</span>)]
     </span><span class="kw">fn </span>to_capstone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;capstone::Capstone, capstone::Error&gt; {

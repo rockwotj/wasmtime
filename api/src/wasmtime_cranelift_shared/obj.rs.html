@@ -563,9 +563,6 @@
 <a href="#563" id="563">563</a>
 <a href="#564" id="564">564</a>
 <a href="#565" id="565">565</a>
-<a href="#566" id="566">566</a>
-<a href="#567" id="567">567</a>
-<a href="#568" id="568">568</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Object file builder.
 //!
 //! Creates ELF image based on `Compilation` information. The ELF contains
@@ -683,12 +680,9 @@
         resolve_reloc_target: <span class="kw">impl </span>Fn(FuncIndex) -&gt; usize,
     ) -&gt; (SymbolId, Range&lt;u64&gt;) {
         <span class="kw">let </span>body_len = body.len() <span class="kw">as </span>u64;
-        <span class="kw">let </span>off = <span class="self">self</span>.text.append(
-            <span class="bool-val">true</span>,
-            <span class="kw-2">&amp;</span>body,
-            <span class="self">self</span>.compiler.function_alignment().max(alignment),
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.ctrl_plane,
-        );
+        <span class="kw">let </span>off = <span class="self">self
+            </span>.text
+            .append(<span class="bool-val">true</span>, <span class="kw-2">&amp;</span>body, alignment, <span class="kw-2">&amp;mut </span><span class="self">self</span>.ctrl_plane);
 
         <span class="kw">let </span>symbol_id = <span class="self">self</span>.obj.add_symbol(Symbol {
             name: name.as_bytes().to_vec(),

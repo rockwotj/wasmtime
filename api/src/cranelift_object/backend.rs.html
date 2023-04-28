@@ -1206,7 +1206,7 @@
         <span class="kw-2">*</span>defined = <span class="bool-val">true</span>;
 
         <span class="kw">let </span>align = alignment
-            .max(<span class="self">self</span>.isa.function_alignment() <span class="kw">as </span>u64)
+            .max(<span class="self">self</span>.isa.function_alignment().minimum.into())
             .max(<span class="self">self</span>.isa.symbol_alignment());
         <span class="kw">let </span>(section, offset) = <span class="kw">if </span><span class="self">self</span>.per_function_section {
             <span class="kw">let </span>symbol_name = <span class="self">self</span>.object.symbol(symbol).name.clone();

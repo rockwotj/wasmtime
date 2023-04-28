@@ -223,9 +223,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::ir::Function;
 
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::settings <span class="kw">as </span>riscv_settings;
-<span class="kw">use </span><span class="kw">crate</span>::isa::{Builder <span class="kw">as </span>IsaBuilder, TargetIsa};
+<span class="kw">use </span><span class="kw">crate</span>::isa::{Builder <span class="kw">as </span>IsaBuilder, FunctionAlignment, TargetIsa};
 <span class="kw">use </span><span class="kw">crate</span>::machinst::{
-    compile, CompiledCode, CompiledCodeStencil, MachTextSectionBuilder, Reg, SigSet,
+    compile, CompiledCode, CompiledCodeStencil, MachInst, MachTextSectionBuilder, Reg, SigSet,
     TextSectionBuilder, VCode,
 };
 <span class="kw">use </span><span class="kw">crate</span>::result::CodegenResult;
@@ -385,9 +385,9 @@
         inst::unwind::systemv::map_reg(reg).map(|reg| reg.<span class="number">0</span>)
     }
 
-    <span class="kw">fn </span>function_alignment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
-        <span class="number">4
-    </span>}
+    <span class="kw">fn </span>function_alignment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FunctionAlignment {
+        inst::Inst::function_alignment()
+    }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;disas&quot;</span>)]
     </span><span class="kw">fn </span>to_capstone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;capstone::Capstone, capstone::Error&gt; {

@@ -1523,6 +1523,23 @@
 <a href="#1523" id="1523">1523</a>
 <a href="#1524" id="1524">1524</a>
 <a href="#1525" id="1525">1525</a>
+<a href="#1526" id="1526">1526</a>
+<a href="#1527" id="1527">1527</a>
+<a href="#1528" id="1528">1528</a>
+<a href="#1529" id="1529">1529</a>
+<a href="#1530" id="1530">1530</a>
+<a href="#1531" id="1531">1531</a>
+<a href="#1532" id="1532">1532</a>
+<a href="#1533" id="1533">1533</a>
+<a href="#1534" id="1534">1534</a>
+<a href="#1535" id="1535">1535</a>
+<a href="#1536" id="1536">1536</a>
+<a href="#1537" id="1537">1537</a>
+<a href="#1538" id="1538">1538</a>
+<a href="#1539" id="1539">1539</a>
+<a href="#1540" id="1540">1540</a>
+<a href="#1541" id="1541">1541</a>
+<a href="#1542" id="1542">1542</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::code::CodeObject;
 <span class="kw">use crate</span>::{
     signatures::SignatureCollection,
@@ -1686,9 +1703,16 @@
     ) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>func_infos = PrimaryMap::with_capacity(function_compilations.len());
         <span class="kw">let </span><span class="kw-2">mut </span>func_indices = Vec::with_capacity(function_compilations.len());
-        <span class="kw">let </span><span class="kw-2">mut </span>array_to_wasm_trampoline_indices = <span class="macro">vec!</span>[];
-        <span class="kw">let </span><span class="kw-2">mut </span>native_to_wasm_trampoline_indices = <span class="macro">vec!</span>[];
 
+        <span class="comment">// Place all wasm-compiled functions, in order, into the final object.
+        // This should help keep a sense of locality between functions, if
+        // necessary.
+        //
+        // Trampolines are deferred to get inserted after all wasm functions
+        // since they don&#39;t need the same locality and also don&#39;t require
+        // alignment since they&#39;re not hot.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>array_to_wasm_trampolines = Vec::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>native_to_wasm_trampolines = Vec::new();
         <span class="kw">for </span>CompileFunctionResult {
             info,
             function,
@@ -1699,21 +1723,31 @@
             <span class="kw">let </span>def_idx = func_infos.push(info);
             <span class="kw">let </span>idx = translation.module.func_index(def_idx).as_u32();
 
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(array_to_wasm_trampoline) = array_to_wasm_trampoline {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(trampoline) = array_to_wasm_trampoline {
                 <span class="kw">let </span>sym = <span class="macro">format!</span>(<span class="string">&quot;{symbol_prefix}_array_to_wasm_trampoline_{idx}&quot;</span>);
-                array_to_wasm_trampoline_indices.push((compiled_funcs.len(), def_idx));
-                compiled_funcs.push((sym, array_to_wasm_trampoline));
+                array_to_wasm_trampolines.push((def_idx, (sym, trampoline)));
             }
 
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(native_to_wasm_trampoline) = native_to_wasm_trampoline {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(trampoline) = native_to_wasm_trampoline {
                 <span class="kw">let </span>sym = <span class="macro">format!</span>(<span class="string">&quot;{symbol_prefix}_native_to_wasm_trampoline_{idx}&quot;</span>);
-                native_to_wasm_trampoline_indices.push((compiled_funcs.len(), def_idx));
-                compiled_funcs.push((sym, native_to_wasm_trampoline));
+                native_to_wasm_trampolines.push((def_idx, (sym, trampoline)));
             }
 
             <span class="kw">let </span>sym = <span class="macro">format!</span>(<span class="string">&quot;{symbol_prefix}_function_{idx}&quot;</span>);
             func_indices.push(compiled_funcs.len());
             compiled_funcs.push((sym, function));
+        }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>array_to_wasm_trampoline_indices = <span class="macro">vec!</span>[];
+        <span class="kw">for </span>(def_idx, pair) <span class="kw">in </span>array_to_wasm_trampolines {
+            array_to_wasm_trampoline_indices.push((compiled_funcs.len(), def_idx));
+            compiled_funcs.push(pair);
+        }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>native_to_wasm_trampoline_indices = <span class="macro">vec!</span>[];
+        <span class="kw">for </span>(def_idx, pair) <span class="kw">in </span>native_to_wasm_trampolines {
+            native_to_wasm_trampoline_indices.push((compiled_funcs.len(), def_idx));
+            compiled_funcs.push(pair);
         }
 
         ModuleFunctionIndices {

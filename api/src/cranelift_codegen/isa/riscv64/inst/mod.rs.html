@@ -1796,6 +1796,13 @@
 <a href="#1796" id="1796">1796</a>
 <a href="#1797" id="1797">1797</a>
 <a href="#1798" id="1798">1798</a>
+<a href="#1799" id="1799">1799</a>
+<a href="#1800" id="1800">1800</a>
+<a href="#1801" id="1801">1801</a>
+<a href="#1802" id="1802">1802</a>
+<a href="#1803" id="1803">1803</a>
+<a href="#1804" id="1804">1804</a>
+<a href="#1805" id="1805">1805</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines riscv64-specific machine instruction types.
 
 </span><span class="comment">// Some variants are not constructed, but we still want them as options in the future.
@@ -1808,7 +1815,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::ir::types::{<span class="self">self</span>, F32, F64, I128, I16, I32, I64, I8, R32, R64};
 
 <span class="kw">pub use </span><span class="kw">crate</span>::ir::{ExternalName, MemFlags, Opcode, SourceLoc, Type, ValueLabel};
-<span class="kw">use </span><span class="kw">crate</span>::isa::CallConv;
+<span class="kw">use </span><span class="kw">crate</span>::isa::{CallConv, FunctionAlignment};
 <span class="kw">use </span><span class="kw">crate</span>::machinst::<span class="kw-2">*</span>;
 <span class="kw">use crate</span>::{settings, CodegenError, CodegenResult};
 
@@ -2598,6 +2605,13 @@
 
     <span class="kw">fn </span>ref_type_regclass(_settings: <span class="kw-2">&amp;</span>settings::Flags) -&gt; RegClass {
         RegClass::Int
+    }
+
+    <span class="kw">fn </span>function_alignment() -&gt; FunctionAlignment {
+        FunctionAlignment {
+            minimum: <span class="number">4</span>,
+            preferred: <span class="number">4</span>,
+        }
     }
 }
 

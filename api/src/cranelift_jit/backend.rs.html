@@ -1235,7 +1235,7 @@
                 std::mem::size_of::&lt;[u8; <span class="number">16</span>]&gt;(),
                 <span class="self">self</span>.isa
                     .symbol_alignment()
-                    .max(<span class="self">self</span>.isa.function_alignment() <span class="kw">as </span>u64),
+                    .max(<span class="self">self</span>.isa.function_alignment().minimum <span class="kw">as </span>u64),
             )
             .unwrap()
             .cast::&lt;[u8; <span class="number">16</span>]&gt;();
@@ -1672,7 +1672,7 @@
 
         <span class="kw">let </span>size = compiled_code.code_info().total_size <span class="kw">as </span>usize;
         <span class="kw">let </span>align = alignment
-            .max(<span class="self">self</span>.isa.function_alignment() <span class="kw">as </span>u64)
+            .max(<span class="self">self</span>.isa.function_alignment().minimum <span class="kw">as </span>u64)
             .max(<span class="self">self</span>.isa.symbol_alignment());
         <span class="kw">let </span>ptr = <span class="self">self
             </span>.memory
@@ -1756,7 +1756,7 @@
 
         <span class="kw">let </span>size = bytes.len();
         <span class="kw">let </span>align = alignment
-            .max(<span class="self">self</span>.isa.function_alignment() <span class="kw">as </span>u64)
+            .max(<span class="self">self</span>.isa.function_alignment().minimum <span class="kw">as </span>u64)
             .max(<span class="self">self</span>.isa.symbol_alignment());
         <span class="kw">let </span>ptr = <span class="self">self
             </span>.memory

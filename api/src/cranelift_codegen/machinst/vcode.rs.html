@@ -1566,6 +1566,9 @@
 <a href="#1566" id="1566">1566</a>
 <a href="#1567" id="1567">1567</a>
 <a href="#1568" id="1568">1568</a>
+<a href="#1569" id="1569">1569</a>
+<a href="#1570" id="1570">1570</a>
+<a href="#1571" id="1571">1571</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This implements the VCode container: a CFG of Insts that have been lowered.
 //!
 //! VCode is virtual-register code. An instruction in VCode is almost a machine
@@ -2614,10 +2617,13 @@
         <span class="comment">// emission state is not needed anymore, move control plane back out
         </span><span class="kw-2">*</span>ctrl_plane = state.take_ctrl_plane();
 
-        <span class="comment">// Emit the constants used by the function.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>alignment = <span class="number">1</span>;
+        <span class="comment">// Emit the constants used by the function, and additionally collect
+        // this function&#39;s alignment at the same time. The alignment start at
+        // the ISA-defined minimum, and can possibly get increased if necessary
+        // for constants.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>function_alignment = I::function_alignment().minimum;
         <span class="kw">for </span>(constant, data) <span class="kw">in </span><span class="self">self</span>.constants.iter() {
-            alignment = data.alignment().max(alignment);
+            function_alignment = data.alignment().max(function_alignment);
 
             <span class="kw">let </span>label = buffer.get_label_for_constant(constant);
             buffer.defer_constant(label, data.alignment(), data.as_slice(), u32::max_value());
@@ -2661,7 +2667,7 @@
             dynamic_stackslot_offsets: <span class="self">self</span>.abi.dynamic_stackslot_offsets().clone(),
             value_labels_ranges,
             frame_size,
-            alignment,
+            alignment: function_alignment,
         }
     }
 

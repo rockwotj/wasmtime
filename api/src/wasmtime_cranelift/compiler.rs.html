@@ -1352,6 +1352,11 @@
 <a href="#1352" id="1352">1352</a>
 <a href="#1353" id="1353">1353</a>
 <a href="#1354" id="1354">1354</a>
+<a href="#1355" id="1355">1355</a>
+<a href="#1356" id="1356">1356</a>
+<a href="#1357" id="1357">1357</a>
+<a href="#1358" id="1358">1358</a>
+<a href="#1359" id="1359">1359</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::debug::{DwarfSectionRelocTarget, ModuleMemoryOffset};
 <span class="kw">use </span><span class="kw">crate</span>::func_environ::FuncEnvironment;
 <span class="kw">use crate</span>::{array_call_signature, native_call_signature, DEBUG_ASSERT_TRAP_CODE};
@@ -1984,10 +1989,6 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn </span>function_alignment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
-        <span class="self">self</span>.isa.function_alignment()
-    }
-
     <span class="kw">fn </span>create_systemv_cie(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;gimli::write::CommonInformationEntry&gt; {
         <span class="self">self</span>.isa.create_systemv_cie()
     }
@@ -2391,7 +2392,16 @@
             .into_iter()
             .filter_map(mach_trap_to_trap)
             .collect();
-        <span class="kw">let </span>alignment = compiled_code.alignment;
+
+        <span class="comment">// Give wasm functions, user defined code, a &quot;preferred&quot; alignment
+        // instead of the minimum alignment as this can help perf in niche
+        // situations.
+        </span><span class="kw">let </span>preferred_alignment = <span class="kw">if </span>body_and_tunables.is_some() {
+            <span class="self">self</span>.compiler.isa.function_alignment().preferred
+        } <span class="kw">else </span>{
+            <span class="number">1
+        </span>};
+        <span class="kw">let </span>alignment = compiled_code.alignment.max(preferred_alignment);
 
         <span class="kw">let </span>address_map = <span class="kw">match </span>body_and_tunables {
             <span class="prelude-val">Some</span>((body, tunables)) =&gt; Compiler::get_function_address_map(
