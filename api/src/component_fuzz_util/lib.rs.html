@@ -1008,10 +1008,10 @@
 </span><span class="kw">const </span>MAX_TYPE_DEPTH: u32 = <span class="number">99</span>;
 
 <span class="doccomment">/// The name of the imported host function which the generated component will call
-</span><span class="kw">pub const </span>IMPORT_FUNCTION: <span class="kw-2">&amp;</span>str = <span class="string">&quot;echo&quot;</span>;
+</span><span class="kw">pub const </span>IMPORT_FUNCTION: <span class="kw-2">&amp;</span>str = <span class="string">&quot;echo-import&quot;</span>;
 
 <span class="doccomment">/// The name of the exported guest function which the host should call
-</span><span class="kw">pub const </span>EXPORT_FUNCTION: <span class="kw-2">&amp;</span>str = <span class="string">&quot;echo&quot;</span>;
+</span><span class="kw">pub const </span>EXPORT_FUNCTION: <span class="kw-2">&amp;</span>str = <span class="string">&quot;echo-export&quot;</span>;
 
 <span class="attr">#[derive(Copy, Clone, PartialEq, Eq)]
 </span><span class="kw">enum </span>CoreType {
@@ -1819,7 +1819,7 @@
             <span class="macro">format!</span>(
                 <span class="string">r#&quot;
                 (component ${name}
-                    (import &quot;echo&quot; (func $f (type $sig)))
+                    (import &quot;{IMPORT_FUNCTION}&quot; (func $f (type $sig)))
 
                     (core instance $libc (instantiate $libc))
 
@@ -1835,9 +1835,9 @@
                         (with &quot;host&quot; (instance (export &quot;{IMPORT_FUNCTION}&quot; (func $f_lower))))
                     ))
 
-                    (func (export &quot;echo&quot;) (type $sig)
+                    (func (export &quot;{EXPORT_FUNCTION}&quot;) (type $sig)
                         (canon lift
-                            (core func $i &quot;echo&quot;)
+                            (core func $i &quot;{EXPORT_FUNCTION}&quot;)
                             (memory $libc &quot;memory&quot;)
                             (realloc (func $libc &quot;realloc&quot;))
                             string-encoding={encoding}
@@ -1873,9 +1873,9 @@
 
                 {c1}
                 {c2}
-                (instance $c1 (instantiate $c1 (with &quot;echo&quot; (func $f))))
-                (instance $c2 (instantiate $c2 (with &quot;echo&quot; (func $c1 &quot;echo&quot;))))
-                (export &quot;echo&quot; (func $c2 &quot;echo&quot;))
+                (instance $c1 (instantiate $c1 (with &quot;{IMPORT_FUNCTION}&quot; (func $f))))
+                (instance $c2 (instantiate $c2 (with &quot;{IMPORT_FUNCTION}&quot; (func $c1 &quot;{EXPORT_FUNCTION}&quot;))))
+                (export &quot;{EXPORT_FUNCTION}&quot; (func $c2 &quot;{EXPORT_FUNCTION}&quot;))
             )&quot;#</span>,
         )
         .into()
