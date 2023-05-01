@@ -97,6 +97,15 @@
 <a href="#97" id="97">97</a>
 <a href="#98" id="98">98</a>
 <a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implementation of a &quot;compiler builder&quot; for cranelift
 //!
 //! This module contains the implementation of how Cranelift is configured, as
@@ -108,6 +117,7 @@
     CodegenResult,
 };
 <span class="kw">use </span>std::fmt;
+<span class="kw">use </span>std::path;
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>wasmtime_cranelift_shared::isa_builder::IsaBuilder;
 <span class="kw">use </span>wasmtime_environ::{CacheStore, CompilerBuilder, Setting};
@@ -116,6 +126,7 @@
     inner: IsaBuilder&lt;CodegenResult&lt;OwnedTargetIsa&gt;&gt;,
     linkopts: LinkOptions,
     cache_store: <span class="prelude-ty">Option</span>&lt;Arc&lt;<span class="kw">dyn </span>CacheStore&gt;&gt;,
+    clif_dir: <span class="prelude-ty">Option</span>&lt;path::PathBuf&gt;,
 }
 
 <span class="attr">#[derive(Clone, Default)]
@@ -136,12 +147,18 @@
         inner: IsaBuilder::new(|triple| isa::lookup(triple).map_err(|e| e.into())),
         linkopts: LinkOptions::default(),
         cache_store: <span class="prelude-val">None</span>,
+        clif_dir: <span class="prelude-val">None</span>,
     })
 }
 
 <span class="kw">impl </span>CompilerBuilder <span class="kw">for </span>Builder {
     <span class="kw">fn </span>triple(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>target_lexicon::Triple {
         <span class="self">self</span>.inner.triple()
+    }
+
+    <span class="kw">fn </span>clif_dir(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>path::Path) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.clif_dir = <span class="prelude-val">Some</span>(path.to_path_buf());
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn </span>target(<span class="kw-2">&amp;mut </span><span class="self">self</span>, target: target_lexicon::Triple) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
@@ -173,6 +190,7 @@
             isa,
             <span class="self">self</span>.cache_store.clone(),
             <span class="self">self</span>.linkopts.clone(),
+            <span class="self">self</span>.clif_dir.clone(),
         )))
     }
 
