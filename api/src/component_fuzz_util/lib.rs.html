@@ -983,6 +983,33 @@
 <a href="#983" id="983">983</a>
 <a href="#984" id="984">984</a>
 <a href="#985" id="985">985</a>
+<a href="#986" id="986">986</a>
+<a href="#987" id="987">987</a>
+<a href="#988" id="988">988</a>
+<a href="#989" id="989">989</a>
+<a href="#990" id="990">990</a>
+<a href="#991" id="991">991</a>
+<a href="#992" id="992">992</a>
+<a href="#993" id="993">993</a>
+<a href="#994" id="994">994</a>
+<a href="#995" id="995">995</a>
+<a href="#996" id="996">996</a>
+<a href="#997" id="997">997</a>
+<a href="#998" id="998">998</a>
+<a href="#999" id="999">999</a>
+<a href="#1000" id="1000">1000</a>
+<a href="#1001" id="1001">1001</a>
+<a href="#1002" id="1002">1002</a>
+<a href="#1003" id="1003">1003</a>
+<a href="#1004" id="1004">1004</a>
+<a href="#1005" id="1005">1005</a>
+<a href="#1006" id="1006">1006</a>
+<a href="#1007" id="1007">1007</a>
+<a href="#1008" id="1008">1008</a>
+<a href="#1009" id="1009">1009</a>
+<a href="#1010" id="1010">1010</a>
+<a href="#1011" id="1011">1011</a>
+<a href="#1012" id="1012">1012</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module generates test cases for the Wasmtime component model function APIs,
 //! e.g. `wasmtime::component::func::Func` and `TypedFunc`.
 //!
@@ -1002,16 +1029,15 @@
 
 <span class="kw">const </span>MAX_FLAT_PARAMS: usize = <span class="number">16</span>;
 <span class="kw">const </span>MAX_FLAT_RESULTS: usize = <span class="number">1</span>;
-<span class="kw">const </span>MAX_ARITY: u32 = <span class="number">5</span>;
-
-<span class="comment">// Wasmtime allows up to 100 type depth so limit this to just under that.
-</span><span class="kw">const </span>MAX_TYPE_DEPTH: u32 = <span class="number">99</span>;
 
 <span class="doccomment">/// The name of the imported host function which the generated component will call
 </span><span class="kw">pub const </span>IMPORT_FUNCTION: <span class="kw-2">&amp;</span>str = <span class="string">&quot;echo-import&quot;</span>;
 
 <span class="doccomment">/// The name of the exported guest function which the host should call
 </span><span class="kw">pub const </span>EXPORT_FUNCTION: <span class="kw-2">&amp;</span>str = <span class="string">&quot;echo-export&quot;</span>;
+
+<span class="doccomment">/// Wasmtime allows up to 100 type depth so limit this to just under that.
+</span><span class="kw">pub const </span>MAX_TYPE_DEPTH: u32 = <span class="number">99</span>;
 
 <span class="attr">#[derive(Copy, Clone, PartialEq, Eq)]
 </span><span class="kw">enum </span>CoreType {
@@ -1045,21 +1071,6 @@
     }
 }
 
-<span class="attr">#[derive(Debug, Clone)]
-</span><span class="kw">pub struct </span>UsizeInRange&lt;<span class="kw">const </span>L: usize, <span class="kw">const </span>H: usize&gt;(usize);
-
-<span class="kw">impl</span>&lt;<span class="kw">const </span>L: usize, <span class="kw">const </span>H: usize&gt; UsizeInRange&lt;L, H&gt; {
-    <span class="kw">pub fn </span>as_usize(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.<span class="number">0
-    </span>}
-}
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="kw">const </span>L: usize, <span class="kw">const </span>H: usize&gt; Arbitrary&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>UsizeInRange&lt;L, H&gt; {
-    <span class="kw">fn </span>arbitrary(u: <span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; arbitrary::Result&lt;<span class="self">Self</span>&gt; {
-        <span class="prelude-val">Ok</span>(UsizeInRange(u.int_in_range(L..=H)<span class="question-mark">?</span>))
-    }
-}
-
 <span class="doccomment">/// Wraps a `Box&lt;[T]&gt;` and provides an `Arbitrary` implementation that always generates slices of length less than
 /// or equal to the longest tuple for which Wasmtime generates a `ComponentType` impl
 </span><span class="attr">#[derive(Debug, Clone)]
@@ -1068,20 +1079,20 @@
 <span class="kw">impl</span>&lt;T, <span class="kw">const </span>L: u32, <span class="kw">const </span>H: u32&gt; VecInRange&lt;T, L, H&gt; {
     <span class="kw">fn </span>new&lt;<span class="lifetime">&#39;a</span>&gt;(
         input: <span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;a</span>&gt;,
-        gen: <span class="kw">impl </span>Fn(<span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; arbitrary::Result&lt;T&gt;,
+        fuel: <span class="kw-2">&amp;mut </span>u32,
+        gen: <span class="kw">impl </span>Fn(<span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;a</span>&gt;, <span class="kw-2">&amp;mut </span>u32) -&gt; arbitrary::Result&lt;T&gt;,
     ) -&gt; arbitrary::Result&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>ret = Vec::new();
         input.arbitrary_loop(<span class="prelude-val">Some</span>(L), <span class="prelude-val">Some</span>(H), |input| {
-            ret.push(gen(input)<span class="question-mark">?</span>);
-            <span class="prelude-val">Ok</span>(std::ops::ControlFlow::Continue(()))
+            <span class="kw">if </span><span class="kw-2">*</span>fuel &gt; <span class="number">0 </span>{
+                <span class="kw-2">*</span>fuel = <span class="kw-2">*</span>fuel - <span class="number">1</span>;
+                ret.push(gen(input, fuel)<span class="question-mark">?</span>);
+                <span class="prelude-val">Ok</span>(std::ops::ControlFlow::Continue(()))
+            } <span class="kw">else </span>{
+                <span class="prelude-val">Ok</span>(std::ops::ControlFlow::Break(()))
+            }
         })<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>(ret))
-    }
-}
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Arbitrary&lt;<span class="lifetime">&#39;a</span>&gt;, <span class="kw">const </span>L: u32, <span class="kw">const </span>H: u32&gt; Arbitrary&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>VecInRange&lt;T, L, H&gt; {
-    <span class="kw">fn </span>arbitrary(input: <span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; arbitrary::Result&lt;<span class="self">Self</span>&gt; {
-        VecInRange::new(input, |input| input.arbitrary())
     }
 }
 
@@ -1126,7 +1137,7 @@
     <span class="comment">// Like records, allow a good number of variants, but variants require at
     // least one case.
     </span>Variant(VecInRange&lt;<span class="prelude-ty">Option</span>&lt;Type&gt;, <span class="number">1</span>, <span class="number">200</span>&gt;),
-    Enum(UsizeInRange&lt;<span class="number">1</span>, <span class="number">257</span>&gt;),
+    Enum(u32),
     Union(VecInRange&lt;Type, <span class="number">1</span>, <span class="number">200</span>&gt;),
 
     <span class="prelude-ty">Option</span>(Box&lt;Type&gt;),
@@ -1135,14 +1146,17 @@
         err: <span class="prelude-ty">Option</span>&lt;Box&lt;Type&gt;&gt;,
     },
 
-    <span class="comment">// Generate 0 flags all the way up to 65 flags which exercises the 0 to
-    // 3 x u32 cases.
-    </span>Flags(UsizeInRange&lt;<span class="number">0</span>, <span class="number">65</span>&gt;),
+    Flags(u32),
 }
 
 <span class="kw">impl </span>Type {
-    <span class="kw">fn </span>generate(u: <span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;_</span>&gt;, depth: u32) -&gt; arbitrary::Result&lt;Type&gt; {
-        <span class="kw">let </span>max = <span class="kw">if </span>depth == <span class="number">0 </span>{ <span class="number">12 </span>} <span class="kw">else </span>{ <span class="number">21 </span>};
+    <span class="kw">pub fn </span>generate(
+        u: <span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;_</span>&gt;,
+        depth: u32,
+        fuel: <span class="kw-2">&amp;mut </span>u32,
+    ) -&gt; arbitrary::Result&lt;Type&gt; {
+        <span class="kw-2">*</span>fuel = fuel.saturating_sub(<span class="number">1</span>);
+        <span class="kw">let </span>max = <span class="kw">if </span>depth == <span class="number">0 </span>|| <span class="kw-2">*</span>fuel == <span class="number">0 </span>{ <span class="number">12 </span>} <span class="kw">else </span>{ <span class="number">21 </span>};
         <span class="prelude-val">Ok</span>(<span class="kw">match </span>u.int_in_range(<span class="number">0</span>..=max)<span class="question-mark">? </span>{
             <span class="number">0 </span>=&gt; Type::Bool,
             <span class="number">1 </span>=&gt; Type::S8,
@@ -1158,26 +1172,42 @@
             <span class="number">11 </span>=&gt; Type::Char,
             <span class="number">12 </span>=&gt; Type::String,
             <span class="comment">// ^-- if you add something here update the `depth == 0` case above
-            </span><span class="number">13 </span>=&gt; Type::List(Box::new(Type::generate(u, depth - <span class="number">1</span>)<span class="question-mark">?</span>)),
-            <span class="number">14 </span>=&gt; Type::Record(Type::generate_list(u, depth - <span class="number">1</span>)<span class="question-mark">?</span>),
-            <span class="number">15 </span>=&gt; Type::Tuple(Type::generate_list(u, depth - <span class="number">1</span>)<span class="question-mark">?</span>),
-            <span class="number">16 </span>=&gt; Type::Variant(VecInRange::new(u, |u| Type::generate_opt(u, depth - <span class="number">1</span>))<span class="question-mark">?</span>),
-            <span class="number">17 </span>=&gt; Type::Enum(u.arbitrary()<span class="question-mark">?</span>),
-            <span class="number">18 </span>=&gt; Type::Union(Type::generate_list(u, depth - <span class="number">1</span>)<span class="question-mark">?</span>),
-            <span class="number">19 </span>=&gt; Type::Option(Box::new(Type::generate(u, depth - <span class="number">1</span>)<span class="question-mark">?</span>)),
+            </span><span class="number">13 </span>=&gt; Type::List(Box::new(Type::generate(u, depth - <span class="number">1</span>, fuel)<span class="question-mark">?</span>)),
+            <span class="number">14 </span>=&gt; Type::Record(Type::generate_list(u, depth - <span class="number">1</span>, fuel)<span class="question-mark">?</span>),
+            <span class="number">15 </span>=&gt; Type::Tuple(Type::generate_list(u, depth - <span class="number">1</span>, fuel)<span class="question-mark">?</span>),
+            <span class="number">16 </span>=&gt; Type::Variant(VecInRange::new(u, fuel, |u, fuel| {
+                Type::generate_opt(u, depth - <span class="number">1</span>, fuel)
+            })<span class="question-mark">?</span>),
+            <span class="number">17 </span>=&gt; {
+                <span class="kw">let </span>amt = u.int_in_range(<span class="number">1</span>..=(<span class="kw-2">*</span>fuel).max(<span class="number">1</span>).min(<span class="number">257</span>))<span class="question-mark">?</span>;
+                <span class="kw-2">*</span>fuel -= amt;
+                Type::Enum(amt)
+            }
+            <span class="number">18 </span>=&gt; Type::Union(Type::generate_list(u, depth - <span class="number">1</span>, fuel)<span class="question-mark">?</span>),
+            <span class="number">19 </span>=&gt; Type::Option(Box::new(Type::generate(u, depth - <span class="number">1</span>, fuel)<span class="question-mark">?</span>)),
             <span class="number">20 </span>=&gt; Type::Result {
-                ok: Type::generate_opt(u, depth - <span class="number">1</span>)<span class="question-mark">?</span>.map(Box::new),
-                err: Type::generate_opt(u, depth - <span class="number">1</span>)<span class="question-mark">?</span>.map(Box::new),
+                ok: Type::generate_opt(u, depth - <span class="number">1</span>, fuel)<span class="question-mark">?</span>.map(Box::new),
+                err: Type::generate_opt(u, depth - <span class="number">1</span>, fuel)<span class="question-mark">?</span>.map(Box::new),
             },
-            <span class="number">21 </span>=&gt; Type::Flags(u.arbitrary()<span class="question-mark">?</span>),
+            <span class="number">21 </span>=&gt; {
+                <span class="comment">// Generate 0 flags all the way up to 65 flags which exercises
+                // the 0 to 3 x u32 cases.
+                </span><span class="kw">let </span>amt = u.int_in_range(<span class="number">0</span>..=(<span class="kw-2">*</span>fuel).min(<span class="number">65</span>))<span class="question-mark">?</span>;
+                <span class="kw-2">*</span>fuel -= amt;
+                Type::Flags(amt)
+            }
             <span class="comment">// ^-- if you add something here update the `depth != 0` case above
             </span><span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
         })
     }
 
-    <span class="kw">fn </span>generate_opt(u: <span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;_</span>&gt;, depth: u32) -&gt; arbitrary::Result&lt;<span class="prelude-ty">Option</span>&lt;Type&gt;&gt; {
+    <span class="kw">fn </span>generate_opt(
+        u: <span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;_</span>&gt;,
+        depth: u32,
+        fuel: <span class="kw-2">&amp;mut </span>u32,
+    ) -&gt; arbitrary::Result&lt;<span class="prelude-ty">Option</span>&lt;Type&gt;&gt; {
         <span class="prelude-val">Ok</span>(<span class="kw">if </span>u.arbitrary()<span class="question-mark">? </span>{
-            <span class="prelude-val">Some</span>(Type::generate(u, depth)<span class="question-mark">?</span>)
+            <span class="prelude-val">Some</span>(Type::generate(u, depth, fuel)<span class="question-mark">?</span>)
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>})
@@ -1186,18 +1216,20 @@
     <span class="kw">fn </span>generate_list&lt;<span class="kw">const </span>L: u32, <span class="kw">const </span>H: u32&gt;(
         u: <span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;_</span>&gt;,
         depth: u32,
+        fuel: <span class="kw-2">&amp;mut </span>u32,
     ) -&gt; arbitrary::Result&lt;VecInRange&lt;Type, L, H&gt;&gt; {
-        VecInRange::new(u, |u| Type::generate(u, depth))
+        VecInRange::new(u, fuel, |u, fuel| Type::generate(u, depth, fuel))
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Arbitrary&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Type {
-    <span class="kw">fn </span>arbitrary(u: <span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; arbitrary::Result&lt;Type&gt; {
-        Type::generate(u, MAX_TYPE_DEPTH)
-    }
-}
+<span class="comment">// impl&lt;&#39;a&gt; Arbitrary&lt;&#39;a&gt; for Type {
+//     fn arbitrary(u: &amp;mut Unstructured&lt;&#39;a&gt;) -&gt; arbitrary::Result&lt;Type&gt; {
+//         let mut fuel = 500;
+//         Type::generate(u, MAX_TYPE_DEPTH, &amp;mut fuel)
+//     }
+// }
 
-<span class="kw">fn </span>lower_record&lt;<span class="lifetime">&#39;a</span>&gt;(types: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Type&gt;, vec: <span class="kw-2">&amp;mut </span>Vec&lt;CoreType&gt;) {
+</span><span class="kw">fn </span>lower_record&lt;<span class="lifetime">&#39;a</span>&gt;(types: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Type&gt;, vec: <span class="kw-2">&amp;mut </span>Vec&lt;CoreType&gt;) {
     <span class="kw">for </span>ty <span class="kw">in </span>types {
         ty.lower(vec);
     }
@@ -1268,9 +1300,9 @@
             Type::Result { ok, err } =&gt; {
                 lower_variant([ok.as_deref(), err.as_deref()].into_iter(), vec)
             }
-            Type::Flags(count) =&gt; {
-                vec.extend(iter::repeat(CoreType::I32).take(u32_count_from_flag_count(count.<span class="number">0</span>)))
-            }
+            Type::Flags(count) =&gt; vec.extend(
+                iter::repeat(CoreType::I32).take(u32_count_from_flag_count(<span class="kw-2">*</span>count <span class="kw">as </span>usize)),
+            ),
         }
     }
 
@@ -1308,7 +1340,7 @@
             Type::Variant(types) =&gt; variant_size_and_alignment(types.<span class="number">0</span>.iter().map(|t| t.as_ref())),
             Type::Union(types) =&gt; variant_size_and_alignment(types.<span class="number">0</span>.iter().map(<span class="prelude-val">Some</span>)),
 
-            Type::Enum(count) =&gt; variant_size_and_alignment((<span class="number">0</span>..count.<span class="number">0</span>).map(|<span class="kw">_</span>| <span class="prelude-val">None</span>)),
+            Type::Enum(count) =&gt; variant_size_and_alignment((<span class="number">0</span>..<span class="kw-2">*</span>count).map(|<span class="kw">_</span>| <span class="prelude-val">None</span>)),
 
             Type::Option(ty) =&gt; variant_size_and_alignment([<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;**</span>ty)].into_iter()),
 
@@ -1316,7 +1348,7 @@
                 variant_size_and_alignment([ok.as_deref(), err.as_deref()].into_iter())
             }
 
-            Type::Flags(count) =&gt; <span class="kw">match </span>FlagsSize::from_count(count.<span class="number">0</span>) {
+            Type::Flags(count) =&gt; <span class="kw">match </span>FlagsSize::from_count(<span class="kw-2">*</span>count <span class="kw">as </span>usize) {
                 FlagsSize::Size0 =&gt; SizeAndAlignment {
                     size: <span class="number">0</span>,
                     alignment: <span class="number">1</span>,
@@ -1381,7 +1413,7 @@
     }
 }
 
-<span class="kw">fn </span>make_import_and_export(params: <span class="kw-2">&amp;</span>[Type], results: <span class="kw-2">&amp;</span>[Type]) -&gt; String {
+<span class="kw">fn </span>make_import_and_export(params: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>Type], results: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>Type]) -&gt; String {
     <span class="kw">let </span>params_lowered = params
         .iter()
         .flat_map(|ty| ty.lowered())
@@ -1434,7 +1466,8 @@
         </span>)
     } <span class="kw">else </span>{
         <span class="kw">let </span>SizeAndAlignment { size, alignment } =
-            Type::Record(VecInRange(results.to_vec())).size_and_alignment();
+            Type::Record(VecInRange(results.iter().map(|t| (<span class="kw-2">*</span>t).clone()).collect()))
+                .size_and_alignment();
 
         <span class="macro">format!</span>(
             <span class="string">r#&quot;
@@ -1576,7 +1609,7 @@
             <span class="macro">quote!</span>(#name)
         }
         Type::Enum(count) =&gt; {
-            <span class="kw">let </span>cases = (<span class="number">0</span>..count.<span class="number">0</span>)
+            <span class="kw">let </span>cases = (<span class="number">0</span>..<span class="kw-2">*</span>count)
                 .map(|index| {
                     <span class="kw">let </span>name = <span class="macro">format_ident!</span>(<span class="string">&quot;E{index}&quot;</span>);
                     <span class="macro">quote!</span>(#name,)
@@ -1616,7 +1649,7 @@
             <span class="kw">let </span><span class="kw-2">mut </span>flags = TokenStream::new();
             <span class="kw">let </span><span class="kw-2">mut </span>names = TokenStream::new();
 
-            <span class="kw">for </span>index <span class="kw">in </span><span class="number">0</span>..count.<span class="number">0 </span>{
+            <span class="kw">for </span>index <span class="kw">in </span><span class="number">0</span>..<span class="kw-2">*</span>count {
                 <span class="kw">let </span>name = <span class="macro">format_ident!</span>(<span class="string">&quot;F{index}&quot;</span>);
                 flags.extend(<span class="macro">quote!</span>(<span class="kw">const </span>#name;));
                 names.extend(<span class="macro">quote!</span>(#type_name::#name,))
@@ -1743,7 +1776,7 @@
             }
             Type::Enum(count) =&gt; {
                 decl.push_str(<span class="string">&quot;(enum&quot;</span>);
-                <span class="kw">for </span>index <span class="kw">in </span><span class="number">0</span>..count.<span class="number">0 </span>{
+                <span class="kw">for </span>index <span class="kw">in </span><span class="number">0</span>..<span class="kw-2">*</span>count {
                     <span class="macro">write!</span>(decl, <span class="string">r#&quot; &quot;E{index}&quot;&quot;#</span>).unwrap();
                 }
                 decl.push_str(<span class="string">&quot;)&quot;</span>);
@@ -1776,7 +1809,7 @@
             }
             Type::Flags(count) =&gt; {
                 decl.push_str(<span class="string">&quot;(flags&quot;</span>);
-                <span class="kw">for </span>index <span class="kw">in </span><span class="number">0</span>..count.<span class="number">0 </span>{
+                <span class="kw">for </span>index <span class="kw">in </span><span class="number">0</span>..<span class="kw-2">*</span>count {
                     <span class="macro">write!</span>(decl, <span class="string">r#&quot; &quot;F{index}&quot;&quot;#</span>).unwrap();
                 }
                 decl.push_str(<span class="string">&quot;)&quot;</span>);
@@ -1883,19 +1916,40 @@
 }
 
 <span class="doccomment">/// Represents a test case for calling a component function
-</span><span class="attr">#[derive(Arbitrary, Debug)]
-</span><span class="kw">pub struct </span>TestCase {
+</span><span class="attr">#[derive(Debug)]
+</span><span class="kw">pub struct </span>TestCase&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="doccomment">/// The types of parameters to pass to the function
-    </span><span class="kw">pub </span>params: VecInRange&lt;Type, <span class="number">0</span>, MAX_ARITY&gt;,
+    </span><span class="kw">pub </span>params: Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Type&gt;,
     <span class="doccomment">/// The result types of the the function
-    </span><span class="kw">pub </span>results: VecInRange&lt;Type, <span class="number">0</span>, MAX_ARITY&gt;,
+    </span><span class="kw">pub </span>results: Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Type&gt;,
     <span class="doccomment">/// String encoding to use from host-to-component.
     </span><span class="kw">pub </span>encoding1: StringEncoding,
     <span class="doccomment">/// String encoding to use from component-to-host.
     </span><span class="kw">pub </span>encoding2: StringEncoding,
 }
 
-<span class="kw">impl </span>TestCase {
+<span class="comment">// impl&lt;&#39;a&gt; Arbitrary&lt;&#39;a&gt; for TestCase {
+//     fn arbitrary(u: &amp;mut Unstructured&lt;&#39;a&gt;) -&gt; arbitrary::Result&lt;TestCase&gt; {
+//         let mut params = Vec::new();
+//         let mut results = Vec::new();
+//         let mut fuel = 300;
+//         for _ in 0..u.int_in_range(0..=MAX_ARITY)? {
+//             params.push(Type::generate(u, MAX_TYPE_DEPTH, &amp;mut fuel)?);
+//         }
+//         for _ in 0..u.int_in_range(0..=MAX_ARITY)? {
+//             results.push(Type::generate(u, MAX_TYPE_DEPTH, &amp;mut fuel)?);
+//         }
+
+//         Ok(TestCase {
+//             params,
+//             results,
+//             encoding1: u.arbitrary()?,
+//             encoding2: u.arbitrary()?,
+//         })
+//     }
+// }
+
+</span><span class="kw">impl </span>TestCase&lt;<span class="lifetime">&#39;_</span>&gt; {
     <span class="doccomment">/// Generate a `Declarations` for this `TestCase` which may be used to build a component to execute the case.
     </span><span class="kw">pub fn </span>declarations(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Declarations {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = TypesBuilder::default();

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["arbitrary_val","static_api_test0","static_api_test1","static_api_test2","static_api_test3","static_api_test4","static_api_test5"]};
+window.SIDEBAR_ITEMS = {"fn":["arbitrary_val","static_api_test"]};
