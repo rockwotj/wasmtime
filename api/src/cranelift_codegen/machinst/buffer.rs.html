@@ -2914,7 +2914,7 @@
         //    (end of buffer)
         </span><span class="self">self</span>.data.truncate(b.start <span class="kw">as </span>usize);
         <span class="self">self</span>.fixup_records.truncate(b.fixup);
-        <span class="kw">while let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>last_srcloc) = <span class="self">self</span>.srclocs.last_mut() {
+        <span class="kw">while let </span><span class="prelude-val">Some</span>(last_srcloc) = <span class="self">self</span>.srclocs.last_mut() {
             <span class="kw">if </span>last_srcloc.end &lt;= b.start {
                 <span class="kw">break</span>;
             }
