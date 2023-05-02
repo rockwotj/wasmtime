@@ -129,7 +129,7 @@
 <span class="kw">use </span><span class="self">self</span>::unit::clone_unit;
 <span class="kw">use </span><span class="kw">crate</span>::debug::gc::build_dependencies;
 <span class="kw">use </span><span class="kw">crate</span>::debug::ModuleMemoryOffset;
-<span class="kw">use </span><span class="kw">crate</span>::CompiledFunctions;
+<span class="kw">use </span><span class="kw">crate</span>::CompiledFunctionsMetadata;
 <span class="kw">use </span>anyhow::Error;
 <span class="kw">use </span>cranelift_codegen::isa::TargetIsa;
 <span class="kw">use </span>gimli::{
@@ -177,7 +177,7 @@
 <span class="kw">pub fn </span>transform_dwarf(
     isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa,
     di: <span class="kw-2">&amp;</span>DebugInfoData,
-    funcs: <span class="kw-2">&amp;</span>CompiledFunctions,
+    funcs: <span class="kw-2">&amp;</span>CompiledFunctionsMetadata,
     memory_offset: <span class="kw-2">&amp;</span>ModuleMemoryOffset,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;write::Dwarf, Error&gt; {
     <span class="kw">let </span>addr_tr = AddressTransform::new(funcs, <span class="kw-2">&amp;</span>di.wasm_file);

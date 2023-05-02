@@ -41,7 +41,7 @@ var sourcesIndex = JSON.parse('{\
 "wasmtime_component_macro":["",[],["bindgen.rs","component.rs","lib.rs"]],\
 "wasmtime_component_util":["",[],["lib.rs"]],\
 "wasmtime_cranelift":["",[["compiler",[],["component.rs"]],["debug",[["transform",[],["address_transform.rs","attr.rs","expression.rs","line_program.rs","mod.rs","range_info_builder.rs","refs.rs","simulate.rs","unit.rs","utils.rs"]]],["gc.rs","write_debuginfo.rs"]]],["builder.rs","compiler.rs","debug.rs","func_environ.rs","lib.rs"]],\
-"wasmtime_cranelift_shared":["",[],["isa_builder.rs","lib.rs","obj.rs"]],\
+"wasmtime_cranelift_shared":["",[],["compiled_function.rs","isa_builder.rs","lib.rs","obj.rs"]],\
 "wasmtime_environ":["",[["component",[["translate",[],["adapt.rs","inline.rs"]]],["compiler.rs","dfg.rs","info.rs","translate.rs","types.rs","vmcomponent_offsets.rs"]],["fact",[],["core_types.rs","signature.rs","trampoline.rs","transcode.rs","traps.rs"]]],["address_map.rs","builtin.rs","compilation.rs","component.rs","fact.rs","lib.rs","module.rs","module_environ.rs","module_types.rs","obj.rs","ref_bits.rs","scopevec.rs","stack_map.rs","trap_encoding.rs","tunables.rs","vmoffsets.rs"]],\
 "wasmtime_explorer":["",[],["lib.rs"]],\
 "wasmtime_fiber":["",[["unix",[],["x86_64.rs"]]],["lib.rs","unix.rs"]],\

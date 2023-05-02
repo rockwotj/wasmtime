@@ -1247,6 +1247,7 @@
 <a href="#1247" id="1247">1247</a>
 <a href="#1248" id="1248">1248</a>
 <a href="#1249" id="1249">1249</a>
+<a href="#1250" id="1250">1250</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::address_transform::AddressTransform;
 <span class="kw">use </span><span class="kw">crate</span>::debug::ModuleMemoryOffset;
 <span class="kw">use </span>anyhow::{Context, Error, <span class="prelude-ty">Result</span>};
@@ -2031,7 +2032,7 @@
         compile_expression, AddressTransform, CompiledExpression, CompiledExpressionPart,
         FunctionFrameInfo, JumpTargetMarker, ValueLabel, ValueLabelsRanges,
     };
-    <span class="kw">use </span><span class="kw">crate</span>::CompiledFunction;
+    <span class="kw">use </span><span class="kw">crate</span>::CompiledFunctionMetadata;
     <span class="kw">use </span>gimli::{<span class="self">self</span>, constants, Encoding, EndianSlice, Expression, RunTimeEndian};
     <span class="kw">use </span>wasmtime_environ::FilePos;
 
@@ -2361,13 +2362,14 @@
     }
 
     <span class="kw">fn </span>create_mock_address_transform() -&gt; AddressTransform {
-        <span class="kw">use </span><span class="kw">crate</span>::FunctionAddressMap;
         <span class="kw">use </span>cranelift_entity::PrimaryMap;
+        <span class="kw">use </span>wasmtime_cranelift_shared::FunctionAddressMap;
         <span class="kw">use </span>wasmtime_environ::InstructionAddressMap;
         <span class="kw">use </span>wasmtime_environ::WasmFileInfo;
+
         <span class="kw">let </span><span class="kw-2">mut </span>module_map = PrimaryMap::new();
         <span class="kw">let </span>code_section_offset: u32 = <span class="number">100</span>;
-        <span class="kw">let </span>func = CompiledFunction {
+        <span class="kw">let </span>func = CompiledFunctionMetadata {
             address_map: FunctionAddressMap {
                 instructions: <span class="macro">vec!</span>[
                     InstructionAddressMap {

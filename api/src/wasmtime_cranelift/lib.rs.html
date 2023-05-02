@@ -175,68 +175,17 @@
 <a href="#175" id="175">175</a>
 <a href="#176" id="176">176</a>
 <a href="#177" id="177">177</a>
-<a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
-<a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
-<a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
-<a href="#205" id="205">205</a>
-<a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a>
-<a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a>
-<a href="#211" id="211">211</a>
-<a href="#212" id="212">212</a>
-<a href="#213" id="213">213</a>
-<a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
-<a href="#220" id="220">220</a>
-<a href="#221" id="221">221</a>
-<a href="#222" id="222">222</a>
-<a href="#223" id="223">223</a>
-<a href="#224" id="224">224</a>
-<a href="#225" id="225">225</a>
-<a href="#226" id="226">226</a>
-<a href="#227" id="227">227</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Support for compiling with Cranelift.
 //!
 //! This crate provides an implementation of the `wasmtime_environ::Compiler`
 //! and `wasmtime_environ::CompilerBuilder` traits.
 
 </span><span class="kw">use </span>cranelift_codegen::ir;
-<span class="kw">use </span>cranelift_codegen::isa::{unwind::UnwindInfo, CallConv, TargetIsa};
+<span class="kw">use </span>cranelift_codegen::isa::{CallConv, TargetIsa};
 <span class="kw">use </span>cranelift_entity::PrimaryMap;
 <span class="kw">use </span>cranelift_wasm::{DefinedFuncIndex, WasmFuncType, WasmType};
 <span class="kw">use </span>target_lexicon::{Architecture, CallingConvention};
-<span class="kw">use </span>wasmtime_cranelift_shared::Relocation;
-<span class="kw">use </span>wasmtime_environ::{FilePos, InstructionAddressMap, TrapInformation};
+<span class="kw">use </span>wasmtime_cranelift_shared::CompiledFunctionMetadata;
 
 <span class="kw">pub use </span>builder::builder;
 
@@ -245,59 +194,10 @@
 <span class="kw">mod </span>debug;
 <span class="kw">mod </span>func_environ;
 
-<span class="kw">type </span>CompiledFunctions&lt;<span class="lifetime">&#39;a</span>&gt; = PrimaryMap&lt;DefinedFuncIndex, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>CompiledFunction&gt;;
+<span class="kw">type </span>CompiledFunctionsMetadata&lt;<span class="lifetime">&#39;a</span>&gt; = PrimaryMap&lt;DefinedFuncIndex, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>CompiledFunctionMetadata&gt;;
 
 <span class="doccomment">/// Trap code used for debug assertions we emit in our JIT code.
 </span><span class="kw">const </span>DEBUG_ASSERT_TRAP_CODE: u16 = u16::MAX;
-
-<span class="doccomment">/// Compiled function: machine code body, jump table offsets, and unwind information.
-</span><span class="attr">#[derive(Default)]
-</span><span class="kw">pub struct </span>CompiledFunction {
-    <span class="doccomment">/// The machine code for this function.
-    </span>body: Vec&lt;u8&gt;,
-
-    <span class="doccomment">/// The unwind information.
-    </span>unwind_info: <span class="prelude-ty">Option</span>&lt;UnwindInfo&gt;,
-
-    <span class="doccomment">/// Information used to translate from binary offsets back to the original
-    /// location found in the wasm input.
-    </span>address_map: FunctionAddressMap,
-
-    <span class="doccomment">/// Metadata about traps in this module, mapping code offsets to the trap
-    /// that they may cause.
-    </span>traps: Vec&lt;TrapInformation&gt;,
-
-    relocations: Vec&lt;Relocation&gt;,
-    value_labels_ranges: cranelift_codegen::ValueLabelsRanges,
-    sized_stack_slots: ir::StackSlots,
-    alignment: u32,
-}
-
-<span class="doccomment">/// Function and its instructions addresses mappings.
-</span><span class="attr">#[derive(Debug, Clone, PartialEq, Eq, Default)]
-</span><span class="kw">struct </span>FunctionAddressMap {
-    <span class="doccomment">/// An array of data for the instructions in this function, indicating where
-    /// each instruction maps back to in the original function.
-    ///
-    /// This array is sorted least-to-greatest by the `code_offset` field.
-    /// Additionally the span of each `InstructionAddressMap` is implicitly the
-    /// gap between it and the next item in the array.
-    </span>instructions: Box&lt;[InstructionAddressMap]&gt;,
-
-    <span class="doccomment">/// Function&#39;s initial offset in the source file, specified in bytes from
-    /// the front of the file.
-    </span>start_srcloc: FilePos,
-
-    <span class="doccomment">/// Function&#39;s end offset in the source file, specified in bytes from
-    /// the front of the file.
-    </span>end_srcloc: FilePos,
-
-    <span class="doccomment">/// Generated function body offset if applicable, otherwise 0.
-    </span>body_offset: usize,
-
-    <span class="doccomment">/// Generated function body length.
-    </span>body_len: u32,
-}
 
 <span class="doccomment">/// Creates a new cranelift `Signature` with no wasm params/results for the
 /// given calling convention.

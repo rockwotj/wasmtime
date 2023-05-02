@@ -562,7 +562,6 @@
 <a href="#562" id="562">562</a>
 <a href="#563" id="563">563</a>
 <a href="#564" id="564">564</a>
-<a href="#565" id="565">565</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Object file builder.
 //!
 //! Creates ELF image based on `Compilation` information. The ELF contains
@@ -578,7 +577,7 @@
 //! function body, the imported wasm function do not. The trampolines symbol
 //! names have format &quot;_trampoline_N&quot;, where N is `SignatureIndex`.
 
-</span><span class="kw">use crate</span>::{Relocation, RelocationTarget};
+</span><span class="kw">use crate</span>::{CompiledFuncEnv, CompiledFunction, RelocationTarget};
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>cranelift_codegen::binemit::Reloc;
 <span class="kw">use </span>cranelift_codegen::ir::LibCall;
@@ -673,12 +672,11 @@
     </span><span class="kw">pub fn </span>append_func(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         name: <span class="kw-2">&amp;</span>str,
-        body: <span class="kw-2">&amp;</span>[u8],
-        alignment: u32,
-        unwind_info: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>UnwindInfo&gt;,
-        relocations: <span class="kw-2">&amp;</span>[Relocation],
+        compiled_func: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>CompiledFunction&lt;<span class="kw">impl </span>CompiledFuncEnv&gt;,
         resolve_reloc_target: <span class="kw">impl </span>Fn(FuncIndex) -&gt; usize,
     ) -&gt; (SymbolId, Range&lt;u64&gt;) {
+        <span class="kw">let </span>body = compiled_func.buffer.data();
+        <span class="kw">let </span>alignment = compiled_func.alignment;
         <span class="kw">let </span>body_len = body.len() <span class="kw">as </span>u64;
         <span class="kw">let </span>off = <span class="self">self
             </span>.text
@@ -695,11 +693,11 @@
             flags: SymbolFlags::None,
         });
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(info) = unwind_info {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(info) = compiled_func.unwind_info() {
             <span class="self">self</span>.unwind_info.push(off, body_len, info);
         }
 
-        <span class="kw">for </span>r <span class="kw">in </span>relocations {
+        <span class="kw">for </span>r <span class="kw">in </span>compiled_func.relocations() {
             <span class="kw">match </span>r.reloc_target {
                 <span class="comment">// Relocations against user-defined functions means that this is
                 // a relocation against a module-local function, typically a

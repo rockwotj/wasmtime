@@ -188,7 +188,7 @@
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::address_transform::AddressTransform;
 <span class="kw">use </span><span class="kw">super</span>::expression::{CompiledExpression, FunctionFrameInfo};
 <span class="kw">use </span><span class="kw">crate</span>::debug::ModuleMemoryOffset;
-<span class="kw">use </span><span class="kw">crate</span>::CompiledFunctions;
+<span class="kw">use </span><span class="kw">crate</span>::CompiledFunctionsMetadata;
 <span class="kw">use </span>anyhow::Error;
 <span class="kw">use </span>cranelift_codegen::isa::TargetIsa;
 <span class="kw">use </span>gimli::write;
@@ -354,7 +354,7 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_function_frame_info&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;c</span>&gt;(
     memory_offset: <span class="kw-2">&amp;</span>ModuleMemoryOffset,
-    funcs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>CompiledFunctions,
+    funcs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>CompiledFunctionsMetadata,
     func_index: DefinedFuncIndex,
 ) -&gt; <span class="prelude-ty">Option</span>&lt;FunctionFrameInfo&lt;<span class="lifetime">&#39;a</span>&gt;&gt;
 <span class="kw">where

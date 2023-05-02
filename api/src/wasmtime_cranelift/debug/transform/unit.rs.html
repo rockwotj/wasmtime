@@ -528,7 +528,7 @@
 <span class="kw">use </span><span class="kw">super</span>::utils::{add_internal_types, append_vmctx_info, get_function_frame_info};
 <span class="kw">use super</span>::{DebugInputContext, Reader, TransformError};
 <span class="kw">use </span><span class="kw">crate</span>::debug::ModuleMemoryOffset;
-<span class="kw">use </span><span class="kw">crate</span>::CompiledFunctions;
+<span class="kw">use </span><span class="kw">crate</span>::CompiledFunctionsMetadata;
 <span class="kw">use </span>anyhow::{Context, Error};
 <span class="kw">use </span>cranelift_codegen::ir::Endianness;
 <span class="kw">use </span>cranelift_codegen::isa::TargetIsa;
@@ -779,7 +779,7 @@
     unit: Unit&lt;R, R::Offset&gt;,
     context: <span class="kw-2">&amp;</span>DebugInputContext&lt;R&gt;,
     addr_tr: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>AddressTransform,
-    funcs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>CompiledFunctions,
+    funcs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>CompiledFunctionsMetadata,
     memory_offset: <span class="kw-2">&amp;</span>ModuleMemoryOffset,
     out_encoding: gimli::Encoding,
     out_units: <span class="kw-2">&amp;mut </span>write::UnitTable,

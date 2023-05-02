@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["builder"],"struct":["CompiledFunction"]};
+window.SIDEBAR_ITEMS = {"fn":["builder"]};

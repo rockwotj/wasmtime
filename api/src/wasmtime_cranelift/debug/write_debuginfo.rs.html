@@ -168,9 +168,12 @@
 <a href="#168" id="168">168</a>
 <a href="#169" id="169">169</a>
 <a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
 </pre><pre class="rust"><code><span class="kw">pub use </span><span class="kw">crate</span>::debug::transform::transform_dwarf;
 <span class="kw">use </span><span class="kw">crate</span>::debug::ModuleMemoryOffset;
-<span class="kw">use </span><span class="kw">crate</span>::CompiledFunctions;
+<span class="kw">use </span><span class="kw">crate</span>::CompiledFunctionsMetadata;
 <span class="kw">use </span>cranelift_codegen::ir::Endianness;
 <span class="kw">use </span>cranelift_codegen::isa::{unwind::UnwindInfo, TargetIsa};
 <span class="kw">use </span>cranelift_entity::EntityRef;
@@ -307,13 +310,16 @@
     }
 }
 
-<span class="kw">fn </span>create_frame_table&lt;<span class="lifetime">&#39;a</span>&gt;(isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa, funcs: <span class="kw-2">&amp;</span>CompiledFunctions) -&gt; <span class="prelude-ty">Option</span>&lt;FrameTable&gt; {
+<span class="kw">fn </span>create_frame_table&lt;<span class="lifetime">&#39;a</span>&gt;(
+    isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa,
+    funcs: <span class="kw-2">&amp;</span>CompiledFunctionsMetadata,
+) -&gt; <span class="prelude-ty">Option</span>&lt;FrameTable&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>table = FrameTable::default();
 
     <span class="kw">let </span>cie_id = table.add_cie(isa.create_systemv_cie()<span class="question-mark">?</span>);
 
-    <span class="kw">for </span>(i, f) <span class="kw">in </span>funcs {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(UnwindInfo::SystemV(info)) = <span class="kw-2">&amp;</span>f.unwind_info {
+    <span class="kw">for </span>(i, metadata) <span class="kw">in </span>funcs {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(UnwindInfo::SystemV(info)) = <span class="kw-2">&amp;</span>metadata.unwind_info {
             table.add_fde(
                 cie_id,
                 info.to_fde(Address::Symbol {
@@ -330,7 +336,7 @@
 <span class="kw">pub fn </span>emit_dwarf&lt;<span class="lifetime">&#39;a</span>&gt;(
     isa: <span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa,
     debuginfo_data: <span class="kw-2">&amp;</span>DebugInfoData,
-    funcs: <span class="kw-2">&amp;</span>CompiledFunctions,
+    funcs: <span class="kw-2">&amp;</span>CompiledFunctionsMetadata,
     memory_offset: <span class="kw-2">&amp;</span>ModuleMemoryOffset,
 ) -&gt; anyhow::Result&lt;Vec&lt;DwarfSection&gt;&gt; {
     <span class="kw">let </span>dwarf = transform_dwarf(isa, debuginfo_data, funcs, memory_offset)<span class="question-mark">?</span>;

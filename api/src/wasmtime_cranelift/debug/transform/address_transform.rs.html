@@ -783,10 +783,12 @@
 <a href="#783" id="783">783</a>
 <a href="#784" id="784">784</a>
 <a href="#785" id="785">785</a>
-</pre><pre class="rust"><code><span class="kw">use crate</span>::{CompiledFunctions, FunctionAddressMap};
+<a href="#786" id="786">786</a>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::CompiledFunctionsMetadata;
 <span class="kw">use </span>gimli::write;
 <span class="kw">use </span>std::collections::BTreeMap;
 <span class="kw">use </span>std::iter::FromIterator;
+<span class="kw">use </span>wasmtime_cranelift_shared::FunctionAddressMap;
 <span class="kw">use </span>wasmtime_environ::{DefinedFuncIndex, EntityRef, FilePos, PrimaryMap, WasmFileInfo};
 
 <span class="kw">pub type </span>GeneratedAddress = usize;
@@ -973,12 +975,12 @@
 }
 
 <span class="kw">fn </span>build_function_addr_map(
-    funcs: <span class="kw-2">&amp;</span>CompiledFunctions,
+    funcs: <span class="kw-2">&amp;</span>CompiledFunctionsMetadata,
     code_section_offset: u64,
 ) -&gt; PrimaryMap&lt;DefinedFuncIndex, FunctionMap&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>map = PrimaryMap::new();
-    <span class="kw">for </span>(<span class="kw">_</span>, f) <span class="kw">in </span>funcs {
-        <span class="kw">let </span>ft = <span class="kw-2">&amp;</span>f.address_map;
+    <span class="kw">for </span>(<span class="kw">_</span>, metadata) <span class="kw">in </span>funcs {
+        <span class="kw">let </span>ft = <span class="kw-2">&amp;</span>metadata.address_map;
         <span class="kw">let </span><span class="kw-2">mut </span>fn_map = Vec::new();
         <span class="kw">for </span>t <span class="kw">in </span>ft.instructions.iter() {
             <span class="kw">if </span>t.srcloc.file_offset().is_none() {
@@ -1234,13 +1236,13 @@
 }
 
 <span class="kw">impl </span>AddressTransform {
-    <span class="kw">pub fn </span>new(funcs: <span class="kw-2">&amp;</span>CompiledFunctions, wasm_file: <span class="kw-2">&amp;</span>WasmFileInfo) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(funcs: <span class="kw-2">&amp;</span>CompiledFunctionsMetadata, wasm_file: <span class="kw-2">&amp;</span>WasmFileInfo) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>code_section_offset = wasm_file.code_section_offset;
 
         <span class="kw">let </span><span class="kw-2">mut </span>func = BTreeMap::new();
-        <span class="kw">for </span>(i, f) <span class="kw">in </span>funcs {
-            <span class="kw">let </span>ft = <span class="kw-2">&amp;</span>f.address_map;
-            <span class="kw">let </span>(fn_start, fn_end, lookup) = build_function_lookup(ft, code_section_offset);
+        <span class="kw">for </span>(i, metadata) <span class="kw">in </span>funcs {
+            <span class="kw">let </span>(fn_start, fn_end, lookup) =
+                build_function_lookup(<span class="kw-2">&amp;</span>metadata.address_map, code_section_offset);
 
             func.insert(
                 fn_start,
@@ -1390,11 +1392,11 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::{build_function_lookup, get_wasm_code_offset, AddressTransform};
-    <span class="kw">use crate</span>::{CompiledFunction, FunctionAddressMap};
     <span class="kw">use </span>cranelift_entity::PrimaryMap;
     <span class="kw">use </span>gimli::write::Address;
     <span class="kw">use </span>std::iter::FromIterator;
     <span class="kw">use </span>std::mem;
+    <span class="kw">use </span>wasmtime_cranelift_shared::{CompiledFunctionMetadata, FunctionAddressMap};
     <span class="kw">use </span>wasmtime_environ::{FilePos, InstructionAddressMap, WasmFileInfo};
 
     <span class="attr">#[test]
@@ -1513,7 +1515,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_addr_translate() {
-        <span class="kw">let </span>func = CompiledFunction {
+        <span class="kw">let </span>func = CompiledFunctionMetadata {
             address_map: create_simple_func(<span class="number">11</span>),
             ..Default::default()
         };

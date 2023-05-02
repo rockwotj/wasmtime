@@ -189,15 +189,12 @@
 <a href="#189" id="189">189</a>
 <a href="#190" id="190">190</a>
 <a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
 </pre><pre class="rust"><code><span class="kw">use </span>anyhow::Result;
-<span class="kw">use </span>cranelift_codegen::{Final, MachBufferFinalized};
 <span class="kw">use </span>object::write::{Object, SymbolId};
 <span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::sync::Mutex;
 <span class="kw">use </span>wasmparser::FuncValidatorAllocations;
-<span class="kw">use </span>wasmtime_cranelift_shared::obj::ModuleTextBuilder;
+<span class="kw">use </span>wasmtime_cranelift_shared::{CompiledFunction, ModuleTextBuilder};
 <span class="kw">use </span>wasmtime_environ::{
     CompileError, DefinedFuncIndex, FilePos, FuncIndex, FunctionBodyData, FunctionLoc,
     ModuleTranslation, ModuleTypes, PrimaryMap, Tunables, WasmFunctionInfo,
@@ -210,7 +207,16 @@
     allocations: Mutex&lt;Vec&lt;FuncValidatorAllocations&gt;&gt;,
 }
 
-<span class="kw">struct </span>CompiledFunction(MachBufferFinalized&lt;Final&gt;);
+<span class="doccomment">/// The compiled function environment.
+</span><span class="kw">pub struct </span>CompiledFuncEnv;
+<span class="kw">impl </span>wasmtime_cranelift_shared::CompiledFuncEnv <span class="kw">for </span>CompiledFuncEnv {
+    <span class="kw">fn </span>resolve_user_external_name_ref(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        external: cranelift_codegen::ir::UserExternalNameRef,
+    ) -&gt; (u32, u32) {
+        (<span class="number">0</span>, external.as_u32())
+    }
+}
 
 <span class="kw">impl </span>Compiler {
     <span class="kw">pub fn </span>new(isa: Box&lt;<span class="kw">dyn </span>TargetIsa&gt;) -&gt; <span class="self">Self </span>{
@@ -259,13 +265,15 @@
             .map_err(|e| CompileError::Codegen(<span class="macro">format!</span>(<span class="string">&quot;{e:?}&quot;</span>)));
         <span class="self">self</span>.save_allocations(validator.into_allocations());
         <span class="kw">let </span>buffer = buffer<span class="question-mark">?</span>;
+        <span class="kw">let </span>compiled_function =
+            CompiledFunction::new(buffer, CompiledFuncEnv {}, <span class="self">self</span>.isa.function_alignment());
 
         <span class="prelude-val">Ok</span>((
             WasmFunctionInfo {
                 start_srcloc,
                 stack_maps: Box::new([]),
             },
-            Box::new(CompiledFunction(buffer)),
+            Box::new(compiled_function),
         ))
     }
 
@@ -310,23 +318,11 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>ret = Vec::with_capacity(funcs.len());
         <span class="kw">for </span>(i, (sym, func)) <span class="kw">in </span>funcs.iter().enumerate() {
-            <span class="kw">let </span>func = <span class="kw-2">&amp;</span>func.downcast_ref::&lt;CompiledFunction&gt;().unwrap().<span class="number">0</span>;
+            <span class="kw">let </span>func = func
+                .downcast_ref::&lt;CompiledFunction&lt;CompiledFuncEnv&gt;&gt;()
+                .unwrap();
 
-            <span class="comment">// TODO: Implement copying over this data into the
-            // `ModuleTextBuilder` type. Note that this should probably be
-            // deduplicated with the cranelift implementation in the long run.
-            </span><span class="macro">assert!</span>(func.relocs().is_empty());
-            <span class="macro">assert!</span>(func.traps().is_empty());
-            <span class="macro">assert!</span>(func.stack_maps().is_empty());
-
-            <span class="kw">let </span>(sym, range) = builder.append_func(
-                <span class="kw-2">&amp;</span>sym,
-                func.data(),
-                <span class="self">self</span>.isa.function_alignment(),
-                <span class="prelude-val">None</span>,
-                <span class="kw-2">&amp;</span>[],
-                |idx| resolve_reloc(i, idx),
-            );
+            <span class="kw">let </span>(sym, range) = builder.append_func(<span class="kw-2">&amp;</span>sym, func, |idx| resolve_reloc(i, idx));
 
             <span class="kw">let </span>info = FunctionLoc {
                 start: u32::try_from(range.start).unwrap(),

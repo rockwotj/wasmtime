@@ -413,7 +413,7 @@
 <span class="kw">use </span><span class="kw">super</span>::utils::{add_internal_types, append_vmctx_info, get_function_frame_info};
 <span class="kw">use </span><span class="kw">super</span>::AddressTransform;
 <span class="kw">use </span><span class="kw">crate</span>::debug::ModuleMemoryOffset;
-<span class="kw">use </span><span class="kw">crate</span>::CompiledFunctions;
+<span class="kw">use </span><span class="kw">crate</span>::CompiledFunctionsMetadata;
 <span class="kw">use </span>anyhow::{Context, Error};
 <span class="kw">use </span>cranelift_codegen::isa::TargetIsa;
 <span class="kw">use </span>cranelift_wasm::get_vmctx_value_label;
@@ -693,7 +693,7 @@
     addr_tr: <span class="kw-2">&amp;</span>AddressTransform,
     di: <span class="kw-2">&amp;</span>DebugInfoData,
     memory_offset: <span class="kw-2">&amp;</span>ModuleMemoryOffset,
-    funcs: <span class="kw-2">&amp;</span>CompiledFunctions,
+    funcs: <span class="kw-2">&amp;</span>CompiledFunctionsMetadata,
     translated: <span class="kw-2">&amp;</span>HashSet&lt;DefinedFuncIndex&gt;,
     out_encoding: gimli::Encoding,
     out_units: <span class="kw-2">&amp;mut </span>write::UnitTable,
