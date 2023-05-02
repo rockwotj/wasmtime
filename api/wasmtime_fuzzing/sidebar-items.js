@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["generators","mutators","oracles"]};
+window.SIDEBAR_ITEMS = {"fn":["init_fuzzing"],"macro":["single_module_fuzzer"],"mod":["generators","mutators","oracles","single_module_fuzzer"]};

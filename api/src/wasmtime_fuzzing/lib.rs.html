@@ -32,6 +32,7 @@
 <a href="#32" id="32">32</a>
 <a href="#33" id="33">33</a>
 <a href="#34" id="34">34</a>
+<a href="#35" id="35">35</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Fuzzing infrastructure for Wasmtime.
 
 </span><span class="attr">#![deny(missing_docs)]
@@ -41,6 +42,7 @@
 <span class="kw">pub mod </span>generators;
 <span class="kw">pub mod </span>mutators;
 <span class="kw">pub mod </span>oracles;
+<span class="kw">pub mod </span>single_module_fuzzer;
 
 <span class="doccomment">/// One time start up initialization for fuzzing:
 ///
@@ -55,7 +57,7 @@
 /// `Arbitrary` implementation is not derived and does interesting things, then
 /// the `Arbitrary` implementation should call this function, since it runs
 /// before the fuzz target itself.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>init_fuzzing() {
+</span><span class="kw">pub fn </span>init_fuzzing() {
     <span class="kw">static </span>INIT: std::sync::Once = std::sync::Once::new();
 
     INIT.call_once(|| {
