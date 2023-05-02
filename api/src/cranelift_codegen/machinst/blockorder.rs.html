@@ -453,6 +453,18 @@
 <a href="#453" id="453">453</a>
 <a href="#454" id="454">454</a>
 <a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
+<a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
+<a href="#461" id="461">461</a>
+<a href="#462" id="462">462</a>
+<a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Computation of basic block order in emitted code.
 //!
 //! This module handles the translation from CLIF BBs to VCode BBs.
@@ -600,7 +612,11 @@
 
 <span class="kw">impl </span>BlockLoweringOrder {
     <span class="doccomment">/// Compute and return a lowered block order for `f`.
-    </span><span class="kw">pub fn </span>new(f: <span class="kw-2">&amp;</span>Function, domtree: <span class="kw-2">&amp;</span>DominatorTree) -&gt; BlockLoweringOrder {
+    </span><span class="kw">pub fn </span>new(
+        f: <span class="kw-2">&amp;</span>Function,
+        domtree: <span class="kw-2">&amp;</span>DominatorTree,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
+    ) -&gt; BlockLoweringOrder {
         <span class="macro">trace!</span>(<span class="string">&quot;BlockLoweringOrder: function body {:?}&quot;</span>, f);
 
         <span class="comment">// Step 1: compute the in-edge and out-edge count of every block.
@@ -650,7 +666,15 @@
 
             <span class="kw">if </span>block_out_count[block] &gt; <span class="number">1 </span>{
                 <span class="kw">let </span>range = block_succ_range[block].clone();
-                <span class="kw">for </span>(succ_ix, lb) <span class="kw">in </span>block_succs[range].iter_mut().enumerate() {
+
+                <span class="comment">// If chaos-mode is enabled in the control plane, iterate over
+                // the successors in an arbtirary order, which should have no
+                // impact on correctness. The order of the blocks is generally
+                // relevant: Uses must be seen before defs for dead-code
+                // elimination.
+                </span><span class="kw">let </span>succs = ctrl_plane.shuffled(block_succs[range].iter_mut().enumerate());
+
+                <span class="kw">for </span>(succ_ix, lb) <span class="kw">in </span>succs {
                     <span class="kw">let </span>succ = lb.orig_block().unwrap();
                     <span class="kw">if </span>block_in_count[succ] &gt; <span class="number">1 </span>{
                         <span class="comment">// Mutate the successor to be a critical edge, as `block` has multiple
@@ -819,7 +843,7 @@
         cfg.compute(<span class="kw-2">&amp;</span>func);
         <span class="kw">let </span>dom_tree = DominatorTree::with_function(<span class="kw-2">&amp;</span>func, <span class="kw-2">&amp;</span>cfg);
 
-        BlockLoweringOrder::new(<span class="kw-2">&amp;</span>func, <span class="kw-2">&amp;</span>dom_tree)
+        BlockLoweringOrder::new(<span class="kw-2">&amp;</span>func, <span class="kw-2">&amp;</span>dom_tree, <span class="kw-2">&amp;mut </span>Default::default())
     }
 
     <span class="attr">#[test]

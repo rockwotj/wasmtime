@@ -89,6 +89,7 @@
 <a href="#89" id="89">89</a>
 <a href="#90" id="90">90</a>
 <a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Compilation backend pipeline: optimized IR to VCode / binemit.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::dominator_tree::DominatorTree;
@@ -109,11 +110,12 @@
     abi: Callee&lt;&lt;&lt;B <span class="kw">as </span>LowerBackend&gt;::MInst <span class="kw">as </span>MachInst&gt;::ABIMachineSpec&gt;,
     emit_info: &lt;B::MInst <span class="kw">as </span>MachInstEmit&gt;::Info,
     sigs: SigSet,
+    ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
 ) -&gt; CodegenResult&lt;(VCode&lt;B::MInst&gt;, regalloc2::Output)&gt; {
     <span class="kw">let </span>machine_env = b.machine_env();
 
     <span class="comment">// Compute lowered block order.
-    </span><span class="kw">let </span>block_order = BlockLoweringOrder::new(f, domtree);
+    </span><span class="kw">let </span>block_order = BlockLoweringOrder::new(f, domtree, ctrl_plane);
 
     <span class="comment">// Build the lowering context.
     </span><span class="kw">let </span>lower = <span class="kw">crate</span>::machinst::Lower::new(f, machine_env, abi, emit_info, block_order, sigs)<span class="question-mark">?</span>;

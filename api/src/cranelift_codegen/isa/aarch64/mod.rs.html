@@ -237,6 +237,7 @@
 <a href="#237" id="237">237</a>
 <a href="#238" id="238">238</a>
 <a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ARM 64-bit Instruction Set Architecture.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::dominator_tree::DominatorTree;
@@ -297,11 +298,12 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         func: <span class="kw-2">&amp;</span>Function,
         domtree: <span class="kw-2">&amp;</span>DominatorTree,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
     ) -&gt; CodegenResult&lt;(VCode&lt;inst::Inst&gt;, regalloc2::Output)&gt; {
         <span class="kw">let </span>emit_info = EmitInfo::new(<span class="self">self</span>.flags.clone());
         <span class="kw">let </span>sigs = SigSet::new::&lt;abi::AArch64MachineDeps&gt;(func, <span class="kw-2">&amp;</span><span class="self">self</span>.flags)<span class="question-mark">?</span>;
         <span class="kw">let </span>abi = abi::AArch64Callee::new(func, <span class="self">self</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.isa_flags, <span class="kw-2">&amp;</span>sigs)<span class="question-mark">?</span>;
-        compile::compile::&lt;AArch64Backend&gt;(func, domtree, <span class="self">self</span>, abi, emit_info, sigs)
+        compile::compile::&lt;AArch64Backend&gt;(func, domtree, <span class="self">self</span>, abi, emit_info, sigs, ctrl_plane)
     }
 }
 
@@ -313,7 +315,7 @@
         want_disasm: bool,
         ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
     ) -&gt; CodegenResult&lt;CompiledCodeStencil&gt; {
-        <span class="kw">let </span>(vcode, regalloc_result) = <span class="self">self</span>.compile_vcode(func, domtree)<span class="question-mark">?</span>;
+        <span class="kw">let </span>(vcode, regalloc_result) = <span class="self">self</span>.compile_vcode(func, domtree, ctrl_plane)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>emit_result = vcode.emit(
             <span class="kw-2">&amp;</span>regalloc_result,
