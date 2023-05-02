@@ -477,6 +477,8 @@
 <a href="#477" id="477">477</a>
 <a href="#478" id="478">478</a>
 <a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Wasmtime&#39;s embedding API
 //!
 //! Wasmtime is a WebAssembly engine for JIT-complied or ahead-of-time compiled
@@ -878,6 +880,7 @@
 <span class="kw">mod </span>linker;
 <span class="kw">mod </span>memory;
 <span class="kw">mod </span>module;
+<span class="kw">mod </span>profiling;
 <span class="kw">mod </span>r#ref;
 <span class="kw">mod </span>signatures;
 <span class="kw">mod </span>store;
@@ -895,6 +898,7 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::linker::<span class="kw-2">*</span>;
 <span class="kw">pub use </span><span class="kw">crate</span>::memory::<span class="kw-2">*</span>;
 <span class="kw">pub use </span><span class="kw">crate</span>::module::Module;
+<span class="kw">pub use </span><span class="kw">crate</span>::profiling::GuestProfiler;
 <span class="kw">pub use crate</span>::r#ref::ExternRef;
 <span class="attr">#[cfg(feature = <span class="string">&quot;async&quot;</span>)]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::store::CallHookHandler;

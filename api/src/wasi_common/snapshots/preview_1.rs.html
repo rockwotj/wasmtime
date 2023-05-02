@@ -2770,7 +2770,7 @@
     <span class="kw">use </span>wiggle::GuestType;
     <span class="macro">assert_eq!</span>(
         types::Dirent::guest_size(),
-        std::mem::size_of::&lt;types::Dirent&gt;() <span class="kw">as _</span>,
+        std::mem::size_of::&lt;types::Dirent&gt;() <span class="kw">as </span>u32,
         <span class="string">&quot;Dirent guest repr and host repr should match&quot;
     </span>);
     <span class="macro">assert_eq!</span>(

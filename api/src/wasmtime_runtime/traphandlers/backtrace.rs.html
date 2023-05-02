@@ -308,6 +308,8 @@
 <a href="#308" id="308">308</a>
 <a href="#309" id="309">309</a>
 <a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Backtrace and stack walking functionality for Wasm.
 //!
 //! Walking the Wasm stack is comprised of
@@ -614,7 +616,9 @@
     }
 
     <span class="doccomment">/// Iterate over the frames inside this backtrace.
-    </span><span class="kw">pub fn </span>frames&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>ExactSizeIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Frame&gt; + <span class="lifetime">&#39;a </span>{
+    </span><span class="kw">pub fn </span>frames&lt;<span class="lifetime">&#39;a</span>&gt;(
+        <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>,
+    ) -&gt; <span class="kw">impl </span>ExactSizeIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Frame&gt; + DoubleEndedIterator + <span class="lifetime">&#39;a </span>{
         <span class="self">self</span>.<span class="number">0</span>.iter()
     }
 }
