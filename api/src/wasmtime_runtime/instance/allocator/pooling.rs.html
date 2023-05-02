@@ -1353,6 +1353,8 @@
 <a href="#1353" id="1353">1353</a>
 <a href="#1354" id="1354">1354</a>
 <a href="#1355" id="1355">1355</a>
+<a href="#1356" id="1356">1356</a>
+<a href="#1357" id="1357">1357</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements the pooling instance allocator.
 //!
 //! The pooling instance allocator maps memory in advance
@@ -1577,7 +1579,7 @@
         <span class="macro">assert!</span>(memory_index &lt; <span class="self">self</span>.max_memories);
         <span class="kw">let </span>idx = instance_index * <span class="self">self</span>.max_memories + memory_index;
         <span class="kw">let </span>offset = <span class="self">self</span>.initial_memory_offset + idx * <span class="self">self</span>.memory_and_guard_size;
-        <span class="kw">unsafe </span>{ <span class="self">self</span>.mapping.as_mut_ptr().offset(offset <span class="kw">as </span>isize) }
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.mapping.as_ptr().offset(offset <span class="kw">as </span>isize).cast_mut() }
     }
 
     <span class="attr">#[cfg(test)]
@@ -1703,9 +1705,10 @@
 
         <span class="kw">let </span>base: <span class="kw-2">*mut </span>u8 = <span class="kw">unsafe </span>{
             <span class="self">self</span>.mapping
-                .as_mut_ptr()
-                .add(instance_index * <span class="self">self</span>.table_size * <span class="self">self</span>.max_tables) <span class="kw">as _
-        </span>};
+                .as_ptr()
+                .add(instance_index * <span class="self">self</span>.table_size * <span class="self">self</span>.max_tables)
+                .cast_mut()
+        };
 
         <span class="kw">let </span>size = <span class="self">self</span>.table_size;
         (<span class="number">0</span>..<span class="self">self</span>.max_tables).map(<span class="kw">move </span>|i| <span class="kw">unsafe </span>{ base.add(i * size) })
@@ -1764,7 +1767,7 @@
             <span class="kw">unsafe </span>{
                 <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..max_instances {
                     <span class="comment">// Make the stack guard page inaccessible
-                    </span><span class="kw">let </span>bottom_of_stack = mapping.as_mut_ptr().add(i * stack_size);
+                    </span><span class="kw">let </span>bottom_of_stack = mapping.as_ptr().add(i * stack_size).cast_mut();
                     mprotect(bottom_of_stack.cast(), page_size, MprotectFlags::empty())
                         .context(<span class="string">&quot;failed to protect stack guard page&quot;</span>)<span class="question-mark">?</span>;
                 }
@@ -1809,8 +1812,9 @@
 
             <span class="kw">let </span>bottom_of_stack = <span class="self">self
                 </span>.mapping
-                .as_mut_ptr()
-                .add((index * <span class="self">self</span>.stack_size) + <span class="self">self</span>.page_size);
+                .as_ptr()
+                .add((index * <span class="self">self</span>.stack_size) + <span class="self">self</span>.page_size)
+                .cast_mut();
 
             commit_stack_pages(bottom_of_stack, size_without_guard)<span class="question-mark">?</span>;
 

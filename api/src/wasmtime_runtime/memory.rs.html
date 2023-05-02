@@ -936,6 +936,13 @@
 <a href="#936" id="936">936</a>
 <a href="#937" id="937">937</a>
 <a href="#938" id="938">938</a>
+<a href="#939" id="939">939</a>
+<a href="#940" id="940">940</a>
+<a href="#941" id="941">941</a>
+<a href="#942" id="942">942</a>
+<a href="#943" id="943">943</a>
+<a href="#944" id="944">944</a>
+<a href="#945" id="945">945</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Memory management for linear memories.
 //!
 //! `RuntimeLinearMemory` is to WebAssembly linear memories what `Table` is to WebAssembly tables.
@@ -1233,8 +1240,15 @@
             <span class="kw">let </span><span class="kw-2">mut </span>new_mmap = Mmap::accessible_reserved(<span class="number">0</span>, request_bytes)<span class="question-mark">?</span>;
             new_mmap.make_accessible(<span class="self">self</span>.pre_guard_size, new_size)<span class="question-mark">?</span>;
 
-            new_mmap.as_mut_slice()[<span class="self">self</span>.pre_guard_size..][..<span class="self">self</span>.accessible]
-                .copy_from_slice(<span class="kw-2">&amp;</span><span class="self">self</span>.mmap.as_slice()[<span class="self">self</span>.pre_guard_size..][..<span class="self">self</span>.accessible]);
+            <span class="comment">// This method has an exclusive reference to `self.mmap` and just
+            // created `new_mmap` so it should be safe to acquire references
+            // into both of them and copy between them.
+            </span><span class="kw">unsafe </span>{
+                <span class="kw">let </span>range = <span class="self">self</span>.pre_guard_size..<span class="self">self</span>.pre_guard_size + <span class="self">self</span>.accessible;
+                <span class="kw">let </span>src = <span class="self">self</span>.mmap.slice(range.clone());
+                <span class="kw">let </span>dst = new_mmap.slice_mut(range);
+                dst.copy_from_slice(src);
+            }
 
             <span class="comment">// Now drop the MemoryImageSlot, if any. We&#39;ve lost the CoW
             // advantages by explicitly copying all data, but we have
@@ -1285,7 +1299,7 @@
     </span>}
 
     <span class="kw">fn </span>wasm_accessible(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Range&lt;usize&gt; {
-        <span class="kw">let </span>base = <span class="self">self</span>.mmap.as_mut_ptr() <span class="kw">as </span>usize + <span class="self">self</span>.pre_guard_size;
+        <span class="kw">let </span>base = <span class="self">self</span>.mmap.as_ptr() <span class="kw">as </span>usize + <span class="self">self</span>.pre_guard_size;
         <span class="kw">let </span>end = base + (<span class="self">self</span>.mmap.len() - <span class="self">self</span>.pre_guard_size);
         base..end
     }

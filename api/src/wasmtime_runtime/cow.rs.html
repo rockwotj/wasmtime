@@ -1054,6 +1054,7 @@
 <a href="#1054" id="1054">1054</a>
 <a href="#1055" id="1055">1055</a>
 <a href="#1056" id="1056">1056</a>
+<a href="#1057" id="1057">1057</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Copy-on-write initialization support: creation of backing images for
 //! modules, and logic to support mapping these backing images into memory.
 
@@ -1955,14 +1956,14 @@
         <span class="macro">assert!</span>(memfd.is_dirty());
         <span class="comment">// We should be able to access this 64 KiB (try both ends) and
         // it should consist of zeroes.
-        </span><span class="kw">let </span>slice = mmap.as_mut_slice();
+        </span><span class="kw">let </span>slice = <span class="kw">unsafe </span>{ mmap.slice_mut(<span class="number">0</span>..<span class="number">65536</span>) };
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, slice[<span class="number">0</span>]);
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, slice[<span class="number">65535</span>]);
         slice[<span class="number">1024</span>] = <span class="number">42</span>;
         <span class="macro">assert_eq!</span>(<span class="number">42</span>, slice[<span class="number">1024</span>]);
         <span class="comment">// grow the heap
         </span>memfd.set_heap_limit(<span class="number">128 </span>&lt;&lt; <span class="number">10</span>).unwrap();
-        <span class="kw">let </span>slice = mmap.as_slice();
+        <span class="kw">let </span>slice = <span class="kw">unsafe </span>{ mmap.slice(<span class="number">0</span>..<span class="number">1 </span>&lt;&lt; <span class="number">20</span>) };
         <span class="macro">assert_eq!</span>(<span class="number">42</span>, slice[<span class="number">1024</span>]);
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, slice[<span class="number">131071</span>]);
         <span class="comment">// instantiate again; we should see zeroes, even as the
@@ -1970,7 +1971,7 @@
         </span>memfd.clear_and_remain_ready(<span class="number">0</span>).unwrap();
         <span class="macro">assert!</span>(!memfd.is_dirty());
         memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>plan).unwrap();
-        <span class="kw">let </span>slice = mmap.as_slice();
+        <span class="kw">let </span>slice = <span class="kw">unsafe </span>{ mmap.slice(<span class="number">0</span>..<span class="number">65536</span>) };
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, slice[<span class="number">1024</span>]);
     }
 
@@ -1987,37 +1988,37 @@
         <span class="comment">// Instantiate with this image
         </span>memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="macro">assert!</span>(memfd.has_image());
-        <span class="kw">let </span>slice = mmap.as_mut_slice();
+        <span class="kw">let </span>slice = <span class="kw">unsafe </span>{ mmap.slice_mut(<span class="number">0</span>..<span class="number">65536</span>) };
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
         slice[<span class="number">4096</span>] = <span class="number">5</span>;
         <span class="comment">// Clear and re-instantiate same image
         </span>memfd.clear_and_remain_ready(<span class="number">0</span>).unwrap();
         memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>plan).unwrap();
-        <span class="kw">let </span>slice = mmap.as_slice();
+        <span class="kw">let </span>slice = <span class="kw">unsafe </span>{ mmap.slice_mut(<span class="number">0</span>..<span class="number">65536</span>) };
         <span class="comment">// Should not see mutation from above
         </span><span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
         <span class="comment">// Clear and re-instantiate no image
         </span>memfd.clear_and_remain_ready(<span class="number">0</span>).unwrap();
         memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="macro">assert!</span>(!memfd.has_image());
-        <span class="kw">let </span>slice = mmap.as_slice();
+        <span class="kw">let </span>slice = <span class="kw">unsafe </span>{ mmap.slice_mut(<span class="number">0</span>..<span class="number">65536</span>) };
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
         <span class="comment">// Clear and re-instantiate image again
         </span>memfd.clear_and_remain_ready(<span class="number">0</span>).unwrap();
         memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>plan).unwrap();
-        <span class="kw">let </span>slice = mmap.as_slice();
+        <span class="kw">let </span>slice = <span class="kw">unsafe </span>{ mmap.slice_mut(<span class="number">0</span>..<span class="number">65536</span>) };
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
         <span class="comment">// Create another image with different data.
         </span><span class="kw">let </span>image2 = Arc::new(create_memfd_with_data(<span class="number">4096</span>, <span class="kw-2">&amp;</span>[<span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>]).unwrap());
         memfd.clear_and_remain_ready(<span class="number">0</span>).unwrap();
         memfd.instantiate(<span class="number">128 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image2), <span class="kw-2">&amp;</span>plan).unwrap();
-        <span class="kw">let </span>slice = mmap.as_slice();
+        <span class="kw">let </span>slice = <span class="kw">unsafe </span>{ mmap.slice_mut(<span class="number">0</span>..<span class="number">65536</span>) };
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
         <span class="comment">// Instantiate the original image again; we should notice it&#39;s
         // a different image and not reuse the mappings.
         </span>memfd.clear_and_remain_ready(<span class="number">0</span>).unwrap();
         memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>plan).unwrap();
-        <span class="kw">let </span>slice = mmap.as_slice();
+        <span class="kw">let </span>slice = <span class="kw">unsafe </span>{ mmap.slice_mut(<span class="number">0</span>..<span class="number">65536</span>) };
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
     }
 
@@ -2035,7 +2036,7 @@
             <span class="kw">for </span>amt_to_memset <span class="kw">in </span>[<span class="number">0</span>, <span class="number">4096</span>, <span class="number">10 </span>&lt;&lt; <span class="number">12</span>, <span class="number">1 </span>&lt;&lt; <span class="number">20</span>, <span class="number">10 </span>&lt;&lt; <span class="number">20</span>] {
                 memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>plan).unwrap();
                 <span class="macro">assert!</span>(memfd.has_image());
-                <span class="kw">let </span>slice = mmap.as_mut_slice();
+                <span class="kw">let </span>slice = <span class="kw">unsafe </span>{ mmap.slice_mut(<span class="number">0</span>..<span class="number">64 </span>&lt;&lt; <span class="number">10</span>) };
                 <span class="kw">if </span>image_off &gt; <span class="number">0 </span>{
                     <span class="macro">assert_eq!</span>(slice[image_off - <span class="number">1</span>], <span class="number">0</span>);
                 }
@@ -2050,7 +2051,8 @@
         <span class="comment">// Test without an image
         </span><span class="kw">for </span>amt_to_memset <span class="kw">in </span>[<span class="number">0</span>, <span class="number">4096</span>, <span class="number">10 </span>&lt;&lt; <span class="number">12</span>, <span class="number">1 </span>&lt;&lt; <span class="number">20</span>, <span class="number">10 </span>&lt;&lt; <span class="number">20</span>] {
             memfd.instantiate(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>plan).unwrap();
-            <span class="kw">for </span>chunk <span class="kw">in </span>mmap.as_mut_slice()[..<span class="number">64 </span>&lt;&lt; <span class="number">10</span>].chunks_mut(<span class="number">1024</span>) {
+            <span class="kw">let </span>mem = <span class="kw">unsafe </span>{ mmap.slice_mut(<span class="number">0</span>..<span class="number">64 </span>&lt;&lt; <span class="number">10</span>) };
+            <span class="kw">for </span>chunk <span class="kw">in </span>mem.chunks_mut(<span class="number">1024</span>) {
                 <span class="macro">assert_eq!</span>(chunk[<span class="number">0</span>], <span class="number">0</span>);
                 chunk[<span class="number">0</span>] = <span class="number">5</span>;
             }
@@ -2073,7 +2075,7 @@
         // it&#39;s cleared.
         </span>memfd.instantiate(initial, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>image), <span class="kw-2">&amp;</span>plan).unwrap();
         <span class="macro">assert!</span>(memfd.has_image());
-        <span class="kw">let </span>slice = mmap.as_mut_slice();
+        <span class="kw">let </span>slice = <span class="kw">unsafe </span>{ mmap.slice_mut(<span class="number">0</span>..(<span class="number">64 </span>&lt;&lt; <span class="number">10</span>) + <span class="number">4096</span>) };
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);
         slice[<span class="number">4096</span>] = <span class="number">5</span>;
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">5</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="kw-2">&amp;</span>slice[<span class="number">4096</span>..<span class="number">4100</span>]);

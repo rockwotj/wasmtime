@@ -187,6 +187,9 @@
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
 <a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::Mmap;
 <span class="kw">use </span>anyhow::{Context, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>std::fs::File;
@@ -317,7 +320,9 @@
     <span class="kw">type </span>Target = [u8];
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.mmap.as_slice()[<span class="self">self</span>.range.clone()]
+        <span class="comment">// SAFETY: this mmap owns its own range of the underlying mmap so it
+        // should be all good-to-read.
+        </span><span class="kw">unsafe </span>{ <span class="self">self</span>.mmap.slice(<span class="self">self</span>.range.clone()) }
     }
 }
 
@@ -331,7 +336,8 @@
         // specified in `self.range`. This should allow us to safely hand out
         // mutable access to these bytes if so desired.
         </span><span class="kw">unsafe </span>{
-            <span class="kw">let </span>slice = std::slice::from_raw_parts_mut(<span class="self">self</span>.mmap.as_mut_ptr(), <span class="self">self</span>.mmap.len());
+            <span class="kw">let </span>slice =
+                std::slice::from_raw_parts_mut(<span class="self">self</span>.mmap.as_ptr().cast_mut(), <span class="self">self</span>.mmap.len());
             <span class="kw-2">&amp;mut </span>slice[<span class="self">self</span>.range.clone()]
         }
     }
