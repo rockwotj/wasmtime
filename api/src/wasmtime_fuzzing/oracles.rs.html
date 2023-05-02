@@ -891,6 +891,9 @@
 <a href="#891" id="891">891</a>
 <a href="#892" id="892">892</a>
 <a href="#893" id="893">893</a>
+<a href="#894" id="894">894</a>
+<a href="#895" id="895">895</a>
+<a href="#896" id="896">896</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Oracles.
 //!
 //! Oracles take a test case and determine whether we have a bug. For example,
@@ -1032,6 +1035,11 @@
 </span><span class="kw">pub fn </span>instantiate(wasm: <span class="kw-2">&amp;</span>[u8], known_valid: bool, config: <span class="kw-2">&amp;</span>generators::Config, timeout: Timeout) {
     <span class="kw">let </span><span class="kw-2">mut </span>store = config.to_store();
 
+    <span class="kw">let </span>module = <span class="kw">match </span>compile_module(store.engine(), wasm, known_valid, config) {
+        <span class="prelude-val">Some</span>(module) =&gt; module,
+        <span class="prelude-val">None </span>=&gt; <span class="kw">return</span>,
+    };
+
     <span class="kw">let </span><span class="kw-2">mut </span>timeout_state = SignalOnDrop::default();
     <span class="kw">match </span>timeout {
         Timeout::Fuel(fuel) =&gt; set_fuel(<span class="kw-2">&amp;mut </span>store, fuel),
@@ -1052,9 +1060,7 @@
         Timeout::None =&gt; {}
     }
 
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(module) = compile_module(store.engine(), wasm, known_valid, config) {
-        instantiate_with_dummy(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;</span>module);
-    }
+    instantiate_with_dummy(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;</span>module);
 }
 
 <span class="doccomment">/// Represents supported commands to the `instantiate_many` function.

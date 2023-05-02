@@ -730,7 +730,7 @@
     <span class="doccomment">/// Generates an arbitrary method of timing out an instance, ensuring that
     /// this configuration supports the returned timeout.
     </span><span class="kw">pub fn </span>generate_timeout(<span class="kw-2">&amp;mut </span><span class="self">self</span>, u: <span class="kw-2">&amp;mut </span>Unstructured&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; arbitrary::Result&lt;Timeout&gt; {
-        <span class="kw">let </span>time_duration = Duration::from_secs(<span class="number">20</span>);
+        <span class="kw">let </span>time_duration = Duration::from_millis(<span class="number">100</span>);
         <span class="kw">let </span>timeout = u
             .choose(<span class="kw-2">&amp;</span>[Timeout::Fuel(<span class="number">100_000</span>), Timeout::Epoch(time_duration)])<span class="question-mark">?
             </span>.clone();
