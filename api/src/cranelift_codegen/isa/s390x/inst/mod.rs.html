@@ -3406,6 +3406,7 @@
 <a href="#3406" id="3406">3406</a>
 <a href="#3407" id="3407">3407</a>
 <a href="#3408" id="3408">3408</a>
+<a href="#3409" id="3409">3409</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines s390x-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc};
@@ -4525,6 +4526,7 @@
         <span class="kw">match </span>rc {
             RegClass::Int =&gt; types::I64,
             RegClass::Float =&gt; types::I8X16,
+            RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
         }
     }
 

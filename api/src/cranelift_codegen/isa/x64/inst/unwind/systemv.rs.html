@@ -199,6 +199,7 @@
 <a href="#199" id="199">199</a>
 <a href="#200" id="200">200</a>
 <a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Unwind information for System V ABI (x86-64).
 
 </span><span class="kw">use </span><span class="kw">crate</span>::isa::unwind::systemv::RegisterMappingError;
@@ -277,6 +278,7 @@
             </span><span class="prelude-val">Ok</span>(X86_GP_REG_MAP[reg.to_real_reg().unwrap().hw_enc() <span class="kw">as </span>usize])
         }
         RegClass::Float =&gt; <span class="prelude-val">Ok</span>(X86_XMM_REG_MAP[reg.to_real_reg().unwrap().hw_enc() <span class="kw">as </span>usize]),
+        RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
     }
 }
 

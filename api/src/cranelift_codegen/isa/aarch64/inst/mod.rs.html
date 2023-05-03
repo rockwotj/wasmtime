@@ -2941,6 +2941,8 @@
 <a href="#2941" id="2941">2941</a>
 <a href="#2942" id="2942">2942</a>
 <a href="#2943" id="2943">2943</a>
+<a href="#2944" id="2944">2944</a>
+<a href="#2945" id="2945">2945</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines aarch64-specific machine instruction types.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc};
@@ -3973,6 +3975,7 @@
                     }
                 }
             }
+            RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
         }
     }
 
@@ -4026,6 +4029,7 @@
         <span class="kw">match </span>rc {
             RegClass::Float =&gt; types::I8X16,
             RegClass::Int =&gt; types::I64,
+            RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
         }
     }
 

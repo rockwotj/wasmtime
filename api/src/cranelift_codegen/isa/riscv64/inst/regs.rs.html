@@ -367,7 +367,7 @@
 }
 
 <span class="kw">pub fn </span>crate_reg_eviroment(_flags: <span class="kw-2">&amp;</span>settings::Flags) -&gt; MachineEnv {
-    <span class="kw">let </span>preferred_regs_by_class: [Vec&lt;PReg&gt;; <span class="number">2</span>] = {
+    <span class="kw">let </span>preferred_regs_by_class: [Vec&lt;PReg&gt;; <span class="number">3</span>] = {
         <span class="kw">let </span><span class="kw-2">mut </span>x_register: Vec&lt;PReg&gt; = <span class="macro">vec!</span>[];
         x_register.push(PReg::new(<span class="number">5</span>, RegClass::Int));
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">6</span>..=<span class="number">7 </span>{
@@ -390,10 +390,10 @@
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">28</span>..=<span class="number">31 </span>{
             f_register.push(PReg::new(i, RegClass::Float));
         }
-        [x_register, f_register]
+        [x_register, f_register, <span class="macro">vec!</span>[]]
     };
 
-    <span class="kw">let </span>non_preferred_regs_by_class: [Vec&lt;PReg&gt;; <span class="number">2</span>] = {
+    <span class="kw">let </span>non_preferred_regs_by_class: [Vec&lt;PReg&gt;; <span class="number">3</span>] = {
         <span class="kw">let </span><span class="kw-2">mut </span>x_register: Vec&lt;PReg&gt; = <span class="macro">vec!</span>[];
         x_register.push(PReg::new(<span class="number">9</span>, RegClass::Int));
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">18</span>..=<span class="number">27 </span>{
@@ -406,14 +406,14 @@
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">18</span>..=<span class="number">27 </span>{
             f_register.push(PReg::new(i, RegClass::Float));
         }
-        [x_register, f_register]
+        [x_register, f_register, <span class="macro">vec!</span>[]]
     };
 
     MachineEnv {
         preferred_regs_by_class,
         non_preferred_regs_by_class,
         fixed_stack_slots: <span class="macro">vec!</span>[],
-        scratch_by_class: [<span class="prelude-val">None</span>, <span class="prelude-val">None</span>],
+        scratch_by_class: [<span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>],
     }
 }
 

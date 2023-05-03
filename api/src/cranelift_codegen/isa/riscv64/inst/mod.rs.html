@@ -1803,6 +1803,8 @@
 <a href="#1803" id="1803">1803</a>
 <a href="#1804" id="1804">1804</a>
 <a href="#1805" id="1805">1805</a>
+<a href="#1806" id="1806">1806</a>
+<a href="#1807" id="1807">1807</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines riscv64-specific machine instruction types.
 
 </span><span class="comment">// Some variants are not constructed, but we still want them as options in the future.
@@ -2481,6 +2483,7 @@
         <span class="kw">match </span>rc {
             regalloc2::RegClass::Int =&gt; I64,
             regalloc2::RegClass::Float =&gt; F64,
+            regalloc2::RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
         }
     }
 
@@ -2643,6 +2646,7 @@
                 <span class="number">28</span>..=<span class="number">31 </span>=&gt; <span class="macro">format!</span>(<span class="string">&quot;ft{}&quot;</span>, real.hw_enc() - <span class="number">20</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
             },
+            RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
         },
         <span class="prelude-val">None </span>=&gt; {
             <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, reg)

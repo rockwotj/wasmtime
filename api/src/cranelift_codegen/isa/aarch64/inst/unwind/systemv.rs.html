@@ -175,6 +175,7 @@
 <a href="#175" id="175">175</a>
 <a href="#176" id="176">176</a>
 <a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Unwind information for System V ABI (Aarch64).
 
 </span><span class="kw">use </span><span class="kw">crate</span>::isa::aarch64::inst::regs;
@@ -220,6 +221,7 @@
             <span class="kw">let </span>reg = reg.to_real_reg().unwrap().hw_enc() <span class="kw">as </span>u16;
             <span class="prelude-val">Ok</span>(Register(<span class="number">64 </span>+ reg))
         }
+        RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
     }
 }
 

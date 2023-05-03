@@ -387,6 +387,11 @@
 <a href="#387" id="387">387</a>
 <a href="#388" id="388">388</a>
 <a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
 </pre><pre class="rust"><code><span class="doccomment">//! AArch64 ISA definitions: registers.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::isa::aarch64::inst::OperandSize;
@@ -593,6 +598,8 @@
                 preg(vreg(<span class="number">30</span>)),
                 preg(vreg(<span class="number">31</span>)),
             ],
+            <span class="comment">// Vector Regclass is unused
+            </span><span class="macro">vec!</span>[],
         ],
         non_preferred_regs_by_class: [
             <span class="macro">vec!</span>[
@@ -617,9 +624,11 @@
                 preg(vreg(<span class="number">14</span>)),
                 preg(vreg(<span class="number">15</span>)),
             ],
+            <span class="comment">// Vector Regclass is unused
+            </span><span class="macro">vec!</span>[],
         ],
         fixed_stack_slots: <span class="macro">vec!</span>[],
-        scratch_by_class: [<span class="prelude-val">None</span>, <span class="prelude-val">None</span>],
+        scratch_by_class: [<span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>],
     };
 
     <span class="kw">if </span>!flags.enable_pinned_reg() {
@@ -656,6 +665,7 @@
         <span class="kw">match </span>rreg.class() {
             RegClass::Int =&gt; show_ireg(rreg),
             RegClass::Float =&gt; show_vreg(rreg),
+            RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
         }
     } <span class="kw">else </span>{
         <span class="macro">format!</span>(<span class="string">&quot;%{:?}&quot;</span>, reg)

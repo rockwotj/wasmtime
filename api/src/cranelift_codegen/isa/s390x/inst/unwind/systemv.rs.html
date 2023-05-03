@@ -213,6 +213,7 @@
 <a href="#213" id="213">213</a>
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Unwind information for System V ABI (s390x).
 
 </span><span class="kw">use </span><span class="kw">crate</span>::isa::unwind::systemv::RegisterMappingError;
@@ -298,6 +299,7 @@
     <span class="kw">match </span>reg.class() {
         RegClass::Int =&gt; <span class="prelude-val">Ok</span>(GPR_MAP[reg.to_real_reg().unwrap().hw_enc() <span class="kw">as </span>usize]),
         RegClass::Float =&gt; <span class="prelude-val">Ok</span>(VR_MAP[reg.to_real_reg().unwrap().hw_enc() <span class="kw">as </span>usize]),
+        RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
     }
 }
 

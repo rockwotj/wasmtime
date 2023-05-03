@@ -541,7 +541,7 @@
 <span class="attr">#[cfg(feature = <span class="string">&quot;enable-serde&quot;</span>)]
 </span><span class="kw">use </span>serde::{Deserialize, Serialize};
 
-<span class="doccomment">/// The first 128 vregs (64 int, 64 float/vec) are &quot;pinned&quot; to
+<span class="doccomment">/// The first 192 vregs (64 int, 64 float, 64 vec) are &quot;pinned&quot; to
 /// physical registers: this means that they are always constrained to
 /// the corresponding register at all use/mod/def sites.
 ///
@@ -549,7 +549,7 @@
 /// particular use/def/mod sites, and this is preferable; but pinned
 /// vregs allow us to migrate code that has been written using
 /// RealRegs directly.
-</span><span class="kw">const </span>PINNED_VREGS: usize = <span class="number">128</span>;
+</span><span class="kw">const </span>PINNED_VREGS: usize = <span class="number">192</span>;
 
 <span class="doccomment">/// Convert a `VReg` to its pinned `PReg`, if any.
 </span><span class="kw">pub fn </span>pinned_vreg_to_preg(vreg: VReg) -&gt; <span class="prelude-ty">Option</span>&lt;PReg&gt; {

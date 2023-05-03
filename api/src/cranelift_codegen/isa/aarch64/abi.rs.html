@@ -1273,6 +1273,12 @@
 <a href="#1273" id="1273">1273</a>
 <a href="#1274" id="1274">1274</a>
 <a href="#1275" id="1275">1275</a>
+<a href="#1276" id="1276">1276</a>
+<a href="#1277" id="1277">1277</a>
+<a href="#1278" id="1278">1278</a>
+<a href="#1279" id="1279">1279</a>
+<a href="#1280" id="1280">1280</a>
+<a href="#1281" id="1281">1281</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implementation of a standard AArch64 ABI.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::ir;
@@ -1529,12 +1535,14 @@
                 <span class="kw">let </span>next_reg = <span class="kw">match </span>rc {
                     RegClass::Int =&gt; <span class="kw-2">&amp;mut </span>next_xreg,
                     RegClass::Float =&gt; <span class="kw-2">&amp;mut </span>next_vreg,
+                    RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
                 };
 
                 <span class="kw">if </span><span class="kw-2">*</span>next_reg &lt; max_per_class_reg_vals &amp;&amp; remaining_reg_vals &gt; <span class="number">0 </span>{
                     <span class="kw">let </span>reg = <span class="kw">match </span>rc {
                         RegClass::Int =&gt; xreg(<span class="kw-2">*</span>next_reg),
                         RegClass::Float =&gt; vreg(<span class="kw-2">*</span>next_reg),
+                        RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
                     };
                     <span class="comment">// Overlay Z-regs on V-regs for parameter passing.
                     </span><span class="kw">let </span>ty = <span class="kw">if </span>param.value_type.is_dynamic_vector() {
@@ -1982,6 +1990,7 @@
             <span class="kw">match </span>reg.to_reg().class() {
                 RegClass::Int =&gt; clobbered_int.push(reg),
                 RegClass::Float =&gt; clobbered_vec.push(reg),
+                RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
             }
         }
 
@@ -2347,6 +2356,7 @@
         </span><span class="kw">match </span>rc {
             RegClass::Int =&gt; <span class="number">1</span>,
             RegClass::Float =&gt; vector_size / <span class="number">8</span>,
+            RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
         }
     }
 
@@ -2449,6 +2459,7 @@
                 </span>r.hw_enc() &gt;= <span class="number">8 </span>&amp;&amp; r.hw_enc() &lt;= <span class="number">15
             </span>}
         }
+        RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
     }
 }
 
@@ -2467,6 +2478,7 @@
             <span class="kw">match </span>reg.to_reg().class() {
                 RegClass::Int =&gt; int_saves.push(reg),
                 RegClass::Float =&gt; vec_saves.push(reg),
+                RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
             }
         }
     }

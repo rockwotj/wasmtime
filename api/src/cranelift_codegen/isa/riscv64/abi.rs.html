@@ -720,6 +720,10 @@
 <a href="#720" id="720">720</a>
 <a href="#721" id="721">721</a>
 <a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
+<a href="#725" id="725">725</a>
+<a href="#726" id="726">726</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implementation of a standard Riscv64 ABI.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::ir;
@@ -1139,6 +1143,7 @@
                 <span class="kw">let </span>ty = <span class="kw">match </span>r_reg.class() {
                     regalloc2::RegClass::Int =&gt; I64,
                     regalloc2::RegClass::Float =&gt; F64,
+                    RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
                 };
                 <span class="kw">if </span>flags.unwind_info() {
                     insts.push(Inst::Unwind {
@@ -1185,6 +1190,7 @@
             <span class="kw">let </span>ty = <span class="kw">match </span>rreg.class() {
                 regalloc2::RegClass::Int =&gt; I64,
                 regalloc2::RegClass::Float =&gt; F64,
+                RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
             };
             insts.push(<span class="self">Self</span>::gen_load_stack(
                 StackAMode::SPOffset(-cur_offset, ty),
@@ -1297,6 +1303,7 @@
         </span><span class="kw">match </span>rc {
             RegClass::Int =&gt; <span class="number">1</span>,
             RegClass::Float =&gt; <span class="number">1</span>,
+            RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
         }
     }
 
@@ -1416,6 +1423,7 @@
             RegClass::Float =&gt; {
                 clobbered_size += <span class="number">8</span>;
             }
+            RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
         }
     }
     align_to(clobbered_size, <span class="number">16</span>)

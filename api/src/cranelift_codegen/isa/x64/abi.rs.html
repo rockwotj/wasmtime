@@ -970,6 +970,12 @@
 <a href="#970" id="970">970</a>
 <a href="#971" id="971">971</a>
 <a href="#972" id="972">972</a>
+<a href="#973" id="973">973</a>
+<a href="#974" id="974">974</a>
+<a href="#975" id="975">975</a>
+<a href="#976" id="976">976</a>
+<a href="#977" id="977">977</a>
+<a href="#978" id="978">978</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implementation of the standard x64 ABI.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, types, LibCall, MemFlags, Opcode, Signature, TrapCode, Type};
@@ -1486,6 +1492,7 @@
                     ));
                     cur_offset += <span class="number">16</span>;
                 }
+                RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
             };
             <span class="kw">if </span>flags.unwind_info() {
                 insts.push(Inst::Unwind {
@@ -1538,6 +1545,7 @@
                     ));
                     cur_offset += <span class="number">16</span>;
                 }
+                RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
             }
         }
         <span class="comment">// Adjust RSP back upward.
@@ -1647,6 +1655,7 @@
         </span><span class="kw">match </span>rc {
             RegClass::Int =&gt; <span class="number">1</span>,
             RegClass::Float =&gt; vector_scale / <span class="number">8</span>,
+            RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
         }
     }
 
@@ -1859,6 +1868,7 @@
             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         },
         RegClass::Float =&gt; <span class="bool-val">false</span>,
+        RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
     }
 }
 
@@ -1875,6 +1885,7 @@
             <span class="number">6 </span>| <span class="number">7 </span>| <span class="number">8 </span>| <span class="number">9 </span>| <span class="number">10 </span>| <span class="number">11 </span>| <span class="number">12 </span>| <span class="number">13 </span>| <span class="number">14 </span>| <span class="number">15 </span>=&gt; <span class="bool-val">true</span>,
             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         },
+        RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
     }
 }
 
@@ -1889,6 +1900,7 @@
                 clobbered_size = align_to(clobbered_size, <span class="number">16</span>);
                 clobbered_size += <span class="number">16</span>;
             }
+            RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
         }
     }
     align_to(clobbered_size, <span class="number">16</span>)
