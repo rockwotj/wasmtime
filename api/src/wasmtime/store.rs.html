@@ -2051,6 +2051,12 @@
 <a href="#2051" id="2051">2051</a>
 <a href="#2052" id="2052">2052</a>
 <a href="#2053" id="2053">2053</a>
+<a href="#2054" id="2054">2054</a>
+<a href="#2055" id="2055">2055</a>
+<a href="#2056" id="2056">2056</a>
+<a href="#2057" id="2057">2057</a>
+<a href="#2058" id="2058">2058</a>
+<a href="#2059" id="2059">2059</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Wasmtime&#39;s &quot;store&quot; type
 //!
 //! This module, and its submodules, contain the `Store` type and various types
@@ -3281,7 +3287,13 @@
     <span class="kw">pub fn </span>gc(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="comment">// For this crate&#39;s API, we ensure that `set_stack_canary` invariants
         // are upheld for all host--&gt;Wasm calls.
-        </span><span class="kw">unsafe </span>{ wasmtime_runtime::gc(<span class="kw-2">&amp;</span><span class="self">self</span>.modules, <span class="kw-2">&amp;mut </span><span class="self">self</span>.externref_activations_table) }
+        </span><span class="kw">unsafe </span>{
+            wasmtime_runtime::gc(
+                <span class="self">self</span>.runtime_limits(),
+                <span class="kw-2">&amp;</span><span class="self">self</span>.modules,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.externref_activations_table,
+            )
+        }
     }
 
     <span class="doccomment">/// Yields the async context, assuming that we are executing on a fiber and

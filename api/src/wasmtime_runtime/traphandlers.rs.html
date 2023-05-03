@@ -624,73 +624,6 @@
 <a href="#624" id="624">624</a>
 <a href="#625" id="625">625</a>
 <a href="#626" id="626">626</a>
-<a href="#627" id="627">627</a>
-<a href="#628" id="628">628</a>
-<a href="#629" id="629">629</a>
-<a href="#630" id="630">630</a>
-<a href="#631" id="631">631</a>
-<a href="#632" id="632">632</a>
-<a href="#633" id="633">633</a>
-<a href="#634" id="634">634</a>
-<a href="#635" id="635">635</a>
-<a href="#636" id="636">636</a>
-<a href="#637" id="637">637</a>
-<a href="#638" id="638">638</a>
-<a href="#639" id="639">639</a>
-<a href="#640" id="640">640</a>
-<a href="#641" id="641">641</a>
-<a href="#642" id="642">642</a>
-<a href="#643" id="643">643</a>
-<a href="#644" id="644">644</a>
-<a href="#645" id="645">645</a>
-<a href="#646" id="646">646</a>
-<a href="#647" id="647">647</a>
-<a href="#648" id="648">648</a>
-<a href="#649" id="649">649</a>
-<a href="#650" id="650">650</a>
-<a href="#651" id="651">651</a>
-<a href="#652" id="652">652</a>
-<a href="#653" id="653">653</a>
-<a href="#654" id="654">654</a>
-<a href="#655" id="655">655</a>
-<a href="#656" id="656">656</a>
-<a href="#657" id="657">657</a>
-<a href="#658" id="658">658</a>
-<a href="#659" id="659">659</a>
-<a href="#660" id="660">660</a>
-<a href="#661" id="661">661</a>
-<a href="#662" id="662">662</a>
-<a href="#663" id="663">663</a>
-<a href="#664" id="664">664</a>
-<a href="#665" id="665">665</a>
-<a href="#666" id="666">666</a>
-<a href="#667" id="667">667</a>
-<a href="#668" id="668">668</a>
-<a href="#669" id="669">669</a>
-<a href="#670" id="670">670</a>
-<a href="#671" id="671">671</a>
-<a href="#672" id="672">672</a>
-<a href="#673" id="673">673</a>
-<a href="#674" id="674">674</a>
-<a href="#675" id="675">675</a>
-<a href="#676" id="676">676</a>
-<a href="#677" id="677">677</a>
-<a href="#678" id="678">678</a>
-<a href="#679" id="679">679</a>
-<a href="#680" id="680">680</a>
-<a href="#681" id="681">681</a>
-<a href="#682" id="682">682</a>
-<a href="#683" id="683">683</a>
-<a href="#684" id="684">684</a>
-<a href="#685" id="685">685</a>
-<a href="#686" id="686">686</a>
-<a href="#687" id="687">687</a>
-<a href="#688" id="688">688</a>
-<a href="#689" id="689">689</a>
-<a href="#690" id="690">690</a>
-<a href="#691" id="691">691</a>
-<a href="#692" id="692">692</a>
-<a href="#693" id="693">693</a>
 </pre><pre class="rust"><code><span class="doccomment">//! WebAssembly trap handling, which is built on top of the lower-level
 //! signalhandling mechanisms.
 
@@ -941,7 +874,6 @@
 // usage of its accessor methods.
 </span><span class="kw">mod </span>call_thread_state {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span>std::mem;
 
     <span class="doccomment">/// Temporary state stored on the stack which is registered in the `tls` module
     /// below for calls into wasm.
@@ -955,16 +887,27 @@
 
         prev: Cell&lt;tls::Ptr&gt;,
 
-        <span class="comment">// The values of `VMRuntimeLimits::last_wasm_{exit_{pc,fp},entry_sp}` for
-        // the *previous* `CallThreadState`. Our *current* last wasm PC/FP/SP are
-        // saved in `self.limits`. We save a copy of the old registers here because
-        // the `VMRuntimeLimits` typically doesn&#39;t change across nested calls into
-        // Wasm (i.e. they are typically calls back into the same store and
-        // `self.limits == self.prev.limits`) and we must to maintain the list of
+        <span class="comment">// The values of `VMRuntimeLimits::last_wasm_{exit_{pc,fp},entry_sp}`
+        // for the *previous* `CallThreadState` for this same store/limits. Our
+        // *current* last wasm PC/FP/SP are saved in `self.limits`. We save a
+        // copy of the old registers here because the `VMRuntimeLimits`
+        // typically doesn&#39;t change across nested calls into Wasm (i.e. they are
+        // typically calls back into the same store and `self.limits ==
+        // self.prev.limits`) and we must to maintain the list of
         // contiguous-Wasm-frames stack regions for backtracing purposes.
         </span>old_last_wasm_exit_fp: Cell&lt;usize&gt;,
         old_last_wasm_exit_pc: Cell&lt;usize&gt;,
         old_last_wasm_entry_sp: Cell&lt;usize&gt;,
+    }
+
+    <span class="kw">impl </span>Drop <span class="kw">for </span>CallThreadState {
+        <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+            <span class="kw">unsafe </span>{
+                <span class="kw-2">*</span>(<span class="kw-2">*</span><span class="self">self</span>.limits).last_wasm_exit_fp.get() = <span class="self">self</span>.old_last_wasm_exit_fp.get();
+                <span class="kw-2">*</span>(<span class="kw-2">*</span><span class="self">self</span>.limits).last_wasm_exit_pc.get() = <span class="self">self</span>.old_last_wasm_exit_pc.get();
+                <span class="kw-2">*</span>(<span class="kw-2">*</span><span class="self">self</span>.limits).last_wasm_entry_sp.get() = <span class="self">self</span>.old_last_wasm_entry_sp.get();
+            }
+        }
     }
 
     <span class="kw">impl </span>CallThreadState {
@@ -981,9 +924,9 @@
                 capture_backtrace,
                 limits,
                 prev: Cell::new(ptr::null()),
-                old_last_wasm_exit_fp: Cell::new(<span class="number">0</span>),
-                old_last_wasm_exit_pc: Cell::new(<span class="number">0</span>),
-                old_last_wasm_entry_sp: Cell::new(<span class="number">0</span>),
+                old_last_wasm_exit_fp: Cell::new(<span class="kw">unsafe </span>{ <span class="kw-2">*</span>(<span class="kw-2">*</span>limits).last_wasm_exit_fp.get() }),
+                old_last_wasm_exit_pc: Cell::new(<span class="kw">unsafe </span>{ <span class="kw-2">*</span>(<span class="kw-2">*</span>limits).last_wasm_exit_pc.get() }),
+                old_last_wasm_entry_sp: Cell::new(<span class="kw">unsafe </span>{ <span class="kw-2">*</span>(<span class="kw-2">*</span>limits).last_wasm_entry_sp.get() }),
             }
         }
 
@@ -1007,83 +950,15 @@
             <span class="self">self</span>.prev.get()
         }
 
-        <span class="doccomment">/// Connect the link to the previous `CallThreadState`.
-        ///
-        /// Synchronizes the last wasm FP, PC, and SP on `self` and the old
-        /// `self.prev` for the given new `prev`, and returns the old
-        /// `self.prev`.
-        </span><span class="kw">pub unsafe fn </span>set_prev(<span class="kw-2">&amp;</span><span class="self">self</span>, prev: tls::Ptr) -&gt; tls::Ptr {
-            <span class="kw">let </span>old_prev = <span class="self">self</span>.prev.get();
+        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>push(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+            <span class="macro">assert!</span>(<span class="self">self</span>.prev.get().is_null());
+            <span class="self">self</span>.prev.set(tls::raw::replace(<span class="self">self</span>));
+        }
 
-            <span class="comment">// Restore the old `prev`&#39;s saved registers in its
-            // `VMRuntimeLimits`. This is necessary for when we are async
-            // suspending the top `CallThreadState` and doing `set_prev(null)`
-            // on it, and so any stack walking we do subsequently will start at
-            // the old `prev` and look at its `VMRuntimeLimits` to get the
-            // initial saved registers.
-            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(old_prev) = old_prev.as_ref() {
-                <span class="kw-2">*</span>(<span class="kw-2">*</span>old_prev.limits).last_wasm_exit_fp.get() = <span class="self">self</span>.old_last_wasm_exit_fp();
-                <span class="kw-2">*</span>(<span class="kw-2">*</span>old_prev.limits).last_wasm_exit_pc.get() = <span class="self">self</span>.old_last_wasm_exit_pc();
-                <span class="kw-2">*</span>(<span class="kw-2">*</span>old_prev.limits).last_wasm_entry_sp.get() = <span class="self">self</span>.old_last_wasm_entry_sp();
-            }
-
-            <span class="self">self</span>.prev.set(prev);
-
-            <span class="kw">let </span><span class="kw-2">mut </span>old_last_wasm_exit_fp = <span class="number">0</span>;
-            <span class="kw">let </span><span class="kw-2">mut </span>old_last_wasm_exit_pc = <span class="number">0</span>;
-            <span class="kw">let </span><span class="kw-2">mut </span>old_last_wasm_entry_sp = <span class="number">0</span>;
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(prev) = prev.as_ref() {
-                <span class="comment">// We are entering a new `CallThreadState` or resuming a
-                // previously suspended one. This means we will push new Wasm
-                // frames that save the new Wasm FP/SP/PC registers into
-                // `VMRuntimeLimits`, we need to first save the old Wasm
-                // FP/SP/PC registers into this new `CallThreadState` to
-                // maintain our list of contiguous Wasm frame regions that we
-                // use when capturing stack traces.
-                //
-                // NB: the Wasm&lt;---&gt;host trampolines saved the Wasm FP/SP/PC
-                // registers in the active-at-that-time store&#39;s
-                // `VMRuntimeLimits`. For the most recent FP/PC/SP that is the
-                // `state.prev.limits` (since we haven&#39;t entered this
-                // `CallThreadState` yet). And that can be a different
-                // `VMRuntimeLimits` instance from the currently active
-                // `state.limits`, which will be used by the upcoming call into
-                // Wasm! Consider the case where we have multiple, nested calls
-                // across stores (with host code in between, by necessity, since
-                // only things in the same store can be linked directly
-                // together):
-                //
-                //     | ...             |
-                //     | Host            |  |
-                //     +-----------------+  | stack
-                //     | Wasm in store A |  | grows
-                //     +-----------------+  | down
-                //     | Host            |  |
-                //     +-----------------+  |
-                //     | Wasm in store B |  V
-                //     +-----------------+
-                //
-                // In this scenario `state.limits != state.prev.limits`,
-                // i.e. `B.limits != A.limits`! Therefore we must take care to
-                // read the old FP/SP/PC from `state.prev.limits`, rather than
-                // `state.limits`, and store those saved registers into the
-                // current `state`.
-                //
-                // See also the comment above the
-                // `CallThreadState::old_last_wasm_*` fields.
-                </span>old_last_wasm_exit_fp =
-                    mem::replace(<span class="kw-2">&amp;mut *</span>(<span class="kw-2">*</span>prev.limits).last_wasm_exit_fp.get(), <span class="number">0</span>);
-                old_last_wasm_exit_pc =
-                    mem::replace(<span class="kw-2">&amp;mut *</span>(<span class="kw-2">*</span>prev.limits).last_wasm_exit_pc.get(), <span class="number">0</span>);
-                old_last_wasm_entry_sp =
-                    mem::replace(<span class="kw-2">&amp;mut *</span>(<span class="kw-2">*</span>prev.limits).last_wasm_entry_sp.get(), <span class="number">0</span>);
-            }
-
-            <span class="self">self</span>.old_last_wasm_exit_fp.set(old_last_wasm_exit_fp);
-            <span class="self">self</span>.old_last_wasm_exit_pc.set(old_last_wasm_exit_pc);
-            <span class="self">self</span>.old_last_wasm_entry_sp.set(old_last_wasm_entry_sp);
-
-            old_prev
+        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>pop(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+            <span class="kw">let </span>prev = <span class="self">self</span>.prev.replace(ptr::null());
+            <span class="kw">let </span>head = tls::raw::replace(prev);
+            <span class="macro">assert!</span>(std::ptr::eq(head, <span class="self">self</span>));
         }
     }
 }
@@ -1126,7 +1001,7 @@
                 needs_backtrace: <span class="bool-val">false</span>,
                 ..
             }) =&gt; <span class="prelude-val">None</span>,
-            UnwindReason::Trap(<span class="kw">_</span>) =&gt; <span class="self">self</span>.capture_backtrace(<span class="prelude-val">None</span>),
+            UnwindReason::Trap(<span class="kw">_</span>) =&gt; <span class="self">self</span>.capture_backtrace(<span class="self">self</span>.limits, <span class="prelude-val">None</span>),
         };
         <span class="kw">unsafe </span>{
             (<span class="kw-2">*</span><span class="self">self</span>.unwind.get()).as_mut_ptr().write((reason, backtrace));
@@ -1180,7 +1055,7 @@
     }
 
     <span class="kw">fn </span>set_jit_trap(<span class="kw-2">&amp;</span><span class="self">self</span>, pc: <span class="kw-2">*const </span>u8, fp: usize, faulting_addr: <span class="prelude-ty">Option</span>&lt;usize&gt;) {
-        <span class="kw">let </span>backtrace = <span class="self">self</span>.capture_backtrace(<span class="prelude-val">Some</span>((pc <span class="kw">as </span>usize, fp)));
+        <span class="kw">let </span>backtrace = <span class="self">self</span>.capture_backtrace(<span class="self">self</span>.limits, <span class="prelude-val">Some</span>((pc <span class="kw">as </span>usize, fp)));
         <span class="kw">unsafe </span>{
             (<span class="kw-2">*</span><span class="self">self</span>.unwind.get()).as_mut_ptr().write((
                 UnwindReason::Trap(TrapReason::Jit {
@@ -1192,12 +1067,16 @@
         }
     }
 
-    <span class="kw">fn </span>capture_backtrace(<span class="kw-2">&amp;</span><span class="self">self</span>, pc_and_fp: <span class="prelude-ty">Option</span>&lt;(usize, usize)&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Backtrace&gt; {
+    <span class="kw">fn </span>capture_backtrace(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        limits: <span class="kw-2">*const </span>VMRuntimeLimits,
+        trap_pc_and_fp: <span class="prelude-ty">Option</span>&lt;(usize, usize)&gt;,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;Backtrace&gt; {
         <span class="kw">if </span>!<span class="self">self</span>.capture_backtrace {
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
 
-        <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ Backtrace::new_with_trap_state(<span class="self">self</span>, pc_and_fp) })
+        <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ Backtrace::new_with_trap_state(limits, <span class="self">self</span>, trap_pc_and_fp) })
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>iter&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="self">Self</span>&gt; + <span class="lifetime">&#39;a </span>{
@@ -1226,7 +1105,6 @@
 // the caller to the trap site.
 </span><span class="kw">mod </span>tls {
     <span class="kw">use </span><span class="kw">super</span>::CallThreadState;
-    <span class="kw">use </span>std::ptr;
 
     <span class="kw">pub use </span>raw::Ptr;
 
@@ -1244,7 +1122,7 @@
     //
     // Note, though, that if async support is disabled at compile time then
     // these functions are free to be inlined.
-    </span><span class="kw">mod </span>raw {
+    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">mod </span>raw {
         <span class="kw">use </span><span class="kw">super</span>::CallThreadState;
         <span class="kw">use </span>std::cell::Cell;
         <span class="kw">use </span>std::ptr;
@@ -1318,8 +1196,7 @@
             // accidentally used later.
             </span><span class="kw">let </span>state = raw::get();
             <span class="kw">if let </span><span class="prelude-val">Some</span>(state) = state.as_ref() {
-                <span class="kw">let </span>prev_state = state.set_prev(ptr::null());
-                raw::replace(prev_state);
+                state.pop();
             } <span class="kw">else </span>{
                 <span class="comment">// Null case: we aren&#39;t in a wasm context, so theres no tls to
                 // save for restoration.
@@ -1333,18 +1210,12 @@
         /// This is unsafe because it&#39;s intended to only be used within the
         /// context of stack switching within wasmtime.
         </span><span class="kw">pub unsafe fn </span>replace(<span class="self">self</span>) {
-            <span class="comment">// Null case: we aren&#39;t in a wasm context, so theres no tls
-            // to restore.
-            </span><span class="kw">if </span><span class="self">self</span>.state.is_null() {
-                <span class="kw">return</span>;
-            }
-
-            <span class="comment">// We need to configure our previous TLS pointer to whatever is in
-            // TLS at this time, and then we set the current state to ourselves.
-            </span><span class="kw">let </span>prev = raw::get();
-            <span class="macro">assert!</span>((<span class="kw-2">*</span><span class="self">self</span>.state).prev().is_null());
-            (<span class="kw-2">*</span><span class="self">self</span>.state).set_prev(prev);
-            raw::replace(<span class="self">self</span>.state);
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(state) = <span class="self">self</span>.state.as_ref() {
+                state.push();
+            } <span class="kw">else </span>{
+                <span class="comment">// Null case: we aren&#39;t in a wasm context, so theres no tls
+                // to restore.
+            </span>}
         }
     }
 
@@ -1361,18 +1232,13 @@
             <span class="attr">#[inline]
             </span><span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
                 <span class="kw">unsafe </span>{
-                    <span class="kw">let </span>prev = <span class="self">self</span>.state.set_prev(ptr::null());
-                    <span class="kw">let </span>old_state = raw::replace(prev);
-                    <span class="macro">debug_assert!</span>(std::ptr::eq(old_state, <span class="self">self</span>.state));
+                    <span class="self">self</span>.state.pop();
                 }
             }
         }
 
-        <span class="kw">let </span>prev = raw::replace(state);
-
         <span class="kw">unsafe </span>{
-            state.set_prev(prev);
-
+            state.push();
             <span class="kw">let </span>reset = Reset { state };
             closure(reset.state)
         }

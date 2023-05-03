@@ -56,7 +56,7 @@ stack traces in this profile. Any stack frames which were executing
 host code or functions from other modules will be omitted. See the
 “Security” section of the <a href="struct.GuestProfiler.html" title="struct wiggle::wasmtime_crate::GuestProfiler"><code>GuestProfiler</code></a> documentation for guidance
 on what modules should not be included in this list.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.sample" class="method"><h4 class="code-header">pub fn <a href="#method.sample" class="fn">sample</a>(&amp;mut self)</h4></section></summary><div class="docblock"><p>Add a sample to the profile. This function collects a backtrace from
+</div></details><details class="toggle method-toggle" open><summary><section id="method.sample" class="method"><h4 class="code-header">pub fn <a href="#method.sample" class="fn">sample</a>(&amp;mut self, store: impl <a class="trait" href="trait.AsContext.html" title="trait wiggle::wasmtime_crate::AsContext">AsContext</a>)</h4></section></summary><div class="docblock"><p>Add a sample to the profile. This function collects a backtrace from
 any stack frames for allowed modules on the current stack. It should
 typically be called from a callback registered using
 <a href="struct.Store.html#method.epoch_deadline_callback" title="method wiggle::wasmtime_crate::Store::epoch_deadline_callback"><code>Store::epoch_deadline_callback()</code></a>.</p>

@@ -1074,6 +1074,8 @@
 <a href="#1074" id="1074">1074</a>
 <a href="#1075" id="1075">1075</a>
 <a href="#1076" id="1076">1076</a>
+<a href="#1077" id="1077">1077</a>
+<a href="#1078" id="1078">1078</a>
 </pre><pre class="rust"><code><span class="doccomment">//! # `VMExternRef`
 //!
 //! `VMExternRef` is a reference-counted box for any kind of data that is
@@ -1175,7 +1177,8 @@
 //! Examination of Deferred Reference Counting and Cycle Detection* by Quinane:
 //! &lt;https://openresearch-repository.anu.edu.au/bitstream/1885/42030/2/hon-thesis.pdf&gt;
 
-</span><span class="kw">use </span>std::alloc::Layout;
+</span><span class="kw">use crate</span>::{Backtrace, VMRuntimeLimits};
+<span class="kw">use </span>std::alloc::Layout;
 <span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::cell::UnsafeCell;
 <span class="kw">use </span>std::cmp;
@@ -1186,8 +1189,6 @@
 <span class="kw">use </span>std::ptr::{<span class="self">self</span>, NonNull};
 <span class="kw">use </span>std::sync::atomic::{<span class="self">self</span>, AtomicUsize, Ordering};
 <span class="kw">use </span>wasmtime_environ::StackMap;
-
-<span class="kw">use </span><span class="kw">crate</span>::Backtrace;
 
 <span class="doccomment">/// An external reference to some opaque data.
 ///
@@ -1725,6 +1726,7 @@
     </span><span class="attr">#[inline]
     </span><span class="kw">pub unsafe fn </span>insert_with_gc(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        limits: <span class="kw-2">*const </span>VMRuntimeLimits,
         externref: VMExternRef,
         module_info_lookup: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ModuleInfoLookup,
     ) {
@@ -1732,17 +1734,18 @@
         </span><span class="macro">assert!</span>(<span class="self">self</span>.gc_okay);
 
         <span class="kw">if let </span><span class="prelude-val">Err</span>(externref) = <span class="self">self</span>.try_insert(externref) {
-            <span class="self">self</span>.gc_and_insert_slow(externref, module_info_lookup);
+            <span class="self">self</span>.gc_and_insert_slow(limits, externref, module_info_lookup);
         }
     }
 
     <span class="attr">#[inline(never)]
     </span><span class="kw">unsafe fn </span>gc_and_insert_slow(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        limits: <span class="kw-2">*const </span>VMRuntimeLimits,
         externref: VMExternRef,
         module_info_lookup: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ModuleInfoLookup,
     ) {
-        gc(module_info_lookup, <span class="self">self</span>);
+        gc(limits, module_info_lookup, <span class="self">self</span>);
 
         <span class="comment">// Might as well insert right into the hash set, rather than the bump
         // chunk, since we are already on a slow path and we get de-duplication
@@ -1930,6 +1933,7 @@
 /// Additionally, you must have registered the stack maps for every Wasm module
 /// that has frames on the stack with the given `stack_maps_registry`.
 </span><span class="kw">pub unsafe fn </span>gc(
+    limits: <span class="kw-2">*const </span>VMRuntimeLimits,
     module_info_lookup: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ModuleInfoLookup,
     externref_activations_table: <span class="kw-2">&amp;mut </span>VMExternRefActivationsTable,
 ) {
@@ -1970,7 +1974,7 @@
     }
 
     <span class="macro">log::trace!</span>(<span class="string">&quot;begin GC trace&quot;</span>);
-    Backtrace::trace(|frame| {
+    Backtrace::trace(limits, |frame| {
         <span class="kw">let </span>pc = frame.pc();
         <span class="macro">debug_assert!</span>(pc != <span class="number">0</span>, <span class="string">&quot;we should always get a valid PC for Wasm frames&quot;</span>);
 

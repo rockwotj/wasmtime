@@ -593,6 +593,8 @@
 <a href="#593" id="593">593</a>
 <a href="#594" id="594">594</a>
 <a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Runtime library calls.
 //!
 //! Note that Wasm compilers may sometimes perform these inline rather than
@@ -989,7 +991,8 @@
 // `VMExternRefActivationsTable`.
 </span><span class="kw">unsafe fn </span>activations_table_insert_with_gc(vmctx: <span class="kw-2">*mut </span>VMContext, externref: <span class="kw-2">*mut </span>u8) {
     <span class="kw">let </span>externref = VMExternRef::clone_from_raw(externref);
-    <span class="kw">let </span>instance = (<span class="kw-2">*</span>vmctx).instance();
+    <span class="kw">let </span>instance = (<span class="kw-2">*</span>vmctx).instance_mut();
+    <span class="kw">let </span>limits = <span class="kw-2">*</span>instance.runtime_limits();
     <span class="kw">let </span>(activations_table, module_info_lookup) = (<span class="kw-2">*</span>instance.store()).externref_activations_table();
 
     <span class="comment">// Invariant: all `externref`s on the stack have an entry in the activations
@@ -1001,13 +1004,14 @@
     // but it isn&#39;t really a concern because this is already a slow path.
     </span>activations_table.insert_without_gc(externref.clone());
 
-    activations_table.insert_with_gc(externref, module_info_lookup);
+    activations_table.insert_with_gc(limits, externref, module_info_lookup);
 }
 
 <span class="comment">// Perform a Wasm `global.get` for `externref` globals.
 </span><span class="kw">unsafe fn </span>externref_global_get(vmctx: <span class="kw-2">*mut </span>VMContext, index: u32) -&gt; <span class="kw-2">*mut </span>u8 {
     <span class="kw">let </span>index = GlobalIndex::from_u32(index);
     <span class="kw">let </span>instance = (<span class="kw-2">*</span>vmctx).instance_mut();
+    <span class="kw">let </span>limits = <span class="kw-2">*</span>instance.runtime_limits();
     <span class="kw">let </span>global = instance.defined_or_imported_global_ptr(index);
     <span class="kw">match </span>(<span class="kw-2">*</span>global).as_externref().clone() {
         <span class="prelude-val">None </span>=&gt; ptr::null_mut(),
@@ -1015,7 +1019,7 @@
             <span class="kw">let </span>raw = externref.as_raw();
             <span class="kw">let </span>(activations_table, module_info_lookup) =
                 (<span class="kw-2">*</span>instance.store()).externref_activations_table();
-            activations_table.insert_with_gc(externref, module_info_lookup);
+            activations_table.insert_with_gc(limits, externref, module_info_lookup);
             raw
         }
     }

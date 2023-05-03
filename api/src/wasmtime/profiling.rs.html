@@ -210,8 +210,8 @@
 <a href="#210" id="210">210</a>
 <a href="#211" id="211">211</a>
 <a href="#212" id="212">212</a>
-<a href="#213" id="213">213</a>
-</pre><pre class="rust"><code><span class="kw">use </span>anyhow::Result;
+</pre><pre class="rust"><code><span class="kw">use crate</span>::{AsContext, Module};
+<span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>fxprof_processed_profile::debugid::DebugId;
 <span class="kw">use </span>fxprof_processed_profile::{
     CategoryHandle, CpuDelta, Frame, FrameFlags, FrameInfo, LibraryInfo, Profile,
@@ -222,8 +222,6 @@
 <span class="kw">use </span>std::time::{Duration, Instant};
 <span class="kw">use </span>wasmtime_jit::CompiledModule;
 <span class="kw">use </span>wasmtime_runtime::Backtrace;
-
-<span class="kw">use </span><span class="kw">crate</span>::Module;
 
 <span class="comment">// TODO: collect more data
 // - Provide additional hooks for recording host-guest transitions, to be
@@ -342,12 +340,12 @@
     /// any stack frames for allowed modules on the current stack. It should
     /// typically be called from a callback registered using
     /// [`Store::epoch_deadline_callback()`](crate::Store::epoch_deadline_callback).
-    </span><span class="kw">pub fn </span>sample(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    </span><span class="kw">pub fn </span>sample(<span class="kw-2">&amp;mut </span><span class="self">self</span>, store: <span class="kw">impl </span>AsContext) {
         <span class="kw">let </span>now = Timestamp::from_nanos_since_reference(
             <span class="self">self</span>.start.elapsed().as_nanos().try_into().unwrap(),
         );
 
-        <span class="kw">let </span>backtrace = Backtrace::new();
+        <span class="kw">let </span>backtrace = Backtrace::new(store.as_context().<span class="number">0</span>.vmruntime_limits());
         <span class="kw">let </span>frames = backtrace
             .frames()
             <span class="comment">// Samply needs to see the oldest frame first, but we list the newest
