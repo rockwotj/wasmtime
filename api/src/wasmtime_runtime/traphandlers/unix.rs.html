@@ -378,6 +378,13 @@
 <a href="#378" id="378">378</a>
 <a href="#379" id="379">379</a>
 <a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::traphandlers::{tls, wasmtime_longjmp};
 <span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::io;
@@ -394,6 +401,9 @@
 <span class="kw">static </span><span class="kw-2">mut </span>PREV_SIGFPE: MaybeUninit&lt;libc::sigaction&gt; = MaybeUninit::uninit();
 
 <span class="kw">pub unsafe fn </span>platform_init() {
+    <span class="kw">if </span><span class="macro">cfg!</span>(miri) {
+        <span class="kw">return</span>;
+    }
     <span class="kw">let </span>register = |slot: <span class="kw-2">&amp;mut </span>MaybeUninit&lt;libc::sigaction&gt;, signal: i32| {
         <span class="kw">let </span><span class="kw-2">mut </span>handler: libc::sigaction = mem::zeroed();
         <span class="comment">// The flags here are relatively careful, and they are...
@@ -692,6 +702,10 @@
     });
 
     <span class="kw">unsafe fn </span>allocate_sigaltstack() -&gt; <span class="prelude-ty">Option</span>&lt;Stack&gt; {
+        <span class="kw">if </span><span class="macro">cfg!</span>(miri) {
+            <span class="kw">return </span><span class="prelude-val">None</span>;
+        }
+
         <span class="comment">// Check to see if the existing sigaltstack, if it exists, is big
         // enough. If so we don&#39;t need to allocate our own.
         </span><span class="kw">let </span><span class="kw-2">mut </span>old_stack = mem::zeroed();

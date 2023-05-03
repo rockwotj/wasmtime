@@ -54,7 +54,7 @@
 <a href="#54" id="54">54</a>
 <a href="#55" id="55">55</a>
 <a href="#56" id="56">56</a>
-</pre><pre class="rust"><code><span class="kw">use </span>anyhow::{Context, <span class="prelude-ty">Result</span>};
+</pre><pre class="rust"><code><span class="kw">use </span>anyhow::Result;
 
 <span class="kw">fn </span>decommit(addr: <span class="kw-2">*mut </span>u8, len: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">if </span>len == <span class="number">0 </span>{
@@ -63,13 +63,14 @@
 
     <span class="kw">unsafe </span>{
         <span class="macro">cfg_if::cfg_if! </span>{
-            <span class="kw">if </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)] </span>{
+            <span class="kw">if </span><span class="attr">#[cfg(miri)] </span>{
+                std::ptr::write_bytes(addr, <span class="number">0</span>, len);
+            } <span class="kw">else if </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)] </span>{
                 <span class="kw">use </span>rustix::mm::{madvise, Advice};
 
                 <span class="comment">// On Linux, this is enough to cause the kernel to initialize
                 // the pages to 0 on next access
-                </span>madvise(addr <span class="kw">as _</span>, len, Advice::LinuxDontNeed)
-                    .context(<span class="string">&quot;madvise failed to decommit: {}&quot;</span>)<span class="question-mark">?</span>;
+                </span>madvise(addr <span class="kw">as _</span>, len, Advice::LinuxDontNeed)<span class="question-mark">?</span>;
             } <span class="kw">else </span>{
                 <span class="kw">use </span>rustix::mm::{mmap_anonymous, ProtFlags, MapFlags};
 
@@ -82,8 +83,7 @@
                     len,
                     ProtFlags::READ | ProtFlags::WRITE,
                     MapFlags::PRIVATE | MapFlags::FIXED,
-                )
-                .context(<span class="string">&quot;mmap failed to remap pages: {}&quot;</span>)<span class="question-mark">?</span>;
+                )<span class="question-mark">?</span>;
             }
         }
     }
@@ -100,13 +100,13 @@
     decommit(addr, len)
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;async&quot;</span>)]
+<span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, not(miri)))]
 </span><span class="kw">pub fn </span>commit_stack_pages(_addr: <span class="kw-2">*mut </span>u8, _len: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="comment">// A no-op as stack pages remain READ|WRITE
     </span><span class="prelude-val">Ok</span>(())
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;async&quot;</span>)]
+<span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, not(miri)))]
 </span><span class="kw">pub fn </span>reset_stack_pages_to_zero(addr: <span class="kw-2">*mut </span>u8, len: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     decommit(addr, len)
 }

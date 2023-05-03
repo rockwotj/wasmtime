@@ -217,6 +217,9 @@
 <a href="#217" id="217">217</a>
 <a href="#218" id="218">218</a>
 <a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Low-level abstraction for allocating and managing zero-filled pages
 //! of memory.
 
@@ -230,6 +233,9 @@
     <span class="kw">if </span><span class="attr">#[cfg(windows)] </span>{
         <span class="kw">mod </span>windows;
         <span class="kw">use </span>windows <span class="kw">as </span>sys;
+    } <span class="kw">else if </span><span class="attr">#[cfg(miri)] </span>{
+        <span class="kw">mod </span>miri;
+        <span class="kw">use </span>miri <span class="kw">as </span>sys;
     } <span class="kw">else </span>{
         <span class="kw">mod </span>unix;
         <span class="kw">use </span>unix <span class="kw">as </span>sys;

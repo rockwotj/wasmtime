@@ -2235,7 +2235,7 @@
             </span>async_stack_size: <span class="number">2 </span>&lt;&lt; <span class="number">20</span>,
             async_support: <span class="bool-val">false</span>,
             module_version: ModuleVersionStrategy::default(),
-            parallel_compilation: <span class="bool-val">true</span>,
+            parallel_compilation: !<span class="macro">cfg!</span>(miri),
             memory_init_cow: <span class="bool-val">true</span>,
             memory_guaranteed_dense_image_size: <span class="number">16 </span>&lt;&lt; <span class="number">20</span>,
             force_memory_init_memfd: <span class="bool-val">false</span>,

@@ -99,6 +99,16 @@
 <a href="#99" id="99">99</a>
 <a href="#100" id="100">100</a>
 <a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
 </pre><pre class="rust"><code><span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="doccomment">/// Tunable parameters for WebAssembly compilation.
@@ -154,23 +164,26 @@
 
 <span class="kw">impl </span>Default <span class="kw">for </span>Tunables {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>(static_memory_bound, static_memory_offset_guard_size) =
-            <span class="kw">if </span><span class="macro">cfg!</span>(target_pointer_width = <span class="string">&quot;64&quot;</span>) {
-                <span class="comment">// 64-bit has tons of address space to static memories can have 4gb
-                // address space reservations liberally by default, allowing us to
-                // help eliminate bounds checks.
-                //
-                // Coupled with a 2 GiB address space guard it lets us translate
-                // wasm offsets into x86 offsets as aggressively as we can.
-                </span>(<span class="number">0x1_0000</span>, <span class="number">0x8000_0000</span>)
-            } <span class="kw">else if </span><span class="macro">cfg!</span>(target_pointer_width = <span class="string">&quot;32&quot;</span>) {
-                <span class="comment">// For 32-bit we scale way down to 10MB of reserved memory. This
-                // impacts performance severely but allows us to have more than a
-                // few instances running around.
-                </span>((<span class="number">10 </span>* (<span class="number">1 </span>&lt;&lt; <span class="number">20</span>)) / <span class="kw">crate</span>::WASM_PAGE_SIZE <span class="kw">as </span>u64, <span class="number">0x1_0000</span>)
-            } <span class="kw">else </span>{
-                <span class="macro">panic!</span>(<span class="string">&quot;unsupported target_pointer_width&quot;</span>);
-            };
+        <span class="kw">let </span>(static_memory_bound, static_memory_offset_guard_size) = <span class="kw">if </span><span class="macro">cfg!</span>(miri) {
+            <span class="comment">// No virtual memory tricks are available on miri so make these
+            // limits quite conservative.
+            </span>((<span class="number">1 </span>&lt;&lt; <span class="number">20</span>) / <span class="kw">crate</span>::WASM_PAGE_SIZE <span class="kw">as </span>u64, <span class="number">0</span>)
+        } <span class="kw">else if </span><span class="macro">cfg!</span>(target_pointer_width = <span class="string">&quot;64&quot;</span>) {
+            <span class="comment">// 64-bit has tons of address space to static memories can have 4gb
+            // address space reservations liberally by default, allowing us to
+            // help eliminate bounds checks.
+            //
+            // Coupled with a 2 GiB address space guard it lets us translate
+            // wasm offsets into x86 offsets as aggressively as we can.
+            </span>(<span class="number">0x1_0000</span>, <span class="number">0x8000_0000</span>)
+        } <span class="kw">else if </span><span class="macro">cfg!</span>(target_pointer_width = <span class="string">&quot;32&quot;</span>) {
+            <span class="comment">// For 32-bit we scale way down to 10MB of reserved memory. This
+            // impacts performance severely but allows us to have more than a
+            // few instances running around.
+            </span>((<span class="number">10 </span>* (<span class="number">1 </span>&lt;&lt; <span class="number">20</span>)) / <span class="kw">crate</span>::WASM_PAGE_SIZE <span class="kw">as </span>u64, <span class="number">0x1_0000</span>)
+        } <span class="kw">else </span>{
+            <span class="macro">panic!</span>(<span class="string">&quot;unsupported target_pointer_width&quot;</span>);
+        };
         <span class="self">Self </span>{
             static_memory_bound,
             static_memory_offset_guard_size,
@@ -179,16 +192,23 @@
             //
             // Allocate a small guard to optimize common cases but without
             // wasting too much memory.
-            </span>dynamic_memory_offset_guard_size: <span class="number">0x1_0000</span>,
+            </span>dynamic_memory_offset_guard_size: <span class="kw">if </span><span class="macro">cfg!</span>(miri) { <span class="number">0 </span>} <span class="kw">else </span>{ <span class="number">0x1_0000 </span>},
 
             <span class="comment">// We&#39;ve got lots of address space on 64-bit so use a larger
-            // grow-into-this area, but on 32-bit we aren&#39;t as lucky.
-            </span><span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
-            </span>dynamic_memory_growth_reserve: <span class="number">2 </span>&lt;&lt; <span class="number">30</span>, <span class="comment">// 2GB
-            </span><span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
-            </span>dynamic_memory_growth_reserve: <span class="number">1 </span>&lt;&lt; <span class="number">20</span>, <span class="comment">// 1MB
+            // grow-into-this area, but on 32-bit we aren&#39;t as lucky. Miri is
+            // not exactly fast so reduce memory consumption instead of trying
+            // to avoid memory movement.
+            </span>dynamic_memory_growth_reserve: <span class="kw">if </span><span class="macro">cfg!</span>(miri) {
+                <span class="number">0
+            </span>} <span class="kw">else if </span><span class="macro">cfg!</span>(target_pointer_width = <span class="string">&quot;64&quot;</span>) {
+                <span class="number">2 </span>&lt;&lt; <span class="number">30 </span><span class="comment">// 2GB
+            </span>} <span class="kw">else if </span><span class="macro">cfg!</span>(target_pointer_width = <span class="string">&quot;32&quot;</span>) {
+                <span class="number">1 </span>&lt;&lt; <span class="number">20 </span><span class="comment">// 1MB
+            </span>} <span class="kw">else </span>{
+                <span class="macro">panic!</span>(<span class="string">&quot;unsupported target_pointer_width&quot;</span>);
+            },
 
-            </span>generate_native_debuginfo: <span class="bool-val">false</span>,
+            generate_native_debuginfo: <span class="bool-val">false</span>,
             parse_wasm_debuginfo: <span class="bool-val">true</span>,
             consume_fuel: <span class="bool-val">false</span>,
             epoch_interruption: <span class="bool-val">false</span>,

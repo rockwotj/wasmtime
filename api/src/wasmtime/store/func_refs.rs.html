@@ -106,6 +106,8 @@
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{instance::PrePatchedFuncRef, module::ModuleRegistry};
 <span class="kw">use </span>std::{ptr::NonNull, sync::Arc};
 <span class="kw">use </span>wasmtime_runtime::{VMFuncRef, VMNativeCallHostFuncContext};
@@ -157,7 +159,7 @@
     <span class="kw">impl </span>UnpatchedFuncRef {
         <span class="doccomment">/// Safety: Callers must ensure that the given `func_ref` and resulting
         /// wrapped value are used in a `Send + Sync` compatible way.
-        </span><span class="kw">pub unsafe fn </span>new(func_ref: <span class="kw-2">&amp;</span>VMFuncRef) -&gt; UnpatchedFuncRef {
+        </span><span class="kw">pub unsafe fn </span>new(func_ref: <span class="kw-2">&amp;mut </span>VMFuncRef) -&gt; UnpatchedFuncRef {
             <span class="macro">debug_assert!</span>(func_ref.wasm_call.is_none());
             UnpatchedFuncRef(NonNull::from(func_ref))
         }
@@ -188,8 +190,10 @@
         </span><span class="kw">let _ </span>= <span class="kw">unsafe </span>{ VMNativeCallHostFuncContext::from_opaque(func_ref.vmctx) };
 
         <span class="kw">let </span>func_ref = <span class="self">self</span>.bump.alloc(func_ref);
-        <span class="self">self</span>.with_holes.push(UnpatchedFuncRef::new(func_ref));
-        NonNull::from(func_ref)
+        <span class="kw">let </span>unpatched = UnpatchedFuncRef::new(func_ref);
+        <span class="kw">let </span>ret = unpatched.func_ref();
+        <span class="self">self</span>.with_holes.push(unpatched);
+        ret
     }
 
     <span class="doccomment">/// Patch any `VMFuncRef::wasm_call`s that need filling in.

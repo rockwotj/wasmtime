@@ -1355,6 +1355,20 @@
 <a href="#1355" id="1355">1355</a>
 <a href="#1356" id="1356">1356</a>
 <a href="#1357" id="1357">1357</a>
+<a href="#1358" id="1358">1358</a>
+<a href="#1359" id="1359">1359</a>
+<a href="#1360" id="1360">1360</a>
+<a href="#1361" id="1361">1361</a>
+<a href="#1362" id="1362">1362</a>
+<a href="#1363" id="1363">1363</a>
+<a href="#1364" id="1364">1364</a>
+<a href="#1365" id="1365">1365</a>
+<a href="#1366" id="1366">1366</a>
+<a href="#1367" id="1367">1367</a>
+<a href="#1368" id="1368">1368</a>
+<a href="#1369" id="1369">1369</a>
+<a href="#1370" id="1370">1370</a>
+<a href="#1371" id="1371">1371</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements the pooling instance allocator.
 //!
 //! The pooling instance allocator maps memory in advance
@@ -1392,7 +1406,7 @@
 
 <span class="kw">use </span>imp::{commit_table_pages, decommit_table_pages};
 
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, unix))]
+<span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, unix, not(miri)))]
 </span><span class="kw">use </span>imp::{commit_stack_pages, reset_stack_pages_to_zero};
 
 <span class="kw">fn </span>round_up_to_pow2(n: usize, to: usize) -&gt; usize {
@@ -1725,7 +1739,7 @@
 ///
 /// The top of the stack (starting stack pointer) is returned when a stack is allocated
 /// from the pool.
-</span><span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, unix))]
+</span><span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, unix, not(miri)))]
 #[derive(Debug)]
 </span><span class="kw">struct </span>StackPool {
     mapping: Mmap,
@@ -1737,7 +1751,7 @@
     async_stack_keep_resident: usize,
 }
 
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, unix))]
+<span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, unix, not(miri)))]
 </span><span class="kw">impl </span>StackPool {
     <span class="kw">fn </span>new(config: <span class="kw-2">&amp;</span>PoolingInstanceAllocatorConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">use </span>rustix::mm::{mprotect, MprotectFlags};
@@ -1935,7 +1949,7 @@
     linear_memory_keep_resident: usize,
     table_keep_resident: usize,
 
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, unix))]
+    <span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, unix, not(miri)))]
     </span>stacks: StackPool,
     <span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, windows))]
     </span>stack_size: usize,
@@ -1958,7 +1972,7 @@
             tables: TablePool::new(<span class="kw-2">&amp;</span>config.limits)<span class="question-mark">?</span>,
             linear_memory_keep_resident: config.linear_memory_keep_resident,
             table_keep_resident: config.table_keep_resident,
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, unix))]
+            <span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, unix, not(miri)))]
             </span>stacks: StackPool::new(config)<span class="question-mark">?</span>,
             <span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, windows))]
             </span>stack_size: config.stack_size,
@@ -1969,7 +1983,8 @@
         <span class="kw">let </span>size_to_memset = size.min(<span class="self">self</span>.table_keep_resident);
         <span class="kw">unsafe </span>{
             std::ptr::write_bytes(base, <span class="number">0</span>, size_to_memset);
-            decommit_table_pages(base.add(size_to_memset), size - size_to_memset)<span class="question-mark">?</span>;
+            decommit_table_pages(base.add(size_to_memset), size - size_to_memset)
+                .context(<span class="string">&quot;failed to decommit table page&quot;</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -2252,31 +2267,44 @@
         }
     }
 
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, unix))]
+    <span class="attr">#[cfg(feature = <span class="string">&quot;async&quot;</span>)]
     </span><span class="kw">fn </span>allocate_fiber_stack(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;wasmtime_fiber::FiberStack&gt; {
-        <span class="self">self</span>.stacks.allocate()
-    }
+        <span class="macro">cfg_if::cfg_if! </span>{
+            <span class="kw">if </span><span class="attr">#[cfg(miri)] </span>{
+                <span class="macro">unimplemented!</span>()
+            } <span class="kw">else if </span><span class="attr">#[cfg(unix)] </span>{
+                <span class="self">self</span>.stacks.allocate()
+            } <span class="kw">else if </span><span class="attr">#[cfg(windows)] </span>{
+                <span class="kw">if </span><span class="self">self</span>.stack_size == <span class="number">0 </span>{
+                    <span class="macro">bail!</span>(<span class="string">&quot;fiber stack allocation not supported&quot;</span>)
+                }
 
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, unix))]
-    </span><span class="kw">unsafe fn </span>deallocate_fiber_stack(<span class="kw-2">&amp;</span><span class="self">self</span>, stack: <span class="kw-2">&amp;</span>wasmtime_fiber::FiberStack) {
-        <span class="self">self</span>.stacks.deallocate(stack);
-    }
-
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, windows))]
-    </span><span class="kw">fn </span>allocate_fiber_stack(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;wasmtime_fiber::FiberStack&gt; {
-        <span class="kw">if </span><span class="self">self</span>.stack_size == <span class="number">0 </span>{
-            <span class="macro">bail!</span>(<span class="string">&quot;fiber stack allocation not supported&quot;</span>)
+                <span class="comment">// On windows, we don&#39;t use a stack pool as we use the native
+                // fiber implementation
+                </span><span class="kw">let </span>stack = wasmtime_fiber::FiberStack::new(<span class="self">self</span>.stack_size)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(stack)
+            } <span class="kw">else </span>{
+                <span class="macro">compile_error!</span>(<span class="string">&quot;not implemented&quot;</span>);
+            }
         }
-
-        <span class="comment">// On windows, we don&#39;t use a stack pool as we use the native fiber implementation
-        </span><span class="kw">let </span>stack = wasmtime_fiber::FiberStack::new(<span class="self">self</span>.stack_size)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(stack)
     }
 
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;async&quot;</span>, windows))]
-    </span><span class="kw">unsafe fn </span>deallocate_fiber_stack(<span class="kw-2">&amp;</span><span class="self">self</span>, _stack: <span class="kw-2">&amp;</span>wasmtime_fiber::FiberStack) {
-        <span class="comment">// A no-op as we don&#39;t own the fiber stack on Windows
-    </span>}
+    <span class="attr">#[cfg(feature = <span class="string">&quot;async&quot;</span>)]
+    </span><span class="kw">unsafe fn </span>deallocate_fiber_stack(<span class="kw-2">&amp;</span><span class="self">self</span>, stack: <span class="kw-2">&amp;</span>wasmtime_fiber::FiberStack) {
+        <span class="macro">cfg_if::cfg_if! </span>{
+            <span class="kw">if </span><span class="attr">#[cfg(miri)] </span>{
+                <span class="kw">let _ </span>= stack;
+                <span class="macro">unimplemented!</span>()
+            } <span class="kw">else if </span><span class="attr">#[cfg(unix)] </span>{
+                <span class="self">self</span>.stacks.deallocate(stack);
+            } <span class="kw">else if </span><span class="attr">#[cfg(windows)] </span>{
+                <span class="comment">// A no-op as we don&#39;t own the fiber stack on Windows
+                </span><span class="kw">let _ </span>= stack;
+            } <span class="kw">else </span>{
+                <span class="macro">compile_error!</span>(<span class="string">&quot;not implemented&quot;</span>);
+            }
+        }
+    }
 
     <span class="kw">fn </span>purge_module(<span class="kw-2">&amp;</span><span class="self">self</span>, module: CompiledModuleId) {
         <span class="comment">// Purging everything related to `module` primarily means clearing out
@@ -2517,7 +2545,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attr">#[cfg(all(unix, target_pointer_width = <span class="string">&quot;64&quot;</span>, feature = <span class="string">&quot;async&quot;</span>))]
+    <span class="attr">#[cfg(all(unix, target_pointer_width = <span class="string">&quot;64&quot;</span>, feature = <span class="string">&quot;async&quot;</span>, not(miri)))]
     #[test]
     </span><span class="kw">fn </span>test_stack_pool() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>config = PoolingInstanceAllocatorConfig {
@@ -2640,7 +2668,7 @@
         <span class="macro">assert_eq!</span>(pool.memories.memory_size, <span class="number">2 </span>* <span class="number">65536</span>);
     }
 
-    <span class="attr">#[cfg(all(unix, target_pointer_width = <span class="string">&quot;64&quot;</span>, feature = <span class="string">&quot;async&quot;</span>))]
+    <span class="attr">#[cfg(all(unix, target_pointer_width = <span class="string">&quot;64&quot;</span>, feature = <span class="string">&quot;async&quot;</span>, not(miri)))]
     #[test]
     </span><span class="kw">fn </span>test_stack_zeroed() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>config = PoolingInstanceAllocatorConfig {
@@ -2676,7 +2704,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attr">#[cfg(all(unix, target_pointer_width = <span class="string">&quot;64&quot;</span>, feature = <span class="string">&quot;async&quot;</span>))]
+    <span class="attr">#[cfg(all(unix, target_pointer_width = <span class="string">&quot;64&quot;</span>, feature = <span class="string">&quot;async&quot;</span>, not(miri)))]
     #[test]
     </span><span class="kw">fn </span>test_stack_unzeroed() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>config = PoolingInstanceAllocatorConfig {

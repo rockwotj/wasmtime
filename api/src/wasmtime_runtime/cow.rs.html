@@ -1055,10 +1055,16 @@
 <a href="#1055" id="1055">1055</a>
 <a href="#1056" id="1056">1056</a>
 <a href="#1057" id="1057">1057</a>
+<a href="#1058" id="1058">1058</a>
+<a href="#1059" id="1059">1059</a>
+<a href="#1060" id="1060">1060</a>
+<a href="#1061" id="1061">1061</a>
+<a href="#1062" id="1062">1062</a>
+<a href="#1063" id="1063">1063</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Copy-on-write initialization support: creation of backing images for
 //! modules, and logic to support mapping these backing images into memory.
 
-</span><span class="attr">#![cfg_attr(not(unix), allow(unused_imports, unused_variables))]
+</span><span class="attr">#![cfg_attr(any(not(unix), miri), allow(unused_imports, unused_variables))]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::MmapVec;
 <span class="kw">use </span>anyhow::Result;
@@ -1119,14 +1125,14 @@
 
 <span class="attr">#[derive(Debug)]
 </span><span class="kw">enum </span>FdSource {
-    <span class="attr">#[cfg(unix)]
+    <span class="attr">#[cfg(all(unix, not(miri)))]
     </span>Mmap(Arc&lt;File&gt;),
-    <span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    <span class="attr">#[cfg(all(target_os = <span class="string">&quot;linux&quot;</span>, not(miri)))]
     </span>Memfd(memfd::Memfd),
 }
 
 <span class="kw">impl </span>FdSource {
-    <span class="attr">#[cfg(unix)]
+    <span class="attr">#[cfg(all(unix, not(miri)))]
     </span><span class="kw">fn </span>as_file(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>File {
         <span class="kw">match </span><span class="self">self </span>{
             FdSource::Mmap(<span class="kw-2">ref </span>file) =&gt; file,
@@ -1139,7 +1145,7 @@
 <span class="kw">impl </span>PartialEq <span class="kw">for </span>FdSource {
     <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>FdSource) -&gt; bool {
         <span class="macro">cfg_if::cfg_if! </span>{
-            <span class="kw">if </span><span class="attr">#[cfg(unix)] </span>{
+            <span class="kw">if </span><span class="attr">#[cfg(all(unix, not(miri)))] </span>{
                 <span class="kw">use </span>rustix::fd::AsRawFd;
                 <span class="self">self</span>.as_file().as_raw_fd() == other.as_file().as_raw_fd()
             } <span class="kw">else </span>{
@@ -1180,7 +1186,7 @@
         // files, but for now this is still a Linux-specific region of Wasmtime.
         // Some work will be needed to get this file compiling for macOS and
         // Windows.
-        </span><span class="attr">#[cfg(not(windows))]
+        </span><span class="attr">#[cfg(not(any(windows, miri)))]
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(mmap) = mmap {
             <span class="kw">let </span>start = mmap.as_ptr() <span class="kw">as </span>usize;
             <span class="kw">let </span>end = start + mmap.len();
@@ -1207,7 +1213,7 @@
         // may be used to place the data in a form that&#39;s amenable to an mmap.
 
         </span><span class="macro">cfg_if::cfg_if! </span>{
-            <span class="kw">if </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)] </span>{
+            <span class="kw">if </span><span class="attr">#[cfg(all(target_os = <span class="string">&quot;linux&quot;</span>, not(miri)))] </span>{
                 <span class="comment">// On Linux `memfd_create` is used to create an anonymous
                 // in-memory file to represent the heap image. This anonymous
                 // file is then used as the basis for further mmaps.
@@ -1261,7 +1267,7 @@
 
     <span class="kw">unsafe fn </span>map_at(<span class="kw-2">&amp;</span><span class="self">self</span>, base: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="macro">cfg_if::cfg_if! </span>{
-            <span class="kw">if </span><span class="attr">#[cfg(unix)] </span>{
+            <span class="kw">if </span><span class="attr">#[cfg(all(unix, not(miri)))] </span>{
                 <span class="kw">let </span>ptr = rustix::mm::mmap(
                     (base + <span class="self">self</span>.linear_memory_offset) <span class="kw">as </span><span class="kw-2">*mut </span>c_void,
                     <span class="self">self</span>.len,
@@ -1296,7 +1302,7 @@
     }
 }
 
-<span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+<span class="attr">#[cfg(all(target_os = <span class="string">&quot;linux&quot;</span>, not(miri)))]
 </span><span class="kw">fn </span>create_memfd() -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;memfd::Memfd&gt;&gt; {
     <span class="kw">use </span>std::io::ErrorKind;
 
@@ -1649,7 +1655,7 @@
 
     <span class="attr">#[allow(dead_code)] </span><span class="comment">// ignore warnings as this is only used in some cfgs
     </span><span class="kw">unsafe fn </span>reset_all_memory_contents(<span class="kw-2">&amp;mut </span><span class="self">self</span>, keep_resident: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">if </span>!<span class="macro">cfg!</span>(target_os = <span class="string">&quot;linux&quot;</span>) {
+        <span class="kw">if </span>!<span class="macro">cfg!</span>(target_os = <span class="string">&quot;linux&quot;</span>) || <span class="macro">cfg!</span>(miri) {
             <span class="comment">// If we&#39;re not on Linux then there&#39;s no generic platform way to
             // reset memory back to its original state, so instead reset memory
             // back to entirely zeros with an anonymous backing.
@@ -1787,7 +1793,11 @@
 
         <span class="kw">unsafe </span>{
             <span class="macro">cfg_if::cfg_if! </span>{
-                <span class="kw">if </span><span class="attr">#[cfg(unix)] </span>{
+                <span class="kw">if </span><span class="attr">#[cfg(miri)] </span>{
+                    <span class="kw">if </span>readwrite {
+                        std::ptr::write_bytes(start <span class="kw">as </span><span class="kw-2">*mut </span>u8, <span class="number">0u8</span>, range.len());
+                    }
+                } <span class="kw">else if </span><span class="attr">#[cfg(unix)] </span>{
                     <span class="kw">let </span>flags = <span class="kw">if </span>readwrite {
                         rustix::mm::MprotectFlags::READ | rustix::mm::MprotectFlags::WRITE
                     } <span class="kw">else </span>{
@@ -1832,7 +1842,9 @@
 
         <span class="kw">unsafe </span>{
             <span class="macro">cfg_if::cfg_if! </span>{
-                <span class="kw">if </span><span class="attr">#[cfg(unix)] </span>{
+                <span class="kw">if </span><span class="attr">#[cfg(miri)] </span>{
+                    std::ptr::write_bytes(<span class="self">self</span>.base <span class="kw">as </span><span class="kw-2">*mut </span>u8, <span class="number">0</span>, <span class="self">self</span>.static_size);
+                } <span class="kw">else if </span><span class="attr">#[cfg(unix)] </span>{
                     <span class="kw">let </span>ptr = rustix::mm::mmap_anonymous(
                         <span class="self">self</span>.base <span class="kw">as </span><span class="kw-2">*mut </span>c_void,
                         <span class="self">self</span>.static_size,
@@ -1895,7 +1907,7 @@
     }
 }
 
-<span class="attr">#[cfg(all(test, target_os = <span class="string">&quot;linux&quot;</span>))]
+<span class="attr">#[cfg(all(test, target_os = <span class="string">&quot;linux&quot;</span>, not(miri)))]
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span>std::sync::Arc;
 

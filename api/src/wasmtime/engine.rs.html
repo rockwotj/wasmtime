@@ -726,6 +726,7 @@
 <a href="#726" id="726">726</a>
 <a href="#727" id="727">727</a>
 <a href="#728" id="728">728</a>
+<a href="#729" id="729">729</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::signatures::SignatureRegistry;
 <span class="kw">use </span><span class="kw">crate</span>::Config;
 <span class="kw">use </span>anyhow::{Context, <span class="prelude-ty">Result</span>};
@@ -1378,6 +1379,7 @@
     <span class="kw">use </span>tempfile::TempDir;
 
     <span class="attr">#[test]
+    #[cfg_attr(miri, ignore)]
     </span><span class="kw">fn </span>cache_accounts_for_opt_level() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>td = TempDir::new()<span class="question-mark">?</span>;
         <span class="kw">let </span>config_path = td.path().join(<span class="string">&quot;config.toml&quot;</span>);

@@ -318,6 +318,7 @@
 <a href="#318" id="318">318</a>
 <a href="#319" id="319">319</a>
 <a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements a registry of modules for a store.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::code::CodeObject;
@@ -594,6 +595,7 @@
 }
 
 <span class="attr">#[test]
+#[cfg_attr(miri, ignore)]
 </span><span class="kw">fn </span>test_frame_info() -&gt; <span class="prelude-ty">Result</span>&lt;(), anyhow::Error&gt; {
     <span class="kw">use crate</span>::<span class="kw-2">*</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>store = Store::&lt;()&gt;::default();

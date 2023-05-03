@@ -519,6 +519,7 @@
 <a href="#519" id="519">519</a>
 <a href="#520" id="520">520</a>
 <a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implements thread wait and notify primitives with `std::sync` primitives.
 //!
 //! This is a simplified version of the `parking_lot_core` crate.
@@ -800,6 +801,7 @@
             )* ) =&gt; {
                 $(
                 <span class="attr">#[test]
+                #[cfg_attr(miri, ignore)]
                 </span><span class="kw">fn </span><span class="macro-nonterminal">$name</span>() {
                     <span class="kw">if </span>std::env::var(<span class="string">&quot;WASMTIME_TEST_NO_HOG_MEMORY&quot;</span>).is_ok() {
                         <span class="kw">return</span>;
@@ -1011,7 +1013,7 @@
             <span class="kw">let </span>atomic_key = <span class="macro">addr_of!</span>(atomic) <span class="kw">as </span>u64;
 
             <span class="kw">const </span>N: u64 = <span class="number">5</span>;
-            <span class="kw">const </span>M: u64 = <span class="number">1000</span>;
+            <span class="kw">const </span>M: u64 = <span class="kw">if </span><span class="macro">cfg!</span>(miri) { <span class="number">10 </span>} <span class="kw">else </span>{ <span class="number">1000 </span>};
 
             <span class="kw">let </span>thread = s.spawn(<span class="kw">move </span>|| {
                 <span class="kw">while </span>atomic.load(Ordering::SeqCst) != N * M {

@@ -2155,7 +2155,7 @@
 <span class="kw">use </span>std::task::{Context, Poll};
 <span class="kw">use </span>wasmtime_runtime::{
     InstanceAllocationRequest, InstanceAllocator, InstanceHandle, ModuleInfo,
-    OnDemandInstanceAllocator, SignalHandler, StorePtr, VMContext, VMExternRef,
+    OnDemandInstanceAllocator, SignalHandler, StoreBox, StorePtr, VMContext, VMExternRef,
     VMExternRefActivationsTable, VMRuntimeLimits, WasmFault,
 };
 
@@ -2340,7 +2340,7 @@
     externref_activations_table: VMExternRefActivationsTable,
     modules: ModuleRegistry,
     func_refs: FuncRefs,
-    host_globals: Vec&lt;Box&lt;VMHostGlobalContext&gt;&gt;,
+    host_globals: Vec&lt;StoreBox&lt;VMHostGlobalContext&gt;&gt;,
 
     <span class="comment">// Numbers of resources instantiated in this store, and their limits
     </span>instance_count: usize,
@@ -3249,7 +3249,7 @@
         <span class="self">self</span>.func_refs.push_instance_pre_func_refs(func_refs);
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>host_globals(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Vec&lt;Box&lt;VMHostGlobalContext&gt;&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>host_globals(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Vec&lt;StoreBox&lt;VMHostGlobalContext&gt;&gt; {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.host_globals
     }
 

@@ -596,6 +596,7 @@
 <a href="#596" id="596">596</a>
 <a href="#597" id="597">597</a>
 <a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Index/slot allocator policies for the pooling allocator.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::CompiledModuleId;
@@ -1107,7 +1108,8 @@
         <span class="kw">let </span><span class="kw-2">mut </span>last_id = <span class="macro">vec!</span>[<span class="prelude-val">None</span>; <span class="number">1000</span>];
 
         <span class="kw">let </span><span class="kw-2">mut </span>hits = <span class="number">0</span>;
-        <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">100_000 </span>{
+        <span class="kw">let </span>amt = <span class="kw">if </span><span class="macro">cfg!</span>(miri) { <span class="number">100 </span>} <span class="kw">else </span>{ <span class="number">100_000 </span>};
+        <span class="kw">for _ in </span><span class="number">0</span>..amt {
             <span class="kw">loop </span>{
                 <span class="kw">if </span>!allocated.is_empty() &amp;&amp; rng.gen_bool(<span class="number">0.5</span>) {
                     <span class="kw">let </span>i = rng.gen_range(<span class="number">0</span>..allocated.len());
@@ -1133,7 +1135,7 @@
         // IDs). Check for at least double that to ensure some sort of
         // affinity is occurring.
         </span><span class="macro">assert!</span>(
-            hits &gt; <span class="number">20000</span>,
+            hits &gt; (amt / <span class="number">5</span>),
             <span class="string">&quot;expected at least 20000 (20%) ID-reuses but got {}&quot;</span>,
             hits
         );

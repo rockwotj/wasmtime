@@ -103,6 +103,9 @@
 <a href="#103" id="103">103</a>
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This crate provides utilities for instruction cache maintenance for JIT authors.
 //!
 //! In self modifying codes such as when writing a JIT, special care must be taken when marking the
@@ -179,6 +182,9 @@
     <span class="kw">if </span><span class="attr">#[cfg(target_os = <span class="string">&quot;windows&quot;</span>)] </span>{
         <span class="kw">mod </span>win;
         <span class="kw">use </span>win <span class="kw">as </span>imp;
+    } <span class="kw">else if </span><span class="attr">#[cfg(miri)] </span>{
+        <span class="kw">mod </span>miri;
+        <span class="kw">use </span><span class="kw">crate</span>::miri <span class="kw">as </span>imp;
     } <span class="kw">else </span>{
         <span class="kw">mod </span>libc;
         <span class="kw">use </span><span class="kw">crate</span>::libc <span class="kw">as </span>imp;

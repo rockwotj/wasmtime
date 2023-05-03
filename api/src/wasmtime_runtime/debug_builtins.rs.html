@@ -51,6 +51,9 @@
 <a href="#51" id="51">51</a>
 <a href="#52" id="52">52</a>
 <a href="#53" id="53">53</a>
+<a href="#54" id="54">54</a>
+<a href="#55" id="55">55</a>
+<a href="#56" id="56">56</a>
 </pre><pre class="rust"><code><span class="attr">#![doc(hidden)]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::instance::InstanceHandle;
@@ -98,6 +101,9 @@
 // exported as symbols. It is a workaround: the executable normally ignores
 // `pub extern &quot;C&quot;`, see rust-lang/rust#25057.
 </span><span class="kw">pub fn </span>ensure_exported() {
+    <span class="kw">if </span><span class="macro">cfg!</span>(miri) {
+        <span class="kw">return</span>;
+    }
     <span class="kw">unsafe </span>{
         std::ptr::read_volatile(resolve_vmctx_memory_ptr <span class="kw">as </span><span class="kw-2">*const </span>u8);
         std::ptr::read_volatile(set_vmctx_memory <span class="kw">as </span><span class="kw-2">*const </span>u8);

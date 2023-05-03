@@ -678,6 +678,50 @@
 <a href="#678" id="678">678</a>
 <a href="#679" id="679">679</a>
 <a href="#680" id="680">680</a>
+<a href="#681" id="681">681</a>
+<a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
+<a href="#686" id="686">686</a>
+<a href="#687" id="687">687</a>
+<a href="#688" id="688">688</a>
+<a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
+<a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
+<a href="#717" id="717">717</a>
+<a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Runtime support for the component model in Wasmtime
 //!
 //! Currently this runtime support includes a `VMComponentContext` which is
@@ -720,10 +764,36 @@
     <span class="doccomment">/// Size and offset information for the trailing `VMComponentContext`.
     </span>offsets: VMComponentOffsets&lt;HostPtr&gt;,
 
+    <span class="doccomment">/// A self-referential pointer to the `ComponentInstance` itself.
+    ///
+    /// The reason for this field&#39;s existence is a bit subtle because if you
+    /// have a pointer to `ComponentInstance` then why have this field which has
+    /// the same information? The subtlety here is due to the fact that this is
+    /// here to handle provenance and aliasing issues with optimizations in LLVM
+    /// and Rustc. Put another way, this is here to make MIRI happy. That&#39;s an
+    /// oversimplification, though, since this is actually required for
+    /// correctness to communicate the actual intent to LLVM&#39;s optimizations and
+    /// such.
+    ///
+    /// This field is chiefly used during `ComponentInstance::vmctx`. If you
+    /// think of pointers as a pair of address and provenance, this type stores
+    /// the provenance of the entire allocation. That&#39;s technically all we need
+    /// here, just the provenance, but that can only be done with storage of a
+    /// pointer hence the storage here.
+    ///
+    /// Finally note that there&#39;s a small wrapper around this to add `Send` and
+    /// `Sync` bounds, but serves no other purpose.
+    </span>self_reference: RawComponentInstance,
+
     <span class="doccomment">/// A zero-sized field which represents the end of the struct for the actual
     /// `VMComponentContext` to be allocated behind.
     </span>vmctx: VMComponentContext,
 }
+
+<span class="kw">struct </span>RawComponentInstance(NonNull&lt;ComponentInstance&gt;);
+
+<span class="kw">unsafe impl </span>Send <span class="kw">for </span>RawComponentInstance {}
+<span class="kw">unsafe impl </span>Sync <span class="kw">for </span>RawComponentInstance {}
 
 <span class="doccomment">/// Type signature for host-defined trampolines that are called from
 /// WebAssembly.
@@ -788,9 +858,8 @@
 /// `ComponentInstance`.
 </span><span class="attr">#[repr(C)]
 </span><span class="comment">// Set an appropriate alignment for this structure where the most-aligned value
-// internally right now is a pointer.
-</span><span class="attr">#[cfg_attr(target_pointer_width = <span class="string">&quot;32&quot;</span>, repr(align(<span class="number">4</span>)))]
-#[cfg_attr(target_pointer_width = <span class="string">&quot;64&quot;</span>, repr(align(<span class="number">8</span>)))]
+// internally right now `VMGlobalDefinition` which has an alignment of 16 bytes.
+</span><span class="attr">#[repr(align(<span class="number">16</span>))]
 </span><span class="kw">pub struct </span>VMComponentContext {
     <span class="doccomment">/// For more information about this see the equivalent field in `VMContext`
     </span>_marker: marker::PhantomPinned,
@@ -818,7 +887,7 @@
     /// the shape of the component being instantiated and `store` is a pointer
     /// back to the Wasmtime store for host functions to have access to.
     </span><span class="kw">unsafe fn </span>new_at(
-        ptr: <span class="kw-2">*mut </span>ComponentInstance,
+        ptr: NonNull&lt;ComponentInstance&gt;,
         alloc_size: usize,
         offsets: VMComponentOffsets&lt;HostPtr&gt;,
         store: <span class="kw-2">*mut </span><span class="kw">dyn </span>Store,
@@ -826,23 +895,37 @@
         <span class="macro">assert!</span>(alloc_size &gt;= <span class="self">Self</span>::alloc_layout(<span class="kw-2">&amp;</span>offsets).size());
 
         ptr::write(
-            ptr,
+            ptr.as_ptr(),
             ComponentInstance {
                 offsets,
+                self_reference: RawComponentInstance(ptr),
                 vmctx: VMComponentContext {
                     _marker: marker::PhantomPinned,
                 },
             },
         );
 
-        (<span class="kw-2">*</span>ptr).initialize_vmctx(store);
+        (<span class="kw-2">*</span>ptr.as_ptr()).initialize_vmctx(store);
     }
 
     <span class="kw">fn </span>vmctx(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>VMComponentContext {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.vmctx <span class="kw">as </span><span class="kw-2">*const </span>VMComponentContext <span class="kw">as </span><span class="kw-2">*mut </span>VMComponentContext
+        <span class="kw">let </span>self_ref = <span class="self">self</span>.self_reference.<span class="number">0</span>.as_ptr();
+        <span class="kw">unsafe </span>{
+            self_ref
+                .cast::&lt;u8&gt;()
+                .add(mem::size_of::&lt;ComponentInstance&gt;())
+                .cast()
+        }
     }
 
-    <span class="kw">unsafe fn </span>vmctx_plus_offset&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u32) -&gt; <span class="kw-2">*mut </span>T {
+    <span class="kw">unsafe fn </span>vmctx_plus_offset&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u32) -&gt; <span class="kw-2">*const </span>T {
+        <span class="self">self</span>.vmctx()
+            .cast::&lt;u8&gt;()
+            .add(usize::try_from(offset).unwrap())
+            .cast()
+    }
+
+    <span class="kw">unsafe fn </span>vmctx_plus_offset_mut&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, offset: u32) -&gt; <span class="kw-2">*mut </span>T {
         <span class="self">self</span>.vmctx()
             .cast::&lt;u8&gt;()
             .add(usize::try_from(offset).unwrap())
@@ -852,7 +935,12 @@
     <span class="doccomment">/// Returns a pointer to the &quot;may leave&quot; flag for this instance specified
     /// for canonical lowering and lifting operations.
     </span><span class="kw">pub fn </span>instance_flags(<span class="kw-2">&amp;</span><span class="self">self</span>, instance: RuntimeComponentInstanceIndex) -&gt; InstanceFlags {
-        <span class="kw">unsafe </span>{ InstanceFlags(<span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets.instance_flags(instance))) }
+        <span class="kw">unsafe </span>{
+            InstanceFlags(
+                <span class="self">self</span>.vmctx_plus_offset::&lt;VMGlobalDefinition&gt;(<span class="self">self</span>.offsets.instance_flags(instance))
+                    .cast_mut(),
+            )
+        }
     }
 
     <span class="doccomment">/// Returns the store that this component was created with.
@@ -944,7 +1032,7 @@
                 != INVALID_PTR
         );
         <span class="macro">debug_assert!</span>((<span class="kw-2">*</span>ret).vmctx <span class="kw">as </span>usize != INVALID_PTR);
-        NonNull::new(ret).unwrap()
+        NonNull::new(ret.cast_mut()).unwrap()
     }
 
     <span class="doccomment">/// Stores the runtime memory pointer at the index specified.
@@ -958,7 +1046,7 @@
     </span><span class="kw">pub fn </span>set_runtime_memory(<span class="kw-2">&amp;mut </span><span class="self">self</span>, idx: RuntimeMemoryIndex, ptr: <span class="kw-2">*mut </span>VMMemoryDefinition) {
         <span class="kw">unsafe </span>{
             <span class="macro">debug_assert!</span>(!ptr.is_null());
-            <span class="kw">let </span>storage = <span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets.runtime_memory(idx));
+            <span class="kw">let </span>storage = <span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets.runtime_memory(idx));
             <span class="macro">debug_assert!</span>(<span class="kw-2">*</span>storage <span class="kw">as </span>usize == INVALID_PTR);
             <span class="kw-2">*</span>storage = ptr;
         }
@@ -967,7 +1055,7 @@
     <span class="doccomment">/// Same as `set_runtime_memory` but for realloc function pointers.
     </span><span class="kw">pub fn </span>set_runtime_realloc(<span class="kw-2">&amp;mut </span><span class="self">self</span>, idx: RuntimeReallocIndex, ptr: NonNull&lt;VMFuncRef&gt;) {
         <span class="kw">unsafe </span>{
-            <span class="kw">let </span>storage = <span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets.runtime_realloc(idx));
+            <span class="kw">let </span>storage = <span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets.runtime_realloc(idx));
             <span class="macro">debug_assert!</span>(<span class="kw-2">*</span>storage <span class="kw">as </span>usize == INVALID_PTR);
             <span class="kw-2">*</span>storage = ptr.as_ptr();
         }
@@ -980,7 +1068,7 @@
         ptr: NonNull&lt;VMFuncRef&gt;,
     ) {
         <span class="kw">unsafe </span>{
-            <span class="kw">let </span>storage = <span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets.runtime_post_return(idx));
+            <span class="kw">let </span>storage = <span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets.runtime_post_return(idx));
             <span class="macro">debug_assert!</span>(<span class="kw-2">*</span>storage <span class="kw">as </span>usize == INVALID_PTR);
             <span class="kw-2">*</span>storage = ptr.as_ptr();
         }
@@ -1011,7 +1099,7 @@
             <span class="macro">debug_assert!</span>(
                 <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset::&lt;usize&gt;(<span class="self">self</span>.offsets.lowering_data(idx)) == INVALID_PTR
             );
-            <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets.lowering(idx)) = lowering;
+            <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets.lowering(idx)) = lowering;
             <span class="self">self</span>.set_func_ref(
                 <span class="self">self</span>.offsets.lowering_func_ref(idx),
                 wasm_call,
@@ -1072,7 +1160,7 @@
     ) {
         <span class="macro">debug_assert!</span>(<span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset::&lt;usize&gt;(offset) == INVALID_PTR);
         <span class="kw">let </span>vmctx = VMOpaqueContext::from_vmcomponent(<span class="self">self</span>.vmctx());
-        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(offset) = VMFuncRef {
+        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(offset) = VMFuncRef {
             wasm_call: <span class="prelude-val">Some</span>(wasm_call),
             native_call,
             array_call,
@@ -1082,11 +1170,11 @@
     }
 
     <span class="kw">unsafe fn </span>initialize_vmctx(<span class="kw-2">&amp;mut </span><span class="self">self</span>, store: <span class="kw-2">*mut </span><span class="kw">dyn </span>Store) {
-        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets.magic()) = VMCOMPONENT_MAGIC;
-        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets.transcode_libcalls()) =
+        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets.magic()) = VMCOMPONENT_MAGIC;
+        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets.transcode_libcalls()) =
             <span class="kw-2">&amp;</span>transcode::VMBuiltinTranscodeArray::INIT;
-        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets.store()) = store;
-        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(<span class="self">self</span>.offsets.limits()) = (<span class="kw-2">*</span>store).vmruntime_limits();
+        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets.store()) = store;
+        <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets.limits()) = (<span class="kw-2">*</span>store).vmruntime_limits();
 
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.offsets.num_runtime_component_instances {
             <span class="kw">let </span>i = RuntimeComponentInstanceIndex::from_u32(i);
@@ -1103,36 +1191,36 @@
             <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.offsets.num_lowerings {
                 <span class="kw">let </span>i = LoweredIndex::from_u32(i);
                 <span class="kw">let </span>offset = <span class="self">self</span>.offsets.lowering_callee(i);
-                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(offset) = INVALID_PTR;
+                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(offset) = INVALID_PTR;
                 <span class="kw">let </span>offset = <span class="self">self</span>.offsets.lowering_data(i);
-                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(offset) = INVALID_PTR;
+                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(offset) = INVALID_PTR;
                 <span class="kw">let </span>offset = <span class="self">self</span>.offsets.lowering_func_ref(i);
-                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(offset) = INVALID_PTR;
+                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(offset) = INVALID_PTR;
             }
             <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.offsets.num_always_trap {
                 <span class="kw">let </span>i = RuntimeAlwaysTrapIndex::from_u32(i);
                 <span class="kw">let </span>offset = <span class="self">self</span>.offsets.always_trap_func_ref(i);
-                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(offset) = INVALID_PTR;
+                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(offset) = INVALID_PTR;
             }
             <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.offsets.num_transcoders {
                 <span class="kw">let </span>i = RuntimeTranscoderIndex::from_u32(i);
                 <span class="kw">let </span>offset = <span class="self">self</span>.offsets.transcoder_func_ref(i);
-                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(offset) = INVALID_PTR;
+                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(offset) = INVALID_PTR;
             }
             <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.offsets.num_runtime_memories {
                 <span class="kw">let </span>i = RuntimeMemoryIndex::from_u32(i);
                 <span class="kw">let </span>offset = <span class="self">self</span>.offsets.runtime_memory(i);
-                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(offset) = INVALID_PTR;
+                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(offset) = INVALID_PTR;
             }
             <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.offsets.num_runtime_reallocs {
                 <span class="kw">let </span>i = RuntimeReallocIndex::from_u32(i);
                 <span class="kw">let </span>offset = <span class="self">self</span>.offsets.runtime_realloc(i);
-                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(offset) = INVALID_PTR;
+                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(offset) = INVALID_PTR;
             }
             <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.offsets.num_runtime_post_returns {
                 <span class="kw">let </span>i = RuntimePostReturnIndex::from_u32(i);
                 <span class="kw">let </span>offset = <span class="self">self</span>.offsets.runtime_post_return(i);
-                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset(offset) = INVALID_PTR;
+                <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(offset) = INVALID_PTR;
             }
         }
     }
@@ -1183,7 +1271,7 @@
             </span><span class="kw">let </span>ptr = alloc::alloc_zeroed(layout) <span class="kw">as </span><span class="kw-2">*mut </span>ComponentInstance;
             <span class="kw">let </span>ptr = ptr::NonNull::new(ptr).unwrap();
 
-            ComponentInstance::new_at(ptr.as_ptr(), layout.size(), offsets, store);
+            ComponentInstance::new_at(ptr, layout.size(), offsets, store);
 
             OwnedComponentInstance { ptr }
         }

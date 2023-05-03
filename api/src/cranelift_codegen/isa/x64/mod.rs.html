@@ -464,7 +464,7 @@
 
     <span class="comment">// Check for compatibility between flags and ISA level
     // requested. In particular, SIMD support requires SSE4.2.
-    </span><span class="kw">if </span>shared_flags.enable_simd() {
+    </span><span class="kw">if </span>!<span class="macro">cfg!</span>(miri) &amp;&amp; shared_flags.enable_simd() {
         <span class="kw">if </span>!isa_flags.has_sse3() || !isa_flags.has_ssse3() || !isa_flags.has_sse41() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(CodegenError::Unsupported(
                 <span class="string">&quot;SIMD support requires SSE3, SSSE3, and SSE4.1 on x86_64.&quot;</span>.into(),

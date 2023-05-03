@@ -1717,7 +1717,7 @@
     </span><span class="kw">pub fn </span>data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[UnsafeCell&lt;u8&gt;] {
         <span class="kw">unsafe </span>{
             <span class="kw">let </span>definition = <span class="kw-2">&amp;*</span><span class="self">self</span>.<span class="number">0</span>.vmmemory_ptr();
-            slice::from_raw_parts_mut(definition.base.cast(), definition.current_length())
+            slice::from_raw_parts(definition.base.cast(), definition.current_length())
         }
     }
 

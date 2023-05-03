@@ -69,12 +69,11 @@
 <a href="#69" id="69">69</a>
 <a href="#70" id="70">70</a>
 <a href="#71" id="71">71</a>
-<a href="#72" id="72">72</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::store::StoreOpaque;
 <span class="kw">use crate</span>::{GlobalType, Mutability, Val};
 <span class="kw">use </span>std::ptr;
 <span class="kw">use </span>wasmtime_environ::GlobalInit;
-<span class="kw">use </span>wasmtime_runtime::VMGlobalDefinition;
+<span class="kw">use </span>wasmtime_runtime::{StoreBox, VMGlobalDefinition};
 
 <span class="attr">#[repr(C)]
 </span><span class="kw">pub struct </span>VMHostGlobalContext {
@@ -105,42 +104,41 @@
     ty: GlobalType,
     val: Val,
 ) -&gt; wasmtime_runtime::ExportGlobal {
-    <span class="kw">let </span><span class="kw-2">mut </span>ctx = Box::new(VMHostGlobalContext {
+    <span class="kw">let </span>global = wasmtime_environ::Global {
+        wasm_ty: ty.content().to_wasm_type(),
+        mutability: <span class="kw">match </span>ty.mutability() {
+            Mutability::Const =&gt; <span class="bool-val">false</span>,
+            Mutability::Var =&gt; <span class="bool-val">true</span>,
+        },
+        <span class="comment">// TODO: This is just a dummy value; nothing should actually read
+        // this. We should probably remove this field from the struct.
+        </span>initializer: GlobalInit::I32Const(<span class="number">0</span>),
+    };
+    <span class="kw">let </span>ctx = StoreBox::new(VMHostGlobalContext {
         ty,
         global: VMGlobalDefinition::new(),
     });
 
-    <span class="kw">unsafe </span>{
+    <span class="kw">let </span>definition = <span class="kw">unsafe </span>{
+        <span class="kw">let </span>global = <span class="kw-2">&amp;mut </span>(<span class="kw-2">*</span>ctx.get()).global;
         <span class="kw">match </span>val {
-            Val::I32(x) =&gt; <span class="kw-2">*</span>ctx.global.as_i32_mut() = x,
-            Val::I64(x) =&gt; <span class="kw-2">*</span>ctx.global.as_i64_mut() = x,
-            Val::F32(x) =&gt; <span class="kw-2">*</span>ctx.global.as_f32_bits_mut() = x,
-            Val::F64(x) =&gt; <span class="kw-2">*</span>ctx.global.as_f64_bits_mut() = x,
-            Val::V128(x) =&gt; <span class="kw-2">*</span>ctx.global.as_u128_mut() = x,
+            Val::I32(x) =&gt; <span class="kw-2">*</span>global.as_i32_mut() = x,
+            Val::I64(x) =&gt; <span class="kw-2">*</span>global.as_i64_mut() = x,
+            Val::F32(x) =&gt; <span class="kw-2">*</span>global.as_f32_bits_mut() = x,
+            Val::F64(x) =&gt; <span class="kw-2">*</span>global.as_f64_bits_mut() = x,
+            Val::V128(x) =&gt; <span class="kw-2">*</span>global.as_u128_mut() = x,
             Val::FuncRef(f) =&gt; {
-                <span class="kw-2">*</span>ctx.global.as_func_ref_mut() = f.map_or(ptr::null_mut(), |f| {
+                <span class="kw-2">*</span>global.as_func_ref_mut() = f.map_or(ptr::null_mut(), |f| {
                     f.caller_checked_func_ref(store).as_ptr()
                 })
             }
-            Val::ExternRef(x) =&gt; <span class="kw-2">*</span>ctx.global.as_externref_mut() = x.map(|x| x.inner),
+            Val::ExternRef(x) =&gt; <span class="kw-2">*</span>global.as_externref_mut() = x.map(|x| x.inner),
         }
-    }
-
-    <span class="kw">let </span>ret = wasmtime_runtime::ExportGlobal {
-        definition: <span class="kw-2">&amp;mut </span>ctx.global <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>,
-        global: wasmtime_environ::Global {
-            wasm_ty: ctx.ty.content().to_wasm_type(),
-            mutability: <span class="kw">match </span>ctx.ty.mutability() {
-                Mutability::Const =&gt; <span class="bool-val">false</span>,
-                Mutability::Var =&gt; <span class="bool-val">true</span>,
-            },
-            <span class="comment">// TODO: This is just a dummy value; nothing should actually read
-            // this. We should probably remove this field from the struct.
-            </span>initializer: GlobalInit::I32Const(<span class="number">0</span>),
-        },
+        global
     };
+
     store.host_globals().push(ctx);
-    ret
+    wasmtime_runtime::ExportGlobal { definition, global }
 }
 </code></pre></div>
 </section></main></body></html>

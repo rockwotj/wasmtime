@@ -610,6 +610,7 @@
 <a href="#610" id="610">610</a>
 <a href="#611" id="611">611</a>
 <a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module implements serialization and deserialization of `Engine`
 //! configuration data which is embedded into compiled artifacts of Wasmtime.
 //!
@@ -1144,6 +1145,7 @@ Caused by:
     }
 
     <span class="attr">#[test]
+    #[cfg_attr(miri, ignore)]
     </span><span class="kw">fn </span>test_tunables_int_mismatch() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>engine = Engine::default();
         <span class="kw">let </span><span class="kw-2">mut </span>metadata = Metadata::new(<span class="kw-2">&amp;</span>engine);

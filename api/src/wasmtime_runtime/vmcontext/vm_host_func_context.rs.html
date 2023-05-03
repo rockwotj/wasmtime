@@ -140,13 +140,17 @@
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
 <a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Definition of `VM*Context` variant for host functions.
 //!
 //! Keep in sync with `wasmtime_environ::VMHostFuncOffsets`.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::VMFuncRef;
-
-<span class="kw">use </span><span class="kw">super</span>::VMOpaqueContext;
+</span><span class="kw">use </span><span class="kw">super</span>::VMOpaqueContext;
+<span class="kw">use crate</span>::{StoreBox, VMFuncRef};
 <span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>wasmtime_environ::{VM_ARRAY_CALL_HOST_FUNC_MAGIC, VM_NATIVE_CALL_HOST_FUNC_MAGIC};
 
@@ -179,14 +183,17 @@
     </span><span class="kw">pub unsafe fn </span>new(
         func_ref: VMFuncRef,
         host_state: Box&lt;<span class="kw">dyn </span>Any + Send + Sync&gt;,
-    ) -&gt; Box&lt;VMArrayCallHostFuncContext&gt; {
+    ) -&gt; StoreBox&lt;VMArrayCallHostFuncContext&gt; {
         <span class="macro">debug_assert!</span>(func_ref.vmctx.is_null());
-        <span class="kw">let </span><span class="kw-2">mut </span>ctx = Box::new(VMArrayCallHostFuncContext {
+        <span class="kw">let </span>ctx = StoreBox::new(VMArrayCallHostFuncContext {
             magic: wasmtime_environ::VM_ARRAY_CALL_HOST_FUNC_MAGIC,
             func_ref,
             host_state,
         });
-        ctx.func_ref.vmctx = VMOpaqueContext::from_vm_array_call_host_func_context(<span class="kw-2">&amp;mut *</span>ctx);
+        <span class="kw">let </span>vmctx = VMOpaqueContext::from_vm_array_call_host_func_context(ctx.get());
+        <span class="kw">unsafe </span>{
+            (<span class="kw-2">*</span>ctx.get()).func_ref.vmctx = vmctx;
+        }
         ctx
     }
 
@@ -251,13 +258,16 @@
     </span><span class="kw">pub unsafe fn </span>new(
         func_ref: VMFuncRef,
         host_state: Box&lt;<span class="kw">dyn </span>Any + Send + Sync&gt;,
-    ) -&gt; Box&lt;VMNativeCallHostFuncContext&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>ctx = Box::new(VMNativeCallHostFuncContext {
+    ) -&gt; StoreBox&lt;VMNativeCallHostFuncContext&gt; {
+        <span class="kw">let </span>ctx = StoreBox::new(VMNativeCallHostFuncContext {
             magic: wasmtime_environ::VM_NATIVE_CALL_HOST_FUNC_MAGIC,
             func_ref,
             host_state,
         });
-        ctx.func_ref.vmctx = VMOpaqueContext::from_vm_native_call_host_func_context(<span class="kw-2">&amp;mut *</span>ctx);
+        <span class="kw">let </span>vmctx = VMOpaqueContext::from_vm_native_call_host_func_context(ctx.get());
+        <span class="kw">unsafe </span>{
+            (<span class="kw-2">*</span>ctx.get()).func_ref.vmctx = vmctx;
+        }
         ctx
     }
 

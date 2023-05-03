@@ -2376,6 +2376,13 @@
 <a href="#2376" id="2376">2376</a>
 <a href="#2377" id="2377">2377</a>
 <a href="#2378" id="2378">2378</a>
+<a href="#2379" id="2379">2379</a>
+<a href="#2380" id="2380">2380</a>
+<a href="#2381" id="2381">2381</a>
+<a href="#2382" id="2382">2382</a>
+<a href="#2383" id="2383">2383</a>
+<a href="#2384" id="2384">2384</a>
+<a href="#2385" id="2385">2385</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::store::{StoreData, StoreOpaque, Stored};
 <span class="kw">use crate</span>::{
     AsContext, AsContextMut, CallHook, Engine, Extern, FuncType, Instance, Module, StoreContext,
@@ -2389,7 +2396,7 @@
 <span class="kw">use </span>std::ptr::{<span class="self">self</span>, NonNull};
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>wasmtime_runtime::{
-    ExportFunction, InstanceHandle, VMArrayCallHostFuncContext, VMContext, VMFuncRef,
+    ExportFunction, InstanceHandle, StoreBox, VMArrayCallHostFuncContext, VMContext, VMFuncRef,
     VMFunctionImport, VMNativeCallHostFuncContext, VMOpaqueContext, VMSharedSignatureIndex,
 };
 
@@ -3804,6 +3811,13 @@
         <span class="kw">return </span><span class="prelude-val">None</span>;
     }
 
+    <span class="comment">// Ignore this stack pointer business on miri since we can&#39;t execute wasm
+    // anyway and the concept of a stack pointer on miri is a bit nebulous
+    // regardless.
+    </span><span class="kw">if </span><span class="macro">cfg!</span>(miri) {
+        <span class="kw">return </span><span class="prelude-val">None</span>;
+    }
+
     <span class="kw">let </span>stack_pointer = psm::stack_pointer() <span class="kw">as </span>usize;
 
     <span class="comment">// Determine the stack pointer where, after which, any wasm code will
@@ -4482,18 +4496,18 @@
 
 <span class="attr">#[doc(hidden)]
 </span><span class="kw">pub enum </span>HostContext {
-    Native(Box&lt;VMNativeCallHostFuncContext&gt;),
-    Array(Box&lt;VMArrayCallHostFuncContext&gt;),
+    Native(StoreBox&lt;VMNativeCallHostFuncContext&gt;),
+    Array(StoreBox&lt;VMArrayCallHostFuncContext&gt;),
 }
 
-<span class="kw">impl </span>From&lt;Box&lt;VMNativeCallHostFuncContext&gt;&gt; <span class="kw">for </span>HostContext {
-    <span class="kw">fn </span>from(ctx: Box&lt;VMNativeCallHostFuncContext&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;StoreBox&lt;VMNativeCallHostFuncContext&gt;&gt; <span class="kw">for </span>HostContext {
+    <span class="kw">fn </span>from(ctx: StoreBox&lt;VMNativeCallHostFuncContext&gt;) -&gt; <span class="self">Self </span>{
         HostContext::Native(ctx)
     }
 }
 
-<span class="kw">impl </span>From&lt;Box&lt;VMArrayCallHostFuncContext&gt;&gt; <span class="kw">for </span>HostContext {
-    <span class="kw">fn </span>from(ctx: Box&lt;VMArrayCallHostFuncContext&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;StoreBox&lt;VMArrayCallHostFuncContext&gt;&gt; <span class="kw">for </span>HostContext {
+    <span class="kw">fn </span>from(ctx: StoreBox&lt;VMArrayCallHostFuncContext&gt;) -&gt; <span class="self">Self </span>{
         HostContext::Array(ctx)
     }
 }
@@ -4645,8 +4659,8 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMFuncRef {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.ctx {
-            HostContext::Native(ctx) =&gt; ctx.func_ref(),
-            HostContext::Array(ctx) =&gt; ctx.func_ref(),
+            HostContext::Native(ctx) =&gt; <span class="kw">unsafe </span>{ (<span class="kw-2">*</span>ctx.get()).func_ref() },
+            HostContext::Array(ctx) =&gt; <span class="kw">unsafe </span>{ (<span class="kw-2">*</span>ctx.get()).func_ref() },
         }
     }
 
