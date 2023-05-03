@@ -3536,7 +3536,6 @@
 <a href="#3536" id="3536">3536</a>
 <a href="#3537" id="3537">3537</a>
 <a href="#3538" id="3538">3538</a>
-<a href="#3539" id="3539">3539</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Parser for .clif files.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::error::{Location, ParseError, ParseResult};
@@ -6270,7 +6269,6 @@
                 ctx.check_table(table, <span class="self">self</span>.loc)<span class="question-mark">?</span>;
                 <span class="self">self</span>.match_token(Token::Comma, <span class="string">&quot;expected &#39;,&#39; between operands&quot;</span>)<span class="question-mark">?</span>;
                 <span class="kw">let </span>arg = <span class="self">self</span>.match_value(<span class="string">&quot;expected SSA value table address&quot;</span>)<span class="question-mark">?</span>;
-                <span class="self">self</span>.match_token(Token::Comma, <span class="string">&quot;expected &#39;,&#39; between operands&quot;</span>)<span class="question-mark">?</span>;
                 <span class="kw">let </span>offset = <span class="self">self</span>.optional_offset32()<span class="question-mark">?</span>;
                 InstructionData::TableAddr {
                     opcode,

@@ -615,6 +615,14 @@
 <a href="#615" id="615">615</a>
 <a href="#616" id="616">616</a>
 <a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Converting Cranelift IR to text.
 //!
 //! The `write` module provides the `write_function` function which converts an IR `Function` to an
@@ -1074,7 +1082,15 @@
             dynamic_stack_slot,
             ..
         } =&gt; <span class="macro">write!</span>(w, <span class="string">&quot; {}, {}&quot;</span>, arg, dynamic_stack_slot),
-        TableAddr { table, arg, .. } =&gt; <span class="macro">write!</span>(w, <span class="string">&quot; {}, {}&quot;</span>, table, arg),
+        TableAddr {
+            table, arg, offset, ..
+        } =&gt; {
+            <span class="kw">if </span>i32::from(offset) == <span class="number">0 </span>{
+                <span class="macro">write!</span>(w, <span class="string">&quot; {}, {}&quot;</span>, table, arg)
+            } <span class="kw">else </span>{
+                <span class="macro">write!</span>(w, <span class="string">&quot; {}, {}{}&quot;</span>, table, arg, offset)
+            }
+        }
         Load {
             flags, arg, offset, ..
         } =&gt; <span class="macro">write!</span>(w, <span class="string">&quot;{} {}{}&quot;</span>, flags, arg, offset),
