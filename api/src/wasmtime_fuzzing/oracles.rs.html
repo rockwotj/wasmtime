@@ -894,6 +894,32 @@
 <a href="#894" id="894">894</a>
 <a href="#895" id="895">895</a>
 <a href="#896" id="896">896</a>
+<a href="#897" id="897">897</a>
+<a href="#898" id="898">898</a>
+<a href="#899" id="899">899</a>
+<a href="#900" id="900">900</a>
+<a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
+<a href="#914" id="914">914</a>
+<a href="#915" id="915">915</a>
+<a href="#916" id="916">916</a>
+<a href="#917" id="917">917</a>
+<a href="#918" id="918">918</a>
+<a href="#919" id="919">919</a>
+<a href="#920" id="920">920</a>
+<a href="#921" id="921">921</a>
+<a href="#922" id="922">922</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Oracles.
 //!
 //! Oracles take a test case and determine whether we have a bug. For example,
@@ -1278,30 +1304,11 @@
         <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
     }
 
-    <span class="kw">match </span>(lhs_results, rhs_results) {
-        <span class="comment">// If the evaluation succeeds, we compare the results.
-        </span>(<span class="prelude-val">Ok</span>(lhs_results), <span class="prelude-val">Ok</span>(rhs_results)) =&gt; <span class="macro">assert_eq!</span>(lhs_results, rhs_results),
-
-        <span class="comment">// Both sides failed. If either one hits a stack overflow then that&#39;s an
-        // engine defined limit which means we can no longer compare the state
-        // of the two instances, so `false` is returned and nothing else is
-        // compared.
-        //
-        // Otherwise, though, the same error should have popped out and this
-        // falls through to checking the intermediate state otherwise.
-        </span>(<span class="prelude-val">Err</span>(lhs), <span class="prelude-val">Err</span>(rhs)) =&gt; {
-            <span class="kw">let </span>err = rhs.downcast::&lt;Trap&gt;().expect(<span class="string">&quot;not a trap&quot;</span>);
-            <span class="kw">let </span>poisoned = err == Trap::StackOverflow || lhs_engine.is_stack_overflow(<span class="kw-2">&amp;</span>lhs);
-
-            <span class="kw">if </span>poisoned {
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
-            }
-            lhs_engine.assert_error_match(<span class="kw-2">&amp;</span>err, <span class="kw-2">&amp;</span>lhs);
-        }
-        <span class="comment">// A real bug is found if only one side fails.
-        </span>(<span class="prelude-val">Ok</span>(<span class="kw">_</span>), <span class="prelude-val">Err</span>(<span class="kw">_</span>)) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;only the `rhs` ({}) failed for this input&quot;</span>, rhs.name()),
-        (<span class="prelude-val">Err</span>(<span class="kw">_</span>), <span class="prelude-val">Ok</span>(<span class="kw">_</span>)) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;only the `lhs` ({}) failed for this input&quot;</span>, lhs.name()),
-    };
+    <span class="kw">match </span>DiffEqResult::new(lhs_engine, lhs_results, rhs_results) {
+        DiffEqResult::Success(lhs, rhs) =&gt; <span class="macro">assert_eq!</span>(lhs, rhs),
+        DiffEqResult::Poisoned =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="bool-val">false</span>),
+        DiffEqResult::Failed =&gt; {}
+    }
 
     <span class="kw">for </span>(global, ty) <span class="kw">in </span>rhs.exported_globals() {
         <span class="macro">log::debug!</span>(<span class="string">&quot;Comparing global `{global}`&quot;</span>);
@@ -1328,6 +1335,51 @@
     }
 
     <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
+}
+
+<span class="doccomment">/// Result of comparing the result of two operations during differential
+/// execution.
+</span><span class="kw">pub enum </span>DiffEqResult&lt;T, U&gt; {
+    <span class="doccomment">/// Both engines succeeded.
+    </span>Success(T, U),
+    <span class="doccomment">/// The result has reached the state where engines may have diverged and
+    /// results can no longer be compared.
+    </span>Poisoned,
+    <span class="doccomment">/// Both engines failed with the same error message, and internal state
+    /// should still match between the two engines.
+    </span>Failed,
+}
+
+<span class="kw">impl</span>&lt;T, U&gt; DiffEqResult&lt;T, U&gt; {
+    <span class="doccomment">/// Computes the differential result from executing in two different
+    /// engines.
+    </span><span class="kw">pub fn </span>new(
+        lhs_engine: <span class="kw-2">&amp;</span><span class="kw">dyn </span>DiffEngine,
+        lhs_result: <span class="prelude-ty">Result</span>&lt;T&gt;,
+        rhs_result: <span class="prelude-ty">Result</span>&lt;U&gt;,
+    ) -&gt; DiffEqResult&lt;T, U&gt; {
+        <span class="kw">match </span>(lhs_result, rhs_result) {
+            (<span class="prelude-val">Ok</span>(lhs_result), <span class="prelude-val">Ok</span>(rhs_result)) =&gt; DiffEqResult::Success(lhs_result, rhs_result),
+
+            <span class="comment">// Both sides failed. If either one hits a stack overflow then that&#39;s an
+            // engine defined limit which means we can no longer compare the state
+            // of the two instances, so `None` is returned and nothing else is
+            // compared.
+            </span>(<span class="prelude-val">Err</span>(lhs), <span class="prelude-val">Err</span>(rhs)) =&gt; {
+                <span class="kw">let </span>err = rhs.downcast::&lt;Trap&gt;().expect(<span class="string">&quot;not a trap&quot;</span>);
+                <span class="kw">let </span>poisoned = err == Trap::StackOverflow || lhs_engine.is_stack_overflow(<span class="kw-2">&amp;</span>lhs);
+
+                <span class="kw">if </span>poisoned {
+                    <span class="kw">return </span>DiffEqResult::Poisoned;
+                }
+                lhs_engine.assert_error_match(<span class="kw-2">&amp;</span>err, <span class="kw-2">&amp;</span>lhs);
+                DiffEqResult::Failed
+            }
+            <span class="comment">// A real bug is found if only one side fails.
+            </span>(<span class="prelude-val">Ok</span>(<span class="kw">_</span>), <span class="prelude-val">Err</span>(<span class="kw">_</span>)) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;only the `rhs` failed for this input&quot;</span>),
+            (<span class="prelude-val">Err</span>(<span class="kw">_</span>), <span class="prelude-val">Ok</span>(<span class="kw">_</span>)) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;only the `lhs` failed for this input&quot;</span>),
+        }
+    }
 }
 
 <span class="doccomment">/// Invoke the given API calls.
