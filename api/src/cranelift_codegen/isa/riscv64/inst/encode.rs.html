@@ -126,6 +126,66 @@
 <a href="#126" id="126">126</a>
 <a href="#127" id="127">127</a>
 <a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Contains the RISC-V instruction encoding logic.
 //!
 //! These formats are specified in the RISC-V specification in section 2.2.
@@ -134,25 +194,50 @@
 //! Some instructions especially in extensions have slight variations from
 //! the base RISC-V specification.
 
-</span><span class="kw">use super</span>::{UImm5, VType};
+</span><span class="kw">use super</span>::{Imm5, UImm5, VType};
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::reg_to_gpr_num;
-<span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::lower::isle::generated_code::VecElementWidth;
+<span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::lower::isle::generated_code::{
+    VecAluOpRRImm5, VecAluOpRRR, VecElementWidth, VecOpCategory, VecOpMasking,
+};
+<span class="kw">use </span><span class="kw">crate</span>::machinst::isle::WritableReg;
 <span class="kw">use </span><span class="kw">crate</span>::Reg;
 
-<span class="doccomment">/// Encode an R-type instruction.
-///
-/// Layout:
+<span class="kw">fn </span>unsigned_field_width(value: u32, width: u8) -&gt; u32 {
+    <span class="macro">debug_assert_eq!</span>(value &amp; (!<span class="number">0 </span>&lt;&lt; width), <span class="number">0</span>);
+    value
+}
+
+<span class="doccomment">/// Layout:
 /// 0-------6-7-------11-12------14-15------19-20------24-25-------31
 /// | Opcode |   rd     |  funct3  |   rs1    |   rs2    |   funct7  |
-</span><span class="kw">pub fn </span>encode_r_type(opcode: u32, rd: Reg, funct3: u32, rs1: Reg, rs2: Reg, funct7: u32) -&gt; u32 {
+</span><span class="kw">fn </span>encode_r_type_bits(opcode: u32, rd: u32, funct3: u32, rs1: u32, rs2: u32, funct7: u32) -&gt; u32 {
     <span class="kw">let </span><span class="kw-2">mut </span>bits = <span class="number">0</span>;
-    bits |= opcode &amp; <span class="number">0b1111111</span>;
-    bits |= reg_to_gpr_num(rd) &lt;&lt; <span class="number">7</span>;
-    bits |= (funct3 &amp; <span class="number">0b111</span>) &lt;&lt; <span class="number">12</span>;
-    bits |= reg_to_gpr_num(rs1) &lt;&lt; <span class="number">15</span>;
-    bits |= reg_to_gpr_num(rs2) &lt;&lt; <span class="number">20</span>;
-    bits |= (funct7 &amp; <span class="number">0b1111111</span>) &lt;&lt; <span class="number">25</span>;
+    bits |= unsigned_field_width(opcode, <span class="number">7</span>);
+    bits |= unsigned_field_width(rd, <span class="number">5</span>) &lt;&lt; <span class="number">7</span>;
+    bits |= unsigned_field_width(funct3, <span class="number">3</span>) &lt;&lt; <span class="number">12</span>;
+    bits |= unsigned_field_width(rs1, <span class="number">5</span>) &lt;&lt; <span class="number">15</span>;
+    bits |= unsigned_field_width(rs2, <span class="number">5</span>) &lt;&lt; <span class="number">20</span>;
+    bits |= unsigned_field_width(funct7, <span class="number">7</span>) &lt;&lt; <span class="number">25</span>;
     bits
+}
+
+<span class="doccomment">/// Encode an R-type instruction.
+</span><span class="kw">pub fn </span>encode_r_type(
+    opcode: u32,
+    rd: WritableReg,
+    funct3: u32,
+    rs1: Reg,
+    rs2: Reg,
+    funct7: u32,
+) -&gt; u32 {
+    encode_r_type_bits(
+        opcode,
+        reg_to_gpr_num(rd.to_reg()),
+        funct3,
+        reg_to_gpr_num(rs1),
+        reg_to_gpr_num(rs2),
+        funct7,
+    )
 }
 
 <span class="doccomment">/// Encodes a Vector ALU instruction.
@@ -168,18 +253,53 @@
 ///
 /// See: https://github.com/riscv/riscv-v-spec/blob/master/valu-format.adoc
 </span><span class="kw">pub fn </span>encode_valu(
-    opcode: u32,
-    vd: Reg,
-    funct3: u32,
+    op: VecAluOpRRR,
+    vd: WritableReg,
     vs1: Reg,
     vs2: Reg,
-    vm: u32,
-    funct6: u32,
+    masking: VecOpMasking,
 ) -&gt; u32 {
-    <span class="kw">let </span>funct6 = funct6 &amp; <span class="number">0b111111</span>;
-    <span class="kw">let </span>vm = vm &amp; <span class="number">0b1</span>;
-    <span class="kw">let </span>funct7 = (funct6 &lt;&lt; <span class="number">1</span>) | vm;
-    encode_r_type(opcode, vd, funct3, vs1, vs2, funct7)
+    <span class="kw">let </span>funct7 = (op.funct6() &lt;&lt; <span class="number">1</span>) | masking.encode();
+    encode_r_type_bits(
+        op.opcode(),
+        reg_to_gpr_num(vd.to_reg()),
+        op.funct3(),
+        reg_to_gpr_num(vs1),
+        reg_to_gpr_num(vs2),
+        funct7,
+    )
+}
+
+<span class="doccomment">/// Encodes a Vector ALU+Imm instruction.
+/// This is just a Vector ALU instruction with an immediate in the VS1 field.
+///
+/// Fields:
+/// - opcode (7 bits)
+/// - vd     (5 bits)
+/// - funct3 (3 bits)
+/// - imm    (5 bits)
+/// - vs2    (5 bits)
+/// - vm     (1 bit)
+/// - funct6 (6 bits)
+///
+/// See: https://github.com/riscv/riscv-v-spec/blob/master/valu-format.adoc
+</span><span class="kw">pub fn </span>encode_valu_imm(
+    op: VecAluOpRRImm5,
+    vd: WritableReg,
+    imm: Imm5,
+    vs2: Reg,
+    masking: VecOpMasking,
+) -&gt; u32 {
+    <span class="kw">let </span>funct7 = (op.funct6() &lt;&lt; <span class="number">1</span>) | masking.encode();
+    <span class="kw">let </span>imm = imm.bits() <span class="kw">as </span>u32;
+    encode_r_type_bits(
+        op.opcode(),
+        reg_to_gpr_num(vd.to_reg()),
+        op.funct3(),
+        imm,
+        reg_to_gpr_num(vs2),
+        funct7,
+    )
 }
 
 <span class="doccomment">/// Encodes a Vector CFG Imm instruction.
@@ -188,11 +308,11 @@
 </span><span class="comment">// TODO: Check if this is any of the known instruction types in the spec.
 </span><span class="kw">pub fn </span>encode_vcfg_imm(opcode: u32, rd: Reg, imm: UImm5, vtype: <span class="kw-2">&amp;</span>VType) -&gt; u32 {
     <span class="kw">let </span><span class="kw-2">mut </span>bits = <span class="number">0</span>;
-    bits |= opcode &amp; <span class="number">0b1111111</span>;
+    bits |= unsigned_field_width(opcode, <span class="number">7</span>);
     bits |= reg_to_gpr_num(rd) &lt;&lt; <span class="number">7</span>;
-    bits |= <span class="number">0b111 </span>&lt;&lt; <span class="number">12</span>;
-    bits |= (imm.bits() &amp; <span class="number">0b11111</span>) &lt;&lt; <span class="number">15</span>;
-    bits |= (vtype.encode() &amp; <span class="number">0b1111111111</span>) &lt;&lt; <span class="number">20</span>;
+    bits |= VecOpCategory::OPCFG.encode() &lt;&lt; <span class="number">12</span>;
+    bits |= unsigned_field_width(imm.bits(), <span class="number">5</span>) &lt;&lt; <span class="number">15</span>;
+    bits |= unsigned_field_width(vtype.encode(), <span class="number">10</span>) &lt;&lt; <span class="number">20</span>;
     bits |= <span class="number">0b11 </span>&lt;&lt; <span class="number">30</span>;
     bits
 }
@@ -207,7 +327,7 @@
     width: VecElementWidth,
     rs1: Reg,
     lumop: u32,
-    vm: u32,
+    masking: VecOpMasking,
     mop: u32,
     nf: u32,
 ) -&gt; u32 {
@@ -220,19 +340,19 @@
     };
 
     <span class="kw">let </span><span class="kw-2">mut </span>bits = <span class="number">0</span>;
-    bits |= opcode &amp; <span class="number">0b1111111</span>;
+    bits |= unsigned_field_width(opcode, <span class="number">7</span>);
     bits |= reg_to_gpr_num(vd) &lt;&lt; <span class="number">7</span>;
     bits |= width &lt;&lt; <span class="number">12</span>;
     bits |= reg_to_gpr_num(rs1) &lt;&lt; <span class="number">15</span>;
-    bits |= (lumop &amp; <span class="number">0b11111</span>) &lt;&lt; <span class="number">20</span>;
-    bits |= (vm &amp; <span class="number">0b1</span>) &lt;&lt; <span class="number">25</span>;
-    bits |= (mop &amp; <span class="number">0b11</span>) &lt;&lt; <span class="number">26</span>;
+    bits |= unsigned_field_width(lumop, <span class="number">5</span>) &lt;&lt; <span class="number">20</span>;
+    bits |= masking.encode() &lt;&lt; <span class="number">25</span>;
+    bits |= unsigned_field_width(mop, <span class="number">2</span>) &lt;&lt; <span class="number">26</span>;
 
     <span class="comment">// The mew bit (inst[28]) when set is expected to be used to encode expanded
     // memory sizes of 128 bits and above, but these encodings are currently reserved.
     </span>bits |= <span class="number">0b0 </span>&lt;&lt; <span class="number">28</span>;
 
-    bits |= (nf &amp; <span class="number">0b111</span>) &lt;&lt; <span class="number">29</span>;
+    bits |= unsigned_field_width(nf, <span class="number">3</span>) &lt;&lt; <span class="number">29</span>;
     bits
 }
 
@@ -246,13 +366,13 @@
     width: VecElementWidth,
     rs1: Reg,
     sumop: u32,
-    vm: u32,
+    masking: VecOpMasking,
     mop: u32,
     nf: u32,
 ) -&gt; u32 {
     <span class="comment">// This is pretty much the same as the load instruction, just
     // with different names on the fields.
-    </span>encode_vmem_load(opcode, vs3, width, rs1, sumop, vm, mop, nf)
+    </span>encode_vmem_load(opcode, vs3, width, rs1, sumop, masking, mop, nf)
 }
 </code></pre></div>
 </section></main></body></html>

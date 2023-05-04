@@ -2912,14 +2912,6 @@
 <a href="#2912" id="2912">2912</a>
 <a href="#2913" id="2913">2913</a>
 <a href="#2914" id="2914">2914</a>
-<a href="#2915" id="2915">2915</a>
-<a href="#2916" id="2916">2916</a>
-<a href="#2917" id="2917">2917</a>
-<a href="#2918" id="2918">2918</a>
-<a href="#2919" id="2919">2919</a>
-<a href="#2920" id="2920">2920</a>
-<a href="#2921" id="2921">2921</a>
-<a href="#2922" id="2922">2922</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::StackMap;
@@ -2927,6 +2919,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::{zero_reg, AluOPRRR};
+<span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::lower::isle::generated_code::VecOpMasking;
 <span class="kw">use </span><span class="kw">crate</span>::machinst::{AllocationConsumer, Reg, Writable};
 <span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>regalloc2::Allocation;
@@ -3389,6 +3382,7 @@
             </span>Inst::VecSetState { .. } =&gt; <span class="prelude-val">None</span>,
 
             Inst::VecAluRRR { vstate, .. } |
+            Inst::VecAluRRImm5 { vstate, .. } |
             <span class="comment">// TODO: Unit-stride loads and stores only need the AVL to be correct, not
             // the full vtype. A future optimization could be to decouple these two when
             // updating vstate. This would allow us to avoid emitting a VecSetState in
@@ -3556,7 +3550,7 @@
 
                 sink.put4(encode_r_type(
                     alu_op.op_code(),
-                    rd.to_reg(),
+                    rd,
                     alu_op.funct3(),
                     rs1,
                     rs2,
@@ -5710,19 +5704,15 @@
                 <span class="kw">let </span>vs2 = allocs.next(vs2);
                 <span class="kw">let </span>vd = allocs.next_writable(vd);
 
-                <span class="comment">// This is the mask bit, we don&#39;t yet implement masking, so set it to 1, which means
-                // masking disabled.
-                </span><span class="kw">let </span>vm = <span class="number">1</span>;
+                sink.put4(encode_valu(op, vd, vs1, vs2, VecOpMasking::Disabled));
+            }
+            <span class="kw-2">&amp;</span>Inst::VecAluRRImm5 {
+                op, vd, imm, vs2, ..
+            } =&gt; {
+                <span class="kw">let </span>vs2 = allocs.next(vs2);
+                <span class="kw">let </span>vd = allocs.next_writable(vd);
 
-                sink.put4(encode_valu(
-                    op.opcode(),
-                    vd.to_reg(),
-                    op.funct3(),
-                    vs1,
-                    vs2,
-                    vm,
-                    op.funct6(),
-                ));
+                sink.put4(encode_valu_imm(op, vd, imm, vs2, VecOpMasking::Disabled));
             }
             <span class="kw-2">&amp;</span>Inst::VecSetState { rd, <span class="kw-2">ref </span>vstate } =&gt; {
                 <span class="kw">let </span>rd = allocs.next_writable(rd);
@@ -5762,17 +5752,14 @@
                     </span>sink.add_trap(TrapCode::HeapOutOfBounds);
                 }
 
-                <span class="comment">// This is the mask bit, we don&#39;t yet implement masking, so set it to 1, which means
-                // masking disabled.
-                </span><span class="kw">let </span>vm = <span class="number">1</span>;
-
                 sink.put4(encode_vmem_load(
                     <span class="number">0x07</span>,
                     to.to_reg(),
                     eew,
                     addr.to_reg(),
                     from.lumop(),
-                    vm,
+                    <span class="comment">// We don&#39;t implement masking yet.
+                    </span>VecOpMasking::Disabled,
                     from.mop(),
                     from.nf(),
                 ));
@@ -5802,17 +5789,14 @@
                     </span>sink.add_trap(TrapCode::HeapOutOfBounds);
                 }
 
-                <span class="comment">// This is the mask bit, we don&#39;t yet implement masking, so set it to 1, which means
-                // masking disabled.
-                </span><span class="kw">let </span>vm = <span class="number">1</span>;
-
                 sink.put4(encode_vmem_store(
                     <span class="number">0x27</span>,
                     from,
                     eew,
                     addr.to_reg(),
                     to.sumop(),
-                    vm,
+                    <span class="comment">// We don&#39;t implement masking yet.
+                    </span>VecOpMasking::Disabled,
                     to.mop(),
                     to.nf(),
                 ));

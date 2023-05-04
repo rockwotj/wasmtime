@@ -538,6 +538,10 @@
 <a href="#538" id="538">538</a>
 <a href="#539" id="539">539</a>
 <a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for riscv64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -778,6 +782,10 @@
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>imm12_from_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg0: u64) -&gt; <span class="prelude-ty">Option</span>&lt;Imm12&gt; {
         Imm12::maybe_from_u64(arg0)
+    }
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>imm5_from_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg0: u64) -&gt; <span class="prelude-ty">Option</span>&lt;Imm5&gt; {
+        Imm5::maybe_from_i8(i8::try_from(arg0 <span class="kw">as </span>i64).ok()<span class="question-mark">?</span>)
     }
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>writable_zero_reg(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; WritableReg {
