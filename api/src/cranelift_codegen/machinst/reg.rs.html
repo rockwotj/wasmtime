@@ -530,6 +530,11 @@
 <a href="#530" id="530">530</a>
 <a href="#531" id="531">531</a>
 <a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Definitions for registers, operands, etc. Provides a thin
 //! interface over the register allocator so that we can more easily
 //! swap it out or shim it when necessary.
@@ -1028,7 +1033,12 @@
             )
         });
 
-        <span class="macro">assert_eq!</span>(preg, alloc.unwrap().to_real_reg().unwrap().into());
+        <span class="kw">match </span>alloc {
+            <span class="prelude-val">Some</span>(alloc) =&gt; {
+                <span class="macro">assert_eq!</span>(preg, alloc.to_real_reg().unwrap().into());
+            }
+            <span class="prelude-val">None </span>=&gt; {}
+        }
     }
 
     <span class="kw">pub fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pre_regalloc_reg: Reg) -&gt; Reg {
