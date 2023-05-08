@@ -1798,29 +1798,6 @@
 <a href="#1798" id="1798">1798</a>
 <a href="#1799" id="1799">1799</a>
 <a href="#1800" id="1800">1800</a>
-<a href="#1801" id="1801">1801</a>
-<a href="#1802" id="1802">1802</a>
-<a href="#1803" id="1803">1803</a>
-<a href="#1804" id="1804">1804</a>
-<a href="#1805" id="1805">1805</a>
-<a href="#1806" id="1806">1806</a>
-<a href="#1807" id="1807">1807</a>
-<a href="#1808" id="1808">1808</a>
-<a href="#1809" id="1809">1809</a>
-<a href="#1810" id="1810">1810</a>
-<a href="#1811" id="1811">1811</a>
-<a href="#1812" id="1812">1812</a>
-<a href="#1813" id="1813">1813</a>
-<a href="#1814" id="1814">1814</a>
-<a href="#1815" id="1815">1815</a>
-<a href="#1816" id="1816">1816</a>
-<a href="#1817" id="1817">1817</a>
-<a href="#1818" id="1818">1818</a>
-<a href="#1819" id="1819">1819</a>
-<a href="#1820" id="1820">1820</a>
-<a href="#1821" id="1821">1821</a>
-<a href="#1822" id="1822">1822</a>
-<a href="#1823" id="1823">1823</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines riscv64-specific machine instruction types.
 
 </span><span class="comment">// Some variants are not constructed, but we still want them as options in the future.
@@ -1984,33 +1961,10 @@
     <span class="macro">assert!</span>(rd.len() &gt; <span class="number">0</span>);
     <span class="kw">let </span><span class="kw-2">mut </span>insts = SmallInstVec::new();
     <span class="kw">for </span>(dst, src) <span class="kw">in </span>rd.iter().zip(src.iter()) {
-        <span class="kw">let </span>out_ty = Inst::canonical_type_for_rc(dst.to_reg().class());
-        <span class="kw">let </span>in_ty = Inst::canonical_type_for_rc(src.class());
-        insts.push(gen_move(<span class="kw-2">*</span>dst, out_ty, <span class="kw-2">*</span>src, in_ty));
+        <span class="kw">let </span>ty = Inst::canonical_type_for_rc(dst.to_reg().class());
+        insts.push(Inst::gen_move(<span class="kw-2">*</span>dst, <span class="kw-2">*</span>src, ty));
     }
     insts
-}
-
-<span class="doccomment">/// if input or output is float,
-/// you should use special instruction.
-/// generate a move and re-interpret the data.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>gen_move(rd: Writable&lt;Reg&gt;, oty: Type, rm: Reg, ity: Type) -&gt; Inst {
-    <span class="kw">match </span>(ity.is_float(), oty.is_float()) {
-        (<span class="bool-val">false</span>, <span class="bool-val">false</span>) =&gt; Inst::gen_move(rd, rm, oty),
-        (<span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; Inst::gen_move(rd, rm, oty),
-        (<span class="bool-val">false</span>, <span class="bool-val">true</span>) =&gt; Inst::FpuRR {
-            frm: <span class="prelude-val">None</span>,
-            alu_op: FpuOPRR::move_x_to_f_op(oty),
-            rd: rd,
-            rs: rm,
-        },
-        (<span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; Inst::FpuRR {
-            frm: <span class="prelude-val">None</span>,
-            alu_op: FpuOPRR::move_f_to_x_op(ity),
-            rd: rd,
-            rs: rm,
-        },
-    }
 }
 
 <span class="kw">impl </span>Inst {

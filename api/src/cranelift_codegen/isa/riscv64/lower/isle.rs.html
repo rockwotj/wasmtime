@@ -504,44 +504,6 @@
 <a href="#504" id="504">504</a>
 <a href="#505" id="505">505</a>
 <a href="#506" id="506">506</a>
-<a href="#507" id="507">507</a>
-<a href="#508" id="508">508</a>
-<a href="#509" id="509">509</a>
-<a href="#510" id="510">510</a>
-<a href="#511" id="511">511</a>
-<a href="#512" id="512">512</a>
-<a href="#513" id="513">513</a>
-<a href="#514" id="514">514</a>
-<a href="#515" id="515">515</a>
-<a href="#516" id="516">516</a>
-<a href="#517" id="517">517</a>
-<a href="#518" id="518">518</a>
-<a href="#519" id="519">519</a>
-<a href="#520" id="520">520</a>
-<a href="#521" id="521">521</a>
-<a href="#522" id="522">522</a>
-<a href="#523" id="523">523</a>
-<a href="#524" id="524">524</a>
-<a href="#525" id="525">525</a>
-<a href="#526" id="526">526</a>
-<a href="#527" id="527">527</a>
-<a href="#528" id="528">528</a>
-<a href="#529" id="529">529</a>
-<a href="#530" id="530">530</a>
-<a href="#531" id="531">531</a>
-<a href="#532" id="532">532</a>
-<a href="#533" id="533">533</a>
-<a href="#534" id="534">534</a>
-<a href="#535" id="535">535</a>
-<a href="#536" id="536">536</a>
-<a href="#537" id="537">537</a>
-<a href="#538" id="538">538</a>
-<a href="#539" id="539">539</a>
-<a href="#540" id="540">540</a>
-<a href="#541" id="541">541</a>
-<a href="#542" id="542">542</a>
-<a href="#543" id="543">543</a>
-<a href="#544" id="544">544</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for riscv64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -702,18 +664,18 @@
         });
     }
     <span class="kw">fn </span>load_ra(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Reg {
-        <span class="kw">let </span>tmp = <span class="self">self</span>.temp_writable_reg(I64);
         <span class="kw">if </span><span class="self">self</span>.backend.flags.preserve_frame_pointers() {
+            <span class="kw">let </span>tmp = <span class="self">self</span>.temp_writable_reg(I64);
             <span class="self">self</span>.emit(<span class="kw-2">&amp;</span>MInst::Load {
                 rd: tmp,
                 op: LoadOP::Ld,
                 flags: MemFlags::trusted(),
                 from: AMode::FPOffset(<span class="number">8</span>, I64),
             });
+            tmp.to_reg()
         } <span class="kw">else </span>{
-            <span class="self">self</span>.emit(<span class="kw-2">&amp;</span>gen_move(tmp, I64, link_reg(), I64));
+            link_reg()
         }
-        tmp.to_reg()
     }
     <span class="kw">fn </span>int_zero_reg(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type) -&gt; ValueRegs {
         <span class="macro">assert!</span>(ty.is_int(), <span class="string">&quot;{:?}&quot;</span>, ty);
@@ -736,20 +698,10 @@
         v.clone()
     }
 
-    <span class="kw">fn </span>gen_moves(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rs: ValueRegs, in_ty: Type, out_ty: Type) -&gt; ValueRegs {
-        <span class="kw">let </span>tmp = construct_dest(|ty| <span class="self">self</span>.temp_writable_reg(ty), out_ty);
-        <span class="kw">if </span>in_ty.bits() &lt; <span class="number">64 </span>{
-            <span class="self">self</span>.emit(<span class="kw-2">&amp;</span>gen_move(tmp.regs()[<span class="number">0</span>], out_ty, rs.regs()[<span class="number">0</span>], in_ty));
-        } <span class="kw">else </span>{
-            gen_moves(tmp.regs(), rs.regs())
-                .iter()
-                .for_each(|i| <span class="self">self</span>.emit(i));
-        }
-        tmp.map(|r| r.to_reg())
-    }
     <span class="kw">fn </span>imm12_and(<span class="kw-2">&amp;mut </span><span class="self">self</span>, imm: Imm12, x: i32) -&gt; Imm12 {
         Imm12::from_bits(imm.as_i16() &amp; (x <span class="kw">as </span>i16))
     }
+
     <span class="kw">fn </span>alloc_vec_writable(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type) -&gt; VecWritableReg {
         <span class="kw">if </span>ty.is_int() || ty == R32 || ty == R64 {
             <span class="kw">if </span>ty.bits() &lt;= <span class="number">64 </span>{
@@ -899,21 +851,11 @@
         <span class="self">self</span>.backend.isa_flags.has_zbs()
     }
 
-    <span class="kw">fn </span>move_f_to_x(<span class="kw-2">&amp;mut </span><span class="self">self</span>, r: Reg, ty: Type) -&gt; Reg {
-        <span class="kw">let </span>result = <span class="self">self</span>.temp_writable_reg(I64);
-        <span class="self">self</span>.emit(<span class="kw-2">&amp;</span>gen_move(result, I64, r, ty));
-        result.to_reg()
-    }
     <span class="kw">fn </span>offset32_imm(<span class="kw-2">&amp;mut </span><span class="self">self</span>, offset: i32) -&gt; Offset32 {
         Offset32::new(offset)
     }
     <span class="kw">fn </span>default_memflags(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; MemFlags {
         MemFlags::new()
-    }
-    <span class="kw">fn </span>move_x_to_f(<span class="kw-2">&amp;mut </span><span class="self">self</span>, r: Reg, ty: Type) -&gt; Reg {
-        <span class="kw">let </span>result = <span class="self">self</span>.temp_writable_reg(ty);
-        <span class="self">self</span>.emit(<span class="kw-2">&amp;</span>gen_move(result, ty, r, I64));
-        result.to_reg()
     }
 
     <span class="kw">fn </span>pack_float_rounding_mode(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: <span class="kw-2">&amp;</span>FRM) -&gt; OptionFloatRoundingMode {
@@ -1067,24 +1009,6 @@
     // internal heap allocations.
     </span><span class="kw">let </span><span class="kw-2">mut </span>isle_ctx = RV64IsleContext::new(lower_ctx, backend);
     generated_code::constructor_lower_branch(<span class="kw-2">&amp;mut </span>isle_ctx, branch, <span class="kw-2">&amp;</span>targets.to_vec())
-}
-
-<span class="doccomment">/// construct destination according to ty.
-</span><span class="kw">fn </span>construct_dest&lt;F: std::ops::FnMut(Type) -&gt; WritableReg&gt;(
-    <span class="kw-2">mut </span>alloc: F,
-    ty: Type,
-) -&gt; WritableValueRegs {
-    <span class="kw">if </span>ty.is_int() || ty.is_ref() {
-        <span class="kw">if </span>ty.bits() == <span class="number">128 </span>{
-            WritableValueRegs::two(alloc(I64), alloc(I64))
-        } <span class="kw">else </span>{
-            WritableValueRegs::one(alloc(I64))
-        }
-    } <span class="kw">else if </span>ty.is_float() {
-        WritableValueRegs::one(alloc(F64))
-    } <span class="kw">else </span>{
-        <span class="macro">unimplemented!</span>(<span class="string">&quot;vector type not implemented.&quot;</span>);
-    }
 }
 </code></pre></div>
 </section></main></body></html>
