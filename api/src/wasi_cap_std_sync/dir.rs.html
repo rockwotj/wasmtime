@@ -462,7 +462,6 @@
 <a href="#462" id="462">462</a>
 <a href="#463" id="463">463</a>
 <a href="#464" id="464">464</a>
-<a href="#465" id="465">465</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::file::{filetype_from, File};
 <span class="kw">use </span>cap_fs_ext::{DirEntryExt, DirExt, MetadataExt, OpenOptionsMaybeDirExt, SystemTimeSpec};
 <span class="kw">use </span>cap_std::fs;
@@ -553,12 +552,6 @@
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>f = <span class="self">self</span>.<span class="number">0</span>.open_with(Path::new(path), <span class="kw-2">&amp;</span>opts)<span class="question-mark">?</span>;
-        <span class="comment">// NONBLOCK does not have an OpenOption either, but we can patch that on with set_fd_flags:
-        </span><span class="kw">if </span>fdflags.contains(wasi_common::file::FdFlags::NONBLOCK) {
-            <span class="kw">let </span>set_fd_flags = f.new_set_fd_flags(system_interface::fs::FdFlags::NONBLOCK)<span class="question-mark">?</span>;
-            f.set_fd_flags(set_fd_flags)<span class="question-mark">?</span>;
-        }
-
         <span class="kw">if </span>f.metadata()<span class="question-mark">?</span>.is_dir() {
             <span class="prelude-val">Ok</span>(OpenResult::Dir(Dir::from_cap_std(fs::Dir::from_std_file(
                 f.into_std(),
@@ -566,6 +559,11 @@
         } <span class="kw">else if </span>oflags.contains(OFlags::DIRECTORY) {
             <span class="prelude-val">Err</span>(Error::not_dir().context(<span class="string">&quot;expected directory but got file&quot;</span>))
         } <span class="kw">else </span>{
+            <span class="comment">// NONBLOCK does not have an OpenOption either, but we can patch that on with set_fd_flags:
+            </span><span class="kw">if </span>fdflags.contains(wasi_common::file::FdFlags::NONBLOCK) {
+                <span class="kw">let </span>set_fd_flags = f.new_set_fd_flags(system_interface::fs::FdFlags::NONBLOCK)<span class="question-mark">?</span>;
+                f.set_fd_flags(set_fd_flags)<span class="question-mark">?</span>;
+            }
             <span class="prelude-val">Ok</span>(OpenResult::File(File::from_cap_std(f)))
         }
     }
