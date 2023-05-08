@@ -4000,6 +4000,8 @@
 <a href="#4000" id="4000">4000</a>
 <a href="#4001" id="4001">4001</a>
 <a href="#4002" id="4002">4002</a>
+<a href="#4003" id="4003">4003</a>
+<a href="#4004" id="4004">4004</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -6067,6 +6069,7 @@
                 SseOpcode::Xorpd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F57</span>, <span class="number">2</span>),
                 SseOpcode::Phaddw =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3801</span>, <span class="number">3</span>),
                 SseOpcode::Phaddd =&gt; (LegacyPrefixes::_66, <span class="number">0x0F3802</span>, <span class="number">3</span>),
+                SseOpcode::Movss =&gt; (LegacyPrefixes::_F3, <span class="number">0x0F10</span>, <span class="number">2</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Opcode {:?} not implemented&quot;</span>, op),
             };
 
@@ -6272,6 +6275,7 @@
                 AvxOpcode::Vpunpcklqdq =&gt; (LP::_66, OM::_0F, <span class="number">0x6C</span>),
                 AvxOpcode::Vpunpckhqdq =&gt; (LP::_66, OM::_0F, <span class="number">0x6D</span>),
                 AvxOpcode::Vmovsd =&gt; (LP::_F2, OM::_0F, <span class="number">0x10</span>),
+                AvxOpcode::Vmovss =&gt; (LP::_F3, OM::_0F, <span class="number">0x10</span>),
                 <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected rmir vex opcode {op:?}&quot;</span>),
             };
             VexInstruction::new()

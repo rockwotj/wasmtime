@@ -821,6 +821,16 @@
 <a href="#821" id="821">821</a>
 <a href="#822" id="822">822</a>
 <a href="#823" id="823">823</a>
+<a href="#824" id="824">824</a>
+<a href="#825" id="825">825</a>
+<a href="#826" id="826">826</a>
+<a href="#827" id="827">827</a>
+<a href="#828" id="828">828</a>
+<a href="#829" id="829">829</a>
+<a href="#830" id="830">830</a>
+<a href="#831" id="831">831</a>
+<a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Shared ISLE prelude implementation for optimization (mid-end) and
 //! lowering (backend) ISLE environments.
 
@@ -1511,6 +1521,16 @@
         <span class="attr">#[inline]
         </span><span class="kw">fn </span>u8_and(<span class="kw-2">&amp;mut </span><span class="self">self</span>, a: u8, b: u8) -&gt; u8 {
             a &amp; b
+        }
+
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>u8_shl(<span class="kw-2">&amp;mut </span><span class="self">self</span>, a: u8, b: u8) -&gt; u8 {
+            a &lt;&lt; b
+        }
+
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>u8_shr(<span class="kw-2">&amp;mut </span><span class="self">self</span>, a: u8, b: u8) -&gt; u8 {
+            a &gt;&gt; b
         }
 
         <span class="attr">#[inline]
