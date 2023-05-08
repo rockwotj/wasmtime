@@ -815,9 +815,9 @@
 
 </span><span class="kw">use </span><span class="kw">crate</span>::state::FuncTranslationState;
 <span class="kw">use crate</span>::{
-    DataIndex, ElemIndex, FuncIndex, Global, GlobalIndex, Heap, HeapData, Memory, MemoryIndex,
-    SignatureIndex, Table, TableIndex, Tag, TagIndex, TypeIndex, WasmError, WasmFuncType,
-    WasmResult, WasmType,
+    DataIndex, ElemIndex, FuncIndex, Global, GlobalIndex, GlobalInit, Heap, HeapData, Memory,
+    MemoryIndex, SignatureIndex, Table, TableIndex, Tag, TagIndex, TypeIndex, WasmError,
+    WasmFuncType, WasmResult, WasmType,
 };
 <span class="kw">use </span>core::convert::From;
 <span class="kw">use </span>cranelift_codegen::cursor::FuncCursor;
@@ -1471,7 +1471,7 @@
     }
 
     <span class="doccomment">/// Declares a global to the environment.
-    </span><span class="kw">fn </span>declare_global(<span class="kw-2">&amp;mut </span><span class="self">self</span>, global: Global) -&gt; WasmResult&lt;()&gt;;
+    </span><span class="kw">fn </span>declare_global(<span class="kw-2">&amp;mut </span><span class="self">self</span>, global: Global, init: GlobalInit) -&gt; WasmResult&lt;()&gt;;
 
     <span class="doccomment">/// Provides the number of exports up front. By default this does nothing, but
     /// implementations can use this to preallocate memory if desired.

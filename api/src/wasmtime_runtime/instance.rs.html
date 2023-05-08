@@ -1263,8 +1263,6 @@
 <a href="#1263" id="1263">1263</a>
 <a href="#1264" id="1264">1264</a>
 <a href="#1265" id="1265">1265</a>
-<a href="#1266" id="1266">1266</a>
-<a href="#1267" id="1267">1267</a>
 </pre><pre class="rust"><code><span class="doccomment">//! An `Instance` contains all the runtime state used by execution of a
 //! wasm module (except its callstack and register state). An
 //! `InstanceHandle` is a reference-counting handle for an `Instance`.
@@ -2274,15 +2272,14 @@
     }
 
     <span class="kw">unsafe fn </span>initialize_vmctx_globals(<span class="kw-2">&amp;mut </span><span class="self">self</span>, module: <span class="kw-2">&amp;</span>Module) {
-        <span class="kw">let </span>num_imports = module.num_imported_globals;
-        <span class="kw">for </span>(index, global) <span class="kw">in </span>module.globals.iter().skip(num_imports) {
-            <span class="kw">let </span>def_index = module.defined_global_index(index).unwrap();
-            <span class="kw">let </span>to = <span class="self">self</span>.global_ptr(def_index);
+        <span class="kw">for </span>(index, init) <span class="kw">in </span>module.global_initializers.iter() {
+            <span class="kw">let </span>to = <span class="self">self</span>.global_ptr(index);
+            <span class="kw">let </span>wasm_ty = module.globals[module.global_index(index)].wasm_ty;
 
             <span class="comment">// Initialize the global before writing to it
             </span>ptr::write(to, VMGlobalDefinition::new());
 
-            <span class="kw">match </span>global.initializer {
+            <span class="kw">match </span><span class="kw-2">*</span>init {
                 GlobalInit::I32Const(x) =&gt; <span class="kw-2">*</span>(<span class="kw-2">*</span>to).as_i32_mut() = x,
                 GlobalInit::I64Const(x) =&gt; <span class="kw-2">*</span>(<span class="kw-2">*</span>to).as_i64_mut() = x,
                 GlobalInit::F32Const(x) =&gt; <span class="kw-2">*</span>(<span class="kw-2">*</span>to).as_f32_bits_mut() = x,
@@ -2297,7 +2294,7 @@
                     <span class="comment">// Globals of type `externref` need to manage the reference
                     // count as values move between globals, everything else is just
                     // copy-able bits.
-                    </span><span class="kw">match </span>global.wasm_ty {
+                    </span><span class="kw">match </span>wasm_ty {
                         WasmType::ExternRef =&gt; {
                             <span class="kw-2">*</span>(<span class="kw-2">*</span>to).as_externref_mut() = from.as_externref().clone()
                         }
@@ -2307,13 +2304,12 @@
                 GlobalInit::RefFunc(f) =&gt; {
                     <span class="kw-2">*</span>(<span class="kw-2">*</span>to).as_func_ref_mut() = <span class="self">self</span>.get_func_ref(f).unwrap() <span class="kw">as </span><span class="kw-2">*const </span>VMFuncRef;
                 }
-                GlobalInit::RefNullConst =&gt; <span class="kw">match </span>global.wasm_ty {
+                GlobalInit::RefNullConst =&gt; <span class="kw">match </span>wasm_ty {
                     <span class="comment">// `VMGlobalDefinition::new()` already zeroed out the bits
                     </span>WasmType::FuncRef =&gt; {}
                     WasmType::ExternRef =&gt; {}
                     ty =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unsupported reference type for global: {:?}&quot;</span>, ty),
                 },
-                GlobalInit::Import =&gt; <span class="macro">panic!</span>(<span class="string">&quot;locally-defined global initialized as import&quot;</span>),
             }
         }
     }

@@ -839,6 +839,7 @@
 <a href="#839" id="839">839</a>
 <a href="#840" id="840">840</a>
 <a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::module::{
     FuncRefIndex, Initializer, MemoryInitialization, MemoryInitializer, MemoryPlan, Module,
     ModuleType, TableInitializer, TablePlan,
@@ -1108,7 +1109,7 @@
                         }
                         TypeRef::Global(ty) =&gt; {
                             <span class="self">self</span>.result.module.num_imported_globals += <span class="number">1</span>;
-                            EntityType::Global(Global::new(ty, GlobalInit::Import)<span class="question-mark">?</span>)
+                            EntityType::Global(Global::new(ty)<span class="question-mark">?</span>)
                         }
                         TypeRef::Table(ty) =&gt; {
                             <span class="self">self</span>.result.module.num_imported_tables += <span class="number">1</span>;
@@ -1202,8 +1203,9 @@
                             )));
                         }
                     };
-                    <span class="kw">let </span>ty = Global::new(ty, initializer)<span class="question-mark">?</span>;
+                    <span class="kw">let </span>ty = Global::new(ty)<span class="question-mark">?</span>;
                     <span class="self">self</span>.result.module.globals.push(ty);
+                    <span class="self">self</span>.result.module.global_initializers.push(initializer);
                 }
             }
 

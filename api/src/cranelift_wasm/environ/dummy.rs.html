@@ -899,6 +899,7 @@
 <a href="#899" id="899">899</a>
 <a href="#900" id="900">900</a>
 <a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
 </pre><pre class="rust"><code><span class="doccomment">//! &quot;Dummy&quot; implementations of `ModuleEnvironment` and `FuncEnvironment` for testing
 //! wasm translation. For complete implementations of `ModuleEnvironment` and
 //! `FuncEnvironment`, see [wasmtime-environ] in [Wasmtime].
@@ -911,8 +912,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::state::FuncTranslationState;
 <span class="kw">use </span><span class="kw">crate</span>::WasmType;
 <span class="kw">use crate</span>::{
-    DataIndex, DefinedFuncIndex, ElemIndex, FuncIndex, Global, GlobalIndex, Heap, HeapData,
-    HeapStyle, Memory, MemoryIndex, Table, TableIndex, TypeIndex, WasmFuncType, WasmResult,
+    DataIndex, DefinedFuncIndex, ElemIndex, FuncIndex, Global, GlobalIndex, GlobalInit, Heap,
+    HeapData, HeapStyle, Memory, MemoryIndex, Table, TableIndex, TypeIndex, WasmFuncType,
+    WasmResult,
 };
 <span class="kw">use </span>core::convert::TryFrom;
 <span class="kw">use </span>cranelift_codegen::cursor::FuncCursor;
@@ -1615,7 +1617,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn </span>declare_global(<span class="kw-2">&amp;mut </span><span class="self">self</span>, global: Global) -&gt; WasmResult&lt;()&gt; {
+    <span class="kw">fn </span>declare_global(<span class="kw-2">&amp;mut </span><span class="self">self</span>, global: Global, _init: GlobalInit) -&gt; WasmResult&lt;()&gt; {
         <span class="self">self</span>.info.globals.push(Exportable::new(global));
         <span class="prelude-val">Ok</span>(())
     }

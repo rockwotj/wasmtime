@@ -65,14 +65,9 @@
 <a href="#65" id="65">65</a>
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
-<a href="#68" id="68">68</a>
-<a href="#69" id="69">69</a>
-<a href="#70" id="70">70</a>
-<a href="#71" id="71">71</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::store::StoreOpaque;
 <span class="kw">use crate</span>::{GlobalType, Mutability, Val};
 <span class="kw">use </span>std::ptr;
-<span class="kw">use </span>wasmtime_environ::GlobalInit;
 <span class="kw">use </span>wasmtime_runtime::{StoreBox, VMGlobalDefinition};
 
 <span class="attr">#[repr(C)]
@@ -110,9 +105,6 @@
             Mutability::Const =&gt; <span class="bool-val">false</span>,
             Mutability::Var =&gt; <span class="bool-val">true</span>,
         },
-        <span class="comment">// TODO: This is just a dummy value; nothing should actually read
-        // this. We should probably remove this field from the struct.
-        </span>initializer: GlobalInit::I32Const(<span class="number">0</span>),
     };
     <span class="kw">let </span>ctx = StoreBox::new(VMHostGlobalContext {
         ty,
