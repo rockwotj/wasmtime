@@ -340,14 +340,14 @@
 ///
 /// impl types::UserErrorConversion for YourCtxType {
 ///     fn errno_from_your_rich_error(&amp;mut self, e: YourRichError)
-///         -&gt; Result&lt;types::Errno, wiggle::wasmtime_crate::Trap&gt;
+///         -&gt; Result&lt;types::Errno, wiggle::wasmtime_crate::Error&gt;
 ///     {
 ///         println!(&quot;Rich error: {:?}&quot;, e);
 ///         match e {
 ///             YourRichError::InvalidArg{..} =&gt; Ok(types::Errno::InvalidArg),
 ///             YourRichError::Io{..} =&gt; Ok(types::Errno::Io),
 ///             YourRichError::Overflow =&gt; Ok(types::Errno::Overflow),
-///             YourRichError::Trap(s) =&gt; Err(wiggle::wasmtime_crate::Trap::new(s)),
+///             YourRichError::Trap(s) =&gt; Err(wiggle::wasmtime_crate::Error::msg(s)),
 ///         }
 ///     }
 /// }

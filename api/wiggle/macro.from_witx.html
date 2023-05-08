@@ -133,14 +133,14 @@ made Rust <code>async</code> functions in the module trait.</li>
 
 </span><span class="kw">impl </span>types::UserErrorConversion <span class="kw">for </span>YourCtxType {
     <span class="kw">fn </span>errno_from_your_rich_error(<span class="kw-2">&amp;mut </span><span class="self">self</span>, e: YourRichError)
-        -&gt; <span class="prelude-ty">Result</span>&lt;types::Errno, wiggle::wasmtime_crate::Trap&gt;
+        -&gt; <span class="prelude-ty">Result</span>&lt;types::Errno, wiggle::wasmtime_crate::Error&gt;
     {
         <span class="macro">println!</span>(<span class="string">&quot;Rich error: {:?}&quot;</span>, e);
         <span class="kw">match </span>e {
             YourRichError::InvalidArg{..} =&gt; <span class="prelude-val">Ok</span>(types::Errno::InvalidArg),
             YourRichError::Io{..} =&gt; <span class="prelude-val">Ok</span>(types::Errno::Io),
             YourRichError::Overflow =&gt; <span class="prelude-val">Ok</span>(types::Errno::Overflow),
-            YourRichError::Trap(s) =&gt; <span class="prelude-val">Err</span>(wiggle::wasmtime_crate::Trap::new(s)),
+            YourRichError::Trap(s) =&gt; <span class="prelude-val">Err</span>(wiggle::wasmtime_crate::Error::msg(s)),
         }
     }
 }
