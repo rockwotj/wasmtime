@@ -6,5 +6,5 @@ var searchData=
   ['float64_5ft_3',['float64_t',['../wasm_8h.html#ad5fa85b5864be8871e67f864cdb7e8d7',1,'wasm.h']]],
   ['func_4',['func',['../unionwasmtime__extern__union.html#a915ddf3ce4fb27e5dcd3c27093698697',1,'wasmtime_extern_union']]],
   ['func_2eh_5',['func.h',['../func_8h.html',1,'']]],
-  ['funcref_6',['funcref',['../unionwasmtime__valunion.html#a19f1fe1a1ea34ca7f5ecf7b00a439392',1,'wasmtime_valunion::funcref()'],['../unionwasmtime__val__raw.html#aeedfbd15f9675cb4f9bae748212ec7dc',1,'wasmtime_val_raw::funcref()']]]
+  ['funcref_6',['funcref',['../unionwasmtime__valunion.html#a19f1fe1a1ea34ca7f5ecf7b00a439392',1,'wasmtime_valunion::funcref()'],['../unionwasmtime__val__raw.html#a9022b2b67e02cbabdb1fe4bff3285c34',1,'wasmtime_val_raw::funcref()']]]
 ];

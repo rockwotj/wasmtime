@@ -943,6 +943,19 @@
 <a href="#943" id="943">943</a>
 <a href="#944" id="944">944</a>
 <a href="#945" id="945">945</a>
+<a href="#946" id="946">946</a>
+<a href="#947" id="947">947</a>
+<a href="#948" id="948">948</a>
+<a href="#949" id="949">949</a>
+<a href="#950" id="950">950</a>
+<a href="#951" id="951">951</a>
+<a href="#952" id="952">952</a>
+<a href="#953" id="953">953</a>
+<a href="#954" id="954">954</a>
+<a href="#955" id="955">955</a>
+<a href="#956" id="956">956</a>
+<a href="#957" id="957">957</a>
+<a href="#958" id="958">958</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Memory management for linear memories.
 //!
 //! `RuntimeLinearMemory` is to WebAssembly linear memories what `Table` is to WebAssembly tables.
@@ -950,11 +963,12 @@
 </span><span class="kw">use </span><span class="kw">crate</span>::mmap::Mmap;
 <span class="kw">use </span><span class="kw">crate</span>::parking_spot::ParkingSpot;
 <span class="kw">use </span><span class="kw">crate</span>::vmcontext::VMMemoryDefinition;
-<span class="kw">use crate</span>::{MemoryImage, MemoryImageSlot, Store, WaitResult};
+<span class="kw">use crate</span>::{MemoryImage, MemoryImageSlot, SendSyncPtr, Store, WaitResult};
 <span class="kw">use </span>anyhow::Error;
 <span class="kw">use </span>anyhow::{bail, format_err, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>std::convert::TryFrom;
 <span class="kw">use </span>std::ops::Range;
+<span class="kw">use </span>std::ptr::NonNull;
 <span class="kw">use </span>std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 <span class="kw">use </span>std::sync::{Arc, RwLock};
 <span class="kw">use </span>std::time::Instant;
@@ -1308,9 +1322,12 @@
 <span class="doccomment">/// A &quot;static&quot; memory where the lifetime of the backing memory is managed
 /// elsewhere. Currently used with the pooling allocator.
 </span><span class="kw">struct </span>StaticMemory {
-    <span class="doccomment">/// The memory in the host for this wasm memory. The length of this
-    /// slice is the maximum size of the memory that can be grown to.
-    </span>base: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>[u8],
+    <span class="doccomment">/// The base pointer of this static memory, wrapped up in a send/sync
+    /// wrapper.
+    </span>base: SendSyncPtr&lt;u8&gt;,
+
+    <span class="doccomment">/// The byte capacity of the `base` pointer.
+    </span>capacity: usize,
 
     <span class="doccomment">/// The current size, in bytes, of this memory.
     </span>size: usize,
@@ -1326,29 +1343,31 @@
 
 <span class="kw">impl </span>StaticMemory {
     <span class="kw">fn </span>new(
-        base: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>[u8],
+        base_ptr: <span class="kw-2">*mut </span>u8,
+        base_capacity: usize,
         initial_size: usize,
         maximum_size: <span class="prelude-ty">Option</span>&lt;usize&gt;,
         memory_image: MemoryImageSlot,
         memory_and_guard_size: usize,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">if </span>base.len() &lt; initial_size {
+        <span class="kw">if </span>base_capacity &lt; initial_size {
             <span class="macro">bail!</span>(
                 <span class="string">&quot;initial memory size of {} exceeds the pooling allocator&#39;s \
                  configured maximum memory size of {} bytes&quot;</span>,
                 initial_size,
-                base.len(),
+                base_capacity,
             );
         }
 
         <span class="comment">// Only use the part of the slice that is necessary.
-        </span><span class="kw">let </span>base = <span class="kw">match </span>maximum_size {
-            <span class="prelude-val">Some</span>(max) <span class="kw">if </span>max &lt; base.len() =&gt; <span class="kw-2">&amp;mut </span>base[..max],
-            <span class="kw">_ </span>=&gt; base,
+        </span><span class="kw">let </span>base_capacity = <span class="kw">match </span>maximum_size {
+            <span class="prelude-val">Some</span>(max) <span class="kw">if </span>max &lt; base_capacity =&gt; max,
+            <span class="kw">_ </span>=&gt; base_capacity,
         };
 
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-            base,
+            base: SendSyncPtr::new(NonNull::new(base_ptr).unwrap()),
+            capacity: base_capacity,
             size: initial_size,
             memory_image,
             memory_and_guard_size,
@@ -1362,13 +1381,13 @@
     }
 
     <span class="kw">fn </span>maximum_byte_size(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
-        <span class="prelude-val">Some</span>(<span class="self">self</span>.base.len())
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.capacity)
     }
 
     <span class="kw">fn </span>grow_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_byte_size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="comment">// Never exceed the static memory size; this check should have been made
         // prior to arriving here.
-        </span><span class="macro">assert!</span>(new_byte_size &lt;= <span class="self">self</span>.base.len());
+        </span><span class="macro">assert!</span>(new_byte_size &lt;= <span class="self">self</span>.capacity);
 
         <span class="self">self</span>.memory_image.set_heap_limit(new_byte_size)<span class="question-mark">?</span>;
 
@@ -1379,7 +1398,7 @@
 
     <span class="kw">fn </span>vmmemory(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; VMMemoryDefinition {
         VMMemoryDefinition {
-            base: <span class="self">self</span>.base.as_mut_ptr().cast(),
+            base: <span class="self">self</span>.base.as_ptr(),
             current_length: <span class="self">self</span>.size.into(),
         }
     }
@@ -1627,14 +1646,21 @@
     <span class="doccomment">/// Create a new static (immovable) memory instance for the specified plan.
     </span><span class="kw">pub fn </span>new_static(
         plan: <span class="kw-2">&amp;</span>MemoryPlan,
-        base: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>[u8],
+        base_ptr: <span class="kw-2">*mut </span>u8,
+        base_capacity: usize,
         memory_image: MemoryImageSlot,
         memory_and_guard_size: usize,
         store: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Store,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>(minimum, maximum) = <span class="self">Self</span>::limit_new(plan, <span class="prelude-val">Some</span>(store))<span class="question-mark">?</span>;
-        <span class="kw">let </span>pooled_memory =
-            StaticMemory::new(base, minimum, maximum, memory_image, memory_and_guard_size)<span class="question-mark">?</span>;
+        <span class="kw">let </span>pooled_memory = StaticMemory::new(
+            base_ptr,
+            base_capacity,
+            minimum,
+            maximum,
+            memory_image,
+            memory_and_guard_size,
+        )<span class="question-mark">?</span>;
         <span class="kw">let </span>allocation = Box::new(pooled_memory);
         <span class="kw">let </span>allocation: Box&lt;<span class="kw">dyn </span>RuntimeLinearMemory&gt; = <span class="kw">if </span>plan.memory.shared {
             <span class="comment">// FIXME: since the pooling allocator owns the memory allocation

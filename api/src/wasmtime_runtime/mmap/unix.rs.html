@@ -145,26 +145,25 @@
 <a href="#145" id="145">145</a>
 <a href="#146" id="146">146</a>
 <a href="#147" id="147">147</a>
-</pre><pre class="rust"><code><span class="kw">use </span>anyhow::{anyhow, Context, <span class="prelude-ty">Result</span>};
+<a href="#148" id="148">148</a>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::SendSyncPtr;
+<span class="kw">use </span>anyhow::{anyhow, Context, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>rustix::mm::{mprotect, MprotectFlags};
 <span class="kw">use </span>std::fs::File;
 <span class="kw">use </span>std::ops::Range;
 <span class="kw">use </span>std::path::Path;
-<span class="kw">use </span>std::ptr;
+<span class="kw">use </span>std::ptr::{<span class="self">self</span>, NonNull};
 
 <span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>Mmap {
-    memory: <span class="kw-2">*mut </span>[u8],
+    memory: SendSyncPtr&lt;[u8]&gt;,
 }
-
-<span class="comment">// Mmaps are sendable and threadsafe, and otherwise fix the auto-traits on the
-// `*mut [u8]` storage internally.
-</span><span class="kw">unsafe impl </span>Send <span class="kw">for </span>Mmap {}
-<span class="kw">unsafe impl </span>Sync <span class="kw">for </span>Mmap {}
 
 <span class="kw">impl </span>Mmap {
     <span class="kw">pub fn </span>new_empty() -&gt; Mmap {
-        Mmap { memory: <span class="kw-2">&amp;mut </span>[] }
+        Mmap {
+            memory: SendSyncPtr::from(<span class="kw-2">&amp;mut </span>[][..]),
+        }
     }
 
     <span class="kw">pub fn </span>new(size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
@@ -177,6 +176,7 @@
             )<span class="question-mark">?
         </span>};
         <span class="kw">let </span>memory = std::ptr::slice_from_raw_parts_mut(ptr.cast(), size);
+        <span class="kw">let </span>memory = SendSyncPtr::new(NonNull::new(memory).unwrap());
         <span class="prelude-val">Ok</span>(Mmap { memory })
     }
 
@@ -191,6 +191,7 @@
         </span>};
 
         <span class="kw">let </span>memory = std::ptr::slice_from_raw_parts_mut(ptr.cast(), size);
+        <span class="kw">let </span>memory = SendSyncPtr::new(NonNull::new(memory).unwrap());
         <span class="prelude-val">Ok</span>(Mmap { memory })
     }
 
@@ -213,12 +214,13 @@
             .context(<span class="macro">format!</span>(<span class="string">&quot;mmap failed to allocate {:#x} bytes&quot;</span>, len))<span class="question-mark">?
         </span>};
         <span class="kw">let </span>memory = std::ptr::slice_from_raw_parts_mut(ptr.cast(), len);
+        <span class="kw">let </span>memory = SendSyncPtr::new(NonNull::new(memory).unwrap());
 
         <span class="prelude-val">Ok</span>((Mmap { memory }, file))
     }
 
     <span class="kw">pub fn </span>make_accessible(<span class="kw-2">&amp;mut </span><span class="self">self</span>, start: usize, len: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>ptr = <span class="self">self</span>.memory.cast::&lt;u8&gt;();
+        <span class="kw">let </span>ptr = <span class="self">self</span>.memory.as_ptr().cast::&lt;u8&gt;();
         <span class="kw">unsafe </span>{
             mprotect(
                 ptr.add(start).cast(),
@@ -231,15 +233,15 @@
     }
 
     <span class="kw">pub fn </span>as_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*const </span>u8 {
-        <span class="self">self</span>.memory <span class="kw">as </span><span class="kw-2">*const </span>u8
+        <span class="self">self</span>.memory.as_ptr() <span class="kw">as </span><span class="kw-2">*const </span>u8
     }
 
     <span class="kw">pub fn </span>as_mut_ptr(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>u8 {
-        <span class="self">self</span>.memory.cast()
+        <span class="self">self</span>.memory.as_ptr().cast()
     }
 
     <span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="self">self</span>.memory).len() }
+        <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="self">self</span>.memory.as_ptr()).len() }
     }
 
     <span class="kw">pub unsafe fn </span>make_executable(
@@ -247,7 +249,7 @@
         range: Range&lt;usize&gt;,
         enable_branch_protection: bool,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>base = <span class="self">self</span>.memory.cast::&lt;u8&gt;().add(range.start).cast();
+        <span class="kw">let </span>base = <span class="self">self</span>.memory.as_ptr().cast::&lt;u8&gt;().add(range.start).cast();
         <span class="kw">let </span>len = range.end - range.start;
 
         <span class="kw">let </span>flags = MprotectFlags::READ | MprotectFlags::EXEC;
@@ -271,7 +273,7 @@
     }
 
     <span class="kw">pub unsafe fn </span>make_readonly(<span class="kw-2">&amp;</span><span class="self">self</span>, range: Range&lt;usize&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>base = <span class="self">self</span>.memory.cast::&lt;u8&gt;().add(range.start).cast();
+        <span class="kw">let </span>base = <span class="self">self</span>.memory.as_ptr().cast::&lt;u8&gt;().add(range.start).cast();
         <span class="kw">let </span>len = range.end - range.start;
 
         mprotect(base, len, MprotectFlags::READ)<span class="question-mark">?</span>;
@@ -283,8 +285,8 @@
 <span class="kw">impl </span>Drop <span class="kw">for </span>Mmap {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">unsafe </span>{
-            <span class="kw">let </span>ptr = <span class="self">self</span>.memory.cast();
-            <span class="kw">let </span>len = (<span class="kw-2">*</span><span class="self">self</span>.memory).len();
+            <span class="kw">let </span>ptr = <span class="self">self</span>.memory.as_ptr().cast();
+            <span class="kw">let </span>len = (<span class="kw-2">*</span><span class="self">self</span>.memory.as_ptr()).len();
             <span class="kw">if </span>len == <span class="number">0 </span>{
                 <span class="kw">return</span>;
             }

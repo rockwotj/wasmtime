@@ -1073,9 +1073,6 @@
 <a href="#1073" id="1073">1073</a>
 <a href="#1074" id="1074">1074</a>
 <a href="#1075" id="1075">1075</a>
-<a href="#1076" id="1076">1076</a>
-<a href="#1077" id="1077">1077</a>
-<a href="#1078" id="1078">1078</a>
 </pre><pre class="rust"><code><span class="doccomment">//! # `VMExternRef`
 //!
 //! `VMExternRef` is a reference-counted box for any kind of data that is
@@ -1177,7 +1174,7 @@
 //! Examination of Deferred Reference Counting and Cycle Detection* by Quinane:
 //! &lt;https://openresearch-repository.anu.edu.au/bitstream/1885/42030/2/hon-thesis.pdf&gt;
 
-</span><span class="kw">use crate</span>::{Backtrace, VMRuntimeLimits};
+</span><span class="kw">use crate</span>::{Backtrace, SendSyncPtr, VMRuntimeLimits};
 <span class="kw">use </span>std::alloc::Layout;
 <span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::cell::UnsafeCell;
@@ -1242,17 +1239,13 @@
 /// ```
 </span><span class="attr">#[derive(Debug)]
 #[repr(transparent)]
-</span><span class="kw">pub struct </span>VMExternRef(NonNull&lt;VMExternData&gt;);
+</span><span class="kw">pub struct </span>VMExternRef(SendSyncPtr&lt;VMExternData&gt;);
 
 <span class="kw">impl </span>std::fmt::Pointer <span class="kw">for </span>VMExternRef {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
         std::fmt::Pointer::fmt(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>, f)
     }
 }
-
-<span class="comment">// Data contained is always Send+Sync so these should be safe.
-</span><span class="kw">unsafe impl </span>Send <span class="kw">for </span>VMExternRef {}
-<span class="kw">unsafe impl </span>Sync <span class="kw">for </span>VMExternRef {}
 
 <span class="attr">#[repr(C)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>VMExternData {
@@ -1273,7 +1266,7 @@
 
     <span class="doccomment">/// Always points to the implicit, dynamically-sized `value` member that
     /// precedes this `VMExternData`.
-    </span>value_ptr: NonNull&lt;<span class="kw">dyn </span>Any + Send + Sync&gt;,
+    </span>value_ptr: SendSyncPtr&lt;<span class="kw">dyn </span>Any + Send + Sync&gt;,
 }
 
 <span class="kw">impl </span>Clone <span class="kw">for </span>VMExternRef {
@@ -1339,7 +1332,7 @@
     }
 
     <span class="doccomment">/// Drop the inner value and then free this `VMExternData` heap allocation.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>drop_and_dealloc(<span class="kw-2">mut </span>data: NonNull&lt;VMExternData&gt;) {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>drop_and_dealloc(<span class="kw-2">mut </span>data: SendSyncPtr&lt;VMExternData&gt;) {
         <span class="macro">log::trace!</span>(<span class="string">&quot;Dropping externref data @ {:p}&quot;</span>, data);
 
         <span class="comment">// Note: we introduce a block scope so that we drop the live
@@ -1357,13 +1350,13 @@
             };
 
             ptr::drop_in_place(data.value_ptr.as_ptr());
-            <span class="kw">let </span>alloc_ptr = data.value_ptr.cast::&lt;u8&gt;();
+            <span class="kw">let </span>alloc_ptr = data.value_ptr.as_ptr().cast::&lt;u8&gt;();
 
             (alloc_ptr, layout)
         };
 
         ptr::drop_in_place(data.as_ptr());
-        std::alloc::dealloc(alloc_ptr.as_ptr(), layout);
+        std::alloc::dealloc(alloc_ptr, layout);
     }
 
     <span class="attr">#[inline]
@@ -1414,17 +1407,18 @@
 
             <span class="kw">let </span>extern_data_ptr =
                 alloc_ptr.cast::&lt;u8&gt;().as_ptr().add(footer_offset) <span class="kw">as </span><span class="kw-2">*mut </span>VMExternData;
+
             ptr::write(
                 extern_data_ptr,
                 VMExternData {
                     ref_count: AtomicUsize::new(<span class="number">1</span>),
                     <span class="comment">// Cast from `*mut T` to `*mut dyn Any` here.
-                    </span>value_ptr: NonNull::new_unchecked(value_ptr.as_ptr()),
+                    </span>value_ptr: SendSyncPtr::new(NonNull::new_unchecked(value_ptr.as_ptr())),
                 },
             );
 
             <span class="macro">log::trace!</span>(<span class="string">&quot;New externref data @ {:p}&quot;</span>, extern_data_ptr);
-            VMExternRef(NonNull::new_unchecked(extern_data_ptr))
+            VMExternRef(NonNull::new_unchecked(extern_data_ptr).into())
         }
     }
 
@@ -1439,7 +1433,7 @@
     ///  `clone_from_raw` is called.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>as_raw(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>u8 {
-        <span class="kw">let </span>ptr = <span class="self">self</span>.<span class="number">0</span>.cast::&lt;u8&gt;().as_ptr();
+        <span class="kw">let </span>ptr = <span class="self">self</span>.<span class="number">0</span>.as_ptr().cast::&lt;u8&gt;();
         ptr
     }
 
@@ -1452,7 +1446,7 @@
     ///
     /// Use `from_raw` to recreate the `VMExternRef`.
     </span><span class="kw">pub unsafe fn </span>into_raw(<span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>u8 {
-        <span class="kw">let </span>ptr = <span class="self">self</span>.<span class="number">0</span>.cast::&lt;u8&gt;().as_ptr();
+        <span class="kw">let </span>ptr = <span class="self">self</span>.<span class="number">0</span>.as_ptr().cast::&lt;u8&gt;();
         std::mem::forget(<span class="self">self</span>);
         ptr
     }
@@ -1467,7 +1461,7 @@
     /// function.
     </span><span class="kw">pub unsafe fn </span>from_raw(ptr: <span class="kw-2">*mut </span>u8) -&gt; <span class="self">Self </span>{
         <span class="macro">debug_assert!</span>(!ptr.is_null());
-        VMExternRef(NonNull::new_unchecked(ptr).cast())
+        VMExternRef(NonNull::new_unchecked(ptr).cast().into())
     }
 
     <span class="doccomment">/// Recreate a `VMExternRef` from a pointer returned from a previous call to
@@ -1483,7 +1477,7 @@
     /// so will result in use after free!
     </span><span class="kw">pub unsafe fn </span>clone_from_raw(ptr: <span class="kw-2">*mut </span>u8) -&gt; <span class="self">Self </span>{
         <span class="macro">debug_assert!</span>(!ptr.is_null());
-        <span class="kw">let </span>x = VMExternRef(NonNull::new_unchecked(ptr).cast());
+        <span class="kw">let </span>x = VMExternRef(NonNull::new_unchecked(ptr).cast().into());
         x.extern_data().increment_ref_count();
         x
     }
@@ -2074,7 +2068,7 @@
 
         <span class="kw">let </span>extern_data = VMExternData {
             ref_count: AtomicUsize::new(<span class="number">0</span>),
-            value_ptr: NonNull::new(s).unwrap(),
+            value_ptr: NonNull::new(s).unwrap().into(),
         };
 
         <span class="kw">let </span>extern_data_ptr = <span class="kw-2">&amp;</span>extern_data <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>;

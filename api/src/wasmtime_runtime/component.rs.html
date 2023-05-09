@@ -699,29 +699,6 @@
 <a href="#699" id="699">699</a>
 <a href="#700" id="700">700</a>
 <a href="#701" id="701">701</a>
-<a href="#702" id="702">702</a>
-<a href="#703" id="703">703</a>
-<a href="#704" id="704">704</a>
-<a href="#705" id="705">705</a>
-<a href="#706" id="706">706</a>
-<a href="#707" id="707">707</a>
-<a href="#708" id="708">708</a>
-<a href="#709" id="709">709</a>
-<a href="#710" id="710">710</a>
-<a href="#711" id="711">711</a>
-<a href="#712" id="712">712</a>
-<a href="#713" id="713">713</a>
-<a href="#714" id="714">714</a>
-<a href="#715" id="715">715</a>
-<a href="#716" id="716">716</a>
-<a href="#717" id="717">717</a>
-<a href="#718" id="718">718</a>
-<a href="#719" id="719">719</a>
-<a href="#720" id="720">720</a>
-<a href="#721" id="721">721</a>
-<a href="#722" id="722">722</a>
-<a href="#723" id="723">723</a>
-<a href="#724" id="724">724</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Runtime support for the component model in Wasmtime
 //!
 //! Currently this runtime support includes a `VMComponentContext` which is
@@ -731,10 +708,11 @@
 //! cranelift-compiled adapters, will use this `VMComponentContext` as well.
 
 </span><span class="kw">use crate</span>::{
-    Store, VMArrayCallFunction, VMFuncRef, VMGlobalDefinition, VMMemoryDefinition,
+    SendSyncPtr, Store, VMArrayCallFunction, VMFuncRef, VMGlobalDefinition, VMMemoryDefinition,
     VMNativeCallFunction, VMOpaqueContext, VMSharedSignatureIndex, VMWasmCallFunction, ValRaw,
 };
 <span class="kw">use </span>memoffset::offset_of;
+<span class="kw">use </span>sptr::Strict;
 <span class="kw">use </span>std::alloc::{<span class="self">self</span>, Layout};
 <span class="kw">use </span>std::marker;
 <span class="kw">use </span>std::mem;
@@ -764,36 +742,14 @@
     <span class="doccomment">/// Size and offset information for the trailing `VMComponentContext`.
     </span>offsets: VMComponentOffsets&lt;HostPtr&gt;,
 
-    <span class="doccomment">/// A self-referential pointer to the `ComponentInstance` itself.
-    ///
-    /// The reason for this field&#39;s existence is a bit subtle because if you
-    /// have a pointer to `ComponentInstance` then why have this field which has
-    /// the same information? The subtlety here is due to the fact that this is
-    /// here to handle provenance and aliasing issues with optimizations in LLVM
-    /// and Rustc. Put another way, this is here to make MIRI happy. That&#39;s an
-    /// oversimplification, though, since this is actually required for
-    /// correctness to communicate the actual intent to LLVM&#39;s optimizations and
-    /// such.
-    ///
-    /// This field is chiefly used during `ComponentInstance::vmctx`. If you
-    /// think of pointers as a pair of address and provenance, this type stores
-    /// the provenance of the entire allocation. That&#39;s technically all we need
-    /// here, just the provenance, but that can only be done with storage of a
-    /// pointer hence the storage here.
-    ///
-    /// Finally note that there&#39;s a small wrapper around this to add `Send` and
-    /// `Sync` bounds, but serves no other purpose.
-    </span>self_reference: RawComponentInstance,
+    <span class="doccomment">/// For more information about this see the documentation on
+    /// `Instance::vmctx_self_reference`.
+    </span>vmctx_self_reference: SendSyncPtr&lt;VMComponentContext&gt;,
 
     <span class="doccomment">/// A zero-sized field which represents the end of the struct for the actual
     /// `VMComponentContext` to be allocated behind.
     </span>vmctx: VMComponentContext,
 }
-
-<span class="kw">struct </span>RawComponentInstance(NonNull&lt;ComponentInstance&gt;);
-
-<span class="kw">unsafe impl </span>Send <span class="kw">for </span>RawComponentInstance {}
-<span class="kw">unsafe impl </span>Sync <span class="kw">for </span>RawComponentInstance {}
 
 <span class="doccomment">/// Type signature for host-defined trampolines that are called from
 /// WebAssembly.
@@ -898,7 +854,15 @@
             ptr.as_ptr(),
             ComponentInstance {
                 offsets,
-                self_reference: RawComponentInstance(ptr),
+                vmctx_self_reference: SendSyncPtr::new(
+                    NonNull::new(
+                        ptr.as_ptr()
+                            .cast::&lt;u8&gt;()
+                            .add(mem::size_of::&lt;ComponentInstance&gt;())
+                            .cast(),
+                    )
+                    .unwrap(),
+                ),
                 vmctx: VMComponentContext {
                     _marker: marker::PhantomPinned,
                 },
@@ -909,13 +873,8 @@
     }
 
     <span class="kw">fn </span>vmctx(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>VMComponentContext {
-        <span class="kw">let </span>self_ref = <span class="self">self</span>.self_reference.<span class="number">0</span>.as_ptr();
-        <span class="kw">unsafe </span>{
-            self_ref
-                .cast::&lt;u8&gt;()
-                .add(mem::size_of::&lt;ComponentInstance&gt;())
-                .cast()
-        }
+        <span class="kw">let </span>addr = <span class="macro">std::ptr::addr_of!</span>(<span class="self">self</span>.vmctx);
+        Strict::with_addr(<span class="self">self</span>.vmctx_self_reference.as_ptr(), Strict::addr(addr))
     }
 
     <span class="kw">unsafe fn </span>vmctx_plus_offset&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u32) -&gt; <span class="kw-2">*const </span>T {
@@ -1244,14 +1203,8 @@
 /// This type can be dereferenced to `ComponentInstance` to access the
 /// underlying methods.
 </span><span class="kw">pub struct </span>OwnedComponentInstance {
-    ptr: ptr::NonNull&lt;ComponentInstance&gt;,
+    ptr: SendSyncPtr&lt;ComponentInstance&gt;,
 }
-
-<span class="comment">// Using `NonNull` turns off auto-derivation of these traits but the owned usage
-// here enables these trait impls so long as `ComponentInstance` itself
-// implements these traits.
-</span><span class="kw">unsafe impl </span>Send <span class="kw">for </span>OwnedComponentInstance <span class="kw">where </span>ComponentInstance: Send {}
-<span class="kw">unsafe impl </span>Sync <span class="kw">for </span>OwnedComponentInstance <span class="kw">where </span>ComponentInstance: Sync {}
 
 <span class="kw">impl </span>OwnedComponentInstance {
     <span class="doccomment">/// Allocates a new `ComponentInstance + VMComponentContext` pair on the
@@ -1269,10 +1222,11 @@
             // zeroed allocation is done here to try to contain
             // use-before-initialized issues.
             </span><span class="kw">let </span>ptr = alloc::alloc_zeroed(layout) <span class="kw">as </span><span class="kw-2">*mut </span>ComponentInstance;
-            <span class="kw">let </span>ptr = ptr::NonNull::new(ptr).unwrap();
+            <span class="kw">let </span>ptr = NonNull::new(ptr).unwrap();
 
             ComponentInstance::new_at(ptr, layout.size(), offsets, store);
 
+            <span class="kw">let </span>ptr = SendSyncPtr::new(ptr);
             OwnedComponentInstance { ptr }
         }
     }

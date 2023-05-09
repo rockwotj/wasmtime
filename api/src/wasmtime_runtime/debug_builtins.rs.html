@@ -54,9 +54,11 @@
 <a href="#54" id="54">54</a>
 <a href="#55" id="55">55</a>
 <a href="#56" id="56">56</a>
+<a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
 </pre><pre class="rust"><code><span class="attr">#![doc(hidden)]
 
-</span><span class="kw">use </span><span class="kw">crate</span>::instance::InstanceHandle;
+</span><span class="kw">use </span><span class="kw">crate</span>::instance::Instance;
 <span class="kw">use </span><span class="kw">crate</span>::vmcontext::VMContext;
 <span class="kw">use </span>wasmtime_environ::{EntityRef, MemoryIndex};
 
@@ -64,14 +66,15 @@
 
 <span class="attr">#[no_mangle]
 </span><span class="kw">pub unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn </span>resolve_vmctx_memory(ptr: usize) -&gt; <span class="kw-2">*const </span>u8 {
-    <span class="kw">let </span>handle = InstanceHandle::from_vmctx(VMCTX_AND_MEMORY.<span class="number">0</span>);
-    <span class="macro">assert!</span>(
-        VMCTX_AND_MEMORY.<span class="number">1 </span>&lt; handle.module().memory_plans.len(),
-        <span class="string">&quot;memory index for debugger is out of bounds&quot;
-    </span>);
-    <span class="kw">let </span>index = MemoryIndex::new(VMCTX_AND_MEMORY.<span class="number">1</span>);
-    <span class="kw">let </span>mem = handle.instance().get_memory(index);
-    mem.base.add(ptr)
+    Instance::from_vmctx(VMCTX_AND_MEMORY.<span class="number">0</span>, |handle| {
+        <span class="macro">assert!</span>(
+            VMCTX_AND_MEMORY.<span class="number">1 </span>&lt; handle.module().memory_plans.len(),
+            <span class="string">&quot;memory index for debugger is out of bounds&quot;
+        </span>);
+        <span class="kw">let </span>index = MemoryIndex::new(VMCTX_AND_MEMORY.<span class="number">1</span>);
+        <span class="kw">let </span>mem = handle.get_memory(index);
+        mem.base.add(ptr)
+    })
 }
 
 <span class="attr">#[no_mangle]
@@ -81,14 +84,15 @@
         !VMCTX_AND_MEMORY.<span class="number">0</span>.is_null(),
         <span class="string">&quot;must call `__vmctx-&gt;set()` before resolving Wasm pointers&quot;
     </span>);
-    <span class="kw">let </span>handle = InstanceHandle::from_vmctx(VMCTX_AND_MEMORY.<span class="number">0</span>);
-    <span class="macro">assert!</span>(
-        VMCTX_AND_MEMORY.<span class="number">1 </span>&lt; handle.module().memory_plans.len(),
-        <span class="string">&quot;memory index for debugger is out of bounds&quot;
-    </span>);
-    <span class="kw">let </span>index = MemoryIndex::new(VMCTX_AND_MEMORY.<span class="number">1</span>);
-    <span class="kw">let </span>mem = handle.instance().get_memory(index);
-    mem.base.add(ptr <span class="kw">as </span>usize)
+    Instance::from_vmctx(VMCTX_AND_MEMORY.<span class="number">0</span>, |handle| {
+        <span class="macro">assert!</span>(
+            VMCTX_AND_MEMORY.<span class="number">1 </span>&lt; handle.module().memory_plans.len(),
+            <span class="string">&quot;memory index for debugger is out of bounds&quot;
+        </span>);
+        <span class="kw">let </span>index = MemoryIndex::new(VMCTX_AND_MEMORY.<span class="number">1</span>);
+        <span class="kw">let </span>mem = handle.get_memory(index);
+        mem.base.add(ptr <span class="kw">as </span>usize)
+    })
 }
 
 <span class="attr">#[no_mangle]

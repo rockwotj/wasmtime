@@ -284,6 +284,8 @@
 <a href="#284" id="284">284</a>
 <a href="#285" id="285">285</a>
 <a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Runtime library support for Wasmtime.
 
 </span><span class="attr">#![deny(missing_docs, trivial_numeric_casts, unused_extern_crates)]
@@ -326,6 +328,7 @@
 <span class="kw">mod </span>mmap;
 <span class="kw">mod </span>mmap_vec;
 <span class="kw">mod </span>parking_spot;
+<span class="kw">mod </span>send_sync_ptr;
 <span class="kw">mod </span>store_box;
 <span class="kw">mod </span>table;
 <span class="kw">mod </span>traphandlers;
@@ -340,8 +343,8 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::externref::<span class="kw-2">*</span>;
 <span class="kw">pub use </span><span class="kw">crate</span>::imports::Imports;
 <span class="kw">pub use </span><span class="kw">crate</span>::instance::{
-    InstanceAllocationRequest, InstanceAllocator, InstanceHandle, OnDemandInstanceAllocator,
-    StorePtr,
+    Instance, InstanceAllocationRequest, InstanceAllocator, InstanceHandle,
+    OnDemandInstanceAllocator, StorePtr,
 };
 <span class="attr">#[cfg(feature = <span class="string">&quot;pooling-allocator&quot;</span>)]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::instance::{
@@ -365,6 +368,7 @@
     VMRuntimeLimits, VMSharedSignatureIndex, VMTableDefinition, VMTableImport, VMWasmCallFunction,
     ValRaw,
 };
+<span class="kw">pub use </span>send_sync_ptr::SendSyncPtr;
 
 <span class="kw">mod </span>module_id;
 <span class="kw">pub use </span>module_id::{CompiledModuleId, CompiledModuleIdAllocator};

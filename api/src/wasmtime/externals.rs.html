@@ -760,6 +760,7 @@
 <a href="#760" id="760">760</a>
 <a href="#761" id="761">761</a>
 <a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::store::{StoreData, StoreOpaque, Stored};
 <span class="kw">use </span><span class="kw">crate</span>::trampoline::{generate_global_export, generate_table_export};
 <span class="kw">use crate</span>::{
@@ -769,7 +770,7 @@
 <span class="kw">use </span>anyhow::{anyhow, bail, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>std::mem;
 <span class="kw">use </span>std::ptr;
-<span class="kw">use </span>wasmtime_runtime::{<span class="self">self </span><span class="kw">as </span>runtime, InstanceHandle};
+<span class="kw">use </span>wasmtime_runtime::{<span class="self">self </span><span class="kw">as </span>runtime};
 
 <span class="comment">// Externals
 
@@ -1042,7 +1043,7 @@
                         .map(|inner| ExternRef { inner }),
                 ),
                 ValType::FuncRef =&gt; {
-                    Val::FuncRef(Func::from_raw(store, definition.as_func_ref() <span class="kw">as </span>usize))
+                    Val::FuncRef(Func::from_raw(store, definition.as_func_ref().cast()))
                 }
                 ValType::V128 =&gt; Val::V128(<span class="kw-2">*</span>definition.as_u128()),
             }
@@ -1081,7 +1082,7 @@
                 Val::F32(f) =&gt; <span class="kw-2">*</span>definition.as_u32_mut() = f,
                 Val::F64(f) =&gt; <span class="kw-2">*</span>definition.as_u64_mut() = f,
                 Val::FuncRef(f) =&gt; {
-                    <span class="kw-2">*</span>definition.as_func_ref_mut() = f.map_or(ptr::null(), |f| {
+                    <span class="kw-2">*</span>definition.as_func_ref_mut() = f.map_or(ptr::null_mut(), |f| {
                         f.caller_checked_func_ref(store).as_ptr().cast()
                     });
                 }
@@ -1239,9 +1240,10 @@
     ) -&gt; <span class="kw-2">*mut </span>runtime::Table {
         <span class="kw">unsafe </span>{
             <span class="kw">let </span>export = <span class="kw-2">&amp;</span>store[<span class="self">self</span>.<span class="number">0</span>];
-            <span class="kw">let </span><span class="kw-2">mut </span>handle = InstanceHandle::from_vmctx(export.vmctx);
-            <span class="kw">let </span>idx = handle.table_index(<span class="kw-2">&amp;*</span>export.definition);
-            handle.get_defined_table_with_lazy_init(idx, lazy_init_range)
+            wasmtime_runtime::Instance::from_vmctx(export.vmctx, |handle| {
+                <span class="kw">let </span>idx = handle.table_index(<span class="kw-2">&amp;*</span>export.definition);
+                handle.get_defined_table_with_lazy_init(idx, lazy_init_range)
+            })
         }
     }
 

@@ -19,9 +19,9 @@ var val_8h =
     [ "wasmtime_externref_clone", "val_8h.html#a4d916c5e5577284b14df44e05f48446f", null ],
     [ "wasmtime_externref_data", "val_8h.html#ac9a9e5163f304eb7e6511d3d7624c061", null ],
     [ "wasmtime_externref_delete", "val_8h.html#ab10a7a22e3728db10ba80cd597550882", null ],
-    [ "wasmtime_externref_from_raw", "val_8h.html#aae8eda1fc49807c2fac83d3f3a33872d", null ],
+    [ "wasmtime_externref_from_raw", "val_8h.html#aea3d4c9c6e28b8167e2587a53f4e5aca", null ],
     [ "wasmtime_externref_new", "val_8h.html#a7e0f1ff895edd3eee5be0ee08ba1d9d8", null ],
-    [ "wasmtime_externref_to_raw", "val_8h.html#a752896ddfc4d3ed9e2d39c1ffcf9ce42", null ],
+    [ "wasmtime_externref_to_raw", "val_8h.html#ae4839efd0ba24c1bcf1f2ab0f1e23432", null ],
     [ "wasmtime_val_copy", "val_8h.html#a0b8f7fda8dc08f44d171d73f52601162", null ],
     [ "wasmtime_val_delete", "val_8h.html#a66b1570ac4708802a1099b251724bfe4", null ]
 ];

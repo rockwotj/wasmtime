@@ -105,23 +105,23 @@ Data Fields</h2></td></tr>
 <tr class="separator:a4bd528441f6ee58e2e80cde54754c7f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a88845602b10b5bb6e38f41333d99fa2d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="val_8h.html#a6320d60dd6baf58411e043cee9276aca">wasmtime_v128</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionwasmtime__val__raw.html#a88845602b10b5bb6e38f41333d99fa2d">v128</a></td></tr>
 <tr class="separator:a88845602b10b5bb6e38f41333d99fa2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeedfbd15f9675cb4f9bae748212ec7dc"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionwasmtime__val__raw.html#aeedfbd15f9675cb4f9bae748212ec7dc">funcref</a></td></tr>
-<tr class="separator:aeedfbd15f9675cb4f9bae748212ec7dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a24e8a4c16461b15c572ce3da327c7dd9"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionwasmtime__val__raw.html#a24e8a4c16461b15c572ce3da327c7dd9">externref</a></td></tr>
-<tr class="separator:a24e8a4c16461b15c572ce3da327c7dd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9022b2b67e02cbabdb1fe4bff3285c34"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionwasmtime__val__raw.html#a9022b2b67e02cbabdb1fe4bff3285c34">funcref</a></td></tr>
+<tr class="separator:a9022b2b67e02cbabdb1fe4bff3285c34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b205573f52d826b06e858a43af4190d"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionwasmtime__val__raw.html#a1b205573f52d826b06e858a43af4190d">externref</a></td></tr>
+<tr class="separator:a1b205573f52d826b06e858a43af4190d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Container for possible wasm values. </p>
 <p >This type is used on conjunction with <a class="el" href="func_8h.html#ae4de5e8a5fe28d952339fc33396527a9" title="Creates a new host function in the same manner of wasmtime_func_new, but the function-to-call has no ...">wasmtime_func_new_unchecked</a> as well as <a class="el" href="func_8h.html#a5345b00edd3fd29a0b57ed1305c60ea1" title="Call a WebAssembly function in an &quot;unchecked&quot; fashion.">wasmtime_func_call_unchecked</a>. Instances of this type do not have type information associated with them, it's up to the embedder to figure out how to interpret the bits contained within, often using some other channel to determine the type. </p>
 </div><h2 class="groupheader">Field Documentation</h2>
-<a id="a24e8a4c16461b15c572ce3da327c7dd9" name="a24e8a4c16461b15c572ce3da327c7dd9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a24e8a4c16461b15c572ce3da327c7dd9">&#9670;&nbsp;</a></span>externref</h2>
+<a id="a1b205573f52d826b06e858a43af4190d" name="a1b205573f52d826b06e858a43af4190d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b205573f52d826b06e858a43af4190d">&#9670;&nbsp;</a></span>externref</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">size_t wasmtime_val_raw::externref</td>
+          <td class="memname">void* wasmtime_val_raw::externref</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -163,14 +163,14 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a id="aeedfbd15f9675cb4f9bae748212ec7dc" name="aeedfbd15f9675cb4f9bae748212ec7dc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeedfbd15f9675cb4f9bae748212ec7dc">&#9670;&nbsp;</a></span>funcref</h2>
+<a id="a9022b2b67e02cbabdb1fe4bff3285c34" name="a9022b2b67e02cbabdb1fe4bff3285c34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9022b2b67e02cbabdb1fe4bff3285c34">&#9670;&nbsp;</a></span>funcref</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">size_t wasmtime_val_raw::funcref</td>
+          <td class="memname">void* wasmtime_val_raw::funcref</td>
         </tr>
       </table>
 </div><div class="memdoc">

@@ -985,7 +985,7 @@
 
     <span class="attr">#[inline]
     </span><span class="kw">unsafe fn </span>abi_into_raw(abi: <span class="kw-2">*mut </span>u8, raw: <span class="kw-2">*mut </span>ValRaw) {
-        <span class="kw-2">*</span>raw = ValRaw::externref(abi <span class="kw">as </span>usize);
+        <span class="kw-2">*</span>raw = ValRaw::externref(abi.cast());
     }
 
     <span class="attr">#[inline]
@@ -1071,7 +1071,7 @@
 
     <span class="attr">#[inline]
     </span><span class="kw">unsafe fn </span>abi_into_raw(abi: <span class="self">Self</span>::Abi, raw: <span class="kw-2">*mut </span>ValRaw) {
-        <span class="kw-2">*</span>raw = ValRaw::funcref(abi <span class="kw">as </span>usize);
+        <span class="kw-2">*</span>raw = ValRaw::funcref(abi.cast());
     }
 
     <span class="attr">#[inline]

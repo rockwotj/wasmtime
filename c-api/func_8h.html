@@ -131,13 +131,13 @@ Functions</h2></td></tr>
 <a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_caller_context</b> (<a class="el" href="func_8h.html#abad1840db69084f226feec107cc23d5e">wasmtime_caller_t</a> *caller)</td></tr>
 <tr class="memdesc:a89b944629663a8e879b1ef9bd9b95c80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the store context of the caller object. <br /></td></tr>
 <tr class="separator:a89b944629663a8e879b1ef9bd9b95c80"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5934b1cb99ac0e3e601be386cb566527"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="func_8h.html#a5934b1cb99ac0e3e601be386cb566527">wasmtime_func_from_raw</a> (<a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *context, size_t raw, <a class="el" href="extern_8h.html#ac3661fabd7972df1ade869f17de29dc5">wasmtime_func_t</a> *ret)</td></tr>
-<tr class="memdesc:a5934b1cb99ac0e3e601be386cb566527"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a <code>raw</code> nonzero <code>funcref</code> value from <a class="el" href="val_8h.html#a551b6edd7003e8d98ef5d90e54e05c26" title="Convenience alias for wasmtime_val_raw.">wasmtime_val_raw_t</a> into a <a class="el" href="extern_8h.html#ac3661fabd7972df1ade869f17de29dc5" title="Representation of a function in Wasmtime.">wasmtime_func_t</a>.  <a href="func_8h.html#a5934b1cb99ac0e3e601be386cb566527">More...</a><br /></td></tr>
-<tr class="separator:a5934b1cb99ac0e3e601be386cb566527"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c4d16ff366dbf4c8f9eeb514b8b946b"><td class="memItemLeft" align="right" valign="top"><a id="a4c4d16ff366dbf4c8f9eeb514b8b946b" name="a4c4d16ff366dbf4c8f9eeb514b8b946b"></a>
-size_t&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_func_to_raw</b> (<a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *context, const <a class="el" href="extern_8h.html#ac3661fabd7972df1ade869f17de29dc5">wasmtime_func_t</a> *func)</td></tr>
-<tr class="memdesc:a4c4d16ff366dbf4c8f9eeb514b8b946b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a <code>func</code> which belongs to <code>context</code> into a <code>usize</code> parameter that is suitable for insertion into a <a class="el" href="val_8h.html#a551b6edd7003e8d98ef5d90e54e05c26" title="Convenience alias for wasmtime_val_raw.">wasmtime_val_raw_t</a>. <br /></td></tr>
-<tr class="separator:a4c4d16ff366dbf4c8f9eeb514b8b946b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26ed7b10fb27e06b06671a7b692d5e56"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="func_8h.html#a26ed7b10fb27e06b06671a7b692d5e56">wasmtime_func_from_raw</a> (<a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *context, void *raw, <a class="el" href="extern_8h.html#ac3661fabd7972df1ade869f17de29dc5">wasmtime_func_t</a> *ret)</td></tr>
+<tr class="memdesc:a26ed7b10fb27e06b06671a7b692d5e56"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a <code>raw</code> nonzero <code>funcref</code> value from <a class="el" href="val_8h.html#a551b6edd7003e8d98ef5d90e54e05c26" title="Convenience alias for wasmtime_val_raw.">wasmtime_val_raw_t</a> into a <a class="el" href="extern_8h.html#ac3661fabd7972df1ade869f17de29dc5" title="Representation of a function in Wasmtime.">wasmtime_func_t</a>.  <a href="func_8h.html#a26ed7b10fb27e06b06671a7b692d5e56">More...</a><br /></td></tr>
+<tr class="separator:a26ed7b10fb27e06b06671a7b692d5e56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44775e43be01d50ffbd99ef38be62148"><td class="memItemLeft" align="right" valign="top"><a id="a44775e43be01d50ffbd99ef38be62148" name="a44775e43be01d50ffbd99ef38be62148"></a>
+void *&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_func_to_raw</b> (<a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *context, const <a class="el" href="extern_8h.html#ac3661fabd7972df1ade869f17de29dc5">wasmtime_func_t</a> *func)</td></tr>
+<tr class="memdesc:a44775e43be01d50ffbd99ef38be62148"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a <code>func</code> which belongs to <code>context</code> into a <code>usize</code> parameter that is suitable for insertion into a <a class="el" href="val_8h.html#a551b6edd7003e8d98ef5d90e54e05c26" title="Convenience alias for wasmtime_val_raw.">wasmtime_val_raw_t</a>. <br /></td></tr>
+<tr class="separator:a44775e43be01d50ffbd99ef38be62148"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Wasmtime definitions of how to interact with host and wasm functions. </p>
@@ -412,8 +412,8 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_func_to_ra
 
 </div>
 </div>
-<a id="a5934b1cb99ac0e3e601be386cb566527" name="a5934b1cb99ac0e3e601be386cb566527"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5934b1cb99ac0e3e601be386cb566527">&#9670;&nbsp;</a></span>wasmtime_func_from_raw()</h2>
+<a id="a26ed7b10fb27e06b06671a7b692d5e56" name="a26ed7b10fb27e06b06671a7b692d5e56"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26ed7b10fb27e06b06671a7b692d5e56">&#9670;&nbsp;</a></span>wasmtime_func_from_raw()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -427,7 +427,7 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_func_to_ra
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size_t&#160;</td>
+          <td class="paramtype">void *&#160;</td>
           <td class="paramname"><em>raw</em>, </td>
         </tr>
         <tr>

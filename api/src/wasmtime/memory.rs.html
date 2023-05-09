@@ -946,6 +946,8 @@
 <a href="#946" id="946">946</a>
 <a href="#947" id="947">947</a>
 <a href="#948" id="948">948</a>
+<a href="#949" id="949">949</a>
+<a href="#950" id="950">950</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::store::{StoreData, StoreOpaque, Stored};
 <span class="kw">use </span><span class="kw">crate</span>::trampoline::generate_memory_export;
 <span class="kw">use </span><span class="kw">crate</span>::Trap;
@@ -1496,8 +1498,9 @@
     <span class="kw">fn </span>wasmtime_memory(<span class="kw-2">&amp;</span><span class="self">self</span>, store: <span class="kw-2">&amp;mut </span>StoreOpaque) -&gt; <span class="kw-2">*mut </span>wasmtime_runtime::Memory {
         <span class="kw">unsafe </span>{
             <span class="kw">let </span>export = <span class="kw-2">&amp;</span>store[<span class="self">self</span>.<span class="number">0</span>];
-            <span class="kw">let </span><span class="kw-2">mut </span>handle = wasmtime_runtime::InstanceHandle::from_vmctx(export.vmctx);
-            handle.get_defined_memory(export.index)
+            wasmtime_runtime::Instance::from_vmctx(export.vmctx, |handle| {
+                handle.get_defined_memory(export.index)
+            })
         }
     }
 
@@ -1853,16 +1856,17 @@
         wasmtime_export: wasmtime_runtime::ExportMemory,
         store: <span class="kw-2">&amp;mut </span>StoreOpaque,
     ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>handle = wasmtime_runtime::InstanceHandle::from_vmctx(wasmtime_export.vmctx);
-        <span class="kw">let </span>memory = handle
-            .get_defined_memory(wasmtime_export.index)
-            .as_mut()
-            .unwrap();
-        <span class="kw">let </span>shared_memory = memory
-            .as_shared_memory()
-            .expect(<span class="string">&quot;unable to convert from a shared memory&quot;</span>)
-            .clone();
-        <span class="self">Self</span>(shared_memory, store.engine().clone())
+        wasmtime_runtime::Instance::from_vmctx(wasmtime_export.vmctx, |handle| {
+            <span class="kw">let </span>memory = handle
+                .get_defined_memory(wasmtime_export.index)
+                .as_mut()
+                .unwrap();
+            <span class="kw">let </span>shared_memory = memory
+                .as_shared_memory()
+                .expect(<span class="string">&quot;unable to convert from a shared memory&quot;</span>)
+                .clone();
+            <span class="self">Self</span>(shared_memory, store.engine().clone())
+        })
     }
 }
 

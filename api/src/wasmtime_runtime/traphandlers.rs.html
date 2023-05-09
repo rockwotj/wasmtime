@@ -667,7 +667,7 @@
 
 </span><span class="kw">mod </span>backtrace;
 
-<span class="kw">use crate</span>::{VMContext, VMRuntimeLimits};
+<span class="kw">use crate</span>::{Instance, VMContext, VMRuntimeLimits};
 <span class="kw">use </span>anyhow::Error;
 <span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::cell::{Cell, UnsafeCell};
@@ -921,7 +921,7 @@
 <span class="kw">where
     </span>F: FnMut(<span class="kw-2">*mut </span>VMContext),
 {
-    <span class="kw">let </span>limits = (<span class="kw-2">*</span>caller).instance_mut().runtime_limits();
+    <span class="kw">let </span>limits = Instance::from_vmctx(caller, |i| i.runtime_limits());
 
     <span class="kw">let </span>result = CallThreadState::new(signal_handler, capture_backtrace, <span class="kw-2">*</span>limits).with(|cx| {
         wasmtime_setjmp(

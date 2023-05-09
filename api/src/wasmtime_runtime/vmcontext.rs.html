@@ -1219,38 +1219,15 @@
 <a href="#1219" id="1219">1219</a>
 <a href="#1220" id="1220">1220</a>
 <a href="#1221" id="1221">1221</a>
-<a href="#1222" id="1222">1222</a>
-<a href="#1223" id="1223">1223</a>
-<a href="#1224" id="1224">1224</a>
-<a href="#1225" id="1225">1225</a>
-<a href="#1226" id="1226">1226</a>
-<a href="#1227" id="1227">1227</a>
-<a href="#1228" id="1228">1228</a>
-<a href="#1229" id="1229">1229</a>
-<a href="#1230" id="1230">1230</a>
-<a href="#1231" id="1231">1231</a>
-<a href="#1232" id="1232">1232</a>
-<a href="#1233" id="1233">1233</a>
-<a href="#1234" id="1234">1234</a>
-<a href="#1235" id="1235">1235</a>
-<a href="#1236" id="1236">1236</a>
-<a href="#1237" id="1237">1237</a>
-<a href="#1238" id="1238">1238</a>
-<a href="#1239" id="1239">1239</a>
-<a href="#1240" id="1240">1240</a>
-<a href="#1241" id="1241">1241</a>
-<a href="#1242" id="1242">1242</a>
-<a href="#1243" id="1243">1243</a>
-<a href="#1244" id="1244">1244</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This file declares `VMContext` and several related structs which contain
 //! fields that compiled wasm code accesses directly.
 
 </span><span class="kw">mod </span>vm_host_func_context;
 
 <span class="kw">use </span><span class="kw">crate</span>::externref::VMExternRef;
-<span class="kw">use </span><span class="kw">crate</span>::instance::Instance;
-<span class="kw">use </span>std::any::Any;
+<span class="kw">use </span>sptr::Strict;
 <span class="kw">use </span>std::cell::UnsafeCell;
+<span class="kw">use </span>std::ffi::c_void;
 <span class="kw">use </span>std::marker;
 <span class="kw">use </span>std::ptr::NonNull;
 <span class="kw">use </span>std::sync::atomic::{AtomicUsize, Ordering};
@@ -1814,18 +1791,14 @@
 
     <span class="doccomment">/// Return a reference to the value as a `VMFuncRef`.
     </span><span class="attr">#[allow(clippy::cast_ptr_alignment)]
-    </span><span class="kw">pub unsafe fn </span>as_func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*const </span>VMFuncRef {
-        <span class="kw-2">*</span>(<span class="self">self</span>.storage.as_ref().as_ptr().cast::&lt;<span class="kw-2">*const </span>VMFuncRef&gt;())
+    </span><span class="kw">pub unsafe fn </span>as_func_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>VMFuncRef {
+        <span class="kw-2">*</span>(<span class="self">self</span>.storage.as_ref().as_ptr().cast::&lt;<span class="kw-2">*mut </span>VMFuncRef&gt;())
     }
 
     <span class="doccomment">/// Return a mutable reference to the value as a `VMFuncRef`.
     </span><span class="attr">#[allow(clippy::cast_ptr_alignment)]
-    </span><span class="kw">pub unsafe fn </span>as_func_ref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut *const </span>VMFuncRef {
-        <span class="kw-2">&amp;mut *</span>(<span class="self">self
-            </span>.storage
-            .as_mut()
-            .as_mut_ptr()
-            .cast::&lt;<span class="kw-2">*const </span>VMFuncRef&gt;())
+    </span><span class="kw">pub unsafe fn </span>as_func_ref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut *mut </span>VMFuncRef {
+        <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.storage.as_mut().as_mut_ptr().cast::&lt;<span class="kw-2">*mut </span>VMFuncRef&gt;())
     }
 }
 
@@ -2210,32 +2183,6 @@
         </span><span class="macro">debug_assert_eq!</span>((<span class="kw-2">*</span>opaque).magic, VMCONTEXT_MAGIC);
         opaque.cast()
     }
-
-    <span class="doccomment">/// Return a mutable reference to the associated `Instance`.
-    ///
-    /// # Safety
-    /// This is unsafe because it doesn&#39;t work on just any `VMContext`, it must
-    /// be a `VMContext` allocated as part of an `Instance`.
-    </span><span class="attr">#[allow(clippy::cast_ptr_alignment)]
-    #[inline]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>instance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Instance {
-        <span class="kw-2">&amp;*</span>((<span class="self">self </span><span class="kw">as </span><span class="kw-2">*const </span><span class="self">Self </span><span class="kw">as </span><span class="kw-2">*mut </span>u8).offset(-Instance::vmctx_offset()) <span class="kw">as </span><span class="kw-2">*const </span>Instance)
-    }
-
-    <span class="attr">#[inline]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>instance_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Instance {
-        <span class="kw-2">&amp;mut *</span>((<span class="self">self </span><span class="kw">as </span><span class="kw-2">*const </span><span class="self">Self </span><span class="kw">as </span><span class="kw-2">*mut </span>u8).offset(-Instance::vmctx_offset()) <span class="kw">as </span><span class="kw-2">*mut </span>Instance)
-    }
-
-    <span class="doccomment">/// Return a reference to the host state associated with this `Instance`.
-    ///
-    /// # Safety
-    /// This is unsafe because it doesn&#39;t work on just any `VMContext`, it must
-    /// be a `VMContext` allocated as part of an `Instance`.
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub unsafe fn </span>host_state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn </span>Any {
-        <span class="self">self</span>.instance().host_state()
-    }
 }
 
 <span class="doccomment">/// A &quot;raw&quot; and unsafe representation of a WebAssembly value.
@@ -2308,7 +2255,7 @@
     /// carefully calling the correct functions throughout the runtime.
     ///
     /// This value is always stored in a little-endian format.
-    </span>funcref: usize,
+    </span>funcref: <span class="kw-2">*mut </span>c_void,
 
     <span class="doccomment">/// A WebAssembly `externref` value.
     ///
@@ -2318,8 +2265,13 @@
     /// carefully calling the correct functions throughout the runtime.
     ///
     /// This value is always stored in a little-endian format.
-    </span>externref: usize,
+    </span>externref: <span class="kw-2">*mut </span>c_void,
 }
+
+<span class="comment">// This type is just a bag-of-bits so it&#39;s up to the caller to figure out how
+// to safely deal with threading concerns and safely access interior bits.
+</span><span class="kw">unsafe impl </span>Send <span class="kw">for </span>ValRaw {}
+<span class="kw">unsafe impl </span>Sync <span class="kw">for </span>ValRaw {}
 
 <span class="kw">impl </span>ValRaw {
     <span class="doccomment">/// Creates a WebAssembly `i32` value
@@ -2376,15 +2328,17 @@
 
     <span class="doccomment">/// Creates a WebAssembly `funcref` value
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>funcref(i: usize) -&gt; ValRaw {
-        ValRaw { funcref: i.to_le() }
+    </span><span class="kw">pub fn </span>funcref(i: <span class="kw-2">*mut </span>c_void) -&gt; ValRaw {
+        ValRaw {
+            funcref: Strict::map_addr(i, |i| i.to_le()),
+        }
     }
 
     <span class="doccomment">/// Creates a WebAssembly `externref` value
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>externref(i: usize) -&gt; ValRaw {
+    </span><span class="kw">pub fn </span>externref(i: <span class="kw-2">*mut </span>c_void) -&gt; ValRaw {
         ValRaw {
-            externref: i.to_le(),
+            externref: Strict::map_addr(i, |i| i.to_le()),
         }
     }
 
@@ -2432,14 +2386,14 @@
 
     <span class="doccomment">/// Gets the WebAssembly `funcref` value
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>get_funcref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="kw">unsafe </span>{ usize::from_le(<span class="self">self</span>.funcref) }
+    </span><span class="kw">pub fn </span>get_funcref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>c_void {
+        <span class="kw">unsafe </span>{ Strict::map_addr(<span class="self">self</span>.funcref, |i| usize::from_le(i)) }
     }
 
     <span class="doccomment">/// Gets the WebAssembly `externref` value
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>get_externref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="kw">unsafe </span>{ usize::from_le(<span class="self">self</span>.externref) }
+    </span><span class="kw">pub fn </span>get_externref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>c_void {
+        <span class="kw">unsafe </span>{ Strict::map_addr(<span class="self">self</span>.externref, |i| usize::from_le(i)) }
     }
 }
 

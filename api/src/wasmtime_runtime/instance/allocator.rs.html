@@ -661,9 +661,9 @@
         <span class="self">self</span>.deallocate_tables(index, <span class="kw-2">&amp;mut </span>handle.instance_mut().tables);
         <span class="kw">unsafe </span>{
             <span class="kw">let </span>layout = Instance::alloc_layout(handle.instance().offsets());
-            ptr::drop_in_place(handle.instance);
-            alloc::dealloc(handle.instance.cast(), layout);
-            handle.instance = std::ptr::null_mut();
+            <span class="kw">let </span>ptr = handle.instance.take().unwrap();
+            ptr::drop_in_place(ptr.as_ptr());
+            alloc::dealloc(ptr.as_ptr().cast(), layout);
         }
         <span class="self">self</span>.deallocate_index(index);
     }

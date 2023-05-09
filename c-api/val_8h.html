@@ -181,12 +181,12 @@ Functions</h2></td></tr>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_externref_delete</b> (<a class="el" href="val_8h.html#a1b838a1c7a96e8e55c1caa03f6b58529">wasmtime_externref_t</a> *ref)</td></tr>
 <tr class="memdesc:ab10a7a22e3728db10ba80cd597550882"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrements the reference count of the <code>ref</code>, deleting it if it's the last reference. <br /></td></tr>
 <tr class="separator:ab10a7a22e3728db10ba80cd597550882"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aae8eda1fc49807c2fac83d3f3a33872d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="val_8h.html#a1b838a1c7a96e8e55c1caa03f6b58529">wasmtime_externref_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="val_8h.html#aae8eda1fc49807c2fac83d3f3a33872d">wasmtime_externref_from_raw</a> (<a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *context, size_t raw)</td></tr>
-<tr class="memdesc:aae8eda1fc49807c2fac83d3f3a33872d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a raw <code>externref</code> value coming from <a class="el" href="val_8h.html#a551b6edd7003e8d98ef5d90e54e05c26" title="Convenience alias for wasmtime_val_raw.">wasmtime_val_raw_t</a> into a <a class="el" href="val_8h.html#a1b838a1c7a96e8e55c1caa03f6b58529" title="Convenience alias for wasmtime_externref.">wasmtime_externref_t</a>.  <a href="val_8h.html#aae8eda1fc49807c2fac83d3f3a33872d">More...</a><br /></td></tr>
-<tr class="separator:aae8eda1fc49807c2fac83d3f3a33872d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a752896ddfc4d3ed9e2d39c1ffcf9ce42"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="val_8h.html#a752896ddfc4d3ed9e2d39c1ffcf9ce42">wasmtime_externref_to_raw</a> (<a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *context, const <a class="el" href="val_8h.html#a1b838a1c7a96e8e55c1caa03f6b58529">wasmtime_externref_t</a> *ref)</td></tr>
-<tr class="memdesc:a752896ddfc4d3ed9e2d39c1ffcf9ce42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a <a class="el" href="val_8h.html#a1b838a1c7a96e8e55c1caa03f6b58529" title="Convenience alias for wasmtime_externref.">wasmtime_externref_t</a> to a raw value suitable for storing into a <a class="el" href="val_8h.html#a551b6edd7003e8d98ef5d90e54e05c26" title="Convenience alias for wasmtime_val_raw.">wasmtime_val_raw_t</a>.  <a href="val_8h.html#a752896ddfc4d3ed9e2d39c1ffcf9ce42">More...</a><br /></td></tr>
-<tr class="separator:a752896ddfc4d3ed9e2d39c1ffcf9ce42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea3d4c9c6e28b8167e2587a53f4e5aca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="val_8h.html#a1b838a1c7a96e8e55c1caa03f6b58529">wasmtime_externref_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="val_8h.html#aea3d4c9c6e28b8167e2587a53f4e5aca">wasmtime_externref_from_raw</a> (<a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *context, void *raw)</td></tr>
+<tr class="memdesc:aea3d4c9c6e28b8167e2587a53f4e5aca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a raw <code>externref</code> value coming from <a class="el" href="val_8h.html#a551b6edd7003e8d98ef5d90e54e05c26" title="Convenience alias for wasmtime_val_raw.">wasmtime_val_raw_t</a> into a <a class="el" href="val_8h.html#a1b838a1c7a96e8e55c1caa03f6b58529" title="Convenience alias for wasmtime_externref.">wasmtime_externref_t</a>.  <a href="val_8h.html#aea3d4c9c6e28b8167e2587a53f4e5aca">More...</a><br /></td></tr>
+<tr class="separator:aea3d4c9c6e28b8167e2587a53f4e5aca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4839efd0ba24c1bcf1f2ab0f1e23432"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="val_8h.html#ae4839efd0ba24c1bcf1f2ab0f1e23432">wasmtime_externref_to_raw</a> (<a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *context, const <a class="el" href="val_8h.html#a1b838a1c7a96e8e55c1caa03f6b58529">wasmtime_externref_t</a> *ref)</td></tr>
+<tr class="memdesc:ae4839efd0ba24c1bcf1f2ab0f1e23432"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a <a class="el" href="val_8h.html#a1b838a1c7a96e8e55c1caa03f6b58529" title="Convenience alias for wasmtime_externref.">wasmtime_externref_t</a> to a raw value suitable for storing into a <a class="el" href="val_8h.html#a551b6edd7003e8d98ef5d90e54e05c26" title="Convenience alias for wasmtime_val_raw.">wasmtime_val_raw_t</a>.  <a href="val_8h.html#ae4839efd0ba24c1bcf1f2ab0f1e23432">More...</a><br /></td></tr>
+<tr class="separator:ae4839efd0ba24c1bcf1f2ab0f1e23432"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66b1570ac4708802a1099b251724bfe4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="val_8h.html#a66b1570ac4708802a1099b251724bfe4">wasmtime_val_delete</a> (<a class="el" href="val_8h.html#a97038492e2cc547de6c95cf597453353">wasmtime_val_t</a> *val)</td></tr>
 <tr class="memdesc:a66b1570ac4708802a1099b251724bfe4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delets an owned <a class="el" href="val_8h.html#a97038492e2cc547de6c95cf597453353" title="Convenience alias for wasmtime_val_t.">wasmtime_val_t</a>.  <a href="val_8h.html#a66b1570ac4708802a1099b251724bfe4">More...</a><br /></td></tr>
 <tr class="separator:a66b1570ac4708802a1099b251724bfe4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -219,8 +219,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_val_copy</b>
 
 </div>
 </div>
-<a id="aae8eda1fc49807c2fac83d3f3a33872d" name="aae8eda1fc49807c2fac83d3f3a33872d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aae8eda1fc49807c2fac83d3f3a33872d">&#9670;&nbsp;</a></span>wasmtime_externref_from_raw()</h2>
+<a id="aea3d4c9c6e28b8167e2587a53f4e5aca" name="aea3d4c9c6e28b8167e2587a53f4e5aca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea3d4c9c6e28b8167e2587a53f4e5aca">&#9670;&nbsp;</a></span>wasmtime_externref_from_raw()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -234,7 +234,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_val_copy</b>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size_t&#160;</td>
+          <td class="paramtype">void *&#160;</td>
           <td class="paramname"><em>raw</em>&#160;</td>
         </tr>
         <tr>
@@ -290,14 +290,14 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_val_copy</b>
 
 </div>
 </div>
-<a id="a752896ddfc4d3ed9e2d39c1ffcf9ce42" name="a752896ddfc4d3ed9e2d39c1ffcf9ce42"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a752896ddfc4d3ed9e2d39c1ffcf9ce42">&#9670;&nbsp;</a></span>wasmtime_externref_to_raw()</h2>
+<a id="ae4839efd0ba24c1bcf1f2ab0f1e23432" name="ae4839efd0ba24c1bcf1f2ab0f1e23432"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4839efd0ba24c1bcf1f2ab0f1e23432">&#9670;&nbsp;</a></span>wasmtime_externref_to_raw()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">size_t wasmtime_externref_to_raw </td>
+          <td class="memname">void * wasmtime_externref_to_raw </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *&#160;</td>
           <td class="paramname"><em>context</em>, </td>

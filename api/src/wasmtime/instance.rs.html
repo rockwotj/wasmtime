@@ -1245,7 +1245,7 @@
         // trap-handling configuration in `store` as well.
         </span><span class="kw">let </span>instance = store.<span class="number">0</span>.instance_mut(id);
         <span class="kw">let </span>f = instance.get_exported_func(start);
-        <span class="kw">let </span>caller_vmctx = instance.vmctx_ptr();
+        <span class="kw">let </span>caller_vmctx = instance.vmctx();
         <span class="kw">unsafe </span>{
             <span class="kw">super</span>::func::invoke_wasm_and_catch_traps(store, |_default_caller| {
                 <span class="kw">let </span>func = mem::transmute::&lt;

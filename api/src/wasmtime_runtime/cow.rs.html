@@ -1058,18 +1058,16 @@
 <a href="#1058" id="1058">1058</a>
 <a href="#1059" id="1059">1059</a>
 <a href="#1060" id="1060">1060</a>
-<a href="#1061" id="1061">1061</a>
-<a href="#1062" id="1062">1062</a>
-<a href="#1063" id="1063">1063</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Copy-on-write initialization support: creation of backing images for
 //! modules, and logic to support mapping these backing images into memory.
 
 </span><span class="attr">#![cfg_attr(any(not(unix), miri), allow(unused_imports, unused_variables))]
 
-</span><span class="kw">use </span><span class="kw">crate</span>::MmapVec;
+</span><span class="kw">use crate</span>::{MmapVec, SendSyncPtr};
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>libc::c_void;
 <span class="kw">use </span>std::fs::File;
+<span class="kw">use </span>std::ptr::NonNull;
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::{convert::TryFrom, ops::Range};
 <span class="kw">use </span>wasmtime_environ::{
@@ -1265,18 +1263,18 @@
         }
     }
 
-    <span class="kw">unsafe fn </span>map_at(<span class="kw-2">&amp;</span><span class="self">self</span>, base: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">unsafe fn </span>map_at(<span class="kw-2">&amp;</span><span class="self">self</span>, base: <span class="kw-2">*mut </span>u8) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="macro">cfg_if::cfg_if! </span>{
             <span class="kw">if </span><span class="attr">#[cfg(all(unix, not(miri)))] </span>{
                 <span class="kw">let </span>ptr = rustix::mm::mmap(
-                    (base + <span class="self">self</span>.linear_memory_offset) <span class="kw">as </span><span class="kw-2">*mut </span>c_void,
+                    base.add(<span class="self">self</span>.linear_memory_offset).cast(),
                     <span class="self">self</span>.len,
                     rustix::mm::ProtFlags::READ | rustix::mm::ProtFlags::WRITE,
                     rustix::mm::MapFlags::PRIVATE | rustix::mm::MapFlags::FIXED,
                     <span class="self">self</span>.fd.as_file(),
                     <span class="self">self</span>.fd_offset,
                 )<span class="question-mark">?</span>;
-                <span class="macro">assert_eq!</span>(ptr <span class="kw">as </span>usize, base + <span class="self">self</span>.linear_memory_offset);
+                <span class="macro">assert_eq!</span>(ptr, base.add(<span class="self">self</span>.linear_memory_offset).cast());
                 <span class="prelude-val">Ok</span>(())
             } <span class="kw">else </span>{
                 <span class="kw">match </span><span class="self">self</span>.fd {}
@@ -1284,16 +1282,16 @@
         }
     }
 
-    <span class="kw">unsafe fn </span>remap_as_zeros_at(<span class="kw-2">&amp;</span><span class="self">self</span>, base: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">unsafe fn </span>remap_as_zeros_at(<span class="kw-2">&amp;</span><span class="self">self</span>, base: <span class="kw-2">*mut </span>u8) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="macro">cfg_if::cfg_if! </span>{
             <span class="kw">if </span><span class="attr">#[cfg(unix)] </span>{
                 <span class="kw">let </span>ptr = rustix::mm::mmap_anonymous(
-                    (base + <span class="self">self</span>.linear_memory_offset) <span class="kw">as </span><span class="kw-2">*mut </span>c_void,
+                    base.add(<span class="self">self</span>.linear_memory_offset).cast(),
                     <span class="self">self</span>.len,
                     rustix::mm::ProtFlags::READ | rustix::mm::ProtFlags::WRITE,
                     rustix::mm::MapFlags::PRIVATE | rustix::mm::MapFlags::FIXED,
                 )<span class="question-mark">?</span>;
-                <span class="macro">assert_eq!</span>(ptr <span class="kw">as </span>usize, base + <span class="self">self</span>.linear_memory_offset);
+                <span class="macro">assert_eq!</span>(ptr.cast(), base.add(<span class="self">self</span>.linear_memory_offset));
                 <span class="prelude-val">Ok</span>(())
             } <span class="kw">else </span>{
                 <span class="kw">match </span><span class="self">self</span>.fd {}
@@ -1435,10 +1433,7 @@
     <span class="doccomment">/// The base address in virtual memory of the actual heap memory.
     ///
     /// Bytes at this address are what is seen by the Wasm guest code.
-    ///
-    /// Note that this is stored as `usize` instead of `*mut u8` to not deal
-    /// with `Send`/`Sync.
-    </span>base: usize,
+    </span>base: SendSyncPtr&lt;u8&gt;,
 
     <span class="doccomment">/// The maximum static memory size which `self.accessible` can grow to.
     </span>static_size: usize,
@@ -1487,9 +1482,8 @@
     /// and all memory from `accessible` from `static_size` should be mapped as
     /// `PROT_NONE` backed by zero-bytes.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>create(base_addr: <span class="kw-2">*mut </span>c_void, accessible: usize, static_size: usize) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>base = base_addr <span class="kw">as </span>usize;
         MemoryImageSlot {
-            base,
+            base: NonNull::new(base_addr.cast()).unwrap().into(),
             static_size,
             accessible,
             image: <span class="prelude-val">None</span>,
@@ -1501,7 +1495,11 @@
     <span class="attr">#[cfg(feature = <span class="string">&quot;pooling-allocator&quot;</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>dummy() -&gt; MemoryImageSlot {
         MemoryImageSlot {
-            base: <span class="number">0</span>,
+            <span class="comment">// This pointer isn&#39;t ever actually used so its value doesn&#39;t
+            // matter but we need to satisfy `NonNull` requirement so create a
+            // `dangling` pointer as a sentinel that should cause problems if
+            // it&#39;s actually used.
+            </span>base: NonNull::dangling().into(),
             static_size: <span class="number">0</span>,
             image: <span class="prelude-val">None</span>,
             accessible: <span class="number">0</span>,
@@ -1610,7 +1608,7 @@
                 );
                 <span class="kw">if </span>image.len &gt; <span class="number">0 </span>{
                     <span class="kw">unsafe </span>{
-                        image.map_at(<span class="self">self</span>.base)<span class="question-mark">?</span>;
+                        image.map_at(<span class="self">self</span>.base.as_ptr())<span class="question-mark">?</span>;
                     }
                 }
             }
@@ -1627,7 +1625,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>remove_image(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(image) = <span class="kw-2">&amp;</span><span class="self">self</span>.image {
             <span class="kw">unsafe </span>{
-                image.remap_as_zeros_at(<span class="self">self</span>.base)<span class="question-mark">?</span>;
+                image.remap_as_zeros_at(<span class="self">self</span>.base.as_ptr())<span class="question-mark">?</span>;
             }
             <span class="self">self</span>.image = <span class="prelude-val">None</span>;
         }
@@ -1705,17 +1703,13 @@
                         (keep_resident - image.linear_memory_offset).min(mem_after_image);
 
                     <span class="comment">// This is memset (1)
-                    </span>std::ptr::write_bytes(<span class="self">self</span>.base <span class="kw">as </span><span class="kw-2">*mut </span>u8, <span class="number">0u8</span>, image.linear_memory_offset);
+                    </span>std::ptr::write_bytes(<span class="self">self</span>.base.as_ptr(), <span class="number">0u8</span>, image.linear_memory_offset);
 
                     <span class="comment">// This is madvise (2)
                     </span><span class="self">self</span>.madvise_reset(image.linear_memory_offset, image.len)<span class="question-mark">?</span>;
 
                     <span class="comment">// This is memset (3)
-                    </span>std::ptr::write_bytes(
-                        (<span class="self">self</span>.base + image_end) <span class="kw">as </span><span class="kw-2">*mut </span>u8,
-                        <span class="number">0u8</span>,
-                        remaining_memset,
-                    );
+                    </span>std::ptr::write_bytes(<span class="self">self</span>.base.as_ptr().add(image_end), <span class="number">0u8</span>, remaining_memset);
 
                     <span class="comment">// This is madvise (4)
                     </span><span class="self">self</span>.madvise_reset(
@@ -1743,7 +1737,7 @@
                     // Note that the memset may be zero bytes here.
 
                     // This is memset (1)
-                    </span>std::ptr::write_bytes(<span class="self">self</span>.base <span class="kw">as </span><span class="kw-2">*mut </span>u8, <span class="number">0u8</span>, keep_resident);
+                    </span>std::ptr::write_bytes(<span class="self">self</span>.base.as_ptr(), <span class="number">0u8</span>, keep_resident);
 
                     <span class="comment">// This is madvise (2)
                     </span><span class="self">self</span>.madvise_reset(keep_resident, <span class="self">self</span>.accessible - keep_resident)<span class="question-mark">?</span>;
@@ -1755,7 +1749,7 @@
             // the rest.
             </span><span class="prelude-val">None </span>=&gt; {
                 <span class="kw">let </span>size_to_memset = keep_resident.min(<span class="self">self</span>.accessible);
-                std::ptr::write_bytes(<span class="self">self</span>.base <span class="kw">as </span><span class="kw-2">*mut </span>u8, <span class="number">0u8</span>, size_to_memset);
+                std::ptr::write_bytes(<span class="self">self</span>.base.as_ptr(), <span class="number">0u8</span>, size_to_memset);
                 <span class="self">self</span>.madvise_reset(size_to_memset, <span class="self">self</span>.accessible - size_to_memset)<span class="question-mark">?</span>;
             }
         }
@@ -1772,7 +1766,7 @@
         <span class="macro">cfg_if::cfg_if! </span>{
             <span class="kw">if </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)] </span>{
                 rustix::mm::madvise(
-                    (<span class="self">self</span>.base + base) <span class="kw">as </span><span class="kw-2">*mut </span>c_void,
+                    <span class="self">self</span>.base.as_ptr().add(base).cast(),
                     len,
                     rustix::mm::Advice::LinuxDontNeed,
                 )<span class="question-mark">?</span>;
@@ -1786,16 +1780,16 @@
     <span class="kw">fn </span>set_protection(<span class="kw-2">&amp;</span><span class="self">self</span>, range: Range&lt;usize&gt;, readwrite: bool) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="macro">assert!</span>(range.start &lt;= range.end);
         <span class="macro">assert!</span>(range.end &lt;= <span class="self">self</span>.static_size);
-        <span class="kw">let </span>start = <span class="self">self</span>.base.checked_add(range.start).unwrap();
         <span class="kw">if </span>range.len() == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         }
 
         <span class="kw">unsafe </span>{
+            <span class="kw">let </span>start = <span class="self">self</span>.base.as_ptr().add(range.start);
             <span class="macro">cfg_if::cfg_if! </span>{
                 <span class="kw">if </span><span class="attr">#[cfg(miri)] </span>{
                     <span class="kw">if </span>readwrite {
-                        std::ptr::write_bytes(start <span class="kw">as </span><span class="kw-2">*mut </span>u8, <span class="number">0u8</span>, range.len());
+                        std::ptr::write_bytes(start, <span class="number">0u8</span>, range.len());
                     }
                 } <span class="kw">else if </span><span class="attr">#[cfg(unix)] </span>{
                     <span class="kw">let </span>flags = <span class="kw">if </span>readwrite {
@@ -1803,14 +1797,14 @@
                     } <span class="kw">else </span>{
                         rustix::mm::MprotectFlags::empty()
                     };
-                    rustix::mm::mprotect(start <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>, range.len(), flags)<span class="question-mark">?</span>;
+                    rustix::mm::mprotect(start.cast(), range.len(), flags)<span class="question-mark">?</span>;
                 } <span class="kw">else </span>{
                     <span class="kw">use </span>windows_sys::Win32::System::Memory::<span class="kw-2">*</span>;
 
                     <span class="kw">let </span>failure = <span class="kw">if </span>readwrite {
-                        VirtualAlloc(start <span class="kw">as _</span>, range.len(), MEM_COMMIT, PAGE_READWRITE).is_null()
+                        VirtualAlloc(start.cast(), range.len(), MEM_COMMIT, PAGE_READWRITE).is_null()
                     } <span class="kw">else </span>{
-                        VirtualFree(start <span class="kw">as _</span>, range.len(), MEM_DECOMMIT) == <span class="number">0
+                        VirtualFree(start.cast(), range.len(), MEM_DECOMMIT) == <span class="number">0
                     </span>};
                     <span class="kw">if </span>failure {
                         <span class="kw">return </span><span class="prelude-val">Err</span>(std::io::Error::last_os_error().into());
@@ -1843,18 +1837,18 @@
         <span class="kw">unsafe </span>{
             <span class="macro">cfg_if::cfg_if! </span>{
                 <span class="kw">if </span><span class="attr">#[cfg(miri)] </span>{
-                    std::ptr::write_bytes(<span class="self">self</span>.base <span class="kw">as </span><span class="kw-2">*mut </span>u8, <span class="number">0</span>, <span class="self">self</span>.static_size);
+                    std::ptr::write_bytes(<span class="self">self</span>.base.as_ptr(), <span class="number">0</span>, <span class="self">self</span>.static_size);
                 } <span class="kw">else if </span><span class="attr">#[cfg(unix)] </span>{
                     <span class="kw">let </span>ptr = rustix::mm::mmap_anonymous(
-                        <span class="self">self</span>.base <span class="kw">as </span><span class="kw-2">*mut </span>c_void,
+                        <span class="self">self</span>.base.as_ptr().cast(),
                         <span class="self">self</span>.static_size,
                         rustix::mm::ProtFlags::empty(),
                         rustix::mm::MapFlags::PRIVATE | rustix::mm::MapFlags::FIXED,
                     )<span class="question-mark">?</span>;
-                    <span class="macro">assert_eq!</span>(ptr <span class="kw">as </span>usize, <span class="self">self</span>.base);
+                    <span class="macro">assert_eq!</span>(ptr, <span class="self">self</span>.base.as_ptr().cast());
                 } <span class="kw">else </span>{
                     <span class="kw">use </span>windows_sys::Win32::System::Memory::<span class="kw-2">*</span>;
-                    <span class="kw">if </span>VirtualFree(<span class="self">self</span>.base <span class="kw">as _</span>, <span class="self">self</span>.static_size, MEM_DECOMMIT) == <span class="number">0 </span>{
+                    <span class="kw">if </span>VirtualFree(<span class="self">self</span>.base.as_ptr().cast(), <span class="self">self</span>.static_size, MEM_DECOMMIT) == <span class="number">0 </span>{
                         <span class="kw">return </span><span class="prelude-val">Err</span>(std::io::Error::last_os_error().into());
                     }
                 }

@@ -1263,6 +1263,90 @@
 <a href="#1263" id="1263">1263</a>
 <a href="#1264" id="1264">1264</a>
 <a href="#1265" id="1265">1265</a>
+<a href="#1266" id="1266">1266</a>
+<a href="#1267" id="1267">1267</a>
+<a href="#1268" id="1268">1268</a>
+<a href="#1269" id="1269">1269</a>
+<a href="#1270" id="1270">1270</a>
+<a href="#1271" id="1271">1271</a>
+<a href="#1272" id="1272">1272</a>
+<a href="#1273" id="1273">1273</a>
+<a href="#1274" id="1274">1274</a>
+<a href="#1275" id="1275">1275</a>
+<a href="#1276" id="1276">1276</a>
+<a href="#1277" id="1277">1277</a>
+<a href="#1278" id="1278">1278</a>
+<a href="#1279" id="1279">1279</a>
+<a href="#1280" id="1280">1280</a>
+<a href="#1281" id="1281">1281</a>
+<a href="#1282" id="1282">1282</a>
+<a href="#1283" id="1283">1283</a>
+<a href="#1284" id="1284">1284</a>
+<a href="#1285" id="1285">1285</a>
+<a href="#1286" id="1286">1286</a>
+<a href="#1287" id="1287">1287</a>
+<a href="#1288" id="1288">1288</a>
+<a href="#1289" id="1289">1289</a>
+<a href="#1290" id="1290">1290</a>
+<a href="#1291" id="1291">1291</a>
+<a href="#1292" id="1292">1292</a>
+<a href="#1293" id="1293">1293</a>
+<a href="#1294" id="1294">1294</a>
+<a href="#1295" id="1295">1295</a>
+<a href="#1296" id="1296">1296</a>
+<a href="#1297" id="1297">1297</a>
+<a href="#1298" id="1298">1298</a>
+<a href="#1299" id="1299">1299</a>
+<a href="#1300" id="1300">1300</a>
+<a href="#1301" id="1301">1301</a>
+<a href="#1302" id="1302">1302</a>
+<a href="#1303" id="1303">1303</a>
+<a href="#1304" id="1304">1304</a>
+<a href="#1305" id="1305">1305</a>
+<a href="#1306" id="1306">1306</a>
+<a href="#1307" id="1307">1307</a>
+<a href="#1308" id="1308">1308</a>
+<a href="#1309" id="1309">1309</a>
+<a href="#1310" id="1310">1310</a>
+<a href="#1311" id="1311">1311</a>
+<a href="#1312" id="1312">1312</a>
+<a href="#1313" id="1313">1313</a>
+<a href="#1314" id="1314">1314</a>
+<a href="#1315" id="1315">1315</a>
+<a href="#1316" id="1316">1316</a>
+<a href="#1317" id="1317">1317</a>
+<a href="#1318" id="1318">1318</a>
+<a href="#1319" id="1319">1319</a>
+<a href="#1320" id="1320">1320</a>
+<a href="#1321" id="1321">1321</a>
+<a href="#1322" id="1322">1322</a>
+<a href="#1323" id="1323">1323</a>
+<a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a>
+<a href="#1327" id="1327">1327</a>
+<a href="#1328" id="1328">1328</a>
+<a href="#1329" id="1329">1329</a>
+<a href="#1330" id="1330">1330</a>
+<a href="#1331" id="1331">1331</a>
+<a href="#1332" id="1332">1332</a>
+<a href="#1333" id="1333">1333</a>
+<a href="#1334" id="1334">1334</a>
+<a href="#1335" id="1335">1335</a>
+<a href="#1336" id="1336">1336</a>
+<a href="#1337" id="1337">1337</a>
+<a href="#1338" id="1338">1338</a>
+<a href="#1339" id="1339">1339</a>
+<a href="#1340" id="1340">1340</a>
+<a href="#1341" id="1341">1341</a>
+<a href="#1342" id="1342">1342</a>
+<a href="#1343" id="1343">1343</a>
+<a href="#1344" id="1344">1344</a>
+<a href="#1345" id="1345">1345</a>
+<a href="#1346" id="1346">1346</a>
+<a href="#1347" id="1347">1347</a>
+<a href="#1348" id="1348">1348</a>
+<a href="#1349" id="1349">1349</a>
 </pre><pre class="rust"><code><span class="doccomment">//! An `Instance` contains all the runtime state used by execution of a
 //! wasm module (except its callstack and register state). An
 //! `InstanceHandle` is a reference-counting handle for an `Instance`.
@@ -1277,16 +1361,15 @@
     VMTableDefinition, VMTableImport,
 };
 <span class="kw">use crate</span>::{
-    ExportFunction, ExportGlobal, ExportMemory, ExportTable, Imports, ModuleRuntimeInfo, Store,
-    VMFunctionBody, VMSharedSignatureIndex, WasmFault,
+    ExportFunction, ExportGlobal, ExportMemory, ExportTable, Imports, ModuleRuntimeInfo,
+    SendSyncPtr, Store, VMFunctionBody, VMSharedSignatureIndex, WasmFault,
 };
 <span class="kw">use </span>anyhow::Error;
 <span class="kw">use </span>anyhow::Result;
-<span class="kw">use </span>memoffset::offset_of;
+<span class="kw">use </span>sptr::Strict;
 <span class="kw">use </span>std::alloc::{<span class="self">self</span>, Layout};
 <span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::convert::TryFrom;
-<span class="kw">use </span>std::hash::Hash;
 <span class="kw">use </span>std::ops::Range;
 <span class="kw">use </span>std::ptr::NonNull;
 <span class="kw">use </span>std::sync::atomic::AtomicU64;
@@ -1319,7 +1402,7 @@
 /// This `Instance` type is used as a ubiquitous representation for WebAssembly
 /// values, whether or not they were created on the host or through a module.
 </span><span class="attr">#[repr(C)] </span><span class="comment">// ensure that the vmctx field is last.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Instance {
+</span><span class="kw">pub struct </span>Instance {
     <span class="doccomment">/// The runtime info (corresponding to the &quot;compiled module&quot;
     /// abstraction in higher layers) that is retained and needed for
     /// lazy initialization. This provides access to the underlying
@@ -1359,6 +1442,52 @@
     /// This is always 0 for the on-demand instance allocator and it&#39;s the
     /// index of the slot in the pooling allocator.
     </span>index: usize,
+
+    <span class="doccomment">/// A pointer to the `vmctx` field at the end of the `Instance`.
+    ///
+    /// If you&#39;re looking at this a reasonable question would be &quot;why do we need
+    /// a pointer to ourselves?&quot; because after all the pointer&#39;s value is
+    /// trivially derivable from any `&amp;Instance` pointer. The rationale for this
+    /// field&#39;s existence is subtle, but it&#39;s required for correctness. The
+    /// short version is &quot;this makes miri happy&quot;.
+    ///
+    /// The long version of why this field exists is that the rules that MIRI
+    /// uses to ensure pointers are used correctly have various conditions on
+    /// them depend on how pointers are used. More specifically if `*mut T` is
+    /// derived from `&amp;mut T`, then that invalidates all prior pointers drived
+    /// from the `&amp;mut T`. This means that while we liberally want to re-acquire
+    /// a `*mut VMContext` throughout the implementation of `Instance` the
+    /// trivial way, a function `fn vmctx(&amp;mut Instance) -&gt; *mut VMContext`
+    /// would effectively invalidate all prior `*mut VMContext` pointers
+    /// acquired. The purpose of this field is to serve as a sort of
+    /// source-of-truth for where `*mut VMContext` pointers come from.
+    ///
+    /// This field is initialized when the `Instance` is created with the
+    /// original allocation&#39;s pointer. That means that the provenance of this
+    /// pointer contains the entire allocation (both instance and `VMContext`).
+    /// This provenance bit is then &quot;carried through&quot; where `fn vmctx` will base
+    /// all returned pointers on this pointer itself. This provides the means of
+    /// never invalidating this pointer throughout MIRI and additionally being
+    /// able to still temporarily have `&amp;mut Instance` methods and such.
+    ///
+    /// It&#39;s important to note, though, that this is not here purely for MIRI.
+    /// The careful construction of the `fn vmctx` method has ramifications on
+    /// the LLVM IR generated, for example. A historical CVE on Wasmtime,
+    /// GHSA-ch89-5g45-qwc7, was caused due to relying on undefined behavior. By
+    /// deriving VMContext pointers from this pointer it specifically hints to
+    /// LLVM that trickery is afoot and it properly informs `noalias` and such
+    /// annotations and analysis. More-or-less this pointer is actually loaded
+    /// in LLVM IR which helps defeat otherwise present aliasing optimizations,
+    /// which we want, since writes to this should basically never be optimized
+    /// out.
+    ///
+    /// As a final note it&#39;s worth pointing out that the machine code generated
+    /// for accessing `fn vmctx` is still as one would expect. This member isn&#39;t
+    /// actually ever loaded at runtime (or at least shouldn&#39;t be). Perhaps in
+    /// the future if the memory consumption of this field is a problem we could
+    /// shrink it slightly, but for now one extra pointer per wasm instance
+    /// seems not too bad.
+    </span>vmctx_self_reference: SendSyncPtr&lt;VMContext&gt;,
 
     <span class="doccomment">/// Additional context used by compiled wasm code. This field is last, and
     /// represents a dynamically-sized array that extends beyond the nominal
@@ -1400,6 +1529,9 @@
                 dropped_elements,
                 dropped_data,
                 host_state: req.host_state,
+                vmctx_self_reference: SendSyncPtr::new(
+                    NonNull::new(ptr.cast::&lt;u8&gt;().add(mem::size_of::&lt;Instance&gt;()).cast()).unwrap(),
+                ),
                 vmctx: VMContext {
                     _marker: std::marker::PhantomPinned,
                 },
@@ -1407,19 +1539,51 @@
         );
 
         (<span class="kw-2">*</span>ptr).initialize_vmctx(module, req.runtime_info.offsets(), req.store, req.imports);
-        InstanceHandle { instance: ptr }
+        InstanceHandle {
+            instance: <span class="prelude-val">Some</span>(SendSyncPtr::new(NonNull::new(ptr).unwrap())),
+        }
+    }
+
+    <span class="doccomment">/// Converts the provided `*mut VMContext` to an `Instance` pointer and runs
+    /// the provided closure with the instance.
+    ///
+    /// This method will move the `vmctx` pointer backwards to point to the
+    /// original `Instance` that precedes it. The closure is provided a
+    /// temporary version of the `Instance` pointer with a constrained lifetime
+    /// to the closure to ensure it doesn&#39;t accidentally escape.
+    ///
+    /// # Unsafety
+    ///
+    /// Callers must validate that the `vmctx` pointer is a valid allocation
+    /// and that it&#39;s valid to acquire `&amp;mut Instance` at this time. For example
+    /// this can&#39;t be called twice on the same `VMContext` to get two active
+    /// pointers to the same `Instance`.
+    </span><span class="kw">pub unsafe fn </span>from_vmctx&lt;R&gt;(vmctx: <span class="kw-2">*mut </span>VMContext, f: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span>Instance) -&gt; R) -&gt; R {
+        <span class="kw">let </span>ptr = vmctx
+            .cast::&lt;u8&gt;()
+            .sub(mem::size_of::&lt;Instance&gt;())
+            .cast::&lt;Instance&gt;();
+        f(<span class="kw-2">&amp;mut *</span>ptr)
     }
 
     <span class="doccomment">/// Helper function to access various locations offset from our `*mut
     /// VMContext` object.
+    ///
+    /// # Safety
+    ///
+    /// This method is unsafe because the `offset` must be within bounds of the
+    /// `VMContext` object trailing this instance.
     </span><span class="kw">unsafe fn </span>vmctx_plus_offset&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: u32) -&gt; <span class="kw-2">*const </span>T {
-        (<span class="macro">std::ptr::addr_of!</span>(<span class="self">self</span>.vmctx).cast::&lt;u8&gt;())
+        <span class="self">self</span>.vmctx()
+            .cast::&lt;u8&gt;()
             .add(usize::try_from(offset).unwrap())
             .cast()
     }
 
-    <span class="kw">unsafe fn </span>vmctx_plus_offset_mut&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, offset: u32) -&gt; <span class="kw-2">*mut </span>T {
-        (<span class="macro">std::ptr::addr_of_mut!</span>(<span class="self">self</span>.vmctx).cast::&lt;u8&gt;())
+    <span class="doccomment">/// Dual of `vmctx_plus_offset`, but for mutability.
+    </span><span class="kw">unsafe fn </span>vmctx_plus_offset_mut&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, offset: u32) -&gt; <span class="kw-2">*mut </span>T {
+        <span class="self">self</span>.vmctx()
+            .cast::&lt;u8&gt;()
             .add(usize::try_from(offset).unwrap())
             .cast()
     }
@@ -1487,8 +1651,11 @@
             <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span><span class="self">self</span>.get_defined_memory(defined_index) }
         } <span class="kw">else </span>{
             <span class="kw">let </span>import = <span class="self">self</span>.imported_memory(index);
-            <span class="kw">let </span>ctx = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>import.vmctx };
-            <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>ctx.instance_mut().get_defined_memory(import.index) }
+            <span class="kw">unsafe </span>{
+                <span class="kw">let </span>ptr =
+                    Instance::from_vmctx(import.vmctx, |i| i.get_defined_memory(import.index));
+                <span class="kw-2">&amp;mut *</span>ptr
+            }
         }
     }
 
@@ -1567,7 +1734,7 @@
         ptr
     }
 
-    <span class="kw">pub unsafe fn </span>set_store(<span class="kw-2">&amp;mut </span><span class="self">self</span>, store: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">*mut </span><span class="kw">dyn </span>Store&gt;) {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>set_store(<span class="kw-2">&amp;mut </span><span class="self">self</span>, store: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">*mut </span><span class="kw">dyn </span>Store&gt;) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(store) = store {
             <span class="kw-2">*</span><span class="self">self</span>.vmctx_plus_offset_mut(<span class="self">self</span>.offsets().vmctx_store()) = store;
             <span class="kw-2">*</span><span class="self">self</span>.runtime_limits() = (<span class="kw-2">*</span>store).vmruntime_limits();
@@ -1594,14 +1761,29 @@
 
     <span class="doccomment">/// Return a reference to the vmctx used by compiled wasm code.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>vmctx(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMContext {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.vmctx
-    }
-
-    <span class="doccomment">/// Return a raw pointer to the vmctx used by compiled wasm code.
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>vmctx_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>VMContext {
-        <span class="self">self</span>.vmctx() <span class="kw">as </span><span class="kw-2">*const </span>VMContext <span class="kw">as </span><span class="kw-2">*mut </span>VMContext
+    </span><span class="kw">pub fn </span>vmctx(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>VMContext {
+        <span class="comment">// The definition of this method is subtle but intentional. The goal
+        // here is that effectively this should return `&amp;mut self.vmctx`, but
+        // it&#39;s not quite so simple. Some more documentation is available on the
+        // `vmctx_self_reference` field, but the general idea is that we&#39;re
+        // creating a pointer to return with proper provenance. Provenance is
+        // still in the works in Rust at the time of this writing but the load
+        // of the `self.vmctx_self_reference` field is important here as it
+        // affects how LLVM thinks about aliasing with respect to the returned
+        // pointer.
+        //
+        // The intention of this method is to codegen to machine code as `&amp;mut
+        // self.vmctx`, however. While it doesn&#39;t show up like this in LLVM IR
+        // (there&#39;s an actual load of the field) it does look like that by the
+        // time the backend runs. (that&#39;s magic to me, the backend removing
+        // loads...)
+        //
+        // As a final minor note, strict provenance APIs are not stable on Rust
+        // today so the `sptr` crate is used. This crate provides the extension
+        // trait `Strict` but the method names conflict with the nightly methods
+        // so a different syntax is used to invoke methods here.
+        </span><span class="kw">let </span>addr = <span class="macro">std::ptr::addr_of!</span>(<span class="self">self</span>.vmctx);
+        Strict::with_addr(<span class="self">self</span>.vmctx_self_reference.as_ptr(), Strict::addr(addr))
     }
 
     <span class="kw">fn </span>get_exported_func(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: FuncIndex) -&gt; ExportFunction {
@@ -1613,7 +1795,7 @@
     <span class="kw">fn </span>get_exported_table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: TableIndex) -&gt; ExportTable {
         <span class="kw">let </span>(definition, vmctx) = <span class="kw">if let </span><span class="prelude-val">Some</span>(def_index) = <span class="self">self</span>.module().defined_table_index(index)
         {
-            (<span class="self">self</span>.table_ptr(def_index), <span class="self">self</span>.vmctx_ptr())
+            (<span class="self">self</span>.table_ptr(def_index), <span class="self">self</span>.vmctx())
         } <span class="kw">else </span>{
             <span class="kw">let </span>import = <span class="self">self</span>.imported_table(index);
             (import.from, import.vmctx)
@@ -1628,7 +1810,7 @@
     <span class="kw">fn </span>get_exported_memory(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: MemoryIndex) -&gt; ExportMemory {
         <span class="kw">let </span>(definition, vmctx, def_index) =
             <span class="kw">if let </span><span class="prelude-val">Some</span>(def_index) = <span class="self">self</span>.module().defined_memory_index(index) {
-                (<span class="self">self</span>.memory_ptr(def_index), <span class="self">self</span>.vmctx_ptr(), def_index)
+                (<span class="self">self</span>.memory_ptr(def_index), <span class="self">self</span>.vmctx(), def_index)
             } <span class="kw">else </span>{
                 <span class="kw">let </span>import = <span class="self">self</span>.imported_memory(index);
                 (import.from, import.vmctx, import.index)
@@ -1667,14 +1849,8 @@
         <span class="kw-2">&amp;*</span><span class="self">self</span>.host_state
     }
 
-    <span class="doccomment">/// Return the offset from the vmctx pointer to its containing Instance.
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>vmctx_offset() -&gt; isize {
-        <span class="macro">offset_of!</span>(<span class="self">Self</span>, vmctx) <span class="kw">as </span>isize
-    }
-
     <span class="doccomment">/// Return the table index for the given `VMTableDefinition`.
-    </span><span class="kw">unsafe fn </span>table_index(<span class="kw-2">&amp;mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>VMTableDefinition) -&gt; DefinedTableIndex {
+    </span><span class="kw">pub unsafe fn </span>table_index(<span class="kw-2">&amp;mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>VMTableDefinition) -&gt; DefinedTableIndex {
         <span class="kw">let </span>index = DefinedTableIndex::new(
             usize::try_from(
                 (table <span class="kw">as </span><span class="kw-2">*const </span>VMTableDefinition)
@@ -1696,17 +1872,26 @@
         index: MemoryIndex,
         delta: u64,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;usize&gt;, Error&gt; {
-        <span class="kw">let </span>(idx, instance) = <span class="kw">if let </span><span class="prelude-val">Some</span>(idx) = <span class="self">self</span>.module().defined_memory_index(index) {
-            (idx, <span class="self">self</span>)
-        } <span class="kw">else </span>{
-            <span class="kw">let </span>import = <span class="self">self</span>.imported_memory(index);
-            <span class="kw">unsafe </span>{
-                <span class="kw">let </span>foreign_instance = (<span class="kw-2">*</span>import.vmctx).instance_mut();
-                (import.index, foreign_instance)
+        <span class="kw">match </span><span class="self">self</span>.module().defined_memory_index(index) {
+            <span class="prelude-val">Some</span>(idx) =&gt; <span class="self">self</span>.defined_memory_grow(idx, delta),
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="kw">let </span>import = <span class="self">self</span>.imported_memory(index);
+                <span class="kw">unsafe </span>{
+                    Instance::from_vmctx(import.vmctx, |i| {
+                        i.defined_memory_grow(import.index, delta)
+                    })
+                }
             }
-        };
-        <span class="kw">let </span>store = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>instance.store() };
-        <span class="kw">let </span>memory = <span class="kw-2">&amp;mut </span>instance.memories[idx];
+        }
+    }
+
+    <span class="kw">fn </span>defined_memory_grow(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        idx: DefinedMemoryIndex,
+        delta: u64,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;usize&gt;, Error&gt; {
+        <span class="kw">let </span>store = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span><span class="self">self</span>.store() };
+        <span class="kw">let </span>memory = <span class="kw-2">&amp;mut </span><span class="self">self</span>.memories[idx];
 
         <span class="kw">let </span>result = <span class="kw">unsafe </span>{ memory.grow(delta, <span class="prelude-val">Some</span>(store)) };
 
@@ -1714,7 +1899,7 @@
         // pointer and/or the length changed.
         </span><span class="kw">if </span>memory.as_shared_memory().is_none() {
             <span class="kw">let </span>vmmemory = memory.vmmemory();
-            instance.set_memory(idx, vmmemory);
+            <span class="self">self</span>.set_memory(idx, vmmemory);
         }
 
         result
@@ -1735,9 +1920,9 @@
         delta: u32,
         init_value: TableElement,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;u32&gt;, Error&gt; {
-        <span class="kw">let </span>(defined_table_index, instance) =
-            <span class="self">self</span>.get_defined_table_index_and_instance(table_index);
-        instance.defined_table_grow(defined_table_index, delta, init_value)
+        <span class="self">self</span>.with_defined_table_index_and_instance(table_index, |i, instance| {
+            instance.defined_table_grow(i, delta, init_value)
+        })
     }
 
     <span class="kw">fn </span>defined_table_grow(
@@ -1797,7 +1982,7 @@
                     .array_to_wasm_trampoline(def_index)
                     .expect(<span class="string">&quot;should have array-to-Wasm trampoline for escaping function&quot;</span>),
                 wasm_call: <span class="prelude-val">Some</span>(<span class="self">self</span>.runtime_info.function(def_index)),
-                vmctx: VMOpaqueContext::from_vmcontext(<span class="self">self</span>.vmctx_ptr()),
+                vmctx: VMOpaqueContext::from_vmcontext(<span class="self">self</span>.vmctx()),
                 type_index,
             }
         } <span class="kw">else </span>{
@@ -1944,7 +2129,7 @@
     </span>}
 
     <span class="doccomment">/// Get a locally-defined memory.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_defined_memory(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: DefinedMemoryIndex) -&gt; <span class="kw-2">*mut </span>Memory {
+    </span><span class="kw">pub fn </span>get_defined_memory(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: DefinedMemoryIndex) -&gt; <span class="kw-2">*mut </span>Memory {
         <span class="macro">ptr::addr_of_mut!</span>(<span class="self">self</span>.memories[index])
     }
 
@@ -2100,12 +2285,25 @@
         table_index: TableIndex,
         range: <span class="kw">impl </span>Iterator&lt;Item = u32&gt;,
     ) -&gt; <span class="kw-2">*mut </span>Table {
-        <span class="kw">let </span>(idx, instance) = <span class="self">self</span>.get_defined_table_index_and_instance(table_index);
-        <span class="kw">let </span>elt_ty = instance.tables[idx].element_type();
+        <span class="self">self</span>.with_defined_table_index_and_instance(table_index, |idx, instance| {
+            instance.get_defined_table_with_lazy_init(idx, range)
+        })
+    }
+
+    <span class="doccomment">/// Gets the raw runtime table data structure owned by this instance
+    /// given the provided `idx`.
+    ///
+    /// The `range` specified is eagerly initialized for funcref tables.
+    </span><span class="kw">pub fn </span>get_defined_table_with_lazy_init(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        idx: DefinedTableIndex,
+        range: <span class="kw">impl </span>Iterator&lt;Item = u32&gt;,
+    ) -&gt; <span class="kw-2">*mut </span>Table {
+        <span class="kw">let </span>elt_ty = <span class="self">self</span>.tables[idx].element_type();
 
         <span class="kw">if </span>elt_ty == TableElementType::Func {
             <span class="kw">for </span>i <span class="kw">in </span>range {
-                <span class="kw">let </span>value = <span class="kw">match </span>instance.tables[idx].get(i) {
+                <span class="kw">let </span>value = <span class="kw">match </span><span class="self">self</span>.tables[idx].get(i) {
                     <span class="prelude-val">Some</span>(value) =&gt; value,
                     <span class="prelude-val">None </span>=&gt; {
                         <span class="comment">// Out-of-bounds; caller will handle by likely
@@ -2115,14 +2313,15 @@
                     }
                 };
                 <span class="kw">if </span>value.is_uninit() {
-                    <span class="kw">let </span>table_init = <span class="kw">match </span><span class="kw-2">&amp;</span>instance.module().table_initialization {
+                    <span class="kw">let </span>module = <span class="self">self</span>.module();
+                    <span class="kw">let </span>table_init = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.module().table_initialization {
                         <span class="comment">// We unfortunately can&#39;t borrow `tables` outside the
                         // loop because we need to call `get_func_ref` (a `&amp;mut`
                         // method) below; so unwrap it dynamically here.
                         </span>TableInitialization::FuncTable { tables, .. } =&gt; tables,
                         <span class="kw">_ </span>=&gt; <span class="kw">break</span>,
                     }
-                    .get(table_index);
+                    .get(module.table_index(idx));
 
                     <span class="comment">// The TableInitialization::FuncTable elements table may
                     // be smaller than the current size of the table: it
@@ -2135,26 +2334,27 @@
                     </span><span class="kw">let </span>func_index =
                         table_init.and_then(|indices| indices.get(i <span class="kw">as </span>usize).cloned());
                     <span class="kw">let </span>func_ref = func_index
-                        .and_then(|func_index| instance.get_func_ref(func_index))
+                        .and_then(|func_index| <span class="self">self</span>.get_func_ref(func_index))
                         .unwrap_or(std::ptr::null_mut());
 
                     <span class="kw">let </span>value = TableElement::FuncRef(func_ref);
 
-                    instance.tables[idx]
+                    <span class="self">self</span>.tables[idx]
                         .set(i, value)
                         .expect(<span class="string">&quot;Table type should match and index should be in-bounds&quot;</span>);
                 }
             }
         }
 
-        <span class="macro">ptr::addr_of_mut!</span>(instance.tables[idx])
+        <span class="macro">ptr::addr_of_mut!</span>(<span class="self">self</span>.tables[idx])
     }
 
     <span class="doccomment">/// Get a table by index regardless of whether it is locally-defined or an
     /// imported, foreign table.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, table_index: TableIndex) -&gt; <span class="kw-2">*mut </span>Table {
-        <span class="kw">let </span>(idx, instance) = <span class="self">self</span>.get_defined_table_index_and_instance(table_index);
-        <span class="macro">ptr::addr_of_mut!</span>(instance.tables[idx])
+        <span class="self">self</span>.with_defined_table_index_and_instance(table_index, |idx, instance| {
+            <span class="macro">ptr::addr_of_mut!</span>(instance.tables[idx])
+        })
     }
 
     <span class="doccomment">/// Get a locally-defined table.
@@ -2162,19 +2362,21 @@
         <span class="macro">ptr::addr_of_mut!</span>(<span class="self">self</span>.tables[index])
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_defined_table_index_and_instance(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>with_defined_table_index_and_instance&lt;R&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         index: TableIndex,
-    ) -&gt; (DefinedTableIndex, <span class="kw-2">&amp;mut </span>Instance) {
+        f: <span class="kw">impl </span>FnOnce(DefinedTableIndex, <span class="kw-2">&amp;mut </span>Instance) -&gt; R,
+    ) -&gt; R {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(defined_table_index) = <span class="self">self</span>.module().defined_table_index(index) {
-            (defined_table_index, <span class="self">self</span>)
+            f(defined_table_index, <span class="self">self</span>)
         } <span class="kw">else </span>{
             <span class="kw">let </span>import = <span class="self">self</span>.imported_table(index);
             <span class="kw">unsafe </span>{
-                <span class="kw">let </span>foreign_instance = (<span class="kw-2">*</span>import.vmctx).instance_mut();
-                <span class="kw">let </span>foreign_table_def = <span class="kw-2">&amp;*</span>import.from;
-                <span class="kw">let </span>foreign_table_index = foreign_instance.table_index(foreign_table_def);
-                (foreign_table_index, foreign_instance)
+                Instance::from_vmctx(import.vmctx, |foreign_instance| {
+                    <span class="kw">let </span>foreign_table_def = import.from;
+                    <span class="kw">let </span>foreign_table_index = foreign_instance.table_index(<span class="kw-2">&amp;*</span>foreign_table_def);
+                    f(foreign_table_index, foreign_instance)
+                })
             }
         }
     }
@@ -2302,7 +2504,7 @@
                     }
                 }
                 GlobalInit::RefFunc(f) =&gt; {
-                    <span class="kw-2">*</span>(<span class="kw-2">*</span>to).as_func_ref_mut() = <span class="self">self</span>.get_func_ref(f).unwrap() <span class="kw">as </span><span class="kw-2">*const </span>VMFuncRef;
+                    <span class="kw-2">*</span>(<span class="kw-2">*</span>to).as_func_ref_mut() = <span class="self">self</span>.get_func_ref(f).unwrap();
                 }
                 GlobalInit::RefNullConst =&gt; <span class="kw">match </span>wasm_ty {
                     <span class="comment">// `VMGlobalDefinition::new()` already zeroed out the bits
@@ -2354,45 +2556,21 @@
 }
 
 <span class="doccomment">/// A handle holding an `Instance` of a WebAssembly module.
-</span><span class="attr">#[derive(Hash, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>InstanceHandle {
-    instance: <span class="kw-2">*mut </span>Instance,
-}
-
-<span class="comment">// These are only valid if the `Instance` type is send/sync, hence the
-// assertion below.
-</span><span class="kw">unsafe impl </span>Send <span class="kw">for </span>InstanceHandle {}
-<span class="kw">unsafe impl </span>Sync <span class="kw">for </span>InstanceHandle {}
-
-<span class="kw">fn </span>_assert_send_sync() {
-    <span class="kw">fn </span>_assert&lt;T: Send + Sync&gt;() {}
-    _assert::&lt;Instance&gt;();
+    instance: <span class="prelude-ty">Option</span>&lt;SendSyncPtr&lt;Instance&gt;&gt;,
 }
 
 <span class="kw">impl </span>InstanceHandle {
-    <span class="doccomment">/// Create a new `InstanceHandle` pointing at the instance
-    /// pointed to by the given `VMContext` pointer.
-    ///
-    /// # Safety
-    /// This is unsafe because it doesn&#39;t work on just any `VMContext`, it must
-    /// be a `VMContext` allocated as part of an `Instance`.
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub unsafe fn </span>from_vmctx(vmctx: <span class="kw-2">*mut </span>VMContext) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>instance = (<span class="kw-2">&amp;mut *</span>vmctx).instance();
-        <span class="self">Self </span>{
-            instance: instance <span class="kw">as </span><span class="kw-2">*const </span>Instance <span class="kw">as </span><span class="kw-2">*mut </span>Instance,
-        }
-    }
-
-    <span class="doccomment">/// Return a reference to the vmctx used by compiled wasm code.
-    </span><span class="kw">pub fn </span>vmctx(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>VMContext {
-        <span class="self">self</span>.instance().vmctx()
+    <span class="doccomment">/// Creates an &quot;empty&quot; instance handle which internally has a null pointer
+    /// to an instance.
+    </span><span class="kw">pub fn </span>null() -&gt; InstanceHandle {
+        InstanceHandle { instance: <span class="prelude-val">None </span>}
     }
 
     <span class="doccomment">/// Return a raw pointer to the vmctx used by compiled wasm code.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>vmctx_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>VMContext {
-        <span class="self">self</span>.instance().vmctx_ptr()
+    </span><span class="kw">pub fn </span>vmctx(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>VMContext {
+        <span class="self">self</span>.instance().vmctx()
     }
 
     <span class="doccomment">/// Return a reference to a module.
@@ -2444,16 +2622,6 @@
         <span class="self">self</span>.instance().host_state()
     }
 
-    <span class="doccomment">/// Get a memory defined locally within this module.
-    </span><span class="kw">pub fn </span>get_defined_memory(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: DefinedMemoryIndex) -&gt; <span class="kw-2">*mut </span>Memory {
-        <span class="self">self</span>.instance_mut().get_defined_memory(index)
-    }
-
-    <span class="doccomment">/// Return the table index for the given `VMTableDefinition` in this instance.
-    </span><span class="kw">pub unsafe fn </span>table_index(<span class="kw-2">&amp;mut </span><span class="self">self</span>, table: <span class="kw-2">&amp;</span>VMTableDefinition) -&gt; DefinedTableIndex {
-        <span class="self">self</span>.instance_mut().table_index(table)
-    }
-
     <span class="doccomment">/// Get a table defined locally within this module.
     </span><span class="kw">pub fn </span>get_defined_table(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: DefinedTableIndex) -&gt; <span class="kw-2">*mut </span>Table {
         <span class="self">self</span>.instance_mut().get_defined_table(index)
@@ -2473,11 +2641,11 @@
     <span class="doccomment">/// Return a reference to the contained `Instance`.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>instance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Instance {
-        <span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span>(<span class="self">self</span>.instance <span class="kw">as </span><span class="kw-2">*const </span>Instance) }
+        <span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span><span class="self">self</span>.instance.unwrap().as_ptr() }
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>instance_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Instance {
-        <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span><span class="self">self</span>.instance }
+        <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span><span class="self">self</span>.instance.unwrap().as_ptr() }
     }
 
     <span class="doccomment">/// Returns the `Store` pointer that was stored on creation

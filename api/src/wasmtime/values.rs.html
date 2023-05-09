@@ -401,14 +401,14 @@
             Val::ExternRef(e) =&gt; {
                 <span class="kw">let </span>externref = <span class="kw">match </span>e {
                     <span class="prelude-val">Some</span>(e) =&gt; e.to_raw(store),
-                    <span class="prelude-val">None </span>=&gt; <span class="number">0</span>,
+                    <span class="prelude-val">None </span>=&gt; ptr::null_mut(),
                 };
                 ValRaw::externref(externref)
             }
             Val::FuncRef(f) =&gt; {
                 <span class="kw">let </span>funcref = <span class="kw">match </span>f {
                     <span class="prelude-val">Some</span>(f) =&gt; f.to_raw(store),
-                    <span class="prelude-val">None </span>=&gt; <span class="number">0</span>,
+                    <span class="prelude-val">None </span>=&gt; ptr::null_mut(),
                 };
                 ValRaw::funcref(funcref)
             }

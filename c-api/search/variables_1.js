@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['externref_0',['externref',['../unionwasmtime__valunion.html#a5e33b2d761242050607a69487effa88d',1,'wasmtime_valunion::externref()'],['../unionwasmtime__val__raw.html#a24e8a4c16461b15c572ce3da327c7dd9',1,'wasmtime_val_raw::externref()']]]
+  ['externref_0',['externref',['../unionwasmtime__valunion.html#a5e33b2d761242050607a69487effa88d',1,'wasmtime_valunion::externref()'],['../unionwasmtime__val__raw.html#a1b205573f52d826b06e858a43af4190d',1,'wasmtime_val_raw::externref()']]]
 ];

@@ -571,16 +571,26 @@
 <a href="#571" id="571">571</a>
 <a href="#572" id="572">572</a>
 <a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Memory management for tables.
 //!
 //! `Table` is to WebAssembly tables what `LinearMemory` is to WebAssembly linear memories.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::vmcontext::{VMFuncRef, VMTableDefinition};
-<span class="kw">use crate</span>::{Store, VMExternRef};
+<span class="kw">use crate</span>::{SendSyncPtr, Store, VMExternRef};
 <span class="kw">use </span>anyhow::{bail, format_err, Error, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span>sptr::Strict;
 <span class="kw">use </span>std::convert::{TryFrom, TryInto};
 <span class="kw">use </span>std::ops::Range;
-<span class="kw">use </span>std::ptr;
+<span class="kw">use </span>std::ptr::{<span class="self">self</span>, NonNull};
 <span class="kw">use </span>wasmtime_environ::{TablePlan, Trap, WasmType, FUNCREF_INIT_BIT, FUNCREF_MASK};
 
 <span class="doccomment">/// An element going into or coming out of a table.
@@ -618,13 +628,17 @@
     /// This is unsafe as it will *not* clone any externref, leaving the reference count unchanged.
     ///
     /// This should only be used if the raw pointer is no longer in use.
-    </span><span class="kw">unsafe fn </span>from_table_value(ty: TableElementType, ptr: usize) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">unsafe fn </span>from_table_value(ty: TableElementType, ptr: TableValue) -&gt; <span class="self">Self </span>{
         <span class="kw">match </span>(ty, ptr) {
-            (TableElementType::Func, <span class="number">0</span>) =&gt; <span class="self">Self</span>::UninitFunc,
-            (TableElementType::Func, ptr) =&gt; <span class="self">Self</span>::FuncRef((ptr &amp; FUNCREF_MASK) <span class="kw">as _</span>),
-            (TableElementType::Extern, <span class="number">0</span>) =&gt; <span class="self">Self</span>::ExternRef(<span class="prelude-val">None</span>),
-            (TableElementType::Extern, ptr) =&gt; {
-                <span class="self">Self</span>::ExternRef(<span class="prelude-val">Some</span>(VMExternRef::from_raw(ptr <span class="kw">as </span><span class="kw-2">*mut </span>u8)))
+            (TableElementType::Func, <span class="prelude-val">None</span>) =&gt; <span class="self">Self</span>::UninitFunc,
+            (TableElementType::Func, <span class="prelude-val">Some</span>(ptr)) =&gt; {
+                <span class="kw">let </span>ptr = ptr.as_ptr();
+                <span class="kw">let </span>masked = Strict::map_addr(ptr, |a| a &amp; FUNCREF_MASK);
+                <span class="self">Self</span>::FuncRef(masked.cast())
+            }
+            (TableElementType::Extern, <span class="prelude-val">None</span>) =&gt; <span class="self">Self</span>::ExternRef(<span class="prelude-val">None</span>),
+            (TableElementType::Extern, <span class="prelude-val">Some</span>(ptr)) =&gt; {
+                <span class="self">Self</span>::ExternRef(<span class="prelude-val">Some</span>(VMExternRef::from_raw(ptr.as_ptr())))
             }
         }
     }
@@ -634,13 +648,13 @@
     /// # Safety
     ///
     /// This is unsafe as it will clone any externref, incrementing the reference count.
-    </span><span class="kw">unsafe fn </span>clone_from_table_value(ty: TableElementType, ptr: usize) -&gt; <span class="self">Self </span>{
-        <span class="kw">match </span>(ty, ptr) {
-            (TableElementType::Func, <span class="number">0</span>) =&gt; <span class="self">Self</span>::UninitFunc,
-            (TableElementType::Func, ptr) =&gt; <span class="self">Self</span>::FuncRef((ptr &amp; FUNCREF_MASK) <span class="kw">as _</span>),
-            (TableElementType::Extern, <span class="number">0</span>) =&gt; <span class="self">Self</span>::ExternRef(<span class="prelude-val">None</span>),
-            (TableElementType::Extern, ptr) =&gt; {
-                <span class="self">Self</span>::ExternRef(<span class="prelude-val">Some</span>(VMExternRef::clone_from_raw(ptr <span class="kw">as </span><span class="kw-2">*mut </span>u8)))
+    </span><span class="kw">unsafe fn </span>clone_from_table_value(ty: TableElementType, ptr: TableValue) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span>ty {
+            <span class="comment">// Functions have no ownership, so defer to the prior method.
+            </span>TableElementType::Func =&gt; TableElement::from_table_value(ty, ptr),
+
+            TableElementType::Extern =&gt; {
+                <span class="self">Self</span>::ExternRef(ptr.map(|p| VMExternRef::clone_from_raw(p.as_ptr())))
             }
         }
     }
@@ -654,12 +668,14 @@
     /// This is unsafe as it will consume any underlying externref into a raw pointer without modifying
     /// the reference count.
     ///
-    /// Use `from_raw` to properly drop any table elements stored as raw pointers.
-    </span><span class="kw">unsafe fn </span>into_table_value(<span class="self">self</span>) -&gt; usize {
+    </span><span class="kw">unsafe fn </span>into_table_value(<span class="self">self</span>) -&gt; TableValue {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::UninitFunc =&gt; <span class="number">0</span>,
-            <span class="self">Self</span>::FuncRef(e) =&gt; (e <span class="kw">as </span>usize) | FUNCREF_INIT_BIT,
-            <span class="self">Self</span>::ExternRef(e) =&gt; e.map_or(<span class="number">0</span>, |e| e.into_raw() <span class="kw">as </span>usize),
+            <span class="self">Self</span>::UninitFunc =&gt; <span class="prelude-val">None</span>,
+            <span class="self">Self</span>::FuncRef(e) =&gt; {
+                <span class="kw">let </span>tagged = Strict::map_addr(e, |e| e | FUNCREF_INIT_BIT);
+                <span class="prelude-val">Some</span>(NonNull::new(tagged.cast()).unwrap().into())
+            }
+            <span class="self">Self</span>::ExternRef(e) =&gt; e.map(|e| NonNull::new(e.into_raw()).unwrap().into()),
         }
     }
 
@@ -674,10 +690,10 @@
     /// # Safety
     ///
     /// The same warnings as for `into_table_values()` apply.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>into_ref_asserting_initialized(<span class="self">self</span>) -&gt; usize {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>into_ref_asserting_initialized(<span class="self">self</span>) -&gt; <span class="kw-2">*mut </span>u8 {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::FuncRef(e) =&gt; e <span class="kw">as </span>usize,
-            <span class="self">Self</span>::ExternRef(e) =&gt; e.map_or(<span class="number">0</span>, |e| e.into_raw() <span class="kw">as </span>usize),
+            <span class="self">Self</span>::FuncRef(e) =&gt; e.cast(),
+            <span class="self">Self</span>::ExternRef(e) =&gt; e.map_or(ptr::null_mut(), |e| e.into_raw()),
             <span class="self">Self</span>::UninitFunc =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Uninitialized table element value outside of table slot&quot;</span>),
         }
     }
@@ -717,7 +733,7 @@
     </span>Static {
         <span class="doccomment">/// Where data for this table is stored. The length of this list is the
         /// maximum size of the table.
-        </span>data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>[usize],
+        </span>data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>[TableValue],
         <span class="doccomment">/// The current size of the table.
         </span>size: u32,
         <span class="doccomment">/// The type of this table.
@@ -728,13 +744,15 @@
     </span>Dynamic {
         <span class="doccomment">/// Dynamically managed storage space for this table. The length of this
         /// vector is the current size of the table.
-        </span>elements: Vec&lt;usize&gt;,
+        </span>elements: Vec&lt;TableValue&gt;,
         <span class="doccomment">/// The type of this table.
         </span>ty: TableElementType,
         <span class="doccomment">/// Maximum size that `elements` can grow to.
         </span>maximum: <span class="prelude-ty">Option</span>&lt;u32&gt;,
     },
 }
+
+<span class="kw">pub type </span>TableValue = <span class="prelude-ty">Option</span>&lt;SendSyncPtr&lt;u8&gt;&gt;;
 
 <span class="kw">fn </span>wasm_to_table_type(ty: WasmType) -&gt; <span class="prelude-ty">Result</span>&lt;TableElementType&gt; {
     <span class="kw">match </span>ty {
@@ -748,7 +766,7 @@
     <span class="doccomment">/// Create a new dynamic (movable) table instance for the specified table plan.
     </span><span class="kw">pub fn </span>new_dynamic(plan: <span class="kw-2">&amp;</span>TablePlan, store: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Store) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="self">Self</span>::limit_new(plan, store)<span class="question-mark">?</span>;
-        <span class="kw">let </span>elements = <span class="macro">vec!</span>[<span class="number">0</span>; plan.table.minimum <span class="kw">as </span>usize];
+        <span class="kw">let </span>elements = <span class="macro">vec!</span>[<span class="prelude-val">None</span>; plan.table.minimum <span class="kw">as </span>usize];
         <span class="kw">let </span>ty = wasm_to_table_type(plan.table.wasm_ty)<span class="question-mark">?</span>;
         <span class="kw">let </span>maximum = plan.table.maximum;
 
@@ -762,7 +780,7 @@
     <span class="doccomment">/// Create a new static (immovable) table instance for the specified table plan.
     </span><span class="kw">pub fn </span>new_static(
         plan: <span class="kw-2">&amp;</span>TablePlan,
-        data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>[usize],
+        data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>[TableValue],
         store: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Store,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="self">Self</span>::limit_new(plan, store)<span class="question-mark">?</span>;
@@ -933,11 +951,11 @@
             Table::Static { size, data, .. } =&gt; {
                 <span class="macro">debug_assert!</span>(data[<span class="kw-2">*</span>size <span class="kw">as </span>usize..new_size <span class="kw">as </span>usize]
                     .iter()
-                    .all(|x| <span class="kw-2">*</span>x == <span class="number">0</span>));
+                    .all(|x| x.is_none()));
                 <span class="kw-2">*</span>size = new_size;
             }
             Table::Dynamic { elements, .. } =&gt; {
-                elements.resize(new_size <span class="kw">as </span>usize, <span class="number">0</span>);
+                elements.resize(new_size <span class="kw">as </span>usize, <span class="prelude-val">None</span>);
             }
         }
 
@@ -1038,21 +1056,21 @@
         }
     }
 
-    <span class="kw">fn </span>elements(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[usize] {
+    <span class="kw">fn </span>elements(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[TableValue] {
         <span class="kw">match </span><span class="self">self </span>{
             Table::Static { data, size, .. } =&gt; <span class="kw-2">&amp;</span>data[..<span class="kw-2">*</span>size <span class="kw">as </span>usize],
             Table::Dynamic { elements, .. } =&gt; <span class="kw-2">&amp;</span>elements[..],
         }
     }
 
-    <span class="kw">fn </span>elements_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[usize] {
+    <span class="kw">fn </span>elements_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[TableValue] {
         <span class="kw">match </span><span class="self">self </span>{
             Table::Static { data, size, .. } =&gt; <span class="kw-2">&amp;mut </span>data[..<span class="kw-2">*</span>size <span class="kw">as </span>usize],
             Table::Dynamic { elements, .. } =&gt; <span class="kw-2">&amp;mut </span>elements[..],
         }
     }
 
-    <span class="kw">fn </span>set_raw(ty: TableElementType, elem: <span class="kw-2">&amp;mut </span>usize, val: TableElement) {
+    <span class="kw">fn </span>set_raw(ty: TableElementType, elem: <span class="kw-2">&amp;mut </span>TableValue, val: TableElement) {
         <span class="kw">unsafe </span>{
             <span class="kw">let </span>old = <span class="kw-2">*</span>elem;
             <span class="kw-2">*</span>elem = val.into_table_value();
