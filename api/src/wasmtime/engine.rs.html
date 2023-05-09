@@ -776,7 +776,7 @@
 
 <span class="kw">struct </span>EngineInner {
     config: Config,
-    <span class="attr">#[cfg(compiler)]
+    <span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
     </span>compiler: Box&lt;<span class="kw">dyn </span>wasmtime_environ::Compiler&gt;,
     allocator: Box&lt;<span class="kw">dyn </span>InstanceAllocator + Send + Sync&gt;,
     profiler: Box&lt;<span class="kw">dyn </span>ProfilingAgent&gt;,
@@ -813,7 +813,7 @@
         <span class="kw">let </span>config = config.clone();
         config.validate()<span class="question-mark">?</span>;
 
-        <span class="attr">#[cfg(compiler)]
+        <span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
         </span><span class="kw">let </span>(config, compiler) = config.build_compiler()<span class="question-mark">?</span>;
 
         <span class="kw">let </span>allocator = config.build_allocator()<span class="question-mark">?</span>;
@@ -821,7 +821,7 @@
 
         <span class="prelude-val">Ok</span>(Engine {
             inner: Arc::new(EngineInner {
-                <span class="attr">#[cfg(compiler)]
+                <span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
                 </span>compiler,
                 config,
                 allocator,
@@ -861,7 +861,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner.config
     }
 
-    <span class="attr">#[cfg(compiler)]
+    <span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>compiler(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn </span>wasmtime_environ::Compiler {
         <span class="kw-2">&amp;*</span><span class="self">self</span>.inner.compiler
     }
@@ -945,8 +945,8 @@
     ///
     /// [binary]: https://webassembly.github.io/spec/core/binary/index.html
     /// [text]: https://webassembly.github.io/spec/core/text/index.html
-    </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))]
     </span><span class="kw">pub fn </span>precompile_module(<span class="kw-2">&amp;</span><span class="self">self</span>, bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;&gt; {
         <span class="attr">#[cfg(feature = <span class="string">&quot;wat&quot;</span>)]
         </span><span class="kw">let </span>bytes = wat::parse_bytes(<span class="kw-2">&amp;</span>bytes)<span class="question-mark">?</span>;
@@ -956,9 +956,9 @@
 
     <span class="doccomment">/// Same as [`Engine::precompile_module`] except for a
     /// [`Component`](crate::component::Component)
-    </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;component-model&quot;</span>)]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))]
+    #[cfg(feature = <span class="string">&quot;component-model&quot;</span>)]
     #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;component-model&quot;</span>)))]
     </span><span class="kw">pub fn </span>precompile_component(<span class="kw-2">&amp;</span><span class="self">self</span>, bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;&gt; {
         <span class="attr">#[cfg(feature = <span class="string">&quot;wat&quot;</span>)]
@@ -973,7 +973,7 @@
     /// are compatible with a different [`Engine`] instance only if the two engines use
     /// compatible [`Config`]s. If this Hash matches between two [`Engine`]s then binaries
     /// from one are guaranteed to deserialize in the other.
-    </span><span class="attr">#[cfg(compiler)]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
     #[cfg_attr(nightlydoc, doc(cfg(feature = <span class="string">&quot;cranelift&quot;</span>)))] </span><span class="comment">// see build.rs
     </span><span class="kw">pub fn </span>precompile_compatibility_hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>std::hash::Hash + <span class="lifetime">&#39;_ </span>{
         <span class="kw">crate</span>::module::HashedEngineCompileEnv(<span class="self">self</span>)
@@ -1028,11 +1028,11 @@
     /// and/or running code for.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>target(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; target_lexicon::Triple {
         <span class="comment">// If a compiler is configured, use that target.
-        </span><span class="attr">#[cfg(compiler)]
+        </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
         </span><span class="kw">return </span><span class="self">self</span>.compiler().triple().clone();
 
         <span class="comment">// ... otherwise it&#39;s the native target
-        </span><span class="attr">#[cfg(not(compiler))]
+        </span><span class="attr">#[cfg(not(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>)))]
         </span><span class="kw">return </span>target_lexicon::Triple::host();
     }
 
@@ -1052,7 +1052,7 @@
     }
 
     <span class="kw">fn </span>_check_compatible_with_native_host(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), String&gt; {
-        <span class="attr">#[cfg(compiler)]
+        <span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
         </span>{
             <span class="kw">let </span>compiler = <span class="self">self</span>.compiler();
 
@@ -1305,12 +1305,12 @@
         ))
     }
 
-    <span class="attr">#[cfg(compiler)]
+    <span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>append_compiler_info(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: <span class="kw-2">&amp;mut </span>Object&lt;<span class="lifetime">&#39;_</span>&gt;) {
         serialization::append_compiler_info(<span class="self">self</span>, obj);
     }
 
-    <span class="attr">#[cfg(compiler)]
+    <span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>append_bti(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: <span class="kw-2">&amp;mut </span>Object&lt;<span class="lifetime">&#39;_</span>&gt;) {
         <span class="kw">let </span>section = obj.add_section(
             obj.segment_name(StandardSegment::Data).to_vec(),

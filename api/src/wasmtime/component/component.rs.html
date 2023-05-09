@@ -613,8 +613,8 @@
     /// provided.
     </span><span class="comment">//
     // FIXME: need to write more docs here.
-    </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))]
     </span><span class="kw">pub fn </span>new(engine: <span class="kw-2">&amp;</span>Engine, bytes: <span class="kw">impl </span>AsRef&lt;[u8]&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Component&gt; {
         <span class="kw">let </span>bytes = bytes.as_ref();
         <span class="attr">#[cfg(feature = <span class="string">&quot;wat&quot;</span>)]
@@ -626,8 +626,8 @@
     /// by `file`.
     </span><span class="comment">//
     // FIXME: need to write more docs here.
-    </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))]
     </span><span class="kw">pub fn </span>from_file(engine: <span class="kw-2">&amp;</span>Engine, file: <span class="kw">impl </span>AsRef&lt;Path&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Component&gt; {
         <span class="kw">match </span><span class="self">Self</span>::new(
             engine,
@@ -652,8 +652,8 @@
     /// provided.
     </span><span class="comment">//
     // FIXME: need to write more docs here.
-    </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))]
     </span><span class="kw">pub fn </span>from_binary(engine: <span class="kw-2">&amp;</span>Engine, binary: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Component&gt; {
         engine
             .check_compatible_with_native_host()
@@ -697,7 +697,7 @@
     /// any necessary extra functions required for operation with components.
     /// The output artifact here is the serialized object file contained within
     /// an owned mmap along with metadata about the compilation itself.
-    </span><span class="attr">#[cfg(compiler)]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>build_artifacts(
         engine: <span class="kw-2">&amp;</span>Engine,
         binary: <span class="kw-2">&amp;</span>[u8],

@@ -653,7 +653,7 @@
 ///
 /// The blob of bytes is inserted into the object file specified to become part
 /// of the final compiled artifact.
-</span><span class="attr">#[cfg(compiler)]
+</span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
 </span><span class="kw">pub fn </span>append_compiler_info(engine: <span class="kw-2">&amp;</span>Engine, obj: <span class="kw-2">&amp;mut </span>Object&lt;<span class="lifetime">&#39;_</span>&gt;) {
     <span class="kw">let </span>section = obj.add_section(
         obj.segment_name(StandardSegment::Data).to_vec(),
@@ -784,7 +784,7 @@
 }
 
 <span class="kw">impl </span>Metadata {
-    <span class="attr">#[cfg(compiler)]
+    <span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
     </span><span class="kw">fn </span>new(engine: <span class="kw-2">&amp;</span>Engine) -&gt; Metadata {
         <span class="kw">let </span>wasmparser::WasmFeatures {
             reference_types,

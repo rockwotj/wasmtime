@@ -2710,8 +2710,8 @@
     /// documentation.
     ///
     /// [`Trap`]: crate::Trap
-    </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))]
     </span><span class="kw">pub fn </span>new&lt;T&gt;(
         store: <span class="kw">impl </span>AsContextMut&lt;Data = T&gt;,
         ty: FuncType,
@@ -2748,8 +2748,8 @@
     /// This function is not safe because it&#39;s not known at compile time that
     /// the `func` provided correctly interprets the argument types provided to
     /// it, or that the results it produces will be of the correct type.
-    </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))]
     </span><span class="kw">pub unsafe fn </span>new_unchecked&lt;T&gt;(
         <span class="kw-2">mut </span>store: <span class="kw">impl </span>AsContextMut&lt;Data = T&gt;,
         ty: FuncType,
@@ -4477,7 +4477,7 @@
 
 <span class="kw">impl </span>HostFunc {
     <span class="doccomment">/// Analog of [`Func::new`]
-    </span><span class="attr">#[cfg(compiler)]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
     </span><span class="kw">pub fn </span>new&lt;T&gt;(
         engine: <span class="kw-2">&amp;</span>Engine,
         ty: FuncType,
@@ -4492,7 +4492,7 @@
     }
 
     <span class="doccomment">/// Analog of [`Func::new_unchecked`]
-    </span><span class="attr">#[cfg(compiler)]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
     </span><span class="kw">pub unsafe fn </span>new_unchecked&lt;T&gt;(
         engine: <span class="kw-2">&amp;</span>Engine,
         ty: FuncType,

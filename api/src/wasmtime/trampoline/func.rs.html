@@ -205,7 +205,7 @@
     }
 }
 
-<span class="attr">#[cfg(compiler)]
+<span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
 </span><span class="kw">pub fn </span>create_array_call_function&lt;F&gt;(
     ft: <span class="kw-2">&amp;</span>FuncType,
     func: F,

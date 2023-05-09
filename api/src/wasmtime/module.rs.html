@@ -1887,8 +1887,8 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))]
     </span><span class="kw">pub fn </span>new(engine: <span class="kw-2">&amp;</span>Engine, bytes: <span class="kw">impl </span>AsRef&lt;[u8]&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Module&gt; {
         <span class="kw">let </span>bytes = bytes.as_ref();
         <span class="attr">#[cfg(feature = <span class="string">&quot;wat&quot;</span>)]
@@ -1924,8 +1924,8 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))]
     </span><span class="kw">pub fn </span>from_file(engine: <span class="kw-2">&amp;</span>Engine, file: <span class="kw">impl </span>AsRef&lt;Path&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Module&gt; {
         <span class="kw">match </span><span class="self">Self</span>::new(
             engine,
@@ -1977,8 +1977,8 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))]
     </span><span class="kw">pub fn </span>from_binary(engine: <span class="kw-2">&amp;</span>Engine, binary: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Module&gt; {
         engine
             .check_compatible_with_native_host()
@@ -2049,8 +2049,8 @@
     /// This is because the file is mapped into memory and lazily loaded pages
     /// reflect the current state of the file, not necessarily the origianl
     /// state of the file.
-    </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))]
     </span><span class="kw">pub unsafe fn </span>from_trusted_file(engine: <span class="kw-2">&amp;</span>Engine, file: <span class="kw">impl </span>AsRef&lt;Path&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Module&gt; {
         <span class="kw">let </span>mmap = MmapVec::from_file(file.as_ref())<span class="question-mark">?</span>;
         <span class="kw">if </span><span class="kw-2">&amp;</span>mmap[<span class="number">0</span>..<span class="number">4</span>] == <span class="string">b&quot;\x7fELF&quot; </span>{
@@ -2061,7 +2061,7 @@
         Module::new(engine, <span class="kw-2">&amp;*</span>mmap)
     }
 
-    <span class="attr">#[cfg(compiler)]
+    <span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>compile_wasm_to_native_trampolines(
         engine: <span class="kw-2">&amp;</span>Engine,
         translations: <span class="kw-2">&amp;</span>[ModuleTranslation&lt;<span class="lifetime">&#39;_</span>&gt;],
@@ -2111,7 +2111,7 @@
     /// Additionally compilation returns an `Option` here which is always
     /// `Some`, notably compiled metadata about the module in addition to the
     /// type information found within.
-    </span><span class="attr">#[cfg(compiler)]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>build_artifacts(
         engine: <span class="kw-2">&amp;</span>Engine,
         wasm: <span class="kw-2">&amp;</span>[u8],
@@ -2187,7 +2187,7 @@
         <span class="prelude-val">Ok</span>((mmap, <span class="prelude-val">Some</span>((info, types))))
     }
 
-    <span class="attr">#[cfg(compiler)]
+    <span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>compile_functions(
         engine: <span class="kw-2">&amp;</span>Engine,
         translation: <span class="kw-2">&amp;mut </span>ModuleTranslation&lt;<span class="lifetime">&#39;_</span>&gt;,
@@ -2458,8 +2458,8 @@
     /// this method, but if a module is both instantiated and serialized then
     /// this method can be useful to get the serialized version without
     /// compiling twice.
-    </span><span class="attr">#[cfg(compiler)]
-    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))] </span><span class="comment">// see build.rs
+    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
+    #[cfg_attr(nightlydoc, doc(cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))))]
     </span><span class="kw">pub fn </span>serialize(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;&gt; {
         <span class="comment">// The current representation of compiled modules within a compiled
         // component means that it cannot be serialized. The mmap returned here
@@ -2865,10 +2865,10 @@
 /// The hash computed for this structure is used to key the global wasmtime
 /// cache and dictates whether artifacts are reused. Consequently the contents
 /// of this hash dictate when artifacts are or aren&#39;t re-used.
-</span><span class="attr">#[cfg(compiler)]
+</span><span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>HashedEngineCompileEnv&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw">pub </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Engine);
 
-<span class="attr">#[cfg(compiler)]
+<span class="attr">#[cfg(any(feature = <span class="string">&quot;cranelift&quot;</span>, feature = <span class="string">&quot;winch&quot;</span>))]
 </span><span class="kw">impl </span>std::hash::Hash <span class="kw">for </span>HashedEngineCompileEnv&lt;<span class="lifetime">&#39;_</span>&gt; {
     <span class="kw">fn </span>hash&lt;H: std::hash::Hasher&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, hasher: <span class="kw-2">&amp;mut </span>H) {
         <span class="comment">// Hash the compiler&#39;s state based on its target and configuration.
