@@ -772,11 +772,6 @@
 <a href="#772" id="772">772</a>
 <a href="#773" id="773">773</a>
 <a href="#774" id="774">774</a>
-<a href="#775" id="775">775</a>
-<a href="#776" id="776">776</a>
-<a href="#777" id="777">777</a>
-<a href="#778" id="778">778</a>
-<a href="#779" id="779">779</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Contains the common Wasmtime command line interface (CLI) flags.
 
 </span><span class="attr">#![deny(trivial_numeric_casts, unused_extern_crates, unstable_features)]
@@ -799,7 +794,7 @@
 <span class="kw">use </span>clap::Parser;
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::path::PathBuf;
-<span class="kw">use </span>wasmtime::{Config, ProfilingStrategy, Strategy};
+<span class="kw">use </span>wasmtime::{Config, Strategy};
 
 <span class="kw">pub const </span>SUPPORTED_WASM_FEATURES: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span>str, <span class="kw-2">&amp;</span>str)] = <span class="kw-2">&amp;</span>[
     (<span class="string">&quot;all&quot;</span>, <span class="string">&quot;enables all supported WebAssembly features&quot;</span>),
@@ -912,10 +907,6 @@
     <span class="doccomment">/// Enable or disable WASI modules
     </span><span class="attr">#[clap(long, value_name = <span class="string">&quot;MODULE,MODULE,...&quot;</span>, parse(try_from_str = parse_wasi_modules))]
     </span><span class="kw">pub </span>wasi_modules: <span class="prelude-ty">Option</span>&lt;WasiModules&gt;,
-
-    <span class="doccomment">/// Profiling strategy (valid options are: perfmap, jitdump, vtune)
-    </span><span class="attr">#[clap(long)]
-    </span><span class="kw">pub </span>profile: <span class="prelude-ty">Option</span>&lt;ProfilingStrategy&gt;,
 
     <span class="doccomment">/// Generate jitdump file (supported on --features=profiling build)
     /// Run optimization passes on translated functions, on by default
@@ -1064,7 +1055,6 @@
             .cranelift_debug_verifier(<span class="self">self</span>.enable_cranelift_debug_verifier)
             .debug_info(<span class="self">self</span>.debug_info)
             .cranelift_opt_level(<span class="self">self</span>.opt_level())
-            .profiler(<span class="self">self</span>.profile.unwrap_or(ProfilingStrategy::None))
             .cranelift_nan_canonicalization(<span class="self">self</span>.enable_cranelift_nan_canonicalization);
 
         <span class="self">self</span>.enable_wasm_features(<span class="kw-2">&amp;mut </span>config);
