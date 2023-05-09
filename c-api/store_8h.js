@@ -12,6 +12,7 @@ var store_8h =
     [ "wasmtime_context_set_wasi", "store_8h.html#aef492fffba97f551b69c360bdaa32d91", null ],
     [ "wasmtime_store_context", "store_8h.html#ad607d829009b7a087af7480ca0685fe2", null ],
     [ "wasmtime_store_delete", "store_8h.html#ac8d51fd98a3c469b3afadc35b31c9bdd", null ],
+    [ "wasmtime_store_epoch_deadline_callback", "store_8h.html#ac9d060a28ce58f4c1cbc3e375f49a064", null ],
     [ "wasmtime_store_limiter", "store_8h.html#a0d8cfde96e219dd23d7c65f3cac2e15a", null ],
     [ "wasmtime_store_new", "store_8h.html#ae8da91047bdee5022e37bcfe76024779", null ]
 ];

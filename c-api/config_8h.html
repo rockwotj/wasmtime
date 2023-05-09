@@ -567,7 +567,7 @@ Functions</h2></td></tr>
 
 <p>Whether or not epoch-based interruption is enabled for generated code. </p>
 <p >This setting is <code>false</code> by default. When enabled wasm code will check the current epoch periodically and abort if the current epoch is beyond a store-configured limit.</p>
-<p >Note that when this setting is enabled all stores will immediately trap and need to have their epoch deadline otherwise configured with <a class="el" href="store_8h.html#ad11ea4baef99c02b709d8e74725b0f50" title="Configures the relative deadline at which point WebAssembly code will trap.">wasmtime_context_set_epoch_deadline</a>.</p>
+<p >Note that when this setting is enabled all stores will immediately trap and need to have their epoch deadline otherwise configured with <a class="el" href="store_8h.html#ad11ea4baef99c02b709d8e74725b0f50" title="Configures the relative deadline at which point WebAssembly code will trap or invoke the callback fun...">wasmtime_context_set_epoch_deadline</a>.</p>
 <p >Note that the current epoch is engine-local and can be incremented with <a class="el" href="engine_8h.html#a99beff342966902917f1b2e78d63f40e" title="Increments the engine-local epoch variable.">wasmtime_engine_increment_epoch</a>. </p>
 
 </div>

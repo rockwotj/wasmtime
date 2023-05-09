@@ -144,8 +144,11 @@ void *&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_context_ge
 <tr class="memdesc:aef492fffba97f551b69c360bdaa32d91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures WASI state within the specified store.  <a href="store_8h.html#aef492fffba97f551b69c360bdaa32d91">More...</a><br /></td></tr>
 <tr class="separator:aef492fffba97f551b69c360bdaa32d91"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad11ea4baef99c02b709d8e74725b0f50"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="store_8h.html#ad11ea4baef99c02b709d8e74725b0f50">wasmtime_context_set_epoch_deadline</a> (<a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *context, uint64_t ticks_beyond_current)</td></tr>
-<tr class="memdesc:ad11ea4baef99c02b709d8e74725b0f50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures the relative deadline at which point WebAssembly code will trap.  <a href="store_8h.html#ad11ea4baef99c02b709d8e74725b0f50">More...</a><br /></td></tr>
+<tr class="memdesc:ad11ea4baef99c02b709d8e74725b0f50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures the relative deadline at which point WebAssembly code will trap or invoke the callback function.  <a href="store_8h.html#ad11ea4baef99c02b709d8e74725b0f50">More...</a><br /></td></tr>
 <tr class="separator:ad11ea4baef99c02b709d8e74725b0f50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9d060a28ce58f4c1cbc3e375f49a064"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="store_8h.html#ac9d060a28ce58f4c1cbc3e375f49a064">wasmtime_store_epoch_deadline_callback</a> (<a class="el" href="store_8h.html#a173db46be4eb6fbb452b1bb2140dadad">wasmtime_store_t</a> *store, <a class="el" href="error_8h.html#a6df4cddb88cff2bfdeecf8bba560af2c">wasmtime_error_t</a> *(*func)(<a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *, void *, uint64_t *), void *data)</td></tr>
+<tr class="memdesc:ac9d060a28ce58f4c1cbc3e375f49a064"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures epoch deadline callback to C function.  <a href="store_8h.html#ac9d060a28ce58f4c1cbc3e375f49a064">More...</a><br /></td></tr>
+<tr class="separator:ac9d060a28ce58f4c1cbc3e375f49a064"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Wasmtime definition of a "store". </p>
@@ -332,9 +335,9 @@ void *&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_context_ge
       </table>
 </div><div class="memdoc">
 
-<p>Configures the relative deadline at which point WebAssembly code will trap. </p>
-<p >This function configures the store-local epoch deadline after which point WebAssembly code will trap.</p>
-<p >See also <a class="el" href="config_8h.html#acff2c4d7a58fc2355dd4f75ea3b0a475" title="Whether or not epoch-based interruption is enabled for generated code.">wasmtime_config_epoch_interruption_set</a>. </p>
+<p>Configures the relative deadline at which point WebAssembly code will trap or invoke the callback function. </p>
+<p >This function configures the store-local epoch deadline after which point WebAssembly code will trap or invoke the callback function.</p>
+<p >See also <a class="el" href="config_8h.html#acff2c4d7a58fc2355dd4f75ea3b0a475" title="Whether or not epoch-based interruption is enabled for generated code.">wasmtime_config_epoch_interruption_set</a> and <a class="el" href="store_8h.html#ac9d060a28ce58f4c1cbc3e375f49a064" title="Configures epoch deadline callback to C function.">wasmtime_store_epoch_deadline_callback</a>. </p>
 
 </div>
 </div>
@@ -367,6 +370,44 @@ void *&#160;</td><td class="memItemRight" valign="bottom"><b>wasmtime_context_ge
 <p>Configures WASI state within the specified store. </p>
 <p >This function is required if <a class="el" href="linker_8h.html#a359c5bee0b01bd7b11aeef0d87710367" title="Defines WASI functions in this linker.">wasmtime_linker_define_wasi</a> is called. This will configure the WASI state for instances defined within this store to the configuration specified.</p>
 <p >This function does not take ownership of <code>context</code> but it does take ownership of <code>wasi</code>. The caller should no longer use <code>wasi</code> after calling this function (even if an error is returned). </p>
+
+</div>
+</div>
+<a id="ac9d060a28ce58f4c1cbc3e375f49a064" name="ac9d060a28ce58f4c1cbc3e375f49a064"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9d060a28ce58f4c1cbc3e375f49a064">&#9670;&nbsp;</a></span>wasmtime_store_epoch_deadline_callback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void wasmtime_store_epoch_deadline_callback </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="store_8h.html#a173db46be4eb6fbb452b1bb2140dadad">wasmtime_store_t</a> *&#160;</td>
+          <td class="paramname"><em>store</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="error_8h.html#a6df4cddb88cff2bfdeecf8bba560af2c">wasmtime_error_t</a> *(*)(<a class="el" href="store_8h.html#a98d503c153853bb098689a122109de81">wasmtime_context_t</a> *, void *, uint64_t *)&#160;</td>
+          <td class="paramname"><em>func</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>data</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Configures epoch deadline callback to C function. </p>
+<p >This function configures a store-local callback function that will be called when the running WebAssembly function has exceeded its epoch deadline. That function can return a <a class="el" href="error_8h.html#a6df4cddb88cff2bfdeecf8bba560af2c" title="Convenience alias for wasmtime_error.">wasmtime_error_t</a> to terminate the function, or set the delta argument and return NULL to update the epoch deadline and resume function execution.</p>
+<p >See also <a class="el" href="config_8h.html#acff2c4d7a58fc2355dd4f75ea3b0a475" title="Whether or not epoch-based interruption is enabled for generated code.">wasmtime_config_epoch_interruption_set</a> and <a class="el" href="store_8h.html#ad11ea4baef99c02b709d8e74725b0f50" title="Configures the relative deadline at which point WebAssembly code will trap or invoke the callback fun...">wasmtime_context_set_epoch_deadline</a>. </p>
 
 </div>
 </div>
