@@ -72,26 +72,69 @@
 <a href="#72" id="72">72</a>
 <a href="#73" id="73">73</a>
 <a href="#74" id="74">74</a>
-</pre><pre class="rust"><code><span class="kw">use crate</span>::{demangling::demangle_function_name_or_index, CompiledModule};
-<span class="kw">use </span>wasmtime_environ::{DefinedFuncIndex, EntityRef};
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+</pre><pre class="rust"><code><span class="attr">#![allow(missing_docs)]
+
+</span><span class="kw">use </span><span class="kw">crate</span>::CodeMemory;
+<span class="attr">#[allow(unused_imports)]
+</span><span class="kw">use </span>anyhow::{bail, <span class="prelude-ty">Result</span>};
 
 <span class="macro">cfg_if::cfg_if! </span>{
     <span class="kw">if </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;jitdump&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))] </span>{
-        <span class="attr">#[path = <span class="string">&quot;profiling/jitdump_linux.rs&quot;</span>]
-        </span><span class="kw">mod </span>jitdump;
+        <span class="kw">mod </span>jitdump;
+        <span class="kw">pub use </span>jitdump::new <span class="kw">as </span>new_jitdump;
     } <span class="kw">else </span>{
-        <span class="attr">#[path = <span class="string">&quot;profiling/jitdump_disabled.rs&quot;</span>]
-        </span><span class="kw">mod </span>jitdump;
+        <span class="kw">pub fn </span>new_jitdump() -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>ProfilingAgent&gt;&gt; {
+            <span class="kw">if </span><span class="macro">cfg!</span>(feature = <span class="string">&quot;jitdump&quot;</span>) {
+                <span class="macro">bail!</span>(<span class="string">&quot;jitdump is not supported on this platform&quot;</span>);
+            } <span class="kw">else </span>{
+                <span class="macro">bail!</span>(<span class="string">&quot;jitdump support disabled at compile time&quot;</span>);
+            }
+        }
     }
 }
 
 <span class="macro">cfg_if::cfg_if! </span>{
     <span class="kw">if </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)] </span>{
-        <span class="attr">#[path = <span class="string">&quot;profiling/perfmap_linux.rs&quot;</span>]
-        </span><span class="kw">mod </span>perfmap;
+        <span class="kw">mod </span>perfmap;
+        <span class="kw">pub use </span>perfmap::new <span class="kw">as </span>new_perfmap;
     } <span class="kw">else </span>{
-        <span class="attr">#[path = <span class="string">&quot;profiling/perfmap_disabled.rs&quot;</span>]
-        </span><span class="kw">mod </span>perfmap;
+        <span class="kw">pub fn </span>new_perfmap() -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>ProfilingAgent&gt;&gt; {
+            <span class="macro">bail!</span>(<span class="string">&quot;perfmap support not supported on this platform&quot;</span>);
+        }
     }
 }
 
@@ -99,52 +142,77 @@
     <span class="comment">// Note: VTune support is disabled on windows mingw because the ittapi crate doesn&#39;t compile
     // there; see also https://github.com/bytecodealliance/wasmtime/pull/4003 for rationale.
     </span><span class="kw">if </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;vtune&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>, not(all(target_os = <span class="string">&quot;windows&quot;</span>, target_env = <span class="string">&quot;gnu&quot;</span>))))] </span>{
-        <span class="attr">#[path = <span class="string">&quot;profiling/vtune.rs&quot;</span>]
-        </span><span class="kw">mod </span>vtune;
+        <span class="kw">mod </span>vtune;
+        <span class="kw">pub use </span>vtune::new <span class="kw">as </span>new_vtune;
     } <span class="kw">else </span>{
-        <span class="attr">#[path = <span class="string">&quot;profiling/vtune_disabled.rs&quot;</span>]
-        </span><span class="kw">mod </span>vtune;
+        <span class="kw">pub fn </span>new_vtune() -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>ProfilingAgent&gt;&gt; {
+            <span class="kw">if </span><span class="macro">cfg!</span>(feature = <span class="string">&quot;vtune&quot;</span>) {
+                <span class="macro">bail!</span>(<span class="string">&quot;VTune is not supported on this platform.&quot;</span>);
+            } <span class="kw">else </span>{
+                <span class="macro">bail!</span>(<span class="string">&quot;VTune support disabled at compile time.&quot;</span>);
+            }
+        }
     }
 }
-
-<span class="kw">pub use </span>jitdump::JitDumpAgent;
-<span class="kw">pub use </span>perfmap::PerfMapAgent;
-<span class="kw">pub use </span>vtune::VTuneAgent;
 
 <span class="doccomment">/// Common interface for profiling tools.
 </span><span class="kw">pub trait </span>ProfilingAgent: Send + Sync + <span class="lifetime">&#39;static </span>{
-    <span class="doccomment">/// Notify the profiler of a new module loaded into memory
-    </span><span class="kw">fn </span>module_load(<span class="kw-2">&amp;</span><span class="self">self</span>, module: <span class="kw-2">&amp;</span>CompiledModule, dbg_image: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;);
+    <span class="kw">fn </span>register_function(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str, addr: <span class="kw-2">*const </span>u8, size: usize);
 
-    <span class="doccomment">/// Notify the profiler about a single dynamically-generated trampoline (for host function)
-    /// that is being loaded now.`
-    </span><span class="kw">fn </span>load_single_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str, addr: <span class="kw-2">*const </span>u8, size: usize, pid: u32, tid: u32);
-}
+    <span class="kw">fn </span>register_module(<span class="kw-2">&amp;</span><span class="self">self</span>, code: <span class="kw-2">&amp;</span>CodeMemory, custom_name: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Fn(usize) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt;) {
+        <span class="kw">use </span>object::{File, Object <span class="kw">as _</span>, ObjectSection, ObjectSymbol, SectionKind, SymbolKind};
 
-<span class="doccomment">/// Default agent for unsupported profiling build.
-</span><span class="attr">#[derive(Debug, Default, Clone, Copy)]
-</span><span class="kw">pub struct </span>NullProfilerAgent;
+        <span class="kw">let </span>image = <span class="kw">match </span>File::parse(<span class="kw-2">&amp;</span>code.mmap()[..]) {
+            <span class="prelude-val">Ok</span>(image) =&gt; image,
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span>,
+        };
 
-<span class="kw">impl </span>ProfilingAgent <span class="kw">for </span>NullProfilerAgent {
-    <span class="kw">fn </span>module_load(<span class="kw-2">&amp;</span><span class="self">self</span>, _module: <span class="kw-2">&amp;</span>CompiledModule, _dbg_image: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;) {}
-    <span class="kw">fn </span>load_single_trampoline(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        _name: <span class="kw-2">&amp;</span>str,
-        _addr: <span class="kw-2">*const </span>u8,
-        _size: usize,
-        _pid: u32,
-        _tid: u32,
-    ) {
+        <span class="kw">let </span>text_base = <span class="kw">match </span>image.sections().find(|s| s.kind() == SectionKind::Text) {
+            <span class="prelude-val">Some</span>(section) =&gt; <span class="kw">match </span>section.data() {
+                <span class="prelude-val">Ok</span>(data) =&gt; data.as_ptr() <span class="kw">as </span>usize,
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span>,
+            },
+            <span class="prelude-val">None </span>=&gt; <span class="kw">return</span>,
+        };
+
+        <span class="kw">for </span>sym <span class="kw">in </span>image.symbols() {
+            <span class="kw">if </span>!sym.is_definition() {
+                <span class="kw">continue</span>;
+            }
+            <span class="kw">if </span>sym.kind() != SymbolKind::Text {
+                <span class="kw">continue</span>;
+            }
+            <span class="kw">let </span>address = sym.address();
+            <span class="kw">let </span>size = sym.size();
+            <span class="kw">if </span>address == <span class="number">0 </span>|| size == <span class="number">0 </span>{
+                <span class="kw">continue</span>;
+            }
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(name) = sym.name() {
+                <span class="kw">let </span>addr = text_base + address <span class="kw">as </span>usize;
+                <span class="kw">let </span>owned;
+                <span class="kw">let </span>name = <span class="kw">match </span>custom_name(address <span class="kw">as </span>usize) {
+                    <span class="prelude-val">Some</span>(name) =&gt; {
+                        owned = name;
+                        <span class="kw-2">&amp;</span>owned
+                    }
+                    <span class="prelude-val">None </span>=&gt; name,
+                };
+                <span class="self">self</span>.register_function(name, addr <span class="kw">as </span><span class="kw-2">*const </span>u8, size <span class="kw">as </span>usize);
+            }
+        }
     }
 }
 
-<span class="attr">#[allow(dead_code)]
-</span><span class="kw">fn </span>debug_name(module: <span class="kw-2">&amp;</span>CompiledModule, index: DefinedFuncIndex) -&gt; String {
-    <span class="kw">let </span>index = module.module().func_index(index);
-    <span class="kw">let </span><span class="kw-2">mut </span>debug_name = String::new();
-    demangle_function_name_or_index(<span class="kw-2">&amp;mut </span>debug_name, module.func_name(index), index.index())
-        .unwrap();
-    debug_name
+<span class="kw">pub fn </span>new_null() -&gt; Box&lt;<span class="kw">dyn </span>ProfilingAgent&gt; {
+    Box::new(NullProfilerAgent)
+}
+
+<span class="attr">#[derive(Debug, Default, Clone, Copy)]
+</span><span class="kw">struct </span>NullProfilerAgent;
+
+<span class="kw">impl </span>ProfilingAgent <span class="kw">for </span>NullProfilerAgent {
+    <span class="kw">fn </span>register_function(<span class="kw-2">&amp;</span><span class="self">self</span>, _name: <span class="kw-2">&amp;</span>str, _addr: <span class="kw-2">*const </span>u8, _size: usize) {}
+    <span class="kw">fn </span>register_module(<span class="kw-2">&amp;</span><span class="self">self</span>, _code: <span class="kw-2">&amp;</span>CodeMemory, _custom_name: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Fn(usize) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt;) {}
 }
 </code></pre></div>
 </section></main></body></html>

@@ -742,7 +742,7 @@
 </span><span class="kw">use </span>wasmtime_cache::CacheConfig;
 <span class="kw">use </span>wasmtime_environ::obj;
 <span class="kw">use </span>wasmtime_environ::{FlagValue, ObjectKind};
-<span class="kw">use </span>wasmtime_jit::{CodeMemory, ProfilingAgent};
+<span class="kw">use </span>wasmtime_jit::{profiling::ProfilingAgent, CodeMemory};
 <span class="kw">use </span>wasmtime_runtime::{debug_builtins, CompiledModuleIdAllocator, InstanceAllocator, MmapVec};
 
 <span class="kw">mod </span>serialization;

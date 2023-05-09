@@ -2063,7 +2063,7 @@
 <span class="attr">#[cfg(feature = <span class="string">&quot;cache&quot;</span>)]
 </span><span class="kw">use </span>wasmtime_cache::CacheConfig;
 <span class="kw">use </span>wasmtime_environ::Tunables;
-<span class="kw">use </span>wasmtime_jit::{JitDumpAgent, NullProfilerAgent, PerfMapAgent, ProfilingAgent, VTuneAgent};
+<span class="kw">use </span>wasmtime_jit::profiling::{<span class="self">self</span>, ProfilingAgent};
 <span class="kw">use </span>wasmtime_runtime::{InstanceAllocator, OnDemandInstanceAllocator, RuntimeMemoryCreator};
 
 <span class="kw">pub use </span>wasmtime_environ::CacheStore;
@@ -3563,10 +3563,10 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>build_profiler(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>ProfilingAgent&gt;&gt; {
         <span class="prelude-val">Ok</span>(<span class="kw">match </span><span class="self">self</span>.profiling_strategy {
-            ProfilingStrategy::PerfMap =&gt; Box::new(PerfMapAgent::new()<span class="question-mark">?</span>) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>ProfilingAgent&gt;,
-            ProfilingStrategy::JitDump =&gt; Box::new(JitDumpAgent::new()<span class="question-mark">?</span>) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>ProfilingAgent&gt;,
-            ProfilingStrategy::VTune =&gt; Box::new(VTuneAgent::new()<span class="question-mark">?</span>) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>ProfilingAgent&gt;,
-            ProfilingStrategy::None =&gt; Box::new(NullProfilerAgent),
+            ProfilingStrategy::PerfMap =&gt; profiling::new_perfmap()<span class="question-mark">?</span>,
+            ProfilingStrategy::JitDump =&gt; profiling::new_jitdump()<span class="question-mark">?</span>,
+            ProfilingStrategy::VTune =&gt; profiling::new_vtune()<span class="question-mark">?</span>,
+            ProfilingStrategy::None =&gt; profiling::new_null(),
         })
     }
 

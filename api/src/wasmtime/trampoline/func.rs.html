@@ -131,51 +131,13 @@
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
 <a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
-<a href="#136" id="136">136</a>
-<a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
-<a href="#141" id="141">141</a>
-<a href="#142" id="142">142</a>
-<a href="#143" id="143">143</a>
-<a href="#144" id="144">144</a>
-<a href="#145" id="145">145</a>
-<a href="#146" id="146">146</a>
-<a href="#147" id="147">147</a>
-<a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
-<a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
-<a href="#161" id="161">161</a>
-<a href="#162" id="162">162</a>
-<a href="#163" id="163">163</a>
-<a href="#164" id="164">164</a>
-<a href="#165" id="165">165</a>
-<a href="#166" id="166">166</a>
-<a href="#167" id="167">167</a>
-<a href="#168" id="168">168</a>
-<a href="#169" id="169">169</a>
-<a href="#170" id="170">170</a>
-<a href="#171" id="171">171</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Support for a calling of an imported function.
 
 </span><span class="kw">use crate</span>::{Engine, FuncType, ValRaw};
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>std::panic::{<span class="self">self</span>, AssertUnwindSafe};
 <span class="kw">use </span>std::ptr::NonNull;
-<span class="kw">use </span>wasmtime_jit::{CodeMemory, ProfilingAgent};
+<span class="kw">use </span>wasmtime_jit::CodeMemory;
 <span class="kw">use </span>wasmtime_runtime::{
     StoreBox, VMArrayCallHostFuncContext, VMContext, VMFuncRef, VMOpaqueContext,
 };
@@ -244,44 +206,6 @@
 }
 
 <span class="attr">#[cfg(compiler)]
-</span><span class="kw">fn </span>register_trampolines(profiler: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ProfilingAgent, code: <span class="kw-2">&amp;</span>CodeMemory) {
-    <span class="kw">use </span>object::{File, Object <span class="kw">as _</span>, ObjectSection, ObjectSymbol, SectionKind, SymbolKind};
-    <span class="kw">let </span>pid = std::process::id();
-    <span class="kw">let </span>tid = pid;
-
-    <span class="kw">let </span>image = <span class="kw">match </span>File::parse(<span class="kw-2">&amp;</span>code.mmap()[..]) {
-        <span class="prelude-val">Ok</span>(image) =&gt; image,
-        <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span>,
-    };
-
-    <span class="kw">let </span>text_base = <span class="kw">match </span>image.sections().find(|s| s.kind() == SectionKind::Text) {
-        <span class="prelude-val">Some</span>(section) =&gt; <span class="kw">match </span>section.data() {
-            <span class="prelude-val">Ok</span>(data) =&gt; data.as_ptr() <span class="kw">as </span>usize,
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span>,
-        },
-        <span class="prelude-val">None </span>=&gt; <span class="kw">return</span>,
-    };
-
-    <span class="kw">for </span>sym <span class="kw">in </span>image.symbols() {
-        <span class="kw">if </span>!sym.is_definition() {
-            <span class="kw">continue</span>;
-        }
-        <span class="kw">if </span>sym.kind() != SymbolKind::Text {
-            <span class="kw">continue</span>;
-        }
-        <span class="kw">let </span>address = sym.address();
-        <span class="kw">let </span>size = sym.size();
-        <span class="kw">if </span>address == <span class="number">0 </span>|| size == <span class="number">0 </span>{
-            <span class="kw">continue</span>;
-        }
-        <span class="kw">if let </span><span class="prelude-val">Ok</span>(name) = sym.name() {
-            <span class="kw">let </span>addr = text_base + address <span class="kw">as </span>usize;
-            profiler.load_single_trampoline(name, addr <span class="kw">as </span><span class="kw-2">*const </span>u8, size <span class="kw">as </span>usize, pid, tid);
-        }
-    }
-}
-
-<span class="attr">#[cfg(compiler)]
 </span><span class="kw">pub fn </span>create_array_call_function&lt;F&gt;(
     ft: <span class="kw-2">&amp;</span>FuncType,
     func: F,
@@ -310,7 +234,7 @@
     </span><span class="kw">let </span><span class="kw-2">mut </span>code_memory = CodeMemory::new(obj)<span class="question-mark">?</span>;
     code_memory.publish()<span class="question-mark">?</span>;
 
-    register_trampolines(engine.profiler(), <span class="kw-2">&amp;</span>code_memory);
+    engine.profiler().register_module(<span class="kw-2">&amp;</span>code_memory, <span class="kw-2">&amp;</span>|<span class="kw">_</span>| <span class="prelude-val">None</span>);
 
     <span class="comment">// Extract the host/wasm trampolines from the results of compilation since
     // we know their start/length.

@@ -36,7 +36,6 @@
 <a href="#36" id="36">36</a>
 <a href="#37" id="37">37</a>
 <a href="#38" id="38">38</a>
-<a href="#39" id="39">39</a>
 </pre><pre class="rust"><code><span class="doccomment">//! JIT-style runtime for WebAssembly using Cranelift.
 
 </span><span class="attr">#![deny(missing_docs, trivial_numeric_casts, unused_extern_crates)]
@@ -63,7 +62,7 @@
 <span class="kw">mod </span>debug;
 <span class="kw">mod </span>demangling;
 <span class="kw">mod </span>instantiate;
-<span class="kw">mod </span>profiling;
+<span class="kw">pub mod </span>profiling;
 <span class="kw">mod </span>unwind;
 
 <span class="kw">pub use </span><span class="kw">crate</span>::code_memory::CodeMemory;
@@ -72,7 +71,6 @@
     SymbolizeContext,
 };
 <span class="kw">pub use </span>demangling::<span class="kw-2">*</span>;
-<span class="kw">pub use </span>profiling::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Version number of this crate.
 </span><span class="kw">pub const </span>VERSION: <span class="kw-2">&amp;</span>str = <span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_VERSION&quot;</span>);
