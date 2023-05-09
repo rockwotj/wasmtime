@@ -1726,106 +1726,12 @@
 <a href="#1726" id="1726">1726</a>
 <a href="#1727" id="1727">1727</a>
 <a href="#1728" id="1728">1728</a>
-<a href="#1729" id="1729">1729</a>
-<a href="#1730" id="1730">1730</a>
-<a href="#1731" id="1731">1731</a>
-<a href="#1732" id="1732">1732</a>
-<a href="#1733" id="1733">1733</a>
-<a href="#1734" id="1734">1734</a>
-<a href="#1735" id="1735">1735</a>
-<a href="#1736" id="1736">1736</a>
-<a href="#1737" id="1737">1737</a>
-<a href="#1738" id="1738">1738</a>
-<a href="#1739" id="1739">1739</a>
-<a href="#1740" id="1740">1740</a>
-<a href="#1741" id="1741">1741</a>
-<a href="#1742" id="1742">1742</a>
-<a href="#1743" id="1743">1743</a>
-<a href="#1744" id="1744">1744</a>
-<a href="#1745" id="1745">1745</a>
-<a href="#1746" id="1746">1746</a>
-<a href="#1747" id="1747">1747</a>
-<a href="#1748" id="1748">1748</a>
-<a href="#1749" id="1749">1749</a>
-<a href="#1750" id="1750">1750</a>
-<a href="#1751" id="1751">1751</a>
-<a href="#1752" id="1752">1752</a>
-<a href="#1753" id="1753">1753</a>
-<a href="#1754" id="1754">1754</a>
-<a href="#1755" id="1755">1755</a>
-<a href="#1756" id="1756">1756</a>
-<a href="#1757" id="1757">1757</a>
-<a href="#1758" id="1758">1758</a>
-<a href="#1759" id="1759">1759</a>
-<a href="#1760" id="1760">1760</a>
-<a href="#1761" id="1761">1761</a>
-<a href="#1762" id="1762">1762</a>
-<a href="#1763" id="1763">1763</a>
-<a href="#1764" id="1764">1764</a>
-<a href="#1765" id="1765">1765</a>
-<a href="#1766" id="1766">1766</a>
-<a href="#1767" id="1767">1767</a>
-<a href="#1768" id="1768">1768</a>
-<a href="#1769" id="1769">1769</a>
-<a href="#1770" id="1770">1770</a>
-<a href="#1771" id="1771">1771</a>
-<a href="#1772" id="1772">1772</a>
-<a href="#1773" id="1773">1773</a>
-<a href="#1774" id="1774">1774</a>
-<a href="#1775" id="1775">1775</a>
-<a href="#1776" id="1776">1776</a>
-<a href="#1777" id="1777">1777</a>
-<a href="#1778" id="1778">1778</a>
-<a href="#1779" id="1779">1779</a>
-<a href="#1780" id="1780">1780</a>
-<a href="#1781" id="1781">1781</a>
-<a href="#1782" id="1782">1782</a>
-<a href="#1783" id="1783">1783</a>
-<a href="#1784" id="1784">1784</a>
-<a href="#1785" id="1785">1785</a>
-<a href="#1786" id="1786">1786</a>
-<a href="#1787" id="1787">1787</a>
-<a href="#1788" id="1788">1788</a>
-<a href="#1789" id="1789">1789</a>
-<a href="#1790" id="1790">1790</a>
-<a href="#1791" id="1791">1791</a>
-<a href="#1792" id="1792">1792</a>
-<a href="#1793" id="1793">1793</a>
-<a href="#1794" id="1794">1794</a>
-<a href="#1795" id="1795">1795</a>
-<a href="#1796" id="1796">1796</a>
-<a href="#1797" id="1797">1797</a>
-<a href="#1798" id="1798">1798</a>
-<a href="#1799" id="1799">1799</a>
-<a href="#1800" id="1800">1800</a>
-<a href="#1801" id="1801">1801</a>
-<a href="#1802" id="1802">1802</a>
-<a href="#1803" id="1803">1803</a>
-<a href="#1804" id="1804">1804</a>
-<a href="#1805" id="1805">1805</a>
-<a href="#1806" id="1806">1806</a>
-<a href="#1807" id="1807">1807</a>
-<a href="#1808" id="1808">1808</a>
-<a href="#1809" id="1809">1809</a>
-<a href="#1810" id="1810">1810</a>
-<a href="#1811" id="1811">1811</a>
-<a href="#1812" id="1812">1812</a>
-<a href="#1813" id="1813">1813</a>
-<a href="#1814" id="1814">1814</a>
-<a href="#1815" id="1815">1815</a>
-<a href="#1816" id="1816">1816</a>
-<a href="#1817" id="1817">1817</a>
-<a href="#1818" id="1818">1818</a>
-<a href="#1819" id="1819">1819</a>
-<a href="#1820" id="1820">1820</a>
-<a href="#1821" id="1821">1821</a>
-<a href="#1822" id="1822">1822</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA definitions: instruction arguments.
 
 </span><span class="comment">// Some variants are never constructed, but we still want them as options in the future.
 </span><span class="attr">#![allow(dead_code)]
 </span><span class="kw">use super</span>::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::ir::condcodes::{CondCode, FloatCC};
+<span class="kw">use </span><span class="kw">crate</span>::ir::condcodes::CondCode;
 
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::{reg_name, reg_to_gpr_num};
 <span class="kw">use </span><span class="kw">crate</span>::machinst::isle::WritableReg;
@@ -3134,68 +3040,6 @@
     }
 }
 
-<span class="doccomment">/// Condition code for comparing floating point numbers.
-/// This condition code is used by the fcmp instruction to compare floating point values. Two IEEE floating point values relate in exactly one of four ways:
-/// UN - unordered when either value is NaN.
-/// EQ - equal numerical value.
-/// LT - x is less than y.
-/// GT - x is greater than y.
-</span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>FloatCCArgs(<span class="kw">pub</span>(<span class="kw">crate</span>) u8);
-
-<span class="kw">impl </span>FloatCCArgs {
-    <span class="comment">// unorder
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>UN: u8 = <span class="number">1 </span>&lt;&lt; <span class="number">0</span>;
-    <span class="comment">// equal
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>EQ: u8 = <span class="number">1 </span>&lt;&lt; <span class="number">1</span>;
-    <span class="comment">// less than
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>LT: u8 = <span class="number">1 </span>&lt;&lt; <span class="number">2</span>;
-    <span class="comment">// greater than
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>GT: u8 = <span class="number">1 </span>&lt;&lt; <span class="number">3</span>;
-    <span class="comment">// not equal
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>NE: u8 = <span class="number">1 </span>&lt;&lt; <span class="number">4</span>;
-
-    <span class="doccomment">/// mask bit for floatcc
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_floatcc&lt;T: Into&lt;FloatCC&gt;&gt;(t: T) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>x = <span class="kw">match </span>t.into() {
-            FloatCC::Ordered =&gt; <span class="self">Self</span>::EQ | <span class="self">Self</span>::LT | <span class="self">Self</span>::GT,
-            FloatCC::Unordered =&gt; <span class="self">Self</span>::UN,
-            FloatCC::Equal =&gt; <span class="self">Self</span>::EQ,
-            FloatCC::NotEqual =&gt; <span class="self">Self</span>::NE,
-            FloatCC::OrderedNotEqual =&gt; <span class="self">Self</span>::LT | <span class="self">Self</span>::GT,
-            FloatCC::UnorderedOrEqual =&gt; <span class="self">Self</span>::UN | <span class="self">Self</span>::EQ,
-            FloatCC::LessThan =&gt; <span class="self">Self</span>::LT,
-            FloatCC::LessThanOrEqual =&gt; <span class="self">Self</span>::LT | <span class="self">Self</span>::EQ,
-            FloatCC::GreaterThan =&gt; <span class="self">Self</span>::GT,
-            FloatCC::GreaterThanOrEqual =&gt; <span class="self">Self</span>::GT | <span class="self">Self</span>::EQ,
-            FloatCC::UnorderedOrLessThan =&gt; <span class="self">Self</span>::UN | <span class="self">Self</span>::LT,
-            FloatCC::UnorderedOrLessThanOrEqual =&gt; <span class="self">Self</span>::UN | <span class="self">Self</span>::LT | <span class="self">Self</span>::EQ,
-            FloatCC::UnorderedOrGreaterThan =&gt; <span class="self">Self</span>::UN | <span class="self">Self</span>::GT,
-            FloatCC::UnorderedOrGreaterThanOrEqual =&gt; <span class="self">Self</span>::UN | <span class="self">Self</span>::GT | <span class="self">Self</span>::EQ,
-        };
-
-        <span class="self">Self</span>(x)
-    }
-
-    <span class="attr">#[inline]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>has(<span class="kw-2">&amp;</span><span class="self">self</span>, other: u8) -&gt; bool {
-        (<span class="self">self</span>.<span class="number">0 </span>&amp; other) == other
-    }
-
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>has_and_clear(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: u8) -&gt; bool {
-        <span class="kw">if </span>!<span class="self">self</span>.has(other) {
-            <span class="kw">return </span><span class="bool-val">false</span>;
-        }
-        <span class="self">self</span>.clear_bits(other);
-        <span class="kw">return </span><span class="bool-val">true</span>;
-    }
-
-    <span class="attr">#[inline]
-    </span><span class="kw">fn </span>clear_bits(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: u8) {
-        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self</span>.<span class="number">0 </span>&amp; !c;
-    }
-}
-
 <span class="kw">impl </span>AtomicOP {
     <span class="attr">#[inline]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>is_load(<span class="self">self</span>) -&gt; bool {
@@ -3507,19 +3351,7 @@
         s
     }
 }
-<span class="kw">impl </span>Default <span class="kw">for </span>FenceFm {
-    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::None
-    }
-}
-<span class="kw">impl </span>FenceFm {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>as_u32(<span class="self">self</span>) -&gt; u32 {
-        <span class="kw">match </span><span class="self">self </span>{
-            FenceFm::None =&gt; <span class="number">0</span>,
-            FenceFm::Tso =&gt; <span class="number">0b1000</span>,
-        }
-    }
-}
+
 <span class="kw">impl </span>FloatRoundOP {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>op_name(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
         <span class="kw">match </span><span class="self">self </span>{
@@ -3620,26 +3452,6 @@
         (<span class="bool-val">false</span>, <span class="number">32</span>) =&gt; (-<span class="number">1.</span>, <span class="number">4294967296.0</span>),
         (<span class="bool-val">false</span>, <span class="number">64</span>) =&gt; (-<span class="number">1.</span>, <span class="number">18446744073709551616.0</span>),
         <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
-    }
-}
-
-<span class="attr">#[cfg(test)]
-</span><span class="kw">mod </span>test {
-    <span class="kw">use </span><span class="kw">super</span>::FloatCCArgs;
-    <span class="attr">#[test]
-
-    </span><span class="kw">fn </span>float_cc_bit_clear() {
-        <span class="kw">let </span><span class="kw-2">mut </span>x = FloatCCArgs(FloatCCArgs::UN | FloatCCArgs::GT | FloatCCArgs::EQ);
-        <span class="macro">assert!</span>(x.has_and_clear(FloatCCArgs::UN | FloatCCArgs::GT));
-        <span class="macro">assert!</span>(x.has(FloatCCArgs::EQ));
-        <span class="macro">assert!</span>(!x.has(FloatCCArgs::UN));
-        <span class="macro">assert!</span>(!x.has(FloatCCArgs::GT));
-    }
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>float_cc_bit_has() {
-        <span class="kw">let </span>x = FloatCCArgs(FloatCCArgs::UN | FloatCCArgs::GT | FloatCCArgs::EQ);
-        <span class="macro">assert!</span>(x.has(FloatCCArgs::UN | FloatCCArgs::GT));
-        <span class="macro">assert!</span>(!x.has(FloatCCArgs::LT));
     }
 }
 </code></pre></div>

@@ -1795,9 +1795,6 @@
 <a href="#1795" id="1795">1795</a>
 <a href="#1796" id="1796">1796</a>
 <a href="#1797" id="1797">1797</a>
-<a href="#1798" id="1798">1798</a>
-<a href="#1799" id="1799">1799</a>
-<a href="#1800" id="1800">1800</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines riscv64-specific machine instruction types.
 
 </span><span class="comment">// Some variants are not constructed, but we still want them as options in the future.
@@ -1855,8 +1852,8 @@
 
 </span><span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::lower::isle::generated_code::MInst;
 <span class="kw">pub use </span><span class="kw">crate</span>::isa::riscv64::lower::isle::generated_code::{
-    AluOPRRI, AluOPRRR, AtomicOP, FClassResult, FFlagsException, FenceFm, FloatRoundOP,
-    FloatSelectOP, FpuOPRR, FpuOPRRR, FpuOPRRRR, IntSelectOP, LoadOP, MInst <span class="kw">as </span>Inst, StoreOP, FRM,
+    AluOPRRI, AluOPRRR, AtomicOP, FClassResult, FFlagsException, FloatRoundOP, FloatSelectOP,
+    FpuOPRR, FpuOPRRR, FpuOPRRRR, IntSelectOP, LoadOP, MInst <span class="kw">as </span>Inst, StoreOP, FRM,
 };
 
 <span class="kw">type </span>BoxCallInfo = Box&lt;CallInfo&gt;;
@@ -3583,9 +3580,6 @@
     }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>overflow_already_lowerd() -&gt; ! {
-    <span class="macro">unreachable!</span>(<span class="string">&quot;overflow and nof should be lowered at early phase.&quot;</span>)
-}
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
