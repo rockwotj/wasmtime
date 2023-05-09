@@ -1726,6 +1726,25 @@
 <a href="#1726" id="1726">1726</a>
 <a href="#1727" id="1727">1727</a>
 <a href="#1728" id="1728">1728</a>
+<a href="#1729" id="1729">1729</a>
+<a href="#1730" id="1730">1730</a>
+<a href="#1731" id="1731">1731</a>
+<a href="#1732" id="1732">1732</a>
+<a href="#1733" id="1733">1733</a>
+<a href="#1734" id="1734">1734</a>
+<a href="#1735" id="1735">1735</a>
+<a href="#1736" id="1736">1736</a>
+<a href="#1737" id="1737">1737</a>
+<a href="#1738" id="1738">1738</a>
+<a href="#1739" id="1739">1739</a>
+<a href="#1740" id="1740">1740</a>
+<a href="#1741" id="1741">1741</a>
+<a href="#1742" id="1742">1742</a>
+<a href="#1743" id="1743">1743</a>
+<a href="#1744" id="1744">1744</a>
+<a href="#1745" id="1745">1745</a>
+<a href="#1746" id="1746">1746</a>
+<a href="#1747" id="1747">1747</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA definitions: instruction arguments.
 
 </span><span class="comment">// Some variants are never constructed, but we still want them as options in the future.
@@ -1763,19 +1782,47 @@
     /// clobber pushes. See the diagram in the documentation for
     /// [crate::isa::riscv64::abi](the ABI module) for more details.
     </span>NominalSPOffset(i64, Type),
+
+    <span class="doccomment">/// A reference to a constant which is placed outside of the function&#39;s
+    /// body, typically at the end.
+    </span>Const(VCodeConstant),
+
+    <span class="doccomment">/// A reference to a label.
+    </span>Label(MachLabel),
 }
 
 <span class="kw">impl </span>AMode {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>reg_offset(reg: Reg, imm: i64, ty: Type) -&gt; AMode {
-        AMode::RegOffset(reg, imm, ty)
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>with_allocs(<span class="self">self</span>, allocs: <span class="kw-2">&amp;mut </span>AllocationConsumer&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span><span class="self">self </span>{
+            AMode::RegOffset(reg, offset, ty) =&gt; AMode::RegOffset(allocs.next(reg), offset, ty),
+            AMode::SPOffset(..)
+            | AMode::FPOffset(..)
+            | AMode::NominalSPOffset(..)
+            | AMode::Const(..)
+            | AMode::Label(..) =&gt; <span class="self">self</span>,
+        }
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_base_register(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Reg {
+    <span class="doccomment">/// Returns the registers that known to the register allocator.
+    /// Keep this in sync with `with_allocs`.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_allocatable_register(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Reg&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="kw-2">&amp;</span>AMode::RegOffset(reg, ..) =&gt; reg,
-            <span class="kw-2">&amp;</span>AMode::SPOffset(..) =&gt; stack_reg(),
-            <span class="kw-2">&amp;</span>AMode::FPOffset(..) =&gt; fp_reg(),
-            <span class="kw-2">&amp;</span>AMode::NominalSPOffset(..) =&gt; stack_reg(),
+            AMode::RegOffset(reg, ..) =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">*</span>reg),
+            AMode::SPOffset(..)
+            | AMode::FPOffset(..)
+            | AMode::NominalSPOffset(..)
+            | AMode::Const(..)
+            | AMode::Label(..) =&gt; <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_base_register(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Reg&gt; {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="kw-2">&amp;</span>AMode::RegOffset(reg, ..) =&gt; <span class="prelude-val">Some</span>(reg),
+            <span class="kw-2">&amp;</span>AMode::SPOffset(..) =&gt; <span class="prelude-val">Some</span>(stack_reg()),
+            <span class="kw-2">&amp;</span>AMode::FPOffset(..) =&gt; <span class="prelude-val">Some</span>(fp_reg()),
+            <span class="kw-2">&amp;</span>AMode::NominalSPOffset(..) =&gt; <span class="prelude-val">Some</span>(stack_reg()),
+            <span class="kw-2">&amp;</span>AMode::Const(..) | AMode::Label(..) =&gt; <span class="prelude-val">None</span>,
         }
     }
 
@@ -1792,27 +1839,12 @@
             <span class="kw-2">&amp;</span>AMode::SPOffset(offset, <span class="kw">_</span>) =&gt; offset,
             <span class="kw-2">&amp;</span>AMode::FPOffset(offset, <span class="kw">_</span>) =&gt; offset,
             <span class="kw-2">&amp;</span>AMode::NominalSPOffset(offset, <span class="kw">_</span>) =&gt; offset,
+            <span class="kw-2">&amp;</span>AMode::Const(<span class="kw">_</span>) | <span class="kw-2">&amp;</span>AMode::Label(<span class="kw">_</span>) =&gt; <span class="number">0</span>,
         }
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>to_string_with_alloc(<span class="kw-2">&amp;</span><span class="self">self</span>, allocs: <span class="kw-2">&amp;mut </span>AllocationConsumer&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; String {
-        <span class="kw">let </span>reg = <span class="self">self</span>.get_base_register();
-        <span class="kw">let </span>next = allocs.next(reg);
-        <span class="kw">let </span>offset = <span class="self">self</span>.get_offset();
-        <span class="kw">match </span><span class="self">self </span>{
-            <span class="kw-2">&amp;</span>AMode::NominalSPOffset(..) =&gt; <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="self">self</span>),
-            <span class="kw">_ </span>=&gt; <span class="macro">format!</span>(<span class="string">&quot;{}({})&quot;</span>, offset, reg_name(next),),
-        }
-    }
-
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>to_addr(<span class="kw-2">&amp;</span><span class="self">self</span>, allocs: <span class="kw-2">&amp;mut </span>AllocationConsumer&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; String {
-        <span class="kw">let </span>reg = <span class="self">self</span>.get_base_register();
-        <span class="kw">let </span>next = allocs.next(reg);
-        <span class="kw">let </span>offset = <span class="self">self</span>.get_offset();
-        <span class="kw">match </span><span class="self">self </span>{
-            <span class="kw-2">&amp;</span>AMode::NominalSPOffset(..) =&gt; <span class="macro">format!</span>(<span class="string">&quot;nsp{:+}&quot;</span>, offset),
-            <span class="kw">_ </span>=&gt; <span class="macro">format!</span>(<span class="string">&quot;{}{:+}&quot;</span>, reg_name(next), offset),
-        }
+        <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.clone().with_allocs(allocs))
     }
 }
 
@@ -1820,7 +1852,7 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result </span>{
         <span class="kw">match </span><span class="self">self </span>{
             <span class="kw-2">&amp;</span>AMode::RegOffset(r, offset, ..) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;{}({:?})&quot;</span>, offset, r)
+                <span class="macro">write!</span>(f, <span class="string">&quot;{}({})&quot;</span>, offset, reg_name(r))
             }
             <span class="kw-2">&amp;</span>AMode::SPOffset(offset, ..) =&gt; {
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}(sp)&quot;</span>, offset)
@@ -1830,6 +1862,12 @@
             }
             <span class="kw-2">&amp;</span>AMode::FPOffset(offset, ..) =&gt; {
                 <span class="macro">write!</span>(f, <span class="string">&quot;{}(fp)&quot;</span>, offset)
+            }
+            <span class="kw-2">&amp;</span>AMode::Const(addr, ..) =&gt; {
+                <span class="macro">write!</span>(f, <span class="string">&quot;[const({})]&quot;</span>, addr.as_u32())
+            }
+            <span class="kw-2">&amp;</span>AMode::Label(label) =&gt; {
+                <span class="macro">write!</span>(f, <span class="string">&quot;[label{}]&quot;</span>, label.as_u32())
             }
         }
     }

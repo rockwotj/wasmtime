@@ -1795,6 +1795,56 @@
 <a href="#1795" id="1795">1795</a>
 <a href="#1796" id="1796">1796</a>
 <a href="#1797" id="1797">1797</a>
+<a href="#1798" id="1798">1798</a>
+<a href="#1799" id="1799">1799</a>
+<a href="#1800" id="1800">1800</a>
+<a href="#1801" id="1801">1801</a>
+<a href="#1802" id="1802">1802</a>
+<a href="#1803" id="1803">1803</a>
+<a href="#1804" id="1804">1804</a>
+<a href="#1805" id="1805">1805</a>
+<a href="#1806" id="1806">1806</a>
+<a href="#1807" id="1807">1807</a>
+<a href="#1808" id="1808">1808</a>
+<a href="#1809" id="1809">1809</a>
+<a href="#1810" id="1810">1810</a>
+<a href="#1811" id="1811">1811</a>
+<a href="#1812" id="1812">1812</a>
+<a href="#1813" id="1813">1813</a>
+<a href="#1814" id="1814">1814</a>
+<a href="#1815" id="1815">1815</a>
+<a href="#1816" id="1816">1816</a>
+<a href="#1817" id="1817">1817</a>
+<a href="#1818" id="1818">1818</a>
+<a href="#1819" id="1819">1819</a>
+<a href="#1820" id="1820">1820</a>
+<a href="#1821" id="1821">1821</a>
+<a href="#1822" id="1822">1822</a>
+<a href="#1823" id="1823">1823</a>
+<a href="#1824" id="1824">1824</a>
+<a href="#1825" id="1825">1825</a>
+<a href="#1826" id="1826">1826</a>
+<a href="#1827" id="1827">1827</a>
+<a href="#1828" id="1828">1828</a>
+<a href="#1829" id="1829">1829</a>
+<a href="#1830" id="1830">1830</a>
+<a href="#1831" id="1831">1831</a>
+<a href="#1832" id="1832">1832</a>
+<a href="#1833" id="1833">1833</a>
+<a href="#1834" id="1834">1834</a>
+<a href="#1835" id="1835">1835</a>
+<a href="#1836" id="1836">1836</a>
+<a href="#1837" id="1837">1837</a>
+<a href="#1838" id="1838">1838</a>
+<a href="#1839" id="1839">1839</a>
+<a href="#1840" id="1840">1840</a>
+<a href="#1841" id="1841">1841</a>
+<a href="#1842" id="1842">1842</a>
+<a href="#1843" id="1843">1843</a>
+<a href="#1844" id="1844">1844</a>
+<a href="#1845" id="1845">1845</a>
+<a href="#1846" id="1846">1846</a>
+<a href="#1847" id="1847">1847</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines riscv64-specific machine instruction types.
 
 </span><span class="comment">// Some variants are not constructed, but we still want them as options in the future.
@@ -2162,11 +2212,15 @@
             collector.reg_def(rd);
         }
         <span class="kw-2">&amp;</span>Inst::Load { rd, from, .. } =&gt; {
-            collector.reg_use(from.get_base_register());
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(r) = from.get_allocatable_register() {
+                collector.reg_use(r);
+            }
             collector.reg_def(rd);
         }
         <span class="kw-2">&amp;</span>Inst::Store { to, src, .. } =&gt; {
-            collector.reg_use(to.get_base_register());
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(r) = to.get_allocatable_register() {
+                collector.reg_use(r);
+            }
             collector.reg_use(src);
         }
 
@@ -2217,7 +2271,9 @@
             collector.reg_def(rd);
         }
         <span class="kw-2">&amp;</span>Inst::LoadAddr { rd, mem } =&gt; {
-            collector.reg_use(mem.get_base_register());
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(r) = mem.get_allocatable_register() {
+                collector.reg_use(r);
+            }
             collector.reg_early_def(rd);
         }
 
@@ -2428,11 +2484,15 @@
             collector.reg_def(rd);
         }
         <span class="kw-2">&amp;</span>Inst::VecLoad { to, <span class="kw-2">ref </span>from, .. } =&gt; {
-            collector.reg_use(from.get_base_register());
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(r) = from.get_allocatable_register() {
+                collector.reg_use(r);
+            }
             collector.reg_def(to);
         }
         <span class="kw-2">&amp;</span>Inst::VecStore { <span class="kw-2">ref </span>to, from, .. } =&gt; {
-            collector.reg_use(to.get_base_register());
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(r) = to.get_allocatable_register() {
+                collector.reg_use(r);
+            }
             collector.reg_use(from);
         }
     }
@@ -3298,7 +3358,7 @@
                 <span class="macro">format!</span>(<span class="string">&quot;load_sym {},{}{:+}&quot;</span>, rd, name.display(<span class="prelude-val">None</span>), offset)
             }
             <span class="kw-2">&amp;</span>MInst::LoadAddr { <span class="kw-2">ref </span>rd, <span class="kw-2">ref </span>mem } =&gt; {
-                <span class="kw">let </span>rs = mem.to_addr(allocs);
+                <span class="kw">let </span>rs = mem.to_string_with_alloc(allocs);
                 <span class="kw">let </span>rd = format_reg(rd.to_reg(), allocs);
                 <span class="macro">format!</span>(<span class="string">&quot;load_addr {},{}&quot;</span>, rd, rs)
             }
@@ -3428,6 +3488,18 @@
     /// is added to the current pc to give the target address. The
     /// conditional branch range is ±4 KiB.
     </span>B12,
+
+    <span class="doccomment">/// Equivalent to the `R_RISCV_PCREL_HI20` relocation, Allows setting
+    /// the immediate field of an `auipc` instruction.
+    </span>PCRelHi20,
+
+    <span class="doccomment">/// Similar to the `R_RISCV_PCREL_LO12_I` relocation but pointing to
+    /// the final address, instead of the `PCREL_HI20` label. Allows setting
+    /// the immediate field of I Type instructions such as `addi` or `lw`.
+    ///
+    /// Since we currently don&#39;t support offsets in labels, this relocation has
+    /// an implicit offset of 4.
+    </span>PCRelLo12I,
 }
 
 <span class="kw">impl </span>MachInstLabelUse <span class="kw">for </span>LabelUse {
@@ -3439,7 +3511,9 @@
     </span><span class="kw">fn </span>max_pos_range(<span class="self">self</span>) -&gt; CodeOffset {
         <span class="kw">match </span><span class="self">self </span>{
             LabelUse::Jal20 =&gt; ((<span class="number">1 </span>&lt;&lt; <span class="number">19</span>) - <span class="number">1</span>) * <span class="number">2</span>,
-            LabelUse::PCRel32 =&gt; Inst::imm_max() <span class="kw">as </span>CodeOffset,
+            LabelUse::PCRelLo12I | LabelUse::PCRelHi20 | LabelUse::PCRel32 =&gt; {
+                Inst::imm_max() <span class="kw">as </span>CodeOffset
+            }
             LabelUse::B12 =&gt; ((<span class="number">1 </span>&lt;&lt; <span class="number">11</span>) - <span class="number">1</span>) * <span class="number">2</span>,
         }
     }
@@ -3455,9 +3529,8 @@
     <span class="doccomment">/// Size of window into code needed to do the patch.
     </span><span class="kw">fn </span>patch_size(<span class="self">self</span>) -&gt; CodeOffset {
         <span class="kw">match </span><span class="self">self </span>{
-            LabelUse::Jal20 =&gt; <span class="number">4</span>,
+            LabelUse::Jal20 | LabelUse::B12 | LabelUse::PCRelHi20 | LabelUse::PCRelLo12I =&gt; <span class="number">4</span>,
             LabelUse::PCRel32 =&gt; <span class="number">8</span>,
-            LabelUse::B12 =&gt; <span class="number">4</span>,
         }
     }
 
@@ -3482,8 +3555,7 @@
     <span class="doccomment">/// Is a veneer supported for this label reference type?
     </span><span class="kw">fn </span>supports_veneer(<span class="self">self</span>) -&gt; bool {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::B12 =&gt; <span class="bool-val">true</span>,
-            <span class="self">Self</span>::Jal20 =&gt; <span class="bool-val">true</span>,
+            <span class="self">Self</span>::Jal20 | <span class="self">Self</span>::B12 =&gt; <span class="bool-val">true</span>,
             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         }
     }
@@ -3491,8 +3563,7 @@
     <span class="doccomment">/// How large is the veneer, if supported?
     </span><span class="kw">fn </span>veneer_size(<span class="self">self</span>) -&gt; CodeOffset {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::B12 =&gt; <span class="number">8</span>,
-            <span class="self">Self</span>::Jal20 =&gt; <span class="number">8</span>,
+            <span class="self">Self</span>::B12 | <span class="self">Self</span>::Jal20 =&gt; <span class="number">8</span>,
             <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
         }
     }
@@ -3575,6 +3646,35 @@
                     | ((offset &gt;&gt; <span class="number">5 </span>&amp; <span class="number">0b11_1111</span>) &lt;&lt; <span class="number">25</span>)
                     | ((offset &gt;&gt; <span class="number">12 </span>&amp; <span class="number">0b1</span>) &lt;&lt; <span class="number">31</span>);
                 buffer[<span class="number">0</span>..<span class="number">4</span>].clone_from_slice(<span class="kw-2">&amp;</span>u32::to_le_bytes(insn | v));
+            }
+
+            LabelUse::PCRelHi20 =&gt; {
+                <span class="comment">// See https://github.com/riscv-non-isa/riscv-elf-psabi-doc/blob/master/riscv-elf.adoc#pc-relative-symbol-addresses
+                //
+                // We need to add 0x800 to ensure that we land at the next page as soon as it goes out of range for the
+                // Lo12 relocation. That relocation is signed and has a maximum range of -2048..2047. So when we get an
+                // offset of 2048, we need to land at the next page and subtract instead.
+                </span><span class="kw">let </span>offset = offset <span class="kw">as </span>u32;
+                <span class="kw">let </span>hi20 = offset.wrapping_add(<span class="number">0x800</span>) &gt;&gt; <span class="number">12</span>;
+                <span class="kw">let </span>insn = (insn &amp; <span class="number">0xFFF</span>) | (hi20 &lt;&lt; <span class="number">12</span>);
+                buffer[<span class="number">0</span>..<span class="number">4</span>].clone_from_slice(<span class="kw-2">&amp;</span>u32::to_le_bytes(insn));
+            }
+
+            LabelUse::PCRelLo12I =&gt; {
+                <span class="comment">// `offset` is the offset from the current instruction to the target address.
+                //
+                // However we are trying to compute the offset to the target address from the previous instruction.
+                // The previous instruction should be the one that contains the PCRelHi20 relocation and
+                // stores/references the program counter (`auipc` usually).
+                //
+                // Since we are trying to compute the offset from the previous instruction, we can
+                // represent it as offset = target_address - (current_instruction_address - 4)
+                // which is equivalent to offset = target_address - current_instruction_address + 4.
+                //
+                // Thus we need to add 4 to the offset here.
+                </span><span class="kw">let </span>lo12 = (offset + <span class="number">4</span>) <span class="kw">as </span>u32 &amp; <span class="number">0xFFF</span>;
+                <span class="kw">let </span>insn = (insn &amp; <span class="number">0xFFFFF</span>) | (lo12 &lt;&lt; <span class="number">20</span>);
+                buffer[<span class="number">0</span>..<span class="number">4</span>].clone_from_slice(<span class="kw-2">&amp;</span>u32::to_le_bytes(insn));
             }
         }
     }

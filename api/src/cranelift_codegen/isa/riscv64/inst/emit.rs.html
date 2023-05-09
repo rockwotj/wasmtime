@@ -2912,6 +2912,50 @@
 <a href="#2912" id="2912">2912</a>
 <a href="#2913" id="2913">2913</a>
 <a href="#2914" id="2914">2914</a>
+<a href="#2915" id="2915">2915</a>
+<a href="#2916" id="2916">2916</a>
+<a href="#2917" id="2917">2917</a>
+<a href="#2918" id="2918">2918</a>
+<a href="#2919" id="2919">2919</a>
+<a href="#2920" id="2920">2920</a>
+<a href="#2921" id="2921">2921</a>
+<a href="#2922" id="2922">2922</a>
+<a href="#2923" id="2923">2923</a>
+<a href="#2924" id="2924">2924</a>
+<a href="#2925" id="2925">2925</a>
+<a href="#2926" id="2926">2926</a>
+<a href="#2927" id="2927">2927</a>
+<a href="#2928" id="2928">2928</a>
+<a href="#2929" id="2929">2929</a>
+<a href="#2930" id="2930">2930</a>
+<a href="#2931" id="2931">2931</a>
+<a href="#2932" id="2932">2932</a>
+<a href="#2933" id="2933">2933</a>
+<a href="#2934" id="2934">2934</a>
+<a href="#2935" id="2935">2935</a>
+<a href="#2936" id="2936">2936</a>
+<a href="#2937" id="2937">2937</a>
+<a href="#2938" id="2938">2938</a>
+<a href="#2939" id="2939">2939</a>
+<a href="#2940" id="2940">2940</a>
+<a href="#2941" id="2941">2941</a>
+<a href="#2942" id="2942">2942</a>
+<a href="#2943" id="2943">2943</a>
+<a href="#2944" id="2944">2944</a>
+<a href="#2945" id="2945">2945</a>
+<a href="#2946" id="2946">2946</a>
+<a href="#2947" id="2947">2947</a>
+<a href="#2948" id="2948">2948</a>
+<a href="#2949" id="2949">2949</a>
+<a href="#2950" id="2950">2950</a>
+<a href="#2951" id="2951">2951</a>
+<a href="#2952" id="2952">2952</a>
+<a href="#2953" id="2953">2953</a>
+<a href="#2954" id="2954">2954</a>
+<a href="#2955" id="2955">2955</a>
+<a href="#2956" id="2956">2956</a>
+<a href="#2957" id="2957">2957</a>
+<a href="#2958" id="2958">2958</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::StackMap;
@@ -3578,80 +3622,58 @@
                 from,
                 flags,
             } =&gt; {
-                <span class="kw">let </span>x;
-                <span class="kw">let </span>base = from.get_base_register();
-                <span class="kw">let </span>base = allocs.next(base);
+                <span class="kw">let </span>from = from.clone().with_allocs(<span class="kw-2">&amp;mut </span>allocs);
                 <span class="kw">let </span>rd = allocs.next_writable(rd);
+
+                <span class="kw">let </span>base = from.get_base_register();
                 <span class="kw">let </span>offset = from.get_offset_with_state(state);
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(imm12) = Imm12::maybe_from_u64(offset <span class="kw">as </span>u64) {
-                    <span class="kw">let </span>srcloc = state.cur_srcloc();
-                    <span class="kw">if </span>!srcloc.is_default() &amp;&amp; !flags.notrap() {
-                        <span class="comment">// Register the offset at which the actual load instruction starts.
-                        </span>sink.add_trap(TrapCode::HeapOutOfBounds);
+                <span class="kw">let </span>offset_imm12 = Imm12::maybe_from_u64(offset <span class="kw">as </span>u64);
+
+                <span class="kw">let </span>(addr, imm12) = <span class="kw">match </span>(base, offset_imm12) {
+                    <span class="comment">// If the offset fits into an imm12 we can directly encode it.
+                    </span>(<span class="prelude-val">Some</span>(base), <span class="prelude-val">Some</span>(imm12)) =&gt; (base, imm12),
+                    <span class="comment">// Otherwise load the address it into a reg and load from it.
+                    </span><span class="kw">_ </span>=&gt; {
+                        <span class="kw">let </span>tmp = writable_spilltmp_reg();
+                        Inst::LoadAddr { rd: tmp, mem: from }.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
+                        (tmp.to_reg(), Imm12::zero())
                     }
-                    x = op.op_code()
-                        | reg_to_gpr_num(rd.to_reg()) &lt;&lt; <span class="number">7
-                        </span>| op.funct3() &lt;&lt; <span class="number">12
-                        </span>| reg_to_gpr_num(base) &lt;&lt; <span class="number">15
-                        </span>| (imm12.as_u32()) &lt;&lt; <span class="number">20</span>;
-                    sink.put4(x);
-                } <span class="kw">else </span>{
-                    <span class="kw">let </span>tmp = writable_spilltmp_reg();
-                    <span class="kw">let </span><span class="kw-2">mut </span>insts =
-                        LoadConstant::U64(offset <span class="kw">as </span>u64).load_constant_and_add(tmp, base);
-                    <span class="kw">let </span>srcloc = state.cur_srcloc();
-                    <span class="kw">if </span>!srcloc.is_default() &amp;&amp; !flags.notrap() {
-                        <span class="comment">// Register the offset at which the actual load instruction starts.
-                        </span>sink.add_trap(TrapCode::HeapOutOfBounds);
-                    }
-                    insts.push(Inst::Load {
-                        op,
-                        from: AMode::RegOffset(tmp.to_reg(), <span class="number">0</span>, I64),
-                        rd,
-                        flags,
-                    });
-                    insts
-                        .into_iter()
-                        .for_each(|inst| inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
+                };
+
+                <span class="kw">let </span>srcloc = state.cur_srcloc();
+                <span class="kw">if </span>!srcloc.is_default() &amp;&amp; !flags.notrap() {
+                    <span class="comment">// Register the offset at which the actual load instruction starts.
+                    </span>sink.add_trap(TrapCode::HeapOutOfBounds);
                 }
+
+                sink.put4(encode_i_type(op.op_code(), rd, op.funct3(), addr, imm12));
             }
             <span class="kw-2">&amp;</span>Inst::Store { op, src, flags, to } =&gt; {
-                <span class="kw">let </span>base = allocs.next(to.get_base_register());
+                <span class="kw">let </span>to = to.clone().with_allocs(<span class="kw-2">&amp;mut </span>allocs);
                 <span class="kw">let </span>src = allocs.next(src);
+
+                <span class="kw">let </span>base = to.get_base_register();
                 <span class="kw">let </span>offset = to.get_offset_with_state(state);
-                <span class="kw">let </span>x;
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(imm12) = Imm12::maybe_from_u64(offset <span class="kw">as </span>u64) {
-                    <span class="kw">let </span>srcloc = state.cur_srcloc();
-                    <span class="kw">if </span>!srcloc.is_default() &amp;&amp; !flags.notrap() {
-                        <span class="comment">// Register the offset at which the actual load instruction starts.
-                        </span>sink.add_trap(TrapCode::HeapOutOfBounds);
+                <span class="kw">let </span>offset_imm12 = Imm12::maybe_from_u64(offset <span class="kw">as </span>u64);
+
+                <span class="kw">let </span>(addr, imm12) = <span class="kw">match </span>(base, offset_imm12) {
+                    <span class="comment">// If the offset fits into an imm12 we can directly encode it.
+                    </span>(<span class="prelude-val">Some</span>(base), <span class="prelude-val">Some</span>(imm12)) =&gt; (base, imm12),
+                    <span class="comment">// Otherwise load the address it into a reg and load from it.
+                    </span><span class="kw">_ </span>=&gt; {
+                        <span class="kw">let </span>tmp = writable_spilltmp_reg();
+                        Inst::LoadAddr { rd: tmp, mem: to }.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
+                        (tmp.to_reg(), Imm12::zero())
                     }
-                    x = op.op_code()
-                        | (imm12.as_u32() &amp; <span class="number">0x1f</span>) &lt;&lt; <span class="number">7
-                        </span>| op.funct3() &lt;&lt; <span class="number">12
-                        </span>| reg_to_gpr_num(base) &lt;&lt; <span class="number">15
-                        </span>| reg_to_gpr_num(src) &lt;&lt; <span class="number">20
-                        </span>| (imm12.as_u32() &gt;&gt; <span class="number">5</span>) &lt;&lt; <span class="number">25</span>;
-                    sink.put4(x);
-                } <span class="kw">else </span>{
-                    <span class="kw">let </span>tmp = writable_spilltmp_reg();
-                    <span class="kw">let </span><span class="kw-2">mut </span>insts =
-                        LoadConstant::U64(offset <span class="kw">as </span>u64).load_constant_and_add(tmp, base);
-                    <span class="kw">let </span>srcloc = state.cur_srcloc();
-                    <span class="kw">if </span>!srcloc.is_default() &amp;&amp; !flags.notrap() {
-                        <span class="comment">// Register the offset at which the actual load instruction starts.
-                        </span>sink.add_trap(TrapCode::HeapOutOfBounds);
-                    }
-                    insts.push(Inst::Store {
-                        op,
-                        to: AMode::RegOffset(tmp.to_reg(), <span class="number">0</span>, I64),
-                        flags,
-                        src,
-                    });
-                    insts
-                        .into_iter()
-                        .for_each(|inst| inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
+                };
+
+                <span class="kw">let </span>srcloc = state.cur_srcloc();
+                <span class="kw">if </span>!srcloc.is_default() &amp;&amp; !flags.notrap() {
+                    <span class="comment">// Register the offset at which the actual load instruction starts.
+                    </span>sink.add_trap(TrapCode::HeapOutOfBounds);
                 }
+
+                sink.put4(encode_s_type(op.op_code(), op.funct3(), addr, src, imm12));
             }
             <span class="kw-2">&amp;</span>Inst::Args { .. } =&gt; {
                 <span class="comment">// Nothing: this is a pseudoinstruction that serves
@@ -4102,23 +4124,61 @@
             }
 
             <span class="kw-2">&amp;</span>Inst::LoadAddr { rd, mem } =&gt; {
-                <span class="kw">let </span>base = mem.get_base_register();
-                <span class="kw">let </span>base = allocs.next(base);
+                <span class="kw">let </span>mem = mem.with_allocs(<span class="kw-2">&amp;mut </span>allocs);
                 <span class="kw">let </span>rd = allocs.next_writable(rd);
+
+                <span class="kw">let </span>base = mem.get_base_register();
                 <span class="kw">let </span>offset = mem.get_offset_with_state(state);
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = Imm12::maybe_from_u64(offset <span class="kw">as </span>u64) {
-                    Inst::AluRRImm12 {
-                        alu_op: AluOPRRI::Addi,
-                        rd,
-                        rs: base,
-                        imm12: offset,
+                <span class="kw">let </span>offset_imm12 = Imm12::maybe_from_u64(offset <span class="kw">as </span>u64);
+
+                <span class="kw">match </span>(mem, base, offset_imm12) {
+                    (<span class="kw">_</span>, <span class="prelude-val">Some</span>(rs), <span class="prelude-val">Some</span>(imm12)) =&gt; {
+                        Inst::AluRRImm12 {
+                            alu_op: AluOPRRI::Addi,
+                            rd,
+                            rs,
+                            imm12,
+                        }
+                        .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
                     }
-                    .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
-                } <span class="kw">else </span>{
-                    <span class="kw">let </span>insts = LoadConstant::U64(offset <span class="kw">as </span>u64).load_constant_and_add(rd, base);
-                    insts
-                        .into_iter()
-                        .for_each(|i| i.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
+                    (<span class="kw">_</span>, <span class="prelude-val">Some</span>(rs), <span class="prelude-val">None</span>) =&gt; {
+                        LoadConstant::U64(offset <span class="kw">as </span>u64)
+                            .load_constant_and_add(rd, rs)
+                            .into_iter()
+                            .for_each(|inst| inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
+                    }
+                    (AMode::Const(addr), <span class="prelude-val">None</span>, <span class="kw">_</span>) =&gt; {
+                        <span class="comment">// Get an address label for the constant and recurse.
+                        </span><span class="kw">let </span>label = sink.get_label_for_constant(addr);
+                        Inst::LoadAddr {
+                            rd,
+                            mem: AMode::Label(label),
+                        }
+                        .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
+                    }
+                    (AMode::Label(label), <span class="prelude-val">None</span>, <span class="kw">_</span>) =&gt; {
+                        <span class="comment">// Get the current PC.
+                        </span>sink.use_label_at_offset(sink.cur_offset(), label, LabelUse::PCRelHi20);
+                        <span class="kw">let </span>inst = Inst::Auipc {
+                            rd,
+                            imm: Imm20::from_bits(<span class="number">0</span>),
+                        };
+                        inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
+
+                        <span class="comment">// Emit an add to the address with a relocation.
+                        // This later gets patched up with the correct offset.
+                        </span>sink.use_label_at_offset(sink.cur_offset(), label, LabelUse::PCRelLo12I);
+                        Inst::AluRRImm12 {
+                            alu_op: AluOPRRI::Addi,
+                            rd,
+                            rs: rd.to_reg(),
+                            imm12: Imm12::zero(),
+                        }
+                        .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
+                    }
+                    (amode, <span class="kw">_</span>, <span class="kw">_</span>) =&gt; {
+                        <span class="macro">unimplemented!</span>(<span class="string">&quot;LoadAddr: {:?}&quot;</span>, amode);
+                    }
                 }
             }
 
@@ -5735,16 +5795,30 @@
                 flags,
                 ..
             } =&gt; {
-                <span class="kw">let </span>offset = from.get_offset_with_state(state);
-                <span class="kw">let </span>from_reg = allocs.next(from.get_base_register());
+                <span class="kw">let </span>from = from.clone().with_allocs(<span class="kw-2">&amp;mut </span>allocs);
                 <span class="kw">let </span>to = allocs.next_writable(to);
 
                 <span class="comment">// Vector Loads don&#39;t support immediate offsets, so we need to load it into a register.
-                </span><span class="kw">let </span>addr = writable_spilltmp_reg();
-                LoadConstant::U64(offset <span class="kw">as </span>u64)
-                    .load_constant_and_add(addr, from_reg)
-                    .into_iter()
-                    .for_each(|inst| inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
+                </span><span class="kw">let </span>addr = <span class="kw">match </span>from {
+                    VecAMode::UnitStride { base } =&gt; {
+                        <span class="kw">let </span>base_reg = base.get_base_register();
+                        <span class="kw">let </span>offset = base.get_offset_with_state(state);
+
+                        <span class="comment">// Reg+0 Offset can be directly encoded
+                        </span><span class="kw">if let </span>(<span class="prelude-val">Some</span>(base_reg), <span class="number">0</span>) = (base_reg, offset) {
+                            base_reg
+                        } <span class="kw">else </span>{
+                            <span class="comment">// Otherwise load the address it into a reg and load from it.
+                            </span><span class="kw">let </span>tmp = writable_spilltmp_reg();
+                            Inst::LoadAddr {
+                                rd: tmp,
+                                mem: base.clone(),
+                            }
+                            .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
+                            tmp.to_reg()
+                        }
+                    }
+                };
 
                 <span class="kw">let </span>srcloc = state.cur_srcloc();
                 <span class="kw">if </span>!srcloc.is_default() &amp;&amp; !flags.notrap() {
@@ -5756,7 +5830,7 @@
                     <span class="number">0x07</span>,
                     to.to_reg(),
                     eew,
-                    addr.to_reg(),
+                    addr,
                     from.lumop(),
                     <span class="comment">// We don&#39;t implement masking yet.
                     </span>VecOpMasking::Disabled,
@@ -5772,16 +5846,30 @@
                 flags,
                 ..
             } =&gt; {
-                <span class="kw">let </span>offset = to.get_offset_with_state(state);
-                <span class="kw">let </span>to_reg = allocs.next(to.get_base_register());
+                <span class="kw">let </span>to = to.clone().with_allocs(<span class="kw-2">&amp;mut </span>allocs);
                 <span class="kw">let </span>from = allocs.next(from);
 
                 <span class="comment">// Vector Stores don&#39;t support immediate offsets, so we need to load it into a register.
-                </span><span class="kw">let </span>addr = writable_spilltmp_reg();
-                LoadConstant::U64(offset <span class="kw">as </span>u64)
-                    .load_constant_and_add(addr, to_reg)
-                    .into_iter()
-                    .for_each(|inst| inst.emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state));
+                </span><span class="kw">let </span>addr = <span class="kw">match </span>to {
+                    VecAMode::UnitStride { base } =&gt; {
+                        <span class="kw">let </span>base_reg = base.get_base_register();
+                        <span class="kw">let </span>offset = base.get_offset_with_state(state);
+
+                        <span class="comment">// Reg+0 Offset can be directly encoded
+                        </span><span class="kw">if let </span>(<span class="prelude-val">Some</span>(base_reg), <span class="number">0</span>) = (base_reg, offset) {
+                            base_reg
+                        } <span class="kw">else </span>{
+                            <span class="comment">// Otherwise load the address it into a reg and load from it.
+                            </span><span class="kw">let </span>tmp = writable_spilltmp_reg();
+                            Inst::LoadAddr {
+                                rd: tmp,
+                                mem: base.clone(),
+                            }
+                            .emit(<span class="kw-2">&amp;</span>[], sink, emit_info, state);
+                            tmp.to_reg()
+                        }
+                    }
+                };
 
                 <span class="kw">let </span>srcloc = state.cur_srcloc();
                 <span class="kw">if </span>!srcloc.is_default() &amp;&amp; !flags.notrap() {
@@ -5793,7 +5881,7 @@
                     <span class="number">0x27</span>,
                     from,
                     eew,
-                    addr.to_reg(),
+                    addr,
                     to.sumop(),
                     <span class="comment">// We don&#39;t implement masking yet.
                     </span>VecOpMasking::Disabled,

@@ -186,6 +186,37 @@
 <a href="#186" id="186">186</a>
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Contains the RISC-V instruction encoding logic.
 //!
 //! These formats are specified in the RISC-V specification in section 2.2.
@@ -194,7 +225,7 @@
 //! Some instructions especially in extensions have slight variations from
 //! the base RISC-V specification.
 
-</span><span class="kw">use super</span>::{Imm5, UImm5, VType};
+</span><span class="kw">use super</span>::{Imm12, Imm5, UImm5, VType};
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::reg_to_gpr_num;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::lower::isle::generated_code::{
     VecAluOpRRImm5, VecAluOpRRR, VecElementWidth, VecOpCategory, VecOpMasking,
@@ -238,6 +269,37 @@
         reg_to_gpr_num(rs2),
         funct7,
     )
+}
+
+<span class="doccomment">/// Encode an I-type instruction.
+///
+/// Layout:
+/// 0-------6-7-------11-12------14-15------19-20------------------31
+/// | Opcode |   rd     |  width   |   rs1    |     Offset[11:0]    |
+</span><span class="kw">pub fn </span>encode_i_type(opcode: u32, rd: WritableReg, width: u32, rs1: Reg, offset: Imm12) -&gt; u32 {
+    <span class="kw">let </span><span class="kw-2">mut </span>bits = <span class="number">0</span>;
+    bits |= unsigned_field_width(opcode, <span class="number">7</span>);
+    bits |= reg_to_gpr_num(rd.to_reg()) &lt;&lt; <span class="number">7</span>;
+    bits |= unsigned_field_width(width, <span class="number">3</span>) &lt;&lt; <span class="number">12</span>;
+    bits |= reg_to_gpr_num(rs1) &lt;&lt; <span class="number">15</span>;
+    bits |= unsigned_field_width(offset.as_u32(), <span class="number">12</span>) &lt;&lt; <span class="number">20</span>;
+    bits
+}
+
+<span class="doccomment">/// Encode an S-type instruction.
+///
+/// Layout:
+/// 0-------6-7-------11-12------14-15------19-20---24-25-------------31
+/// | Opcode | imm[4:0] |  width   |   base   |  src  |    imm[11:5]   |
+</span><span class="kw">pub fn </span>encode_s_type(opcode: u32, width: u32, base: Reg, src: Reg, offset: Imm12) -&gt; u32 {
+    <span class="kw">let </span><span class="kw-2">mut </span>bits = <span class="number">0</span>;
+    bits |= unsigned_field_width(opcode, <span class="number">7</span>);
+    bits |= (offset.as_u32() &amp; <span class="number">0b11111</span>) &lt;&lt; <span class="number">7</span>;
+    bits |= unsigned_field_width(width, <span class="number">3</span>) &lt;&lt; <span class="number">12</span>;
+    bits |= reg_to_gpr_num(base) &lt;&lt; <span class="number">15</span>;
+    bits |= reg_to_gpr_num(src) &lt;&lt; <span class="number">20</span>;
+    bits |= unsigned_field_width(offset.as_u32() &gt;&gt; <span class="number">5</span>, <span class="number">7</span>) &lt;&lt; <span class="number">25</span>;
+    bits
 }
 
 <span class="doccomment">/// Encodes a Vector ALU instruction.
