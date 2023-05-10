@@ -333,6 +333,8 @@
 <a href="#333" id="333">333</a>
 <a href="#334" id="334">334</a>
 <a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Support for maintaining the usefulness of a corpus over time.
 //!
 //! Wasmtime&#39;s fuzzing strategy in general is to use `wasm-smith` to generate
@@ -383,7 +385,9 @@
 //!    This can be useful in case an input is in its binary form or if a
 //!    preexisting corpus is being rewritten.
 
-</span><span class="kw">use </span>arbitrary::{Arbitrary, <span class="prelude-ty">Result</span>, Unstructured};
+</span><span class="kw">use </span>std::borrow::Cow;
+
+<span class="kw">use </span>arbitrary::{Arbitrary, <span class="prelude-ty">Result</span>, Unstructured};
 <span class="kw">use </span>wasm_encoder::Section;
 
 <span class="doccomment">/// Helper macro for fuzz targets that are single-module fuzzers.
@@ -533,8 +537,8 @@
 <span class="kw">fn </span>encode_module(module: <span class="kw-2">&amp;</span>[u8], fuzz_data: <span class="kw-2">&amp;</span>[u8]) -&gt; Vec&lt;u8&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>module = module.to_vec();
     wasm_encoder::CustomSection {
-        name: SECTION_NAME,
-        data: <span class="kw-2">&amp;</span>fuzz_data,
+        name: SECTION_NAME.into(),
+        data: Cow::Borrowed(<span class="kw-2">&amp;</span>fuzz_data),
     }
     .append_to(<span class="kw-2">&amp;mut </span>module);
     module

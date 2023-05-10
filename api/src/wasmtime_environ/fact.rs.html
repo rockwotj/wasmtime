@@ -620,6 +620,7 @@
 <a href="#620" id="620">620</a>
 <a href="#621" id="621">621</a>
 <a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Wasmtime&#39;s Fused Adapter Compiler of Trampolines (FACT)
 //!
 //! This module contains a compiler which emits trampolines to implement fused
@@ -647,6 +648,7 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::fact::transcode::Transcoder;
 <span class="kw">use crate</span>::{EntityRef, FuncIndex, GlobalIndex, MemoryIndex, PrimaryMap};
+<span class="kw">use </span>std::borrow::Cow;
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>wasm_encoder::<span class="kw-2">*</span>;
 
@@ -1059,8 +1061,8 @@
         result.section(<span class="kw-2">&amp;</span>code);
         <span class="kw">if </span><span class="self">self</span>.debug {
             result.section(<span class="kw-2">&amp;</span>CustomSection {
-                name: <span class="string">&quot;wasmtime-trampoline-traps&quot;</span>,
-                data: <span class="kw-2">&amp;</span>traps,
+                name: <span class="string">&quot;wasmtime-trampoline-traps&quot;</span>.into(),
+                data: Cow::Borrowed(<span class="kw-2">&amp;</span>traps),
             });
         }
         result.finish()
