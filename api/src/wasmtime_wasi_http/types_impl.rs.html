@@ -286,6 +286,24 @@
 <a href="#286" id="286">286</a>
 <a href="#287" id="287">287</a>
 <a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::poll::Pollable;
 <span class="kw">use crate</span>::r#struct::{ActiveRequest, Stream};
 <span class="kw">use </span><span class="kw">crate</span>::types::{
@@ -296,6 +314,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::WasiHttp;
 <span class="kw">use </span>anyhow::{anyhow, bail};
 <span class="kw">use </span>std::collections::{hash_map::Entry, HashMap};
+<span class="kw">use </span>tokio::runtime::{Handle, Runtime};
 
 <span class="kw">impl </span><span class="kw">crate</span>::types::Host <span class="kw">for </span>WasiHttp {
     <span class="kw">fn </span>drop_fields(<span class="kw-2">&amp;mut </span><span class="self">self</span>, fields: Fields) -&gt; wasmtime::Result&lt;()&gt; {
@@ -557,15 +576,32 @@
     }
     <span class="kw">fn </span>drop_future_incoming_response(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        _f: FutureIncomingResponse,
+        future: FutureIncomingResponse,
     ) -&gt; wasmtime::Result&lt;()&gt; {
-        <span class="macro">bail!</span>(<span class="string">&quot;unimplemented: drop_future_incoming_response&quot;</span>)
+        <span class="self">self</span>.futures.remove(<span class="kw-2">&amp;</span>future);
+        <span class="prelude-val">Ok</span>(())
     }
     <span class="kw">fn </span>future_incoming_response_get(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        _f: FutureIncomingResponse,
+        future: FutureIncomingResponse,
     ) -&gt; wasmtime::Result&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;IncomingResponse, Error&gt;&gt;&gt; {
-        <span class="macro">bail!</span>(<span class="string">&quot;unimplemented: future_incoming_response_get&quot;</span>)
+        <span class="kw">let </span>f = <span class="self">self
+            </span>.futures
+            .get(<span class="kw-2">&amp;</span>future)
+            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;future not found: {future}&quot;</span>))<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>(handle, _runtime) = <span class="kw">match </span>Handle::try_current() {
+            <span class="prelude-val">Ok</span>(h) =&gt; (h, <span class="prelude-val">None</span>),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
+                <span class="kw">let </span>rt = Runtime::new().unwrap();
+                <span class="kw">let </span>_enter = rt.enter();
+                (rt.handle().clone(), <span class="prelude-val">Some</span>(rt))
+            }
+        };
+        <span class="kw">let </span>response = handle
+            .block_on(<span class="self">self</span>.handle_async(f.request_id, f.options))
+            .map_err(|e| <span class="kw">crate</span>::types::Error::UnexpectedError(e.to_string()));
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(response))
     }
     <span class="kw">fn </span>listen_to_future_incoming_response(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,

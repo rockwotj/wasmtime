@@ -103,6 +103,31 @@
 <a href="#103" id="103">103</a>
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::types::{Method, Scheme};
 <span class="kw">use </span>bytes::{BufMut, Bytes, BytesMut};
 <span class="kw">use </span>std::collections::HashMap;
@@ -119,10 +144,12 @@
     <span class="kw">pub </span>response_id_base: u32,
     <span class="kw">pub </span>fields_id_base: u32,
     <span class="kw">pub </span>streams_id_base: u32,
+    <span class="kw">pub </span>future_id_base: u32,
     <span class="kw">pub </span>requests: HashMap&lt;u32, ActiveRequest&gt;,
     <span class="kw">pub </span>responses: HashMap&lt;u32, ActiveResponse&gt;,
     <span class="kw">pub </span>fields: HashMap&lt;u32, HashMap&lt;String, Vec&lt;String&gt;&gt;&gt;,
     <span class="kw">pub </span>streams: HashMap&lt;u32, Stream&gt;,
+    <span class="kw">pub </span>futures: HashMap&lt;u32, ActiveFuture&gt;,
 }
 
 <span class="attr">#[derive(Clone)]
@@ -148,10 +175,17 @@
     <span class="kw">pub </span>trailers: u32,
 }
 
+<span class="attr">#[derive(Clone)]
+</span><span class="kw">pub struct </span>ActiveFuture {
+    <span class="kw">pub </span>id: u32,
+    <span class="kw">pub </span>request_id: u32,
+    <span class="kw">pub </span>options: <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::default_outgoing_http::RequestOptions&gt;,
+}
+
 <span class="kw">impl </span>ActiveRequest {
     <span class="kw">pub fn </span>new(id: u32) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            id: id,
+            id,
             active_request: <span class="bool-val">false</span>,
             method: Method::Get,
             scheme: <span class="prelude-val">Some</span>(Scheme::Http),
@@ -167,12 +201,26 @@
 <span class="kw">impl </span>ActiveResponse {
     <span class="kw">pub fn </span>new(id: u32) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            id: id,
+            id,
             active_response: <span class="bool-val">false</span>,
             status: <span class="number">0</span>,
             body: <span class="number">0</span>,
             response_headers: HashMap::new(),
             trailers: <span class="number">0</span>,
+        }
+    }
+}
+
+<span class="kw">impl </span>ActiveFuture {
+    <span class="kw">pub fn </span>new(
+        id: u32,
+        request_id: u32,
+        options: <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::default_outgoing_http::RequestOptions&gt;,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            id,
+            request_id,
+            options,
         }
     }
 }
@@ -201,10 +249,12 @@
             response_id_base: <span class="number">1</span>,
             fields_id_base: <span class="number">1</span>,
             streams_id_base: <span class="number">1</span>,
+            future_id_base: <span class="number">1</span>,
             requests: HashMap::new(),
             responses: HashMap::new(),
             fields: HashMap::new(),
             streams: HashMap::new(),
+            futures: HashMap::new(),
         }
     }
 }

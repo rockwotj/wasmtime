@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["ActiveRequest","ActiveResponse","Stream","WasiHttp"]};
+window.SIDEBAR_ITEMS = {"struct":["ActiveFuture","ActiveRequest","ActiveResponse","Stream","WasiHttp"]};
