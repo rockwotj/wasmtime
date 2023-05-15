@@ -5,7 +5,7 @@
     name: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     args: &amp;[<a class="enum" href="../generators/enum.DiffValue.html" title="enum wasmtime_fuzzing::generators::DiffValue">DiffValue</a>],
     result_tys: &amp;[<a class="enum" href="../generators/enum.DiffValueType.html" title="enum wasmtime_fuzzing::generators::DiffValueType">DiffValueType</a>]
-) -&gt; <a class="type" href="https://docs.rs/anyhow/1.0.66/anyhow/type.Result.html" title="type anyhow::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>&gt;</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Evaluate the function identified by <code>name</code> in two different engine
+) -&gt; <a class="type" href="https://docs.rs/anyhow/1.0.71/anyhow/type.Result.html" title="type anyhow::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>&gt;</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Evaluate the function identified by <code>name</code> in two different engine
 instances–<code>lhs</code> and <code>rhs</code>.</p>
 <p>Returns <code>Ok(true)</code> if more evaluations can happen or <code>Ok(false)</code> if the
 instances may have drifted apart and no more evaluations can happen.</p>

@@ -22,7 +22,7 @@ and cause an error to be returned to the host. This enumeration is a list of
 all possible traps that can happen in wasm, in addition to some
 Wasmtime-specific trap codes listed here as well.</p>
 <h2 id="errors-in-wasmtime"><a href="#errors-in-wasmtime">Errors in Wasmtime</a></h2>
-<p>Error-handling in Wasmtime is primarily done through the <a href="https://docs.rs/anyhow/1.0.66/anyhow/index.html" title="mod anyhow"><code>anyhow</code></a> crate
+<p>Error-handling in Wasmtime is primarily done through the <a href="https://docs.rs/anyhow/1.0.71/anyhow/index.html" title="mod anyhow"><code>anyhow</code></a> crate
 where most results are a <a href="type.Result.html" title="type wasmtime::Result"><code>Result&lt;T&gt;</code></a> which is an alias for
 <a href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result"><code>Result&lt;T, anyhow::Error&gt;</code></a>. Errors in Wasmtime are
 represented with <a href="struct.Error.html" title="struct wasmtime::Error"><code>anyhow::Error</code></a> which acts as a container for any type of

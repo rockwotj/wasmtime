@@ -1,4 +1,5 @@
 var sourcesIndex = JSON.parse('{\
+"byte_array_literals":["",[],["lib.rs"]],\
 "clif_json":["",[],["clif-json.rs"]],\
 "clif_util":["",[],["bugpoint.rs","cat.rs","clif-util.rs","compile.rs","disasm.rs","interpret.rs","print_cfg.rs","run.rs","souper_harvest.rs","utils.rs","wasm.rs"]],\
 "component_fuzz_util":["",[],["lib.rs"]],\
@@ -26,10 +27,12 @@ var sourcesIndex = JSON.parse('{\
 "fib":["",[],["fib.rs"]],\
 "islec":["",[],["main.rs"]],\
 "tokio_wasi":["",[],["tokio-wasi.rs"]],\
+"verify_component_adapter":["",[],["main.rs"]],\
 "wasi":["",[],["wasi.rs"]],\
 "wasi_cap_std_sync":["",[["sched",[],["unix.rs"]]],["clocks.rs","dir.rs","file.rs","lib.rs","net.rs","sched.rs","stdio.rs"]],\
 "wasi_common":["",[["sched",[],["subscription.rs"]],["snapshots",[["preview_1",[],["error.rs"]]],["mod.rs","preview_0.rs","preview_1.rs"]]],["clocks.rs","ctx.rs","dir.rs","error.rs","file.rs","lib.rs","pipe.rs","random.rs","sched.rs","string_array.rs","table.rs"]],\
 "wasi_crypto":["",[["asymmetric_common",[],["keypair.rs","managed_keypair.rs","mod.rs","publickey.rs","secretkey.rs"]],["key_exchange",[["dh",[],["mod.rs","x25519.rs"]],["kem",[],["kyber.rs","mod.rs"]]],["keypair.rs","mod.rs","publickey.rs","secretkey.rs"]],["signatures",[],["ecdsa.rs","eddsa.rs","keypair.rs","mod.rs","publickey.rs","rsa.rs","secretkey.rs","signature.rs"]],["symmetric",[],["aes_gcm.rs","chacha_poly.rs","hkdf.rs","hmac_sha2.rs","key.rs","managed_key.rs","mod.rs","sha2.rs","state.rs","tag.rs","xoodyak.rs"]]],["array_output.rs","error.rs","handles.rs","lib.rs","options.rs","rand.rs","secrets_manager.rs","version.rs"]],\
+"wasi_preview1_component_adapter":["",[],["descriptors.rs","lib.rs","macros.rs"]],\
 "wasi_tokio":["",[["sched",[],["unix.rs"]]],["dir.rs","file.rs","lib.rs","net.rs","sched.rs","stdio.rs"]],\
 "wasm_spec_interpreter":["",[],["lib.rs","without_library.rs"]],\
 "wasmtime":["",[["component",[["func",[],["host.rs","options.rs","typed.rs"]]],["component.rs","func.rs","instance.rs","linker.rs","matching.rs","mod.rs","storage.rs","store.rs","types.rs","values.rs"]],["engine",[],["serialization.rs"]],["func",[],["typed.rs"]],["module",[],["registry.rs"]],["store",[],["context.rs","data.rs","func_refs.rs"]],["trampoline",[],["func.rs","global.rs","memory.rs","table.rs"]],["types",[],["matching.rs"]]],["code.rs","config.rs","engine.rs","externals.rs","func.rs","instance.rs","lib.rs","limits.rs","linker.rs","memory.rs","module.rs","profiling.rs","ref.rs","signatures.rs","store.rs","trampoline.rs","trap.rs","types.rs","unix.rs","values.rs"]],\
