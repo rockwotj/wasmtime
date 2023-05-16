@@ -2956,6 +2956,8 @@
 <a href="#2956" id="2956">2956</a>
 <a href="#2957" id="2957">2957</a>
 <a href="#2958" id="2958">2958</a>
+<a href="#2959" id="2959">2959</a>
+<a href="#2960" id="2960">2960</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::StackMap;
@@ -3885,6 +3887,8 @@
             }
 
             <span class="kw-2">&amp;</span>Inst::Mov { rd, rm, ty } =&gt; {
+                <span class="macro">debug_assert_ne!</span>(rd.to_reg().class(), RegClass::Vector);
+                <span class="macro">debug_assert_ne!</span>(rm.class(), RegClass::Vector);
                 <span class="kw">if </span>rd.to_reg() != rm {
                     <span class="kw">let </span>rm = allocs.next(rm);
                     <span class="kw">let </span>rd = allocs.next_writable(rd);

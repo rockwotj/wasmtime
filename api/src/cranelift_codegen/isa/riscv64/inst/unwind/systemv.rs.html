@@ -172,9 +172,6 @@
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
 <a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
-<a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Unwind information for System V ABI (Riscv64).
 
 </span><span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::regs;
@@ -207,17 +204,14 @@
 
 <span class="doccomment">/// Map Cranelift registers to their corresponding Gimli registers.
 </span><span class="kw">pub fn </span>map_reg(reg: Reg) -&gt; <span class="prelude-ty">Result</span>&lt;Register, RegisterMappingError&gt; {
-    <span class="kw">match </span>reg.class() {
-        RegClass::Int =&gt; {
-            <span class="kw">let </span>reg = reg.to_real_reg().unwrap().hw_enc() <span class="kw">as </span>u16;
-            <span class="prelude-val">Ok</span>(Register(reg))
-        }
-        RegClass::Float =&gt; {
-            <span class="kw">let </span>reg = reg.to_real_reg().unwrap().hw_enc() <span class="kw">as </span>u16;
-            <span class="prelude-val">Ok</span>(Register(<span class="number">32 </span>+ reg))
-        }
-        RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
-    }
+    <span class="kw">let </span>reg_offset = <span class="kw">match </span>reg.class() {
+        RegClass::Int =&gt; <span class="number">0</span>,
+        RegClass::Float =&gt; <span class="number">32</span>,
+        RegClass::Vector =&gt; <span class="number">64</span>,
+    };
+
+    <span class="kw">let </span>reg = reg.to_real_reg().unwrap().hw_enc() <span class="kw">as </span>u16;
+    <span class="prelude-val">Ok</span>(Register(reg_offset + reg))
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>RegisterMapper;

@@ -221,14 +221,6 @@
 <a href="#221" id="221">221</a>
 <a href="#222" id="222">222</a>
 <a href="#223" id="223">223</a>
-<a href="#224" id="224">224</a>
-<a href="#225" id="225">225</a>
-<a href="#226" id="226">226</a>
-<a href="#227" id="227">227</a>
-<a href="#228" id="228">228</a>
-<a href="#229" id="229">229</a>
-<a href="#230" id="230">230</a>
-<a href="#231" id="231">231</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA definitions: registers.
 //!
 
@@ -368,45 +360,37 @@
 
 <span class="kw">pub fn </span>crate_reg_eviroment(_flags: <span class="kw-2">&amp;</span>settings::Flags) -&gt; MachineEnv {
     <span class="kw">let </span>preferred_regs_by_class: [Vec&lt;PReg&gt;; <span class="number">3</span>] = {
-        <span class="kw">let </span><span class="kw-2">mut </span>x_register: Vec&lt;PReg&gt; = <span class="macro">vec!</span>[];
-        x_register.push(PReg::new(<span class="number">5</span>, RegClass::Int));
-        <span class="kw">for </span>i <span class="kw">in </span><span class="number">6</span>..=<span class="number">7 </span>{
-            x_register.push(PReg::new(i, RegClass::Int));
-        }
-        <span class="kw">for </span>i <span class="kw">in </span><span class="number">10</span>..=<span class="number">17 </span>{
-            x_register.push(PReg::new(i, RegClass::Int));
-        }
-        <span class="kw">for </span>i <span class="kw">in </span><span class="number">28</span>..=<span class="number">29 </span>{
-            x_register.push(PReg::new(i, RegClass::Int));
-        }
+        <span class="kw">let </span>x_registers: Vec&lt;PReg&gt; = (<span class="number">5</span>..=<span class="number">7</span>)
+            .chain(<span class="number">10</span>..=<span class="number">17</span>)
+            .chain(<span class="number">28</span>..=<span class="number">29</span>)
+            .map(|i| PReg::new(i, RegClass::Int))
+            .collect();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>f_register: Vec&lt;PReg&gt; = <span class="macro">vec!</span>[];
-        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..=<span class="number">7 </span>{
-            f_register.push(PReg::new(i, RegClass::Float));
-        }
-        <span class="kw">for </span>i <span class="kw">in </span><span class="number">10</span>..=<span class="number">17 </span>{
-            f_register.push(PReg::new(i, RegClass::Float));
-        }
-        <span class="kw">for </span>i <span class="kw">in </span><span class="number">28</span>..=<span class="number">31 </span>{
-            f_register.push(PReg::new(i, RegClass::Float));
-        }
-        [x_register, f_register, <span class="macro">vec!</span>[]]
+        <span class="kw">let </span>f_registers: Vec&lt;PReg&gt; = (<span class="number">0</span>..=<span class="number">7</span>)
+            .chain(<span class="number">10</span>..=<span class="number">17</span>)
+            .chain(<span class="number">28</span>..=<span class="number">31</span>)
+            .map(|i| PReg::new(i, RegClass::Float))
+            .collect();
+
+        <span class="kw">let </span>v_registers: Vec&lt;PReg&gt; = (<span class="number">0</span>..=<span class="number">31</span>).map(|i| PReg::new(i, RegClass::Vector)).collect();
+
+        [x_registers, f_registers, v_registers]
     };
 
     <span class="kw">let </span>non_preferred_regs_by_class: [Vec&lt;PReg&gt;; <span class="number">3</span>] = {
-        <span class="kw">let </span><span class="kw-2">mut </span>x_register: Vec&lt;PReg&gt; = <span class="macro">vec!</span>[];
-        x_register.push(PReg::new(<span class="number">9</span>, RegClass::Int));
-        <span class="kw">for </span>i <span class="kw">in </span><span class="number">18</span>..=<span class="number">27 </span>{
-            x_register.push(PReg::new(i, RegClass::Int));
-        }
-        <span class="kw">let </span><span class="kw-2">mut </span>f_register: Vec&lt;PReg&gt; = <span class="macro">vec!</span>[];
-        <span class="kw">for </span>i <span class="kw">in </span><span class="number">8</span>..=<span class="number">9 </span>{
-            f_register.push(PReg::new(i, RegClass::Float));
-        }
-        <span class="kw">for </span>i <span class="kw">in </span><span class="number">18</span>..=<span class="number">27 </span>{
-            f_register.push(PReg::new(i, RegClass::Float));
-        }
-        [x_register, f_register, <span class="macro">vec!</span>[]]
+        <span class="kw">let </span>x_registers: Vec&lt;PReg&gt; = (<span class="number">9</span>..=<span class="number">9</span>)
+            .chain(<span class="number">18</span>..=<span class="number">27</span>)
+            .map(|i| PReg::new(i, RegClass::Int))
+            .collect();
+
+        <span class="kw">let </span>f_registers: Vec&lt;PReg&gt; = (<span class="number">8</span>..=<span class="number">9</span>)
+            .chain(<span class="number">18</span>..=<span class="number">27</span>)
+            .map(|i| PReg::new(i, RegClass::Float))
+            .collect();
+
+        <span class="kw">let </span>v_registers = <span class="macro">vec!</span>[];
+
+        [x_registers, f_registers, v_registers]
     };
 
     MachineEnv {
@@ -423,7 +407,7 @@
     <span class="kw">let </span>v_reg = VReg::new(p_reg.index(), p_reg.class());
     Reg::from(v_reg)
 }
-<span class="kw">pub fn </span>px_reg(enc: usize) -&gt; PReg {
+<span class="kw">pub const fn </span>px_reg(enc: usize) -&gt; PReg {
     PReg::new(enc, RegClass::Int)
 }
 
@@ -453,12 +437,12 @@
 
 <span class="attr">#[inline]
 </span><span class="kw">pub fn </span>v_reg(enc: usize) -&gt; Reg {
-    <span class="kw">let </span>p_reg = PReg::new(enc, RegClass::Float);
+    <span class="kw">let </span>p_reg = PReg::new(enc, RegClass::Vector);
     <span class="kw">let </span>v_reg = VReg::new(p_reg.index(), p_reg.class());
     Reg::from(v_reg)
 }
-<span class="kw">pub fn </span>vx_reg(enc: usize) -&gt; PReg {
-    PReg::new(enc, RegClass::Float)
+<span class="kw">pub const fn </span>pv_reg(enc: usize) -&gt; PReg {
+    PReg::new(enc, RegClass::Vector)
 }
 </code></pre></div>
 </section></main></body></html>

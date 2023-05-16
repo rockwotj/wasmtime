@@ -2408,6 +2408,10 @@
 <a href="#2408" id="2408">2408</a>
 <a href="#2409" id="2409">2409</a>
 <a href="#2410" id="2410">2410</a>
+<a href="#2411" id="2411">2411</a>
+<a href="#2412" id="2412">2412</a>
+<a href="#2413" id="2413">2413</a>
+<a href="#2414" id="2414">2414</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implementation of a vanilla ABI, shared between several machines. The
 //! implementation here assumes that arguments will be passed in registers
 //! first, then additional args on the stack; that the stack grows downward,
@@ -2988,7 +2992,11 @@
     ) -&gt; SmallVec&lt;[<span class="self">Self</span>::I; <span class="number">8</span>]&gt;;
 
     <span class="doccomment">/// Get the number of spillslots required for the given register-class.
-    </span><span class="kw">fn </span>get_number_of_spillslots_for_value(rc: RegClass, target_vector_bytes: u32) -&gt; u32;
+    </span><span class="kw">fn </span>get_number_of_spillslots_for_value(
+        rc: RegClass,
+        target_vector_bytes: u32,
+        isa_flags: <span class="kw-2">&amp;</span><span class="self">Self</span>::F,
+    ) -&gt; u32;
 
     <span class="doccomment">/// Get the current virtual-SP offset from an instruction-emission state.
     </span><span class="kw">fn </span>get_virtual_sp_offset_from_state(s: <span class="kw-2">&amp;</span>&lt;<span class="self">Self</span>::I <span class="kw">as </span>MachInstEmit&gt;::State) -&gt; i64;
@@ -4347,7 +4355,7 @@
                 .map(|(_k, v)| v)
                 .unwrap()
         };
-        M::get_number_of_spillslots_for_value(rc, max)
+        M::get_number_of_spillslots_for_value(rc, max, <span class="kw-2">&amp;</span><span class="self">self</span>.isa_flags)
     }
 
     <span class="doccomment">/// Generate a spill.

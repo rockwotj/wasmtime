@@ -1279,6 +1279,10 @@
 <a href="#1279" id="1279">1279</a>
 <a href="#1280" id="1280">1280</a>
 <a href="#1281" id="1281">1281</a>
+<a href="#1282" id="1282">1282</a>
+<a href="#1283" id="1283">1283</a>
+<a href="#1284" id="1284">1284</a>
+<a href="#1285" id="1285">1285</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implementation of a standard AArch64 ABI.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::ir;
@@ -2350,7 +2354,11 @@
         insts
     }
 
-    <span class="kw">fn </span>get_number_of_spillslots_for_value(rc: RegClass, vector_size: u32) -&gt; u32 {
+    <span class="kw">fn </span>get_number_of_spillslots_for_value(
+        rc: RegClass,
+        vector_size: u32,
+        _isa_flags: <span class="kw-2">&amp;</span><span class="self">Self</span>::F,
+    ) -&gt; u32 {
         <span class="macro">assert_eq!</span>(vector_size % <span class="number">8</span>, <span class="number">0</span>);
         <span class="comment">// We allocate in terms of 8-byte slots.
         </span><span class="kw">match </span>rc {

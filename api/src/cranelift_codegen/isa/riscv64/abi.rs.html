@@ -724,6 +724,97 @@
 <a href="#724" id="724">724</a>
 <a href="#725" id="725">725</a>
 <a href="#726" id="726">726</a>
+<a href="#727" id="727">727</a>
+<a href="#728" id="728">728</a>
+<a href="#729" id="729">729</a>
+<a href="#730" id="730">730</a>
+<a href="#731" id="731">731</a>
+<a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
+<a href="#812" id="812">812</a>
+<a href="#813" id="813">813</a>
+<a href="#814" id="814">814</a>
+<a href="#815" id="815">815</a>
+<a href="#816" id="816">816</a>
+<a href="#817" id="817">817</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implementation of a standard Riscv64 ABI.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::ir;
@@ -768,6 +859,40 @@
 </span><span class="kw">pub struct </span>Riscv64MachineDeps;
 
 <span class="kw">impl </span>IsaFlags <span class="kw">for </span>RiscvFlags {}
+
+<span class="kw">impl </span>RiscvFlags {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>min_vec_reg_size(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+        <span class="kw">let </span>entries = [
+            (<span class="self">self</span>.has_zvl65536b(), <span class="number">65536</span>),
+            (<span class="self">self</span>.has_zvl32768b(), <span class="number">32768</span>),
+            (<span class="self">self</span>.has_zvl16384b(), <span class="number">16384</span>),
+            (<span class="self">self</span>.has_zvl8192b(), <span class="number">8192</span>),
+            (<span class="self">self</span>.has_zvl4096b(), <span class="number">4096</span>),
+            (<span class="self">self</span>.has_zvl2048b(), <span class="number">2048</span>),
+            (<span class="self">self</span>.has_zvl1024b(), <span class="number">1024</span>),
+            (<span class="self">self</span>.has_zvl512b(), <span class="number">512</span>),
+            (<span class="self">self</span>.has_zvl256b(), <span class="number">256</span>),
+            <span class="comment">// In order to claim the Application Profile V extension, a minimum
+            // register size of 128 is required. i.e. V implies Zvl128b.
+            </span>(<span class="self">self</span>.has_v(), <span class="number">128</span>),
+            (<span class="self">self</span>.has_zvl128b(), <span class="number">128</span>),
+            (<span class="self">self</span>.has_zvl64b(), <span class="number">64</span>),
+            (<span class="self">self</span>.has_zvl32b(), <span class="number">32</span>),
+        ];
+
+        <span class="kw">for </span>(has_flag, size) <span class="kw">in </span>entries.into_iter() {
+            <span class="kw">if </span>!has_flag {
+                <span class="kw">continue</span>;
+            }
+
+            <span class="comment">// Due to a limitation in regalloc2, we can&#39;t support types
+            // larger than 1024 bytes. So limit that here.
+            </span><span class="kw">return </span>std::cmp::min(size, <span class="number">1024</span>);
+        }
+
+        <span class="kw">return </span><span class="number">0</span>;
+    }
+}
 
 <span class="kw">impl </span>ABIMachineSpec <span class="kw">for </span>Riscv64MachineDeps {
     <span class="kw">type </span>I = Inst;
@@ -1141,9 +1266,9 @@
             <span class="kw">for </span>reg <span class="kw">in </span>clobbered_callee_saves {
                 <span class="kw">let </span>r_reg = reg.to_reg();
                 <span class="kw">let </span>ty = <span class="kw">match </span>r_reg.class() {
-                    regalloc2::RegClass::Int =&gt; I64,
-                    regalloc2::RegClass::Float =&gt; F64,
-                    RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
+                    RegClass::Int =&gt; I64,
+                    RegClass::Float =&gt; F64,
+                    RegClass::Vector =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Vector Clobber Saves&quot;</span>),
                 };
                 <span class="kw">if </span>flags.unwind_info() {
                     insts.push(Inst::Unwind {
@@ -1188,9 +1313,9 @@
         <span class="kw">for </span>reg <span class="kw">in </span><span class="kw-2">&amp;</span>clobbered_callee_saves {
             <span class="kw">let </span>rreg = reg.to_reg();
             <span class="kw">let </span>ty = <span class="kw">match </span>rreg.class() {
-                regalloc2::RegClass::Int =&gt; I64,
-                regalloc2::RegClass::Float =&gt; F64,
-                RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
+                RegClass::Int =&gt; I64,
+                RegClass::Float =&gt; F64,
+                RegClass::Vector =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Vector Clobber Restores&quot;</span>),
             };
             insts.push(<span class="self">Self</span>::gen_load_stack(
                 StackAMode::SPOffset(-cur_offset, ty),
@@ -1298,12 +1423,16 @@
         insts
     }
 
-    <span class="kw">fn </span>get_number_of_spillslots_for_value(rc: RegClass, _target_vector_bytes: u32) -&gt; u32 {
+    <span class="kw">fn </span>get_number_of_spillslots_for_value(
+        rc: RegClass,
+        _target_vector_bytes: u32,
+        isa_flags: <span class="kw-2">&amp;</span>RiscvFlags,
+    ) -&gt; u32 {
         <span class="comment">// We allocate in terms of 8-byte slots.
         </span><span class="kw">match </span>rc {
             RegClass::Int =&gt; <span class="number">1</span>,
             RegClass::Float =&gt; <span class="number">1</span>,
-            RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
+            RegClass::Vector =&gt; (isa_flags.min_vec_reg_size() / <span class="number">8</span>) <span class="kw">as </span>u32,
         }
     }
 
@@ -1318,20 +1447,7 @@
     }
 
     <span class="kw">fn </span>get_regs_clobbered_by_call(_call_conv_of_callee: isa::CallConv) -&gt; PRegSet {
-        <span class="kw">let </span><span class="kw-2">mut </span>v = PRegSet::empty();
-        <span class="kw">for </span>(k, need_save) <span class="kw">in </span>CALLER_SAVE_X_REG.iter().enumerate() {
-            <span class="kw">if </span>!<span class="kw-2">*</span>need_save {
-                <span class="kw">continue</span>;
-            }
-            v.add(px_reg(k));
-        }
-        <span class="kw">for </span>(k, need_save) <span class="kw">in </span>CALLER_SAVE_F_REG.iter().enumerate() {
-            <span class="kw">if </span>!<span class="kw-2">*</span>need_save {
-                <span class="kw">continue</span>;
-            }
-            v.add(pf_reg(k));
-        }
-        v
+        CLOBBERS
     }
 
     <span class="kw">fn </span>get_clobbered_callee_saves(
@@ -1378,23 +1494,11 @@
     }
 }
 
-<span class="kw">const </span>CALLER_SAVE_X_REG: [bool; <span class="number">32</span>] = [
-    <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="comment">// 0-7
-    </span><span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="comment">// 8-15
-    </span><span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="comment">// 16-23
-    </span><span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="comment">// 24-31
-</span>];
 <span class="kw">const </span>CALLEE_SAVE_X_REG: [bool; <span class="number">32</span>] = [
     <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="comment">// 0-7
     </span><span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="comment">// 8-15
     </span><span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="comment">// 16-23
     </span><span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="comment">// 24-31
-</span>];
-<span class="kw">const </span>CALLER_SAVE_F_REG: [bool; <span class="number">32</span>] = [
-    <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="comment">// 0-7
-    </span><span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="comment">// 8-15
-    </span><span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="comment">// 16-23
-    </span><span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="comment">// 24-31
 </span>];
 <span class="kw">const </span>CALLEE_SAVE_F_REG: [bool; <span class="number">32</span>] = [
     <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="comment">// 0-7
@@ -1406,10 +1510,11 @@
 <span class="doccomment">/// This should be the registers that must be saved by callee.
 </span><span class="attr">#[inline]
 </span><span class="kw">fn </span>is_reg_saved_in_prologue(_conv: CallConv, reg: RealReg) -&gt; bool {
-    <span class="kw">if </span>reg.class() == RegClass::Int {
-        CALLEE_SAVE_X_REG[reg.hw_enc() <span class="kw">as </span>usize]
-    } <span class="kw">else </span>{
-        CALLEE_SAVE_F_REG[reg.hw_enc() <span class="kw">as </span>usize]
+    <span class="kw">match </span>reg.class() {
+        RegClass::Int =&gt; CALLEE_SAVE_X_REG[reg.hw_enc() <span class="kw">as </span>usize],
+        RegClass::Float =&gt; CALLEE_SAVE_F_REG[reg.hw_enc() <span class="kw">as </span>usize],
+        <span class="comment">// All vector registers are caller saved.
+        </span>RegClass::Vector =&gt; <span class="bool-val">false</span>,
     }
 }
 
@@ -1423,11 +1528,88 @@
             RegClass::Float =&gt; {
                 clobbered_size += <span class="number">8</span>;
             }
-            RegClass::Vector =&gt; <span class="macro">unreachable!</span>(),
+            RegClass::Vector =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Vector Size Clobbered&quot;</span>),
         }
     }
     align_to(clobbered_size, <span class="number">16</span>)
 }
+
+<span class="kw">const fn </span>clobbers() -&gt; PRegSet {
+    PRegSet::empty()
+        .with(px_reg(<span class="number">1</span>))
+        .with(px_reg(<span class="number">5</span>))
+        .with(px_reg(<span class="number">6</span>))
+        .with(px_reg(<span class="number">7</span>))
+        .with(px_reg(<span class="number">10</span>))
+        .with(px_reg(<span class="number">11</span>))
+        .with(px_reg(<span class="number">12</span>))
+        .with(px_reg(<span class="number">13</span>))
+        .with(px_reg(<span class="number">14</span>))
+        .with(px_reg(<span class="number">15</span>))
+        .with(px_reg(<span class="number">16</span>))
+        .with(px_reg(<span class="number">17</span>))
+        .with(px_reg(<span class="number">28</span>))
+        .with(px_reg(<span class="number">29</span>))
+        .with(px_reg(<span class="number">30</span>))
+        .with(px_reg(<span class="number">31</span>))
+        <span class="comment">// F Regs
+        </span>.with(pf_reg(<span class="number">0</span>))
+        .with(pf_reg(<span class="number">1</span>))
+        .with(pf_reg(<span class="number">2</span>))
+        .with(pf_reg(<span class="number">3</span>))
+        .with(pf_reg(<span class="number">4</span>))
+        .with(pf_reg(<span class="number">5</span>))
+        .with(pf_reg(<span class="number">6</span>))
+        .with(pf_reg(<span class="number">7</span>))
+        .with(pf_reg(<span class="number">9</span>))
+        .with(pf_reg(<span class="number">10</span>))
+        .with(pf_reg(<span class="number">11</span>))
+        .with(pf_reg(<span class="number">12</span>))
+        .with(pf_reg(<span class="number">13</span>))
+        .with(pf_reg(<span class="number">14</span>))
+        .with(pf_reg(<span class="number">15</span>))
+        .with(pf_reg(<span class="number">16</span>))
+        .with(pf_reg(<span class="number">17</span>))
+        .with(pf_reg(<span class="number">28</span>))
+        .with(pf_reg(<span class="number">29</span>))
+        .with(pf_reg(<span class="number">30</span>))
+        .with(pf_reg(<span class="number">31</span>))
+        <span class="comment">// V Regs - All vector regs get clobbered
+        </span>.with(pv_reg(<span class="number">0</span>))
+        .with(pv_reg(<span class="number">1</span>))
+        .with(pv_reg(<span class="number">2</span>))
+        .with(pv_reg(<span class="number">3</span>))
+        .with(pv_reg(<span class="number">4</span>))
+        .with(pv_reg(<span class="number">5</span>))
+        .with(pv_reg(<span class="number">6</span>))
+        .with(pv_reg(<span class="number">7</span>))
+        .with(pv_reg(<span class="number">8</span>))
+        .with(pv_reg(<span class="number">9</span>))
+        .with(pv_reg(<span class="number">10</span>))
+        .with(pv_reg(<span class="number">11</span>))
+        .with(pv_reg(<span class="number">12</span>))
+        .with(pv_reg(<span class="number">13</span>))
+        .with(pv_reg(<span class="number">14</span>))
+        .with(pv_reg(<span class="number">15</span>))
+        .with(pv_reg(<span class="number">16</span>))
+        .with(pv_reg(<span class="number">17</span>))
+        .with(pv_reg(<span class="number">18</span>))
+        .with(pv_reg(<span class="number">19</span>))
+        .with(pv_reg(<span class="number">20</span>))
+        .with(pv_reg(<span class="number">21</span>))
+        .with(pv_reg(<span class="number">22</span>))
+        .with(pv_reg(<span class="number">23</span>))
+        .with(pv_reg(<span class="number">24</span>))
+        .with(pv_reg(<span class="number">25</span>))
+        .with(pv_reg(<span class="number">26</span>))
+        .with(pv_reg(<span class="number">27</span>))
+        .with(pv_reg(<span class="number">28</span>))
+        .with(pv_reg(<span class="number">29</span>))
+        .with(pv_reg(<span class="number">30</span>))
+        .with(pv_reg(<span class="number">31</span>))
+}
+
+<span class="kw">const </span>CLOBBERS: PRegSet = clobbers();
 
 <span class="kw">impl </span>Riscv64MachineDeps {
     <span class="kw">fn </span>gen_probestack_unroll(insts: <span class="kw-2">&amp;mut </span>SmallInstVec&lt;Inst&gt;, guard_size: u32, probe_count: u32) {

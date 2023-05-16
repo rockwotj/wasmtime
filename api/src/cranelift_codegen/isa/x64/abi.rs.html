@@ -976,6 +976,10 @@
 <a href="#976" id="976">976</a>
 <a href="#977" id="977">977</a>
 <a href="#978" id="978">978</a>
+<a href="#979" id="979">979</a>
+<a href="#980" id="980">980</a>
+<a href="#981" id="981">981</a>
+<a href="#982" id="982">982</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implementation of the standard x64 ABI.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::ir::{<span class="self">self</span>, types, LibCall, MemFlags, Opcode, Signature, TrapCode, Type};
@@ -1650,7 +1654,11 @@
         insts
     }
 
-    <span class="kw">fn </span>get_number_of_spillslots_for_value(rc: RegClass, vector_scale: u32) -&gt; u32 {
+    <span class="kw">fn </span>get_number_of_spillslots_for_value(
+        rc: RegClass,
+        vector_scale: u32,
+        _isa_flags: <span class="kw-2">&amp;</span><span class="self">Self</span>::F,
+    ) -&gt; u32 {
         <span class="comment">// We allocate in terms of 8-byte slots.
         </span><span class="kw">match </span>rc {
             RegClass::Int =&gt; <span class="number">1</span>,
