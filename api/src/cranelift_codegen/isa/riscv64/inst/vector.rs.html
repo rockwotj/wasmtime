@@ -367,12 +367,34 @@
 <a href="#367" id="367">367</a>
 <a href="#368" id="368">368</a>
 <a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::AllocationConsumer;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::EmitState;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::lower::isle::generated_code::{
     VecAMode, VecAluOpRRImm5, VecAluOpRRR, VecAvl, VecElementWidth, VecLmul, VecMaskMode,
     VecOpCategory, VecOpMasking, VecTailMode,
 };
+<span class="kw">use </span><span class="kw">crate</span>::machinst::RegClass;
 <span class="kw">use </span><span class="kw">crate</span>::Reg;
 <span class="kw">use </span>core::fmt;
 
@@ -614,27 +636,46 @@
         </span><span class="number">0x57
     </span>}
     <span class="kw">pub fn </span>funct3(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
-        <span class="kw">match </span><span class="self">self </span>{
-            VecAluOpRRR::Vadd
-            | VecAluOpRRR::Vsub
-            | VecAluOpRRR::Vand
-            | VecAluOpRRR::Vor
-            | VecAluOpRRR::Vxor =&gt; VecOpCategory::OPIVV,
-            VecAluOpRRR::Vmul | VecAluOpRRR::Vmulh | VecAluOpRRR::Vmulhu =&gt; VecOpCategory::OPMVV,
-        }
-        .encode()
+        <span class="self">self</span>.category().encode()
     }
     <span class="kw">pub fn </span>funct6(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
         <span class="comment">// See: https://github.com/riscv/riscv-v-spec/blob/master/inst-table.adoc
         </span><span class="kw">match </span><span class="self">self </span>{
-            VecAluOpRRR::Vadd =&gt; <span class="number">0b000000</span>,
-            VecAluOpRRR::Vsub =&gt; <span class="number">0b000010</span>,
-            VecAluOpRRR::Vmul =&gt; <span class="number">0b100101</span>,
-            VecAluOpRRR::Vmulh =&gt; <span class="number">0b100111</span>,
-            VecAluOpRRR::Vmulhu =&gt; <span class="number">0b100100</span>,
-            VecAluOpRRR::Vand =&gt; <span class="number">0b001001</span>,
-            VecAluOpRRR::Vor =&gt; <span class="number">0b001010</span>,
-            VecAluOpRRR::Vxor =&gt; <span class="number">0b001011</span>,
+            VecAluOpRRR::VaddVV | VecAluOpRRR::VaddVX =&gt; <span class="number">0b000000</span>,
+            VecAluOpRRR::VsubVV | VecAluOpRRR::VsubVX =&gt; <span class="number">0b000010</span>,
+            VecAluOpRRR::VrsubVX =&gt; <span class="number">0b000011</span>,
+            VecAluOpRRR::VmulVV =&gt; <span class="number">0b100101</span>,
+            VecAluOpRRR::VmulhVV =&gt; <span class="number">0b100111</span>,
+            VecAluOpRRR::VmulhuVV =&gt; <span class="number">0b100100</span>,
+            VecAluOpRRR::VandVV =&gt; <span class="number">0b001001</span>,
+            VecAluOpRRR::VorVV =&gt; <span class="number">0b001010</span>,
+            VecAluOpRRR::VxorVV =&gt; <span class="number">0b001011</span>,
+        }
+    }
+
+    <span class="kw">pub fn </span>category(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; VecOpCategory {
+        <span class="kw">match </span><span class="self">self </span>{
+            VecAluOpRRR::VaddVV
+            | VecAluOpRRR::VsubVV
+            | VecAluOpRRR::VandVV
+            | VecAluOpRRR::VorVV
+            | VecAluOpRRR::VxorVV =&gt; VecOpCategory::OPIVV,
+            VecAluOpRRR::VmulVV | VecAluOpRRR::VmulhVV | VecAluOpRRR::VmulhuVV =&gt; {
+                VecOpCategory::OPMVV
+            }
+            VecAluOpRRR::VaddVX | VecAluOpRRR::VsubVX | VecAluOpRRR::VrsubVX =&gt; {
+                VecOpCategory::OPIVX
+            }
+        }
+    }
+
+    <span class="comment">// vs1 is the only variable source, vs2 is fixed.
+    </span><span class="kw">pub fn </span>vs1_regclass(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RegClass {
+        <span class="kw">match </span><span class="self">self</span>.category() {
+            VecOpCategory::OPIVV | VecOpCategory::OPFVV | VecOpCategory::OPMVV =&gt; RegClass::Vector,
+            VecOpCategory::OPIVX | VecOpCategory::OPMVX =&gt; RegClass::Int,
+            VecOpCategory::OPFVF =&gt; RegClass::Float,
+            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
         }
     }
 }
@@ -643,8 +684,8 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">let </span><span class="kw-2">mut </span>s = <span class="macro">format!</span>(<span class="string">&quot;{self:?}&quot;</span>);
         s.make_ascii_lowercase();
-        s.push_str(<span class="string">&quot;.vv&quot;</span>);
-        f.write_str(<span class="kw-2">&amp;</span>s)
+        <span class="kw">let </span>(opcode, category) = s.split_at(s.len() - <span class="number">2</span>);
+        f.write_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}.{}&quot;</span>, opcode, category))
     }
 }
 
@@ -659,7 +700,8 @@
     <span class="kw">pub fn </span>funct6(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
         <span class="comment">// See: https://github.com/riscv/riscv-v-spec/blob/master/inst-table.adoc
         </span><span class="kw">match </span><span class="self">self </span>{
-            VecAluOpRRImm5::Vadd =&gt; <span class="number">0b000000</span>,
+            VecAluOpRRImm5::VaddVI =&gt; <span class="number">0b000000</span>,
+            VecAluOpRRImm5::VrsubVI =&gt; <span class="number">0b000011</span>,
         }
     }
 }
@@ -668,8 +710,8 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">let </span><span class="kw-2">mut </span>s = <span class="macro">format!</span>(<span class="string">&quot;{self:?}&quot;</span>);
         s.make_ascii_lowercase();
-        s.push_str(<span class="string">&quot;.vi&quot;</span>);
-        f.write_str(<span class="kw-2">&amp;</span>s)
+        <span class="kw">let </span>(opcode, category) = s.split_at(s.len() - <span class="number">2</span>);
+        f.write_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}.{}&quot;</span>, opcode, category))
     }
 }
 
