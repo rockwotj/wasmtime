@@ -181,14 +181,74 @@
 <a href="#181" id="181">181</a>
 <a href="#182" id="182">182</a>
 <a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     abi::{ABISig, ABI},
     masm::{MacroAssembler, OperandSize},
+    stack::Val,
     CallingConvention,
 };
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>call::FnCall;
-<span class="kw">use </span>wasmparser::{BinaryReader, FuncValidator, ValType, ValidatorResources, VisitOperator};
+<span class="kw">use </span>wasmparser::{
+    BinaryReader, FuncType, FuncValidator, ValType, ValidatorResources, VisitOperator,
+};
+<span class="kw">use </span>wasmtime_environ::{FuncIndex, VMOffsets};
 
 <span class="kw">mod </span>context;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>context::<span class="kw-2">*</span>;
@@ -216,6 +276,9 @@
 
     <span class="doccomment">/// A reference to the current ABI.
     </span><span class="kw">pub </span>abi: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>A,
+
+    <span class="doccomment">/// Offsets used with the VM context pointer.
+    </span>vmoffsets: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>VMOffsets&lt;u8&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, A, M&gt; CodeGen&lt;<span class="lifetime">&#39;a</span>, A, M&gt;
@@ -229,6 +292,7 @@
         context: CodeGenContext&lt;<span class="lifetime">&#39;a</span>&gt;,
         env: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw">dyn </span>FuncEnv,
         sig: ABISig,
+        vmoffsets: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>VMOffsets&lt;u8&gt;,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             sig,
@@ -236,6 +300,7 @@
             masm,
             abi,
             env,
+            vmoffsets,
         }
     }
 
@@ -272,6 +337,12 @@
             <span class="kw-2">&amp;mut </span><span class="self">self</span>.context.regalloc,
         );
 
+        <span class="comment">// Save the vmctx pointer to its local slot in case we need to reload it
+        // at any point.
+        </span><span class="kw">let </span>vmctx_addr = <span class="self">self</span>.masm.local_address(<span class="kw-2">&amp;</span><span class="self">self</span>.context.frame.vmctx_slot);
+        <span class="self">self</span>.masm
+            .store(&lt;A <span class="kw">as </span>ABI&gt;::vmctx_reg().into(), vmctx_addr, OperandSize::S64);
+
         <span class="kw">while </span>!body.eof() {
             <span class="kw">let </span>offset = body.original_position();
             body.visit_operator(<span class="kw-2">&amp;mut </span>ValidateThenVisit(validator.visitor(offset), <span class="self">self</span>))<span class="question-mark">??</span>;
@@ -304,16 +375,61 @@
     }
 
     <span class="doccomment">/// Emit a direct function call.
-    </span><span class="kw">pub fn </span>emit_call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: u32) {
-        <span class="kw">let </span>callee = <span class="self">self</span>.env.callee_from_index(index);
-        <span class="kw">if </span>callee.import {
-            <span class="comment">// TODO: Only locally defined functions for now.
-            </span><span class="macro">unreachable!</span>()
-        }
+    </span><span class="kw">pub fn </span>emit_call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: FuncIndex) {
+        <span class="kw">let </span>callee = <span class="self">self</span>.env.callee_from_index(index.as_u32());
+        <span class="kw">let </span>(sig, callee_addr): (ABISig, <span class="prelude-ty">Option</span>&lt;&lt;M <span class="kw">as </span>MacroAssembler&gt;::Address&gt;) = <span class="kw">if </span>callee.import
+        {
+            <span class="kw">let </span><span class="kw-2">mut </span>params = <span class="macro">vec!</span>[ValType::I64, ValType::I64];
+            params.extend_from_slice(<span class="kw-2">&amp;</span>callee.ty.params());
+            <span class="kw">let </span>sig = FuncType::new(params, callee.ty.results().to_owned());
 
-        <span class="kw">let </span>sig = <span class="self">self</span>.abi.sig(<span class="kw-2">&amp;</span>callee.ty, <span class="kw-2">&amp;</span>CallingConvention::Default);
-        <span class="kw">let </span>fncall = FnCall::new(<span class="self">self</span>.abi, <span class="kw-2">&amp;</span>sig, <span class="kw-2">&amp;mut </span><span class="self">self</span>.context, <span class="self">self</span>.masm);
-        fncall.emit::&lt;M, A&gt;(<span class="self">self</span>.masm, <span class="kw-2">&amp;mut </span><span class="self">self</span>.context, index);
+            <span class="kw">let </span>caller_vmctx = &lt;A <span class="kw">as </span>ABI&gt;::vmctx_reg();
+            <span class="kw">let </span>callee_vmctx = <span class="self">self</span>.context.any_gpr(<span class="self">self</span>.masm);
+            <span class="kw">let </span>callee_vmctx_offset = <span class="self">self</span>.vmoffsets.vmctx_vmfunction_import_vmctx(index);
+            <span class="kw">let </span>callee_vmctx_addr = <span class="self">self</span>.masm.address_at_reg(caller_vmctx, callee_vmctx_offset);
+            <span class="comment">// FIXME Remove harcoded operand size, this will be needed
+            // once 32-bit architectures are supported.
+            </span><span class="self">self</span>.masm
+                .load(callee_vmctx_addr, callee_vmctx, OperandSize::S64);
+
+            <span class="kw">let </span>callee_body_offset = <span class="self">self</span>.vmoffsets.vmctx_vmfunction_import_wasm_call(index);
+            <span class="kw">let </span>callee_addr = <span class="self">self</span>.masm.address_at_reg(caller_vmctx, callee_body_offset);
+
+            <span class="comment">// Put the callee / caller vmctx at the start of the
+            // range of the stack so that they are used as first
+            // and second arguments.
+            </span><span class="kw">let </span>stack = <span class="kw-2">&amp;mut </span><span class="self">self</span>.context.stack;
+            <span class="kw">let </span>location = stack.len() - (sig.params().len() - <span class="number">2</span>);
+            stack.insert(location <span class="kw">as </span>usize, Val::reg(caller_vmctx));
+            stack.insert(location <span class="kw">as </span>usize, Val::reg(callee_vmctx));
+            (
+                <span class="self">self</span>.abi.sig(<span class="kw-2">&amp;</span>sig, <span class="kw-2">&amp;</span>CallingConvention::Default),
+                <span class="prelude-val">Some</span>(callee_addr),
+            )
+        } <span class="kw">else </span>{
+            (<span class="self">self</span>.abi.sig(<span class="kw-2">&amp;</span>callee.ty, <span class="kw-2">&amp;</span>CallingConvention::Default), <span class="prelude-val">None</span>)
+        };
+
+        <span class="kw">let </span>fncall = FnCall::new::&lt;A, M&gt;(<span class="kw-2">&amp;</span>sig, <span class="kw-2">&amp;mut </span><span class="self">self</span>.context, <span class="self">self</span>.masm);
+        <span class="kw">let </span>alignment = <span class="self">self</span>.abi.call_stack_align();
+        <span class="kw">let </span>addend = <span class="self">self</span>.abi.arg_base_offset();
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(addr) = callee_addr {
+            fncall.indirect::&lt;M, A&gt;(
+                <span class="self">self</span>.masm,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.context,
+                addr,
+                alignment.into(),
+                addend.into(),
+            );
+        } <span class="kw">else </span>{
+            fncall.direct::&lt;M, A&gt;(
+                <span class="self">self</span>.masm,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.context,
+                index,
+                alignment.into(),
+                addend.into(),
+            );
+        }
     }
 
     <span class="doccomment">/// Emit the usual function end instruction sequence.
@@ -324,11 +440,7 @@
     }
 
     <span class="kw">fn </span>spill_register_arguments(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="comment">// TODO
-        // Revisit this once the implicit VMContext argument is introduced;
-        // when that happens the mapping between local slots and abi args
-        // is not going to be symmetric.
-        </span><span class="self">self</span>.sig
+        <span class="self">self</span>.sig
             .params
             .iter()
             .enumerate()

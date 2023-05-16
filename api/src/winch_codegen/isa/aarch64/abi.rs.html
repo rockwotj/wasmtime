@@ -219,6 +219,14 @@
 <a href="#219" id="219">219</a>
 <a href="#220" id="220">220</a>
 <a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::regs;
 <span class="kw">use </span><span class="kw">crate</span>::abi::{ABIArg, ABIResult, ABISig, ABI};
 <span class="kw">use </span><span class="kw">crate</span>::isa::{reg::Reg, CallingConvention};
@@ -306,6 +314,14 @@
 
     <span class="kw">fn </span>scratch_reg() -&gt; Reg {
         <span class="macro">todo!</span>()
+    }
+
+    <span class="kw">fn </span>fp_reg() -&gt; Reg {
+        regs::fp()
+    }
+
+    <span class="kw">fn </span>vmctx_reg() -&gt; Reg {
+        regs::xreg(<span class="number">9</span>)
     }
 
     <span class="kw">fn </span>callee_saved_regs(_call_conv: <span class="kw-2">&amp;</span>CallingConvention) -&gt; SmallVec&lt;[Reg; <span class="number">9</span>]&gt; {

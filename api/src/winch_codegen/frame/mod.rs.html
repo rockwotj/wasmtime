@@ -164,6 +164,10 @@
 <a href="#164" id="164">164</a>
 <a href="#165" id="165">165</a>
 <a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::abi::{align_to, ty_size, ABIArg, ABISig, LocalSlot, ABI};
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>smallvec::SmallVec;
@@ -186,7 +190,7 @@
     </span>}
 }
 
-<span class="doccomment">/// An abstraction to read the defined locals from the WASM binary for a function.
+<span class="doccomment">/// An abstraction to read the defined locals from the Wasm binary for a function.
 </span><span class="attr">#[derive(Default)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>DefinedLocals {
     <span class="doccomment">/// The defined locals for a function.
@@ -196,13 +200,13 @@
 }
 
 <span class="kw">impl </span>DefinedLocals {
-    <span class="doccomment">/// Compute the local slots for a WASM function.
+    <span class="doccomment">/// Compute the local slots for a Wasm function.
     </span><span class="kw">pub fn </span>new(
         reader: <span class="kw-2">&amp;mut </span>BinaryReader&lt;<span class="lifetime">&#39;_</span>&gt;,
         validator: <span class="kw-2">&amp;mut </span>FuncValidator&lt;ValidatorResources&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>next_stack = <span class="number">0</span>;
-        <span class="comment">// The first 32 bits of a WASM binary function describe the number of locals
+        <span class="comment">// The first 32 bits of a Wasm binary function describe the number of locals.
         </span><span class="kw">let </span>local_count = reader.read_var_u32()<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>slots: Locals = Default::default();
 
@@ -240,6 +244,9 @@
     /// Locals get calculated when allocating a frame and are readonly
     /// through the function compilation lifetime.
     </span><span class="kw">pub </span>locals: Locals,
+
+    <span class="doccomment">/// The offset to the slot containing the `VMContext`.
+    </span><span class="kw">pub </span>vmctx_slot: LocalSlot,
 }
 
 <span class="kw">impl </span>Frame {
@@ -256,14 +263,15 @@
                 .map(|l| LocalSlot::new(l.ty, l.offset + defined_locals_start)),
         );
 
-        <span class="kw">let </span>locals_size = align_to(
-            defined_locals_start + defined_locals.stack_size,
-            abi.stack_align().into(),
-        );
+        <span class="kw">let </span>vmctx_slots_size = &lt;A <span class="kw">as </span>ABI&gt;::word_bytes();
+        <span class="kw">let </span>vmctx_offset = defined_locals_start + defined_locals.stack_size + vmctx_slots_size;
+
+        <span class="kw">let </span>locals_size = align_to(vmctx_offset, abi.stack_align().into());
 
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             locals,
             locals_size,
+            vmctx_slot: LocalSlot::i64(vmctx_offset),
             defined_locals_range: DefinedLocalsRange(
                 defined_locals_start..defined_locals.stack_size,
             ),

@@ -76,10 +76,6 @@
 <a href="#76" id="76">76</a>
 <a href="#77" id="77">77</a>
 <a href="#78" id="78">78</a>
-<a href="#79" id="79">79</a>
-<a href="#80" id="80">80</a>
-<a href="#81" id="81">81</a>
-<a href="#82" id="82">82</a>
 </pre><pre class="rust"><code><span class="kw">use </span>anyhow::{Context, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>clap::Parser;
 <span class="kw">use </span>cranelift_codegen::settings;
@@ -87,9 +83,9 @@
 <span class="kw">use </span>target_lexicon::Triple;
 <span class="kw">use </span>wasmtime_environ::{
     wasmparser::{Parser <span class="kw">as </span>WasmParser, Validator},
-    DefinedFuncIndex, FunctionBodyData, ModuleEnvironment, Tunables,
+    DefinedFuncIndex, FunctionBodyData, ModuleEnvironment, Tunables, VMOffsets,
 };
-<span class="kw">use </span>winch_codegen::lookup;
+<span class="kw">use </span>winch_codegen::{lookup, TargetIsa};
 <span class="kw">use </span>winch_environ::FuncEnv;
 <span class="kw">use </span>winch_filetests::disasm::disasm;
 
@@ -118,21 +114,28 @@
     <span class="kw">let </span><span class="kw-2">mut </span>translation = ModuleEnvironment::new(<span class="kw-2">&amp;</span>tunables, <span class="kw-2">&amp;mut </span>validator, <span class="kw-2">&amp;mut </span>types)
         .translate(parser, <span class="kw-2">&amp;</span>bytes)
         .context(<span class="string">&quot;Failed to translate WebAssembly module&quot;</span>)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>vmoffsets = VMOffsets::new(isa.pointer_bytes(), <span class="kw-2">&amp;</span>translation.module);
     <span class="kw">let _ </span>= types.finish();
 
     <span class="kw">let </span>body_inputs = std::mem::take(<span class="kw-2">&amp;mut </span>translation.function_body_inputs);
     <span class="kw">let </span>module = <span class="kw-2">&amp;</span>translation.module;
     <span class="kw">let </span>types = translation.get_types();
-    <span class="kw">let </span>env = FuncEnv::new(module, <span class="kw-2">&amp;</span>types, <span class="kw-2">&amp;</span>isa);
+    <span class="kw">let </span>env = FuncEnv::new(module, <span class="kw-2">&amp;</span>types);
 
     body_inputs
         .into_iter()
-        .try_for_each(|func| compile(<span class="kw-2">&amp;</span>env, func))<span class="question-mark">?</span>;
+        .try_for_each(|func| compile(<span class="kw-2">&amp;</span>env, <span class="kw-2">&amp;</span>isa, <span class="kw-2">&amp;</span>vmoffsets, func))<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">fn </span>compile(env: <span class="kw-2">&amp;</span>FuncEnv, f: (DefinedFuncIndex, FunctionBodyData&lt;<span class="lifetime">&#39;_</span>&gt;)) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<span class="kw">fn </span>compile(
+    env: <span class="kw-2">&amp;</span>FuncEnv,
+    isa: <span class="kw-2">&amp;</span>Box&lt;<span class="kw">dyn </span>TargetIsa&gt;,
+    vmoffsets: <span class="kw-2">&amp;</span>VMOffsets&lt;u8&gt;,
+    f: (DefinedFuncIndex, FunctionBodyData&lt;<span class="lifetime">&#39;_</span>&gt;),
+) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>index = env.module.func_index(f.<span class="number">0</span>);
     <span class="kw">let </span>sig = env
         .types
@@ -140,23 +143,12 @@
         .expect(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;function type at index {:?}&quot;</span>, index.as_u32()));
     <span class="kw">let </span>FunctionBodyData { body, validator } = f.<span class="number">1</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>validator = validator.into_validator(Default::default());
-    <span class="kw">let </span>buffer = env
-        .isa
-        .compile_function(<span class="kw-2">&amp;</span>sig, <span class="kw-2">&amp;</span>body, env, <span class="kw-2">&amp;mut </span>validator)
+    <span class="kw">let </span>buffer = isa
+        .compile_function(<span class="kw-2">&amp;</span>sig, <span class="kw-2">&amp;</span>body, vmoffsets, env, <span class="kw-2">&amp;mut </span>validator)
         .expect(<span class="string">&quot;Couldn&#39;t compile function&quot;</span>);
 
     <span class="macro">println!</span>(<span class="string">&quot;Disassembly for function: {}&quot;</span>, index.as_u32());
-    disasm(buffer.data(), env.isa)<span class="question-mark">?
-        </span>.iter()
-        .for_each(|s| <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, s));
-
-    <span class="kw">let </span>buffer = env
-        .isa
-        .host_to_wasm_trampoline(sig)
-        .expect(<span class="string">&quot;Couldn&#39;t compile trampoline&quot;</span>);
-
-    <span class="macro">println!</span>(<span class="string">&quot;Disassembly for trampoline: {}&quot;</span>, index.as_u32());
-    disasm(buffer.data(), env.isa)<span class="question-mark">?
+    disasm(buffer.data(), isa)<span class="question-mark">?
         </span>.iter()
         .for_each(|s| <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, s));
 

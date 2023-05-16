@@ -133,6 +133,24 @@
 <a href="#133" id="133">133</a>
 <a href="#134" id="134">134</a>
 <a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     abi::ABI,
     codegen::{CodeGen, CodeGenContext},
@@ -143,18 +161,19 @@
 <span class="kw">use </span><span class="kw">crate</span>::masm::MacroAssembler;
 <span class="kw">use </span><span class="kw">crate</span>::regalloc::RegAlloc;
 <span class="kw">use </span><span class="kw">crate</span>::stack::Stack;
-<span class="kw">use </span><span class="kw">crate</span>::trampoline::Trampoline;
 <span class="kw">use </span><span class="kw">crate</span>::FuncEnv;
 <span class="kw">use crate</span>::{
     isa::{Builder, TargetIsa},
     regset::RegSet,
 };
+<span class="kw">use crate</span>::{Trampoline, TrampolineKind};
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>cranelift_codegen::settings::{<span class="self">self</span>, Flags};
 <span class="kw">use </span>cranelift_codegen::{isa::x64::settings <span class="kw">as </span>x64_settings, Final, MachBufferFinalized};
 <span class="kw">use </span>cranelift_codegen::{MachTextSectionBuilder, TextSectionBuilder};
 <span class="kw">use </span>target_lexicon::Triple;
 <span class="kw">use </span>wasmparser::{FuncType, FuncValidator, FunctionBody, ValidatorResources};
+<span class="kw">use </span>wasmtime_environ::VMOffsets;
 
 <span class="kw">use </span><span class="self">self</span>::regs::ALL_GPR;
 
@@ -225,6 +244,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         sig: <span class="kw-2">&amp;</span>FuncType,
         body: <span class="kw-2">&amp;</span>FunctionBody,
+        vmoffsets: <span class="kw-2">&amp;</span>VMOffsets&lt;u8&gt;,
         env: <span class="kw-2">&amp;</span><span class="kw">dyn </span>FuncEnv,
         validator: <span class="kw-2">&amp;mut </span>FuncValidator&lt;ValidatorResources&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt; {
@@ -239,7 +259,7 @@
         <span class="comment">// TODO Add in floating point bitmask
         </span><span class="kw">let </span>regalloc = RegAlloc::new(RegSet::new(ALL_GPR, <span class="number">0</span>), regs::scratch());
         <span class="kw">let </span>codegen_context = CodeGenContext::new(regalloc, stack, <span class="kw-2">&amp;</span>frame);
-        <span class="kw">let </span><span class="kw-2">mut </span>codegen = CodeGen::new(<span class="kw-2">&amp;mut </span>masm, <span class="kw-2">&amp;</span>abi, codegen_context, env, abi_sig);
+        <span class="kw">let </span><span class="kw-2">mut </span>codegen = CodeGen::new(<span class="kw-2">&amp;mut </span>masm, <span class="kw-2">&amp;</span>abi, codegen_context, env, abi_sig, vmoffsets);
 
         codegen.emit(<span class="kw-2">&amp;mut </span>body, validator)<span class="question-mark">?</span>;
 
@@ -255,15 +275,31 @@
         </span><span class="number">16
     </span>}
 
-    <span class="kw">fn </span>host_to_wasm_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, ty: <span class="kw-2">&amp;</span>FuncType) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt; {
+    <span class="kw">fn </span>compile_trampoline(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        ty: <span class="kw-2">&amp;</span>FuncType,
+        kind: TrampolineKind,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt; {
+        <span class="kw">use </span>TrampolineKind::<span class="kw-2">*</span>;
+
         <span class="kw">let </span>abi = abi::X64ABI::default();
         <span class="kw">let </span><span class="kw-2">mut </span>masm = X64Masm::new(<span class="self">self</span>.shared_flags.clone(), <span class="self">self</span>.isa_flags.clone());
         <span class="kw">let </span>call_conv = <span class="self">self</span>.wasmtime_call_conv();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>trampoline =
-            Trampoline::new(<span class="kw-2">&amp;mut </span>masm, <span class="kw-2">&amp;</span>abi, regs::scratch(), regs::argv(), <span class="kw-2">&amp;</span>call_conv);
+        <span class="kw">let </span><span class="kw-2">mut </span>trampoline = Trampoline::new(
+            <span class="kw-2">&amp;mut </span>masm,
+            <span class="kw-2">&amp;</span>abi,
+            regs::scratch(),
+            regs::argv(),
+            <span class="kw-2">&amp;</span>call_conv,
+            <span class="self">self</span>.pointer_bytes(),
+        );
 
-        trampoline.emit_host_to_wasm(ty);
+        <span class="kw">match </span>kind {
+            ArrayToWasm(idx) =&gt; trampoline.emit_array_to_wasm(ty, idx)<span class="question-mark">?</span>,
+            NativeToWasm(idx) =&gt; trampoline.emit_native_to_wasm(ty, idx)<span class="question-mark">?</span>,
+            WasmToNative =&gt; trampoline.emit_wasm_to_native(ty)<span class="question-mark">?</span>,
+        }
 
         <span class="prelude-val">Ok</span>(masm.finalize())
     }

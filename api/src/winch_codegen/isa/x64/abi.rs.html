@@ -335,6 +335,14 @@
 <a href="#335" id="335">335</a>
 <a href="#336" id="336">336</a>
 <a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::regs;
 <span class="kw">use crate</span>::{
     abi::{ABIArg, ABIResult, ABISig, ABI},
@@ -456,6 +464,14 @@
 
     <span class="kw">fn </span>scratch_reg() -&gt; Reg {
         regs::scratch()
+    }
+
+    <span class="kw">fn </span>fp_reg() -&gt; Reg {
+        regs::rbp()
+    }
+
+    <span class="kw">fn </span>vmctx_reg() -&gt; Reg {
+        regs::vmctx()
     }
 
     <span class="kw">fn </span>callee_saved_regs(call_conv: <span class="kw-2">&amp;</span>CallingConvention) -&gt; SmallVec&lt;[Reg; <span class="number">9</span>]&gt; {

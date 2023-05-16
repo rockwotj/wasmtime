@@ -221,6 +221,14 @@
 <a href="#221" id="221">221</a>
 <a href="#222" id="222">222</a>
 <a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module provides all the necessary building blocks for
 //! implementing ISA specific ABIs.
 //!
@@ -256,6 +264,7 @@
 //! |                               |
 //! |                               |
 //! |        Stack slots            |
+//! |        + `VMContext` slot     |
 //! |        + dynamic space        |
 //! |                               |
 //! |                               |
@@ -300,6 +309,13 @@
 
     <span class="doccomment">/// Returns the designated scratch register.
     </span><span class="kw">fn </span>scratch_reg() -&gt; Reg;
+
+    <span class="doccomment">/// Returns the frame pointer register.
+    </span><span class="kw">fn </span>fp_reg() -&gt; Reg;
+
+    <span class="doccomment">/// Returns the pinned register used to hold
+    /// the `VMContext`.
+    </span><span class="kw">fn </span>vmctx_reg() -&gt; Reg;
 
     <span class="doccomment">/// Returns the callee-saved registers for the given
     /// calling convention.

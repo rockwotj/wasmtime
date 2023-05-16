@@ -189,6 +189,47 @@
 <a href="#189" id="189">189</a>
 <a href="#190" id="190">190</a>
 <a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
 </pre><pre class="rust"><code><span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>object::write::{Object, SymbolId};
 <span class="kw">use </span>std::any::Any;
@@ -197,9 +238,9 @@
 <span class="kw">use </span>wasmtime_cranelift_shared::{CompiledFunction, ModuleTextBuilder};
 <span class="kw">use </span>wasmtime_environ::{
     CompileError, DefinedFuncIndex, FilePos, FuncIndex, FunctionBodyData, FunctionLoc,
-    ModuleTranslation, ModuleTypes, PrimaryMap, Tunables, WasmFunctionInfo,
+    ModuleTranslation, ModuleTypes, PrimaryMap, Tunables, VMOffsets, WasmFunctionInfo,
 };
-<span class="kw">use </span>winch_codegen::TargetIsa;
+<span class="kw">use </span>winch_codegen::{TargetIsa, TrampolineKind};
 <span class="kw">use </span>winch_environ::FuncEnv;
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Compiler {
@@ -258,10 +299,11 @@
                 .unwrap(),
         );
         <span class="kw">let </span><span class="kw-2">mut </span>validator = validator.into_validator(<span class="self">self</span>.take_allocations());
-        <span class="kw">let </span>env = FuncEnv::new(<span class="kw-2">&amp;</span>translation.module, translation.get_types(), <span class="kw-2">&amp;</span><span class="self">self</span>.isa);
+        <span class="kw">let </span>vmoffsets = VMOffsets::new(<span class="self">self</span>.isa.pointer_bytes(), <span class="kw-2">&amp;</span>translation.module);
+        <span class="kw">let </span>env = FuncEnv::new(<span class="kw-2">&amp;</span>translation.module, translation.get_types());
         <span class="kw">let </span>buffer = <span class="self">self
             </span>.isa
-            .compile_function(<span class="kw-2">&amp;</span>sig, <span class="kw-2">&amp;</span>body, <span class="kw-2">&amp;</span>env, <span class="kw-2">&amp;mut </span>validator)
+            .compile_function(<span class="kw-2">&amp;</span>sig, <span class="kw-2">&amp;</span>body, <span class="kw-2">&amp;</span>vmoffsets, <span class="kw-2">&amp;</span>env, <span class="kw-2">&amp;mut </span>validator)
             .map_err(|e| CompileError::Codegen(<span class="macro">format!</span>(<span class="string">&quot;{e:?}&quot;</span>)));
         <span class="self">self</span>.save_allocations(validator.into_allocations());
         <span class="kw">let </span>buffer = buffer<span class="question-mark">?</span>;
@@ -283,8 +325,21 @@
         types: <span class="kw-2">&amp;</span>ModuleTypes,
         index: DefinedFuncIndex,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;, CompileError&gt; {
-        <span class="kw">let _ </span>= (translation, types, index);
-        <span class="macro">todo!</span>()
+        <span class="kw">let </span>func_index = translation.module.func_index(index);
+        <span class="kw">let </span>sig = translation.module.functions[func_index].signature;
+        <span class="kw">let </span>ty = <span class="kw-2">&amp;</span>types[sig];
+        <span class="kw">let </span>wasm_ty = wasmparser::FuncType::new(
+            ty.params().iter().copied().map(Into::into),
+            ty.returns().iter().copied().map(Into::into),
+        );
+        <span class="kw">let </span>buffer = <span class="self">self
+            </span>.isa
+            .compile_trampoline(<span class="kw-2">&amp;</span>wasm_ty, TrampolineKind::ArrayToWasm(func_index))
+            .map_err(|e| CompileError::Codegen(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, e)))<span class="question-mark">?</span>;
+        <span class="kw">let </span>compiled_function =
+            CompiledFunction::new(buffer, CompiledFuncEnv {}, <span class="self">self</span>.isa.function_alignment());
+
+        <span class="prelude-val">Ok</span>(Box::new(compiled_function))
     }
 
     <span class="kw">fn </span>compile_native_to_wasm_trampoline(
@@ -293,17 +348,44 @@
         types: <span class="kw-2">&amp;</span>ModuleTypes,
         index: DefinedFuncIndex,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;, CompileError&gt; {
-        <span class="kw">let _ </span>= (translation, types, index);
-        <span class="macro">todo!</span>()
+        <span class="kw">let </span>func_index = translation.module.func_index(index);
+        <span class="kw">let </span>sig = translation.module.functions[func_index].signature;
+        <span class="kw">let </span>ty = <span class="kw-2">&amp;</span>types[sig];
+        <span class="kw">let </span>wasm_ty = wasmparser::FuncType::new(
+            ty.params().iter().copied().map(Into::into),
+            ty.returns().iter().copied().map(Into::into),
+        );
+
+        <span class="kw">let </span>buffer = <span class="self">self
+            </span>.isa
+            .compile_trampoline(<span class="kw-2">&amp;</span>wasm_ty, TrampolineKind::NativeToWasm(func_index))
+            .map_err(|e| CompileError::Codegen(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, e)))<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>compiled_function =
+            CompiledFunction::new(buffer, CompiledFuncEnv {}, <span class="self">self</span>.isa.function_alignment());
+
+        <span class="prelude-val">Ok</span>(Box::new(compiled_function))
     }
 
     <span class="kw">fn </span>compile_wasm_to_native_trampoline(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        translation: <span class="kw-2">&amp;</span>ModuleTranslation&lt;<span class="lifetime">&#39;_</span>&gt;,
+        _translation: <span class="kw-2">&amp;</span>ModuleTranslation&lt;<span class="lifetime">&#39;_</span>&gt;,
         wasm_func_ty: <span class="kw-2">&amp;</span>wasmtime_environ::WasmFuncType,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>Any + Send&gt;, CompileError&gt; {
-        <span class="kw">let _ </span>= (translation, wasm_func_ty);
-        <span class="macro">todo!</span>()
+        <span class="kw">let </span>wasm_ty = wasmparser::FuncType::new(
+            wasm_func_ty.params().iter().copied().map(Into::into),
+            wasm_func_ty.returns().iter().copied().map(Into::into),
+        );
+
+        <span class="kw">let </span>buffer = <span class="self">self
+            </span>.isa
+            .compile_trampoline(<span class="kw-2">&amp;</span>wasm_ty, TrampolineKind::WasmToNative)
+            .map_err(|e| CompileError::Codegen(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, e)))<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>compiled_function =
+            CompiledFunction::new(buffer, CompiledFuncEnv {}, <span class="self">self</span>.isa.function_alignment());
+
+        <span class="prelude-val">Ok</span>(Box::new(compiled_function))
     }
 
     <span class="kw">fn </span>append_code(

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["isa"],"struct":["Callee"],"trait":["FuncEnv"]};
+window.SIDEBAR_ITEMS = {"enum":["TrampolineKind"],"mod":["isa"],"struct":["Callee"],"trait":["FuncEnv"]};

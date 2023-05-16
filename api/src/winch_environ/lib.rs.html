@@ -37,8 +37,6 @@
 <a href="#37" id="37">37</a>
 <a href="#38" id="38">38</a>
 <a href="#39" id="39">39</a>
-<a href="#40" id="40">40</a>
-<a href="#41" id="41">41</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This crate implements Winch&#39;s function compilation environment,
 //! which allows Winch&#39;s code generation to resolve module and runtime
 //! specific information.  This crate mainly implements the
@@ -46,7 +44,7 @@
 
 </span><span class="kw">use </span>wasmparser::types::Types;
 <span class="kw">use </span>wasmtime_environ::{FuncIndex, Module};
-<span class="kw">use </span>winch_codegen::{<span class="self">self</span>, Callee, TargetIsa};
+<span class="kw">use </span>winch_codegen::{<span class="self">self</span>, Callee};
 
 <span class="doccomment">/// Function environment containing module and runtime specific
 /// information.
@@ -55,8 +53,6 @@
     </span><span class="kw">pub </span>module: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Module,
     <span class="doccomment">/// Type information about a module, once it has been validated.
     </span><span class="kw">pub </span>types: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Types,
-    <span class="doccomment">/// The current ISA.
-    </span><span class="kw">pub </span>isa: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Box&lt;<span class="kw">dyn </span>TargetIsa&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; winch_codegen::FuncEnv <span class="kw">for </span>FuncEnv&lt;<span class="lifetime">&#39;a</span>&gt; {
@@ -76,8 +72,8 @@
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FuncEnv&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="doccomment">/// Create a new function environment.
-    </span><span class="kw">pub fn </span>new(module: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Module, types: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Types, isa: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Box&lt;<span class="kw">dyn </span>TargetIsa&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ module, types, isa }
+    </span><span class="kw">pub fn </span>new(module: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Module, types: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Types) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ module, types }
     }
 }
 </code></pre></div>

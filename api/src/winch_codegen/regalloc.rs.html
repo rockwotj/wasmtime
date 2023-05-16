@@ -59,6 +59,15 @@
 <a href="#59" id="59">59</a>
 <a href="#60" id="60">60</a>
 <a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{isa::reg::Reg, regset::RegSet};
 
 <span class="doccomment">/// The register allocator.
@@ -107,6 +116,12 @@
     <span class="kw">where
         </span>F: FnMut(<span class="kw-2">&amp;mut </span>RegAlloc),
     {
+        <span class="comment">// If the scratch register is explicitly requested
+        // just return it, it&#39;s usage should never cause spills.
+        </span><span class="kw">if </span>named == <span class="self">self</span>.scratch {
+            <span class="kw">return </span>named;
+        }
+
         <span class="self">self</span>.regset.gpr(named).unwrap_or_else(|| {
             spill(<span class="self">self</span>);
             <span class="self">self</span>.regset
@@ -117,7 +132,10 @@
 
     <span class="doccomment">/// Mark a particular general purpose register as available.
     </span><span class="kw">pub fn </span>free_gpr(<span class="kw-2">&amp;mut </span><span class="self">self</span>, reg: Reg) {
-        <span class="self">self</span>.regset.free_gpr(reg);
+        <span class="comment">// Never mark the designated scratch register as allocatable.
+        </span><span class="kw">if </span>reg != <span class="self">self</span>.scratch {
+            <span class="self">self</span>.regset.free_gpr(reg);
+        }
     }
 }
 </code></pre></div>

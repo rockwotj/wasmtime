@@ -120,6 +120,12 @@
 <a href="#120" id="120">120</a>
 <a href="#121" id="121">121</a>
 <a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="self">self</span>::regs::{scratch, ALL_GPR};
 <span class="kw">use crate</span>::{
     abi::ABI,
@@ -130,7 +136,7 @@
     regalloc::RegAlloc,
     regset::RegSet,
     stack::Stack,
-    FuncEnv,
+    FuncEnv, TrampolineKind,
 };
 <span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>cranelift_codegen::settings::{<span class="self">self</span>, Flags};
@@ -139,6 +145,7 @@
 <span class="kw">use </span>masm::MacroAssembler <span class="kw">as </span>Aarch64Masm;
 <span class="kw">use </span>target_lexicon::Triple;
 <span class="kw">use </span>wasmparser::{FuncType, FuncValidator, FunctionBody, ValidatorResources};
+<span class="kw">use </span>wasmtime_environ::VMOffsets;
 
 <span class="kw">mod </span>abi;
 <span class="kw">mod </span>address;
@@ -207,6 +214,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         sig: <span class="kw-2">&amp;</span>FuncType,
         body: <span class="kw-2">&amp;</span>FunctionBody,
+        vmoffsets: <span class="kw-2">&amp;</span>VMOffsets&lt;u8&gt;,
         env: <span class="kw-2">&amp;</span><span class="kw">dyn </span>FuncEnv,
         validator: <span class="kw-2">&amp;mut </span>FuncValidator&lt;ValidatorResources&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt; {
@@ -221,7 +229,7 @@
         <span class="comment">// TODO: Add floating point bitmask
         </span><span class="kw">let </span>regalloc = RegAlloc::new(RegSet::new(ALL_GPR, <span class="number">0</span>), scratch());
         <span class="kw">let </span>codegen_context = CodeGenContext::new(regalloc, stack, <span class="kw-2">&amp;</span>frame);
-        <span class="kw">let </span><span class="kw-2">mut </span>codegen = CodeGen::new(<span class="kw-2">&amp;mut </span>masm, <span class="kw-2">&amp;</span>abi, codegen_context, env, abi_sig);
+        <span class="kw">let </span><span class="kw-2">mut </span>codegen = CodeGen::new(<span class="kw-2">&amp;mut </span>masm, <span class="kw-2">&amp;</span>abi, codegen_context, env, abi_sig, vmoffsets);
 
         codegen.emit(<span class="kw-2">&amp;mut </span>body, validator)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(masm.finalize())
@@ -238,7 +246,11 @@
         </span><span class="number">32
     </span>}
 
-    <span class="kw">fn </span>host_to_wasm_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, _ty: <span class="kw-2">&amp;</span>FuncType) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt; {
+    <span class="kw">fn </span>compile_trampoline(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        _ty: <span class="kw-2">&amp;</span>FuncType,
+        _kind: TrampolineKind,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt; {
         <span class="macro">todo!</span>()
     }
 }

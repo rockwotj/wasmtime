@@ -200,7 +200,22 @@
 <a href="#200" id="200">200</a>
 <a href="#201" id="201">201</a>
 <a href="#202" id="202">202</a>
-</pre><pre class="rust"><code><span class="kw">use </span>anyhow::{anyhow, <span class="prelude-ty">Result</span>};
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+</pre><pre class="rust"><code><span class="kw">use crate</span>::{FuncEnv, TrampolineKind};
+<span class="kw">use </span>anyhow::{anyhow, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>core::fmt::Formatter;
 <span class="kw">use </span>cranelift_codegen::isa::{CallConv, IsaBuilder};
 <span class="kw">use </span>cranelift_codegen::settings;
@@ -211,8 +226,7 @@
 };
 <span class="kw">use </span>target_lexicon::{Architecture, Triple};
 <span class="kw">use </span>wasmparser::{FuncType, FuncValidator, FunctionBody, ValidatorResources};
-
-<span class="kw">use </span><span class="kw">crate</span>::FuncEnv;
+<span class="kw">use </span>wasmtime_environ::VMOffsets;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;x64&quot;</span>)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>x64;
@@ -351,6 +365,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         sig: <span class="kw-2">&amp;</span>FuncType,
         body: <span class="kw-2">&amp;</span>FunctionBody,
+        vmoffsets: <span class="kw-2">&amp;</span>VMOffsets&lt;u8&gt;,
         env: <span class="kw-2">&amp;</span><span class="kw">dyn </span>FuncEnv,
         validator: <span class="kw-2">&amp;mut </span>FuncValidator&lt;ValidatorResources&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt;;
@@ -388,8 +403,21 @@
     <span class="doccomment">/// See `cranelift_codegen::isa::TargetIsa::function_alignment`.
     </span><span class="kw">fn </span>function_alignment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32;
 
-    <span class="doccomment">/// Generate a trampoline that can be used to call a wasm function from wasmtime.
-    </span><span class="kw">fn </span>host_to_wasm_trampoline(<span class="kw-2">&amp;</span><span class="self">self</span>, ty: <span class="kw-2">&amp;</span>FuncType) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt;;
+    <span class="doccomment">/// Compile a trampoline kind.
+    ///
+    /// This function, internally dispatches to the right trampoline to emit
+    /// depending on the `kind` paramter.
+    </span><span class="kw">fn </span>compile_trampoline(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        ty: <span class="kw-2">&amp;</span>FuncType,
+        kind: TrampolineKind,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt;;
+
+    <span class="doccomment">/// Returns the pointer width of the ISA in bytes.
+    </span><span class="kw">fn </span>pointer_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+        <span class="kw">let </span>width = <span class="self">self</span>.triple().pointer_width().unwrap();
+        width.bytes()
+    }
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>TargetIsa {

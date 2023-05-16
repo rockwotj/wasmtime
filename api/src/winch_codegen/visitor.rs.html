@@ -213,6 +213,7 @@
 <a href="#213" id="213">213</a>
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module is the central place for machine code emission.
 //! It defines an implementation of wasmparser&#39;s Visitor trait
 //! for `CodeGen`; which defines a visitor per op-code,
@@ -225,6 +226,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::stack::Val;
 <span class="kw">use </span>wasmparser::ValType;
 <span class="kw">use </span>wasmparser::VisitOperator;
+<span class="kw">use </span>wasmtime_environ::FuncIndex;
 
 <span class="doccomment">/// A macro to define unsupported WebAssembly operators.
 ///
@@ -413,7 +415,7 @@
     }
 
     <span class="kw">fn </span>visit_call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: u32) {
-        <span class="self">self</span>.emit_call(index);
+        <span class="self">self</span>.emit_call(FuncIndex::from_u32(index));
     }
 
     <span class="macro">wasmparser::for_each_operator!</span>(def_unsupported);
