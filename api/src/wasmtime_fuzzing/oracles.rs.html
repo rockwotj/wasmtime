@@ -1430,7 +1430,7 @@
 
             ApiCall::InstanceDrop { id } =&gt; {
                 <span class="macro">log::trace!</span>(<span class="string">&quot;dropping instance {}&quot;</span>, id);
-                drop(instances.remove(<span class="kw-2">&amp;</span>id));
+                instances.remove(<span class="kw-2">&amp;</span>id);
             }
 
             ApiCall::CallExportedFunc { instance, nth } =&gt; {

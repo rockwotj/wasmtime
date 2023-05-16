@@ -556,7 +556,7 @@
         <span class="kw">let </span>b = SetOnDrop(a.clone());
         <span class="kw">let </span>fiber =
             Fiber::&lt;(), (), ()&gt;::new(FiberStack::new(<span class="number">1024 </span>* <span class="number">1024</span>).unwrap(), <span class="kw">move </span>|(), _s| {
-                drop(<span class="kw-2">&amp;</span>b);
+                <span class="kw">let _ </span>= <span class="kw-2">&amp;</span>b;
                 <span class="macro">panic!</span>();
             })
             .unwrap();

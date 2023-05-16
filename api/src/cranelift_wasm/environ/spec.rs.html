@@ -908,7 +908,7 @@
     <span class="doccomment">/// Called after the locals for a function have been parsed, and the number
     /// of variables defined by this function is provided.
     </span><span class="kw">fn </span>after_locals(<span class="kw-2">&amp;mut </span><span class="self">self</span>, num_locals_defined: usize) {
-        drop(num_locals_defined);
+        <span class="kw">let _ </span>= num_locals_defined;
     }
 
     <span class="doccomment">/// Set up the necessary preamble definitions in `func` to access the global variable
@@ -1367,7 +1367,7 @@
     <span class="doccomment">/// Translates a type index to its signature index, only called for type
     /// indices which point to functions.
     </span><span class="kw">fn </span>type_to_signature(<span class="kw-2">&amp;</span><span class="self">self</span>, index: TypeIndex) -&gt; WasmResult&lt;SignatureIndex&gt; {
-        drop(index);
+        <span class="kw">let _ </span>= index;
         <span class="prelude-val">Err</span>(WasmError::Unsupported(<span class="string">&quot;module linking&quot;</span>.to_string()))
     }
 
@@ -1408,7 +1408,7 @@
         module: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data </span>str,
         field: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data </span>str,
     ) -&gt; WasmResult&lt;()&gt; {
-        drop((tag, module, field));
+        <span class="kw">let _ </span>= (tag, module, field);
         <span class="prelude-val">Err</span>(WasmError::Unsupported(<span class="string">&quot;wasm tags&quot;</span>.to_string()))
     }
 
@@ -1460,7 +1460,7 @@
 
     <span class="doccomment">/// Declares an tag to the environment
     </span><span class="kw">fn </span>declare_tag(<span class="kw-2">&amp;mut </span><span class="self">self</span>, tag: Tag) -&gt; WasmResult&lt;()&gt; {
-        drop(tag);
+        <span class="kw">let _ </span>= tag;
         <span class="prelude-val">Err</span>(WasmError::Unsupported(<span class="string">&quot;wasm tags&quot;</span>.to_string()))
     }
 
@@ -1495,7 +1495,7 @@
 
     <span class="doccomment">/// Declares an tag export to the environment.
     </span><span class="kw">fn </span>declare_tag_export(<span class="kw-2">&amp;mut </span><span class="self">self</span>, tag_index: TagIndex, name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data </span>str) -&gt; WasmResult&lt;()&gt; {
-        drop((tag_index, name));
+        <span class="kw">let _ </span>= (tag_index, name);
         <span class="prelude-val">Err</span>(WasmError::Unsupported(<span class="string">&quot;wasm tags&quot;</span>.to_string()))
     }
 
@@ -1539,7 +1539,7 @@
     <span class="doccomment">/// Indicates that a declarative element segment was seen in the wasm
     /// module.
     </span><span class="kw">fn </span>declare_elements(<span class="kw-2">&amp;mut </span><span class="self">self</span>, elements: Box&lt;[FuncIndex]&gt;) -&gt; WasmResult&lt;()&gt; {
-        drop(elements);
+        <span class="kw">let _ </span>= elements;
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1558,7 +1558,7 @@
     <span class="doccomment">/// Indicates how many functions the code section reports and the byte
     /// offset of where the code sections starts.
     </span><span class="kw">fn </span>reserve_function_bodies(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bodies: u32, code_section_offset: u64) {
-        drop((bodies, code_section_offset));
+        <span class="kw">let _ </span>= (bodies, code_section_offset);
     }
 
     <span class="doccomment">/// Provides the contents of a function body.

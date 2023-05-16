@@ -1071,8 +1071,6 @@
 <a href="#1071" id="1071">1071</a>
 <a href="#1072" id="1072">1072</a>
 <a href="#1073" id="1073">1073</a>
-<a href="#1074" id="1074">1074</a>
-<a href="#1075" id="1075">1075</a>
 </pre><pre class="rust"><code><span class="doccomment">//! # `VMExternRef`
 //!
 //! `VMExternRef` is a reference-counted box for any kind of data that is
@@ -1294,8 +1292,6 @@
         }
         atomic::fence(Ordering::Acquire);
 
-        <span class="comment">// Drop our live reference to `data` before we drop it itself.
-        </span>drop(data);
         <span class="kw">unsafe </span>{
             VMExternData::drop_and_dealloc(<span class="self">self</span>.<span class="number">0</span>);
         }

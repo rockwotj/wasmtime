@@ -618,7 +618,7 @@
 </span><span class="kw">pub unsafe trait </span>InstanceAllocator {
     <span class="doccomment">/// Validates that a module is supported by the allocator.
     </span><span class="kw">fn </span>validate(<span class="kw-2">&amp;</span><span class="self">self</span>, module: <span class="kw-2">&amp;</span>Module, offsets: <span class="kw-2">&amp;</span>VMOffsets&lt;HostPtr&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        drop((module, offsets));
+        <span class="kw">let _ </span>= (module, offsets);
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -947,7 +947,7 @@
 <span class="kw">impl </span>OnDemandInstanceAllocator {
     <span class="doccomment">/// Creates a new on-demand instance allocator.
     </span><span class="kw">pub fn </span>new(mem_creator: <span class="prelude-ty">Option</span>&lt;Arc&lt;<span class="kw">dyn </span>RuntimeMemoryCreator&gt;&gt;, stack_size: usize) -&gt; <span class="self">Self </span>{
-        drop(stack_size); <span class="comment">// suppress unused warnings w/o async feature
+        <span class="kw">let _ </span>= stack_size; <span class="comment">// suppress unused warnings w/o async feature
         </span><span class="self">Self </span>{
             mem_creator,
             <span class="attr">#[cfg(feature = <span class="string">&quot;async&quot;</span>)]

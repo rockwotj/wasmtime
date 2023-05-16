@@ -1069,7 +1069,6 @@
 <a href="#1069" id="1069">1069</a>
 <a href="#1070" id="1070">1070</a>
 <a href="#1071" id="1071">1071</a>
-<a href="#1072" id="1072">1072</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::component::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::ScopeVec;
 <span class="kw">use crate</span>::{
@@ -1742,12 +1741,11 @@
                 <span class="kw">for </span>alias <span class="kw">in </span>s {
                     <span class="kw">let </span>init = <span class="kw">match </span>alias<span class="question-mark">? </span>{
                         wasmparser::ComponentAlias::InstanceExport {
-                            kind,
+                            kind: <span class="kw">_</span>,
                             instance_index,
                             name,
                         } =&gt; {
                             <span class="kw">let </span>instance = ComponentInstanceIndex::from_u32(instance_index);
-                            drop(kind);
                             <span class="self">self</span>.alias_component_instance_export(instance, name);
                             LocalInitializer::AliasComponentExport(instance, name)
                         }

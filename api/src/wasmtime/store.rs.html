@@ -2415,7 +2415,7 @@
     </span>T: std::ops::DerefMut&lt;Target = StoreOpaque&gt;,
 {
     <span class="kw">pub fn </span>new(<span class="kw-2">mut </span>store: T) -&gt; <span class="self">Self </span>{
-        drop(<span class="kw-2">&amp;mut </span>store);
+        <span class="kw">let _ </span>= <span class="kw-2">&amp;mut </span>store;
         <span class="attr">#[cfg(debug_assertions)]
         </span>{
             <span class="kw">let </span>prev_okay = store.externref_activations_table.set_gc_okay(<span class="bool-val">false</span>);
@@ -4038,7 +4038,7 @@ at https://bytecodealliance.org/security.
         </span>{
             <span class="self">self</span>.epoch_deadline_behavior = EpochDeadline::YieldAndExtendDeadline { delta };
         }
-        drop(delta); <span class="comment">// suppress warning in non-async build
+        <span class="kw">let _ </span>= delta; <span class="comment">// suppress warning in non-async build
     </span>}
 
     <span class="kw">fn </span>get_epoch_deadline(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
