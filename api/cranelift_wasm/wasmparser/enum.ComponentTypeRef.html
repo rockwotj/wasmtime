@@ -2,7 +2,7 @@
     Module(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>),
     Func(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>),
     Value(<a class="enum" href="enum.ComponentValType.html" title="enum cranelift_wasm::wasmparser::ComponentValType">ComponentValType</a>),
-    Type(<a class="enum" href="enum.TypeBounds.html" title="enum cranelift_wasm::wasmparser::TypeBounds">TypeBounds</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>),
+    Type(<a class="enum" href="enum.TypeBounds.html" title="enum cranelift_wasm::wasmparser::TypeBounds">TypeBounds</a>),
     Instance(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>),
     Component(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>),
 }</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Represents a reference to a component type.</p>
@@ -11,7 +11,7 @@
 </div><section id="variant.Func" class="variant"><a href="#variant.Func" class="anchor">§</a><h3 class="code-header">Func(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>)</h3></section><div class="docblock"><p>The reference is to a function type.</p>
 <p>The index is expected to be a type index to a function type.</p>
 </div><section id="variant.Value" class="variant"><a href="#variant.Value" class="anchor">§</a><h3 class="code-header">Value(<a class="enum" href="enum.ComponentValType.html" title="enum cranelift_wasm::wasmparser::ComponentValType">ComponentValType</a>)</h3></section><div class="docblock"><p>The reference is to a value type.</p>
-</div><section id="variant.Type" class="variant"><a href="#variant.Type" class="anchor">§</a><h3 class="code-header">Type(<a class="enum" href="enum.TypeBounds.html" title="enum cranelift_wasm::wasmparser::TypeBounds">TypeBounds</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>)</h3></section><div class="docblock"><p>The reference is to a bounded type.</p>
+</div><section id="variant.Type" class="variant"><a href="#variant.Type" class="anchor">§</a><h3 class="code-header">Type(<a class="enum" href="enum.TypeBounds.html" title="enum cranelift_wasm::wasmparser::TypeBounds">TypeBounds</a>)</h3></section><div class="docblock"><p>The reference is to a bounded type.</p>
 <p>The index is expected to be a type index.</p>
 </div><section id="variant.Instance" class="variant"><a href="#variant.Instance" class="anchor">§</a><h3 class="code-header">Instance(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>)</h3></section><div class="docblock"><p>The reference is to an instance type.</p>
 <p>The index is a type index to an instance type.</p>

@@ -1897,6 +1897,16 @@
 <a href="#1897" id="1897">1897</a>
 <a href="#1898" id="1898">1898</a>
 <a href="#1899" id="1899">1899</a>
+<a href="#1900" id="1900">1900</a>
+<a href="#1901" id="1901">1901</a>
+<a href="#1902" id="1902">1902</a>
+<a href="#1903" id="1903">1903</a>
+<a href="#1904" id="1904">1904</a>
+<a href="#1905" id="1905">1905</a>
+<a href="#1906" id="1906">1906</a>
+<a href="#1907" id="1907">1907</a>
+<a href="#1908" id="1908">1908</a>
+<a href="#1909" id="1909">1909</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::component::{MAX_FLAT_PARAMS, MAX_FLAT_RESULTS};
 <span class="kw">use crate</span>::{EntityType, Global, ModuleTypes, ModuleTypesBuilder, PrimaryMap, SignatureIndex};
 <span class="kw">use </span>anyhow::{bail, <span class="prelude-ty">Result</span>};
@@ -2345,6 +2355,9 @@
             wasmparser::ComponentType::Instance(ty) =&gt; {
                 TypeDef::ComponentInstance(<span class="self">self</span>.component_instance_type(ty)<span class="question-mark">?</span>)
             }
+            wasmparser::ComponentType::Resource { .. } =&gt; {
+                <span class="macro">unimplemented!</span>(<span class="string">&quot;resource types&quot;</span>)
+            }
         })
     }
 
@@ -2366,13 +2379,16 @@
                 <span class="self">self</span>.core_outer_type(<span class="number">0</span>, TypeIndex::from_u32(<span class="kw-2">*</span>ty))
             }
             wasmparser::ComponentTypeRef::Func(ty)
-            | wasmparser::ComponentTypeRef::Type(wasmparser::TypeBounds::Eq, ty)
+            | wasmparser::ComponentTypeRef::Type(wasmparser::TypeBounds::Eq(ty))
             | wasmparser::ComponentTypeRef::Instance(ty)
             | wasmparser::ComponentTypeRef::Component(ty) =&gt; {
                 <span class="self">self</span>.component_outer_type(<span class="number">0</span>, ComponentTypeIndex::from_u32(<span class="kw-2">*</span>ty))
             }
             wasmparser::ComponentTypeRef::Value(..) =&gt; {
                 <span class="macro">unimplemented!</span>(<span class="string">&quot;references to value types&quot;</span>);
+            }
+            wasmparser::ComponentTypeRef::Type(wasmparser::TypeBounds::SubResource) =&gt; {
+                <span class="macro">unimplemented!</span>(<span class="string">&quot;resource types&quot;</span>);
             }
         }
     }
@@ -2602,6 +2618,10 @@
             }
             wasmparser::ComponentDefinedType::Result { ok, err } =&gt; {
                 InterfaceType::Result(<span class="self">self</span>.result_type(ok, err))
+            }
+            wasmparser::ComponentDefinedType::Own(<span class="kw">_</span>)
+            | wasmparser::ComponentDefinedType::Borrow(<span class="kw">_</span>) =&gt; {
+                <span class="macro">unimplemented!</span>(<span class="string">&quot;resource types&quot;</span>)
             }
         };
         <span class="kw">let </span>info = <span class="self">self</span>.type_information(<span class="kw-2">&amp;</span>result);
