@@ -329,6 +329,23 @@
 <a href="#329" id="329">329</a>
 <a href="#330" id="330">330</a>
 <a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::cdsl::settings::{SettingGroup, SettingGroupBuilder};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>define() -&gt; SettingGroup {
@@ -654,6 +671,23 @@
             feature in cranelift-codegen.
         &quot;#</span>,
         <span class="bool-val">false</span>,
+    );
+
+    settings.add_num(
+        <span class="string">&quot;bb_padding_log2_minus_one&quot;</span>,
+        <span class="string">&quot;The log2 of the size to insert dummy padding between basic blocks&quot;</span>,
+        <span class="string">r#&quot;
+            This is a debugging option for stressing various cases during code
+            generation without requiring large functions. This will insert
+            0-byte padding between basic blocks of the specified size.
+
+            The amount of padding inserted two raised to the power of this value
+            minus one. If this value is 0 then no padding is inserted.
+
+            The default for this option is 0 to insert no padding as it&#39;s only
+            intended for testing and development.
+        &quot;#</span>,
+        <span class="number">0</span>,
     );
 
     <span class="comment">// When adding new settings please check if they can also be added

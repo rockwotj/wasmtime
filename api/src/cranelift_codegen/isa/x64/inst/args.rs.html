@@ -2701,7 +2701,7 @@
         }
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>finalize(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>EmitState, buffer: <span class="kw-2">&amp;</span>MachBuffer&lt;Inst&gt;) -&gt; Amode {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>finalize(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>EmitState, buffer: <span class="kw-2">&amp;mut </span>MachBuffer&lt;Inst&gt;) -&gt; Amode {
         <span class="kw">match </span><span class="self">self </span>{
             SyntheticAmode::Real(addr) =&gt; addr.clone(),
             SyntheticAmode::NominalSPOffset { simm32 } =&gt; {

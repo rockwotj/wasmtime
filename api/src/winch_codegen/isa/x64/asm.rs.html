@@ -497,6 +497,9 @@
 <a href="#497" id="497">497</a>
 <a href="#498" id="498">498</a>
 <a href="#499" id="499">499</a>
+<a href="#500" id="500">500</a>
+<a href="#501" id="501">501</a>
+<a href="#502" id="502">502</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Assembler library implementation for x64.
 
 </span><span class="kw">use crate</span>::{
@@ -598,7 +601,10 @@
 
     <span class="doccomment">/// Return the emitted code.
     </span><span class="kw">pub fn </span>finalize(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; MachBufferFinalized&lt;Final&gt; {
-        <span class="kw">let </span>stencil = <span class="self">self</span>.buffer.finish(<span class="self">self</span>.emit_state.ctrl_plane_mut());
+        <span class="kw">let </span>constants = Default::default();
+        <span class="kw">let </span>stencil = <span class="self">self
+            </span>.buffer
+            .finish(<span class="kw-2">&amp;</span>constants, <span class="self">self</span>.emit_state.ctrl_plane_mut());
         stencil.apply_base_srcloc(Default::default())
     }
 

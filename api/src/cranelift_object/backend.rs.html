@@ -1170,7 +1170,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>code: Vec&lt;u8&gt; = Vec::new();
 
         <span class="kw">let </span>res = ctx.compile_and_emit(<span class="self">self</span>.isa(), <span class="kw-2">&amp;mut </span>code, ctrl_plane)<span class="question-mark">?</span>;
-        <span class="kw">let </span>alignment = res.alignment <span class="kw">as </span>u64;
+        <span class="kw">let </span>alignment = res.buffer.alignment <span class="kw">as </span>u64;
 
         <span class="self">self</span>.define_function_bytes(
             func_id,

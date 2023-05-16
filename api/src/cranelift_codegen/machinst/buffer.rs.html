@@ -2217,6 +2217,61 @@
 <a href="#2217" id="2217">2217</a>
 <a href="#2218" id="2218">2218</a>
 <a href="#2219" id="2219">2219</a>
+<a href="#2220" id="2220">2220</a>
+<a href="#2221" id="2221">2221</a>
+<a href="#2222" id="2222">2222</a>
+<a href="#2223" id="2223">2223</a>
+<a href="#2224" id="2224">2224</a>
+<a href="#2225" id="2225">2225</a>
+<a href="#2226" id="2226">2226</a>
+<a href="#2227" id="2227">2227</a>
+<a href="#2228" id="2228">2228</a>
+<a href="#2229" id="2229">2229</a>
+<a href="#2230" id="2230">2230</a>
+<a href="#2231" id="2231">2231</a>
+<a href="#2232" id="2232">2232</a>
+<a href="#2233" id="2233">2233</a>
+<a href="#2234" id="2234">2234</a>
+<a href="#2235" id="2235">2235</a>
+<a href="#2236" id="2236">2236</a>
+<a href="#2237" id="2237">2237</a>
+<a href="#2238" id="2238">2238</a>
+<a href="#2239" id="2239">2239</a>
+<a href="#2240" id="2240">2240</a>
+<a href="#2241" id="2241">2241</a>
+<a href="#2242" id="2242">2242</a>
+<a href="#2243" id="2243">2243</a>
+<a href="#2244" id="2244">2244</a>
+<a href="#2245" id="2245">2245</a>
+<a href="#2246" id="2246">2246</a>
+<a href="#2247" id="2247">2247</a>
+<a href="#2248" id="2248">2248</a>
+<a href="#2249" id="2249">2249</a>
+<a href="#2250" id="2250">2250</a>
+<a href="#2251" id="2251">2251</a>
+<a href="#2252" id="2252">2252</a>
+<a href="#2253" id="2253">2253</a>
+<a href="#2254" id="2254">2254</a>
+<a href="#2255" id="2255">2255</a>
+<a href="#2256" id="2256">2256</a>
+<a href="#2257" id="2257">2257</a>
+<a href="#2258" id="2258">2258</a>
+<a href="#2259" id="2259">2259</a>
+<a href="#2260" id="2260">2260</a>
+<a href="#2261" id="2261">2261</a>
+<a href="#2262" id="2262">2262</a>
+<a href="#2263" id="2263">2263</a>
+<a href="#2264" id="2264">2264</a>
+<a href="#2265" id="2265">2265</a>
+<a href="#2266" id="2266">2266</a>
+<a href="#2267" id="2267">2267</a>
+<a href="#2268" id="2268">2268</a>
+<a href="#2269" id="2269">2269</a>
+<a href="#2270" id="2270">2270</a>
+<a href="#2271" id="2271">2271</a>
+<a href="#2272" id="2272">2272</a>
+<a href="#2273" id="2273">2273</a>
+<a href="#2274" id="2274">2274</a>
 </pre><pre class="rust"><code><span class="doccomment">//! In-memory representation of compiled machine code, with labels and fixups to
 //! refer to those labels. Handles constant-pool island insertion and also
 //! veneer insertion for out-of-range jumps.
@@ -2368,7 +2423,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::timing;
 <span class="kw">use </span><span class="kw">crate</span>::trace;
 <span class="kw">use </span>cranelift_control::ControlPlane;
-<span class="kw">use </span>cranelift_entity::{entity_impl, SecondaryMap};
+<span class="kw">use </span>cranelift_entity::{entity_impl, PrimaryMap};
 <span class="kw">use </span>smallvec::SmallVec;
 <span class="kw">use </span>std::convert::TryFrom;
 <span class="kw">use </span>std::mem;
@@ -2448,7 +2503,7 @@
     /// aliased to A, then we cannot alias A back to B.
     </span>label_aliases: SmallVec&lt;[MachLabel; <span class="number">16</span>]&gt;,
     <span class="doccomment">/// Constants that must be emitted at some point.
-    </span>pending_constants: SmallVec&lt;[MachLabelConstant; <span class="number">16</span>]&gt;,
+    </span>pending_constants: SmallVec&lt;[VCodeConstant; <span class="number">16</span>]&gt;,
     <span class="doccomment">/// Traps that must be emitted at some point.
     </span>pending_traps: SmallVec&lt;[MachLabelTrap; <span class="number">16</span>]&gt;,
     <span class="doccomment">/// Fixups that must be performed after all code is emitted.
@@ -2481,8 +2536,18 @@
     /// when the offset has grown past this (`labels_at_tail_off`) point.
     /// Always &lt;= `cur_offset()`.
     </span>labels_at_tail_off: CodeOffset,
-    <span class="doccomment">/// Map used constants to their [MachLabel].
-    </span>constant_labels: SecondaryMap&lt;VCodeConstant, MachLabel&gt;,
+    <span class="doccomment">/// Metadata about all constants that this function has access to.
+    ///
+    /// This records the size/alignment of all constants (not the actual data)
+    /// along with the last available label generated for the constant. This map
+    /// is consulted when constants are referred to and the label assigned to a
+    /// constant may change over time as well.
+    </span>constants: PrimaryMap&lt;VCodeConstant, MachBufferConstant&gt;,
+    <span class="doccomment">/// All recorded usages of constants as pairs of the constant and where the
+    /// constant needs to be placed within `self.data`. Note that the same
+    /// constant may appear in this array multiple times if it was emitted
+    /// multiple times.
+    </span>used_constants: SmallVec&lt;[(VCodeConstant, CodeOffset); <span class="number">4</span>]&gt;,
 }
 
 <span class="kw">impl </span>MachBufferFinalized&lt;Stencil&gt; {
@@ -2500,6 +2565,7 @@
                 .collect(),
             stack_maps: <span class="self">self</span>.stack_maps,
             unwind_info: <span class="self">self</span>.unwind_info,
+            alignment: <span class="self">self</span>.alignment,
         }
     }
 }
@@ -2525,6 +2591,8 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) stack_maps: SmallVec&lt;[MachStackMap; <span class="number">8</span>]&gt;,
     <span class="doccomment">/// Any unwind info at a given location.
     </span><span class="kw">pub </span>unwind_info: SmallVec&lt;[(CodeOffset, UnwindInst); <span class="number">8</span>]&gt;,
+    <span class="doccomment">/// The requireed alignment of this buffer
+    </span><span class="kw">pub </span>alignment: u32,
 }
 
 <span class="kw">const </span>UNKNOWN_LABEL_OFFSET: CodeOffset = <span class="number">0xffff_ffff</span>;
@@ -2600,7 +2668,8 @@
             latest_branches: SmallVec::new(),
             labels_at_tail: SmallVec::new(),
             labels_at_tail_off: <span class="number">0</span>,
-            constant_labels: SecondaryMap::new(),
+            constants: Default::default(),
+            used_constants: Default::default(),
         }
     }
 
@@ -2724,22 +2793,65 @@
         <span class="comment">// Post-invariant: as for `get_label()`.
     </span>}
 
-    <span class="doccomment">/// Reserve the next N MachLabels for constants.
-    </span><span class="kw">pub fn </span>reserve_labels_for_constants(<span class="kw-2">&amp;mut </span><span class="self">self</span>, constants: <span class="kw-2">&amp;</span>VCodeConstants) {
-        <span class="macro">trace!</span>(
-            <span class="string">&quot;MachBuffer: next {} labels are for constants&quot;</span>,
-            constants.len()
-        );
-        <span class="kw">for </span>c <span class="kw">in </span>constants.keys() {
-            <span class="self">self</span>.constant_labels[c] = <span class="self">self</span>.get_label();
+    <span class="doccomment">/// Registers metadata in this `MachBuffer` about the `constants` provided.
+    ///
+    /// This will record the size/alignment of all constants which will prepare
+    /// them for emission later on.
+    </span><span class="kw">pub fn </span>register_constants(<span class="kw-2">&amp;mut </span><span class="self">self</span>, constants: <span class="kw-2">&amp;</span>VCodeConstants) {
+        <span class="kw">for </span>(c, val) <span class="kw">in </span>constants.iter() {
+            <span class="kw">let </span>c2 = <span class="self">self</span>.constants.push(MachBufferConstant {
+                upcoming_label: <span class="prelude-val">None</span>,
+                align: val.alignment(),
+                size: val.as_slice().len(),
+            });
+            <span class="macro">assert_eq!</span>(c, c2);
+        }
+    }
+
+    <span class="doccomment">/// Completes constant emission by iterating over `self.used_constants` and
+    /// filling in the &quot;holes&quot; with the constant values provided by `constants`.
+    ///
+    /// Returns the alignment required for this entire buffer. Alignment starts
+    /// at the ISA&#39;s minimum function alignment and can be increased due to
+    /// constant requirements.
+    </span><span class="kw">fn </span>finish_constants(<span class="kw-2">&amp;mut </span><span class="self">self</span>, constants: <span class="kw-2">&amp;</span>VCodeConstants) -&gt; u32 {
+        <span class="kw">let </span><span class="kw-2">mut </span>alignment = I::function_alignment().minimum;
+        <span class="kw">for </span>(constant, offset) <span class="kw">in </span>mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.used_constants) {
+            <span class="kw">let </span>constant = constants.get(constant);
+            <span class="kw">let </span>data = constant.as_slice();
+            <span class="self">self</span>.data[offset <span class="kw">as </span>usize..][..data.len()].copy_from_slice(data);
+            alignment = constant.alignment().max(alignment);
+        }
+        alignment
+    }
+
+    <span class="doccomment">/// Returns a label that can be used to refer to the `constant` provided.
+    ///
+    /// This will automatically defer a new constant to be emitted for
+    /// `constant` if it has not been previously emitted. Note that this
+    /// function may return a different label for the same constant at
+    /// different points in time. The label is valid to use only from the
+    /// current location; the MachBuffer takes care to emit the same constant
+    /// multiple times if needed so the constant is always in range.
+    </span><span class="kw">pub fn </span>get_label_for_constant(<span class="kw-2">&amp;mut </span><span class="self">self</span>, constant: VCodeConstant) -&gt; MachLabel {
+        <span class="kw">let </span>MachBufferConstant {
+            align,
+            size,
+            upcoming_label,
+        } = <span class="self">self</span>.constants[constant];
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(label) = upcoming_label {
+            <span class="kw">return </span>label;
         }
 
-        <span class="comment">// Post-invariant: as for `get_label()`.
-    </span>}
-
-    <span class="doccomment">/// Retrieve the reserved label for a constant.
-    </span><span class="kw">pub fn </span>get_label_for_constant(<span class="kw-2">&amp;</span><span class="self">self</span>, constant: VCodeConstant) -&gt; MachLabel {
-        <span class="self">self</span>.constant_labels[constant]
+        <span class="kw">let </span>label = <span class="self">self</span>.get_label();
+        <span class="macro">trace!</span>(
+            <span class="string">&quot;defer constant: eventually emit {size} bytes aligned \
+             to {align} at label {label:?}&quot;</span>,
+        );
+        <span class="self">self</span>.update_deadline(size, u32::MAX);
+        <span class="self">self</span>.pending_constants.push(constant);
+        <span class="self">self</span>.constants[constant].upcoming_label = <span class="prelude-val">Some</span>(label);
+        label
     }
 
     <span class="doccomment">/// Bind a label to the current offset. A label can only be bound once.
@@ -3288,30 +3400,6 @@
         // preserves all semantics.
     </span>}
 
-    <span class="doccomment">/// Emit a constant at some point in the future, binding the given label to
-    /// its offset. The constant will be placed at most `max_distance` from the
-    /// current offset.
-    </span><span class="kw">pub fn </span>defer_constant(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        label: MachLabel,
-        align: CodeOffset,
-        data: <span class="kw-2">&amp;</span>[u8],
-        max_distance: CodeOffset,
-    ) {
-        <span class="macro">trace!</span>(
-            <span class="string">&quot;defer_constant: eventually emit {} bytes aligned to {} at label {:?}&quot;</span>,
-            data.len(),
-            align,
-            label
-        );
-        <span class="self">self</span>.update_deadline(data.len(), max_distance);
-        <span class="self">self</span>.pending_constants.push(MachLabelConstant {
-            label,
-            align,
-            data: SmallVec::from(data),
-        });
-    }
-
     <span class="doccomment">/// Emit a trap at some point in the future with the specified code and
     /// stack map.
     ///
@@ -3431,10 +3519,13 @@
             }
         }
 
-        <span class="kw">for </span>MachLabelConstant { label, align, data } <span class="kw">in </span>mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.pending_constants) {
+        <span class="kw">for </span>constant <span class="kw">in </span>mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.pending_constants) {
+            <span class="kw">let </span>MachBufferConstant { align, size, .. } = <span class="self">self</span>.constants[constant];
+            <span class="kw">let </span>label = <span class="self">self</span>.constants[constant].upcoming_label.take().unwrap();
             <span class="self">self</span>.align_to(align);
             <span class="self">self</span>.bind_label(label, ctrl_plane);
-            <span class="self">self</span>.put_data(<span class="kw-2">&amp;</span>data[..]);
+            <span class="self">self</span>.used_constants.push((constant, <span class="self">self</span>.cur_offset()));
+            <span class="self">self</span>.get_appended_space(size);
         }
 
         <span class="kw">for </span>fixup <span class="kw">in </span>mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.fixup_records) {
@@ -3579,7 +3670,11 @@
     }
 
     <span class="doccomment">/// Finish any deferred emissions and/or fixups.
-    </span><span class="kw">pub fn </span>finish(<span class="kw-2">mut </span><span class="self">self</span>, ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane) -&gt; MachBufferFinalized&lt;Stencil&gt; {
+    </span><span class="kw">pub fn </span>finish(
+        <span class="kw-2">mut </span><span class="self">self</span>,
+        constants: <span class="kw-2">&amp;</span>VCodeConstants,
+        ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
+    ) -&gt; MachBufferFinalized&lt;Stencil&gt; {
         <span class="kw">let </span>_tt = timing::vcode_emit_finish();
 
         <span class="comment">// Do any optimizations on branches at tail of buffer, as if we
@@ -3587,6 +3682,8 @@
         </span><span class="self">self</span>.optimize_branches(ctrl_plane);
 
         <span class="self">self</span>.finish_emission_maybe_forcing_veneers(<span class="bool-val">false</span>, ctrl_plane);
+
+        <span class="kw">let </span>alignment = <span class="self">self</span>.finish_constants(constants);
 
         <span class="kw">let </span><span class="kw-2">mut </span>srclocs = <span class="self">self</span>.srclocs;
         srclocs.sort_by_key(|entry| entry.start);
@@ -3599,6 +3696,7 @@
             srclocs,
             stack_maps: <span class="self">self</span>.stack_maps,
             unwind_info: <span class="self">self</span>.unwind_info,
+            alignment,
         }
     }
 
@@ -3778,14 +3876,18 @@
     }
 }
 
-<span class="doccomment">/// A constant that is deferred to the next constant-pool opportunity.
-</span><span class="kw">struct </span>MachLabelConstant {
-    <span class="doccomment">/// This label will refer to the constant&#39;s offset.
-    </span>label: MachLabel,
+<span class="doccomment">/// Metadata about a constant.
+</span><span class="kw">struct </span>MachBufferConstant {
+    <span class="doccomment">/// A label which has not yet been bound which can be used for this
+    /// constant.
+    ///
+    /// This is lazily created when a label is requested for a constant and is
+    /// cleared when a constant is emitted.
+    </span>upcoming_label: <span class="prelude-ty">Option</span>&lt;MachLabel&gt;,
     <span class="doccomment">/// Required alignment.
     </span>align: CodeOffset,
-    <span class="doccomment">/// This data will be emitted when able.
-    </span>data: SmallVec&lt;[u8; <span class="number">16</span>]&gt;,
+    <span class="doccomment">/// The byte size of this constant.
+    </span>size: usize,
 }
 
 <span class="doccomment">/// A trap that is deferred to the next time an island is emitted for either
@@ -4029,13 +4131,14 @@
         <span class="kw">let </span>info = EmitInfo::new(settings::Flags::new(settings::builder()));
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
         <span class="kw">let </span><span class="kw-2">mut </span>state = &lt;Inst <span class="kw">as </span>MachInstEmit&gt;::State::default();
+        <span class="kw">let </span>constants = Default::default();
 
         buf.reserve_labels_for_blocks(<span class="number">2</span>);
         buf.bind_label(label(<span class="number">0</span>), state.ctrl_plane_mut());
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">1</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
         buf.bind_label(label(<span class="number">1</span>), state.ctrl_plane_mut());
-        <span class="kw">let </span>buf = buf.finish(state.ctrl_plane_mut());
+        <span class="kw">let </span>buf = buf.finish(<span class="kw-2">&amp;</span>constants, state.ctrl_plane_mut());
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, buf.total_size());
     }
 
@@ -4044,6 +4147,7 @@
         <span class="kw">let </span>info = EmitInfo::new(settings::Flags::new(settings::builder()));
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
         <span class="kw">let </span><span class="kw-2">mut </span>state = &lt;Inst <span class="kw">as </span>MachInstEmit&gt;::State::default();
+        <span class="kw">let </span>constants = Default::default();
 
         buf.reserve_labels_for_blocks(<span class="number">4</span>);
 
@@ -4065,7 +4169,7 @@
 
         buf.bind_label(label(<span class="number">3</span>), state.ctrl_plane_mut());
 
-        <span class="kw">let </span>buf = buf.finish(state.ctrl_plane_mut());
+        <span class="kw">let </span>buf = buf.finish(<span class="kw-2">&amp;</span>constants, state.ctrl_plane_mut());
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, buf.total_size());
     }
 
@@ -4074,6 +4178,7 @@
         <span class="kw">let </span>info = EmitInfo::new(settings::Flags::new(settings::builder()));
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
         <span class="kw">let </span><span class="kw-2">mut </span>state = &lt;Inst <span class="kw">as </span>MachInstEmit&gt;::State::default();
+        <span class="kw">let </span>constants = Default::default();
 
         buf.reserve_labels_for_blocks(<span class="number">4</span>);
 
@@ -4097,7 +4202,7 @@
 
         buf.bind_label(label(<span class="number">3</span>), state.ctrl_plane_mut());
 
-        <span class="kw">let </span>buf = buf.finish(state.ctrl_plane_mut());
+        <span class="kw">let </span>buf = buf.finish(<span class="kw-2">&amp;</span>constants, state.ctrl_plane_mut());
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf2 = MachBuffer::new();
         <span class="kw">let </span><span class="kw-2">mut </span>state = Default::default();
@@ -4109,7 +4214,7 @@
         <span class="kw">let </span>inst = Inst::Nop4;
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf2, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        <span class="kw">let </span>buf2 = buf2.finish(state.ctrl_plane_mut());
+        <span class="kw">let </span>buf2 = buf2.finish(<span class="kw-2">&amp;</span>constants, state.ctrl_plane_mut());
 
         <span class="macro">assert_eq!</span>(buf.data, buf2.data);
     }
@@ -4119,6 +4224,7 @@
         <span class="kw">let </span>info = EmitInfo::new(settings::Flags::new(settings::builder()));
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
         <span class="kw">let </span><span class="kw-2">mut </span>state = &lt;Inst <span class="kw">as </span>MachInstEmit&gt;::State::default();
+        <span class="kw">let </span>constants = Default::default();
 
         buf.reserve_labels_for_blocks(<span class="number">4</span>);
 
@@ -4147,7 +4253,7 @@
         <span class="kw">let </span>inst = Inst::Nop4;
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        <span class="kw">let </span>buf = buf.finish(state.ctrl_plane_mut());
+        <span class="kw">let </span>buf = buf.finish(<span class="kw-2">&amp;</span>constants, state.ctrl_plane_mut());
 
         <span class="macro">assert_eq!</span>(<span class="number">2000000 </span>+ <span class="number">8</span>, buf.total_size());
 
@@ -4176,7 +4282,7 @@
         };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf2, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        <span class="kw">let </span>buf2 = buf2.finish(state.ctrl_plane_mut());
+        <span class="kw">let </span>buf2 = buf2.finish(<span class="kw-2">&amp;</span>constants, state.ctrl_plane_mut());
 
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>buf.data[<span class="number">0</span>..<span class="number">8</span>], <span class="kw-2">&amp;</span>buf2.data[..]);
     }
@@ -4186,6 +4292,7 @@
         <span class="kw">let </span>info = EmitInfo::new(settings::Flags::new(settings::builder()));
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
         <span class="kw">let </span><span class="kw-2">mut </span>state = &lt;Inst <span class="kw">as </span>MachInstEmit&gt;::State::default();
+        <span class="kw">let </span>constants = Default::default();
 
         buf.reserve_labels_for_blocks(<span class="number">4</span>);
 
@@ -4211,7 +4318,7 @@
         };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        <span class="kw">let </span>buf = buf.finish(state.ctrl_plane_mut());
+        <span class="kw">let </span>buf = buf.finish(<span class="kw-2">&amp;</span>constants, state.ctrl_plane_mut());
 
         <span class="macro">assert_eq!</span>(<span class="number">2000000 </span>+ <span class="number">12</span>, buf.total_size());
 
@@ -4228,7 +4335,7 @@
         };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf2, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        <span class="kw">let </span>buf2 = buf2.finish(state.ctrl_plane_mut());
+        <span class="kw">let </span>buf2 = buf2.finish(<span class="kw-2">&amp;</span>constants, state.ctrl_plane_mut());
 
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>buf.data[<span class="number">2000000</span>..], <span class="kw-2">&amp;</span>buf2.data[..]);
     }
@@ -4271,6 +4378,7 @@
         </span><span class="kw">let </span>info = EmitInfo::new(settings::Flags::new(settings::builder()));
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
         <span class="kw">let </span><span class="kw-2">mut </span>state = &lt;Inst <span class="kw">as </span>MachInstEmit&gt;::State::default();
+        <span class="kw">let </span>constants = Default::default();
 
         buf.reserve_labels_for_blocks(<span class="number">8</span>);
 
@@ -4313,7 +4421,7 @@
         <span class="kw">let </span>inst = Inst::Ret { rets: <span class="macro">vec!</span>[] };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        <span class="kw">let </span>buf = buf.finish(state.ctrl_plane_mut());
+        <span class="kw">let </span>buf = buf.finish(<span class="kw-2">&amp;</span>constants, state.ctrl_plane_mut());
 
         <span class="kw">let </span>golden_data = <span class="macro">vec!</span>[
             <span class="number">0xa0</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0xb4</span>, <span class="comment">// cbz x0, 0x14
@@ -4347,6 +4455,7 @@
         </span><span class="kw">let </span>info = EmitInfo::new(settings::Flags::new(settings::builder()));
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::new();
         <span class="kw">let </span><span class="kw-2">mut </span>state = &lt;Inst <span class="kw">as </span>MachInstEmit&gt;::State::default();
+        <span class="kw">let </span>constants = Default::default();
 
         buf.reserve_labels_for_blocks(<span class="number">5</span>);
 
@@ -4370,7 +4479,7 @@
         <span class="kw">let </span>inst = Inst::Jump { dest: target(<span class="number">1</span>) };
         inst.emit(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;mut </span>buf, <span class="kw-2">&amp;</span>info, <span class="kw-2">&amp;mut </span>state);
 
-        <span class="kw">let </span>buf = buf.finish(state.ctrl_plane_mut());
+        <span class="kw">let </span>buf = buf.finish(<span class="kw-2">&amp;</span>constants, state.ctrl_plane_mut());
 
         <span class="kw">let </span>golden_data = <span class="macro">vec!</span>[
             <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x14</span>, <span class="comment">// b 0
@@ -4383,6 +4492,7 @@
     </span><span class="kw">fn </span>metadata_records() {
         <span class="kw">let </span><span class="kw-2">mut </span>buf = MachBuffer::&lt;Inst&gt;::new();
         <span class="kw">let </span>ctrl_plane = <span class="kw-2">&amp;mut </span>Default::default();
+        <span class="kw">let </span>constants = Default::default();
 
         buf.reserve_labels_for_blocks(<span class="number">1</span>);
 
@@ -4406,7 +4516,7 @@
         );
         buf.put1(<span class="number">4</span>);
 
-        <span class="kw">let </span>buf = buf.finish(ctrl_plane);
+        <span class="kw">let </span>buf = buf.finish(<span class="kw-2">&amp;</span>constants, ctrl_plane);
 
         <span class="macro">assert_eq!</span>(buf.data(), <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
         <span class="macro">assert_eq!</span>(

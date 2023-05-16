@@ -784,27 +784,47 @@
 <a href="#784" id="784">784</a>
 <a href="#785" id="785">785</a>
 <a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
 </pre><pre class="rust"><code><span class="attr">#[derive(Clone, Hash)]
 </span><span class="doccomment">/// Flags group `shared`.
 </span><span class="kw">pub struct </span>Flags {
-    bytes: [u8; <span class="number">8</span>],
+    bytes: [u8; <span class="number">9</span>],
 }
 <span class="kw">impl </span>Flags {
     <span class="doccomment">/// Create flags shared settings group.
     </span><span class="attr">#[allow(unused_variables)]
     </span><span class="kw">pub fn </span>new(builder: Builder) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>bvec = builder.state_for(<span class="string">&quot;shared&quot;</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>shared = <span class="self">Self </span>{ bytes: [<span class="number">0</span>; <span class="number">8</span>] };
-        <span class="macro">debug_assert_eq!</span>(bvec.len(), <span class="number">8</span>);
-        shared.bytes[<span class="number">0</span>..<span class="number">8</span>].copy_from_slice(<span class="kw-2">&amp;</span>bvec);
+        <span class="kw">let </span><span class="kw-2">mut </span>shared = <span class="self">Self </span>{ bytes: [<span class="number">0</span>; <span class="number">9</span>] };
+        <span class="macro">debug_assert_eq!</span>(bvec.len(), <span class="number">9</span>);
+        shared.bytes[<span class="number">0</span>..<span class="number">9</span>].copy_from_slice(<span class="kw-2">&amp;</span>bvec);
         shared
     }
 }
 <span class="kw">impl </span>Flags {
     <span class="doccomment">/// Iterates the setting values.
     </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = Value&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>bytes = [<span class="number">0</span>; <span class="number">8</span>];
-        bytes.copy_from_slice(<span class="kw-2">&amp;</span><span class="self">self</span>.bytes[<span class="number">0</span>..<span class="number">8</span>]);
+        <span class="kw">let </span><span class="kw-2">mut </span>bytes = [<span class="number">0</span>; <span class="number">9</span>];
+        bytes.copy_from_slice(<span class="kw-2">&amp;</span><span class="self">self</span>.bytes[<span class="number">0</span>..<span class="number">9</span>]);
         DESCRIPTORS.iter().filter_map(<span class="kw">move </span>|d| {
             <span class="kw">let </span>values = <span class="kw">match </span><span class="kw-2">&amp;</span>d.detail {
                 detail::Detail::Preset =&gt; <span class="kw">return </span><span class="prelude-val">None</span>,
@@ -1000,11 +1020,11 @@
 </span><span class="kw">impl </span>Flags {
     <span class="doccomment">/// Get a view of the boolean predicates.
     </span><span class="kw">pub fn </span>predicate_view(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">crate</span>::settings::PredicateView {
-        <span class="kw">crate</span>::settings::PredicateView::new(<span class="kw-2">&amp;</span><span class="self">self</span>.bytes[<span class="number">5</span>..])
+        <span class="kw">crate</span>::settings::PredicateView::new(<span class="kw-2">&amp;</span><span class="self">self</span>.bytes[<span class="number">6</span>..])
     }
     <span class="doccomment">/// Dynamic numbered predicate getter.
     </span><span class="kw">fn </span>numbered_predicate(<span class="kw-2">&amp;</span><span class="self">self</span>, p: usize) -&gt; bool {
-        <span class="self">self</span>.bytes[<span class="number">5 </span>+ p / <span class="number">8</span>] &amp; (<span class="number">1 </span>&lt;&lt; (p % <span class="number">8</span>)) != <span class="number">0
+        <span class="self">self</span>.bytes[<span class="number">6 </span>+ p / <span class="number">8</span>] &amp; (<span class="number">1 </span>&lt;&lt; (p % <span class="number">8</span>)) != <span class="number">0
     </span>}
     <span class="doccomment">/// Optimization level for generated code.
     ///
@@ -1113,6 +1133,20 @@
                 <span class="macro">panic!</span>(<span class="string">&quot;Invalid enum value&quot;</span>)
             }
         }
+    }
+    <span class="doccomment">/// The log2 of the size to insert dummy padding between basic blocks
+    ///
+    /// This is a debugging option for stressing various cases during code
+    /// generation without requiring large functions. This will insert
+    /// 0-byte padding between basic blocks of the specified size.
+    ///
+    /// The amount of padding inserted two raised to the power of this value
+    /// minus one. If this value is 0 then no padding is inserted.
+    ///
+    /// The default for this option is 0 to insert no padding as it&#39;s only
+    /// intended for testing and development.
+    </span><span class="kw">pub fn </span>bb_padding_log2_minus_one(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+        <span class="self">self</span>.bytes[<span class="number">5</span>]
     }
     <span class="doccomment">/// Enable the symbolic checker for register allocation.
     ///
@@ -1295,7 +1329,7 @@
         <span class="self">self</span>.numbered_predicate(<span class="number">21</span>)
     }
 }
-<span class="kw">static </span>DESCRIPTORS: [detail::Descriptor; <span class="number">27</span>] = [
+<span class="kw">static </span>DESCRIPTORS: [detail::Descriptor; <span class="number">28</span>] = [
     detail::Descriptor {
         name: <span class="string">&quot;opt_level&quot;</span>,
         description: <span class="string">&quot;Optimization level for generated code.&quot;</span>,
@@ -1327,135 +1361,141 @@
         detail: detail::Detail::Enum { last: <span class="number">1</span>, enumerators: <span class="number">14 </span>},
     },
     detail::Descriptor {
+        name: <span class="string">&quot;bb_padding_log2_minus_one&quot;</span>,
+        description: <span class="string">&quot;The log2 of the size to insert dummy padding between basic blocks&quot;</span>,
+        offset: <span class="number">5</span>,
+        detail: detail::Detail::Num,
+    },
+    detail::Descriptor {
         name: <span class="string">&quot;regalloc_checker&quot;</span>,
         description: <span class="string">&quot;Enable the symbolic checker for register allocation.&quot;</span>,
-        offset: <span class="number">5</span>,
+        offset: <span class="number">6</span>,
         detail: detail::Detail::Bool { bit: <span class="number">0 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;regalloc_verbose_logs&quot;</span>,
         description: <span class="string">&quot;Enable verbose debug logs for regalloc2.&quot;</span>,
-        offset: <span class="number">5</span>,
+        offset: <span class="number">6</span>,
         detail: detail::Detail::Bool { bit: <span class="number">1 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_alias_analysis&quot;</span>,
         description: <span class="string">&quot;Do redundant-load optimizations with alias analysis.&quot;</span>,
-        offset: <span class="number">5</span>,
+        offset: <span class="number">6</span>,
         detail: detail::Detail::Bool { bit: <span class="number">2 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_verifier&quot;</span>,
         description: <span class="string">&quot;Run the Cranelift IR verifier at strategic times during compilation.&quot;</span>,
-        offset: <span class="number">5</span>,
+        offset: <span class="number">6</span>,
         detail: detail::Detail::Bool { bit: <span class="number">3 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;is_pic&quot;</span>,
         description: <span class="string">&quot;Enable Position-Independent Code generation.&quot;</span>,
-        offset: <span class="number">5</span>,
+        offset: <span class="number">6</span>,
         detail: detail::Detail::Bool { bit: <span class="number">4 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;use_colocated_libcalls&quot;</span>,
         description: <span class="string">&quot;Use colocated libcalls.&quot;</span>,
-        offset: <span class="number">5</span>,
+        offset: <span class="number">6</span>,
         detail: detail::Detail::Bool { bit: <span class="number">5 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_float&quot;</span>,
         description: <span class="string">&quot;Enable the use of floating-point instructions.&quot;</span>,
-        offset: <span class="number">5</span>,
+        offset: <span class="number">6</span>,
         detail: detail::Detail::Bool { bit: <span class="number">6 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_nan_canonicalization&quot;</span>,
         description: <span class="string">&quot;Enable NaN canonicalization.&quot;</span>,
-        offset: <span class="number">5</span>,
+        offset: <span class="number">6</span>,
         detail: detail::Detail::Bool { bit: <span class="number">7 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_pinned_reg&quot;</span>,
         description: <span class="string">&quot;Enable the use of the pinned register.&quot;</span>,
-        offset: <span class="number">6</span>,
+        offset: <span class="number">7</span>,
         detail: detail::Detail::Bool { bit: <span class="number">0 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_simd&quot;</span>,
         description: <span class="string">&quot;Enable the use of SIMD instructions.&quot;</span>,
-        offset: <span class="number">6</span>,
+        offset: <span class="number">7</span>,
         detail: detail::Detail::Bool { bit: <span class="number">1 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_atomics&quot;</span>,
         description: <span class="string">&quot;Enable the use of atomic instructions&quot;</span>,
-        offset: <span class="number">6</span>,
+        offset: <span class="number">7</span>,
         detail: detail::Detail::Bool { bit: <span class="number">2 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_safepoints&quot;</span>,
         description: <span class="string">&quot;Enable safepoint instruction insertions.&quot;</span>,
-        offset: <span class="number">6</span>,
+        offset: <span class="number">7</span>,
         detail: detail::Detail::Bool { bit: <span class="number">3 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_llvm_abi_extensions&quot;</span>,
         description: <span class="string">&quot;Enable various ABI extensions defined by LLVM&#39;s behavior.&quot;</span>,
-        offset: <span class="number">6</span>,
+        offset: <span class="number">7</span>,
         detail: detail::Detail::Bool { bit: <span class="number">4 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;unwind_info&quot;</span>,
         description: <span class="string">&quot;Generate unwind information.&quot;</span>,
-        offset: <span class="number">6</span>,
+        offset: <span class="number">7</span>,
         detail: detail::Detail::Bool { bit: <span class="number">5 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;preserve_frame_pointers&quot;</span>,
         description: <span class="string">&quot;Preserve frame pointers&quot;</span>,
-        offset: <span class="number">6</span>,
+        offset: <span class="number">7</span>,
         detail: detail::Detail::Bool { bit: <span class="number">6 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;machine_code_cfg_info&quot;</span>,
         description: <span class="string">&quot;Generate CFG metadata for machine code.&quot;</span>,
-        offset: <span class="number">6</span>,
+        offset: <span class="number">7</span>,
         detail: detail::Detail::Bool { bit: <span class="number">7 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_probestack&quot;</span>,
         description: <span class="string">&quot;Enable the use of stack probes for supported calling conventions.&quot;</span>,
-        offset: <span class="number">7</span>,
+        offset: <span class="number">8</span>,
         detail: detail::Detail::Bool { bit: <span class="number">0 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;probestack_func_adjusts_sp&quot;</span>,
         description: <span class="string">&quot;Enable if the stack probe adjusts the stack pointer.&quot;</span>,
-        offset: <span class="number">7</span>,
+        offset: <span class="number">8</span>,
         detail: detail::Detail::Bool { bit: <span class="number">1 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_jump_tables&quot;</span>,
         description: <span class="string">&quot;Enable the use of jump tables in generated machine code.&quot;</span>,
-        offset: <span class="number">7</span>,
+        offset: <span class="number">8</span>,
         detail: detail::Detail::Bool { bit: <span class="number">2 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_heap_access_spectre_mitigation&quot;</span>,
         description: <span class="string">&quot;Enable Spectre mitigation on heap bounds checks.&quot;</span>,
-        offset: <span class="number">7</span>,
+        offset: <span class="number">8</span>,
         detail: detail::Detail::Bool { bit: <span class="number">3 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_table_access_spectre_mitigation&quot;</span>,
         description: <span class="string">&quot;Enable Spectre mitigation on table bounds checks.&quot;</span>,
-        offset: <span class="number">7</span>,
+        offset: <span class="number">8</span>,
         detail: detail::Detail::Bool { bit: <span class="number">4 </span>},
     },
     detail::Descriptor {
         name: <span class="string">&quot;enable_incremental_compilation_cache_checks&quot;</span>,
         description: <span class="string">&quot;Enable additional checks for debugging the incremental compilation cache.&quot;</span>,
-        offset: <span class="number">7</span>,
+        offset: <span class="number">8</span>,
         detail: detail::Detail::Bool { bit: <span class="number">5 </span>},
     },
 ];
@@ -1482,57 +1522,57 @@
     <span class="number">0xffff</span>,
     <span class="number">0xffff</span>,
     <span class="number">1</span>,
-    <span class="number">7</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">25</span>,
-    <span class="number">14</span>,
-    <span class="number">19</span>,
-    <span class="number">22</span>,
-    <span class="number">0xffff</span>,
+    <span class="number">8</span>,
     <span class="number">0xffff</span>,
     <span class="number">26</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">16</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">13</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">4</span>,
-    <span class="number">0</span>,
-    <span class="number">9</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">21</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">12</span>,
-    <span class="number">17</span>,
-    <span class="number">8</span>,
     <span class="number">15</span>,
+    <span class="number">20</span>,
+    <span class="number">23</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">27</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">17</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">14</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
     <span class="number">0xffff</span>,
     <span class="number">5</span>,
     <span class="number">0xffff</span>,
     <span class="number">0xffff</span>,
+    <span class="number">4</span>,
+    <span class="number">0</span>,
+    <span class="number">10</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">22</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">13</span>,
     <span class="number">18</span>,
-    <span class="number">3</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">24</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">0xffff</span>,
-    <span class="number">20</span>,
-    <span class="number">23</span>,
+    <span class="number">9</span>,
+    <span class="number">16</span>,
     <span class="number">0xffff</span>,
     <span class="number">6</span>,
-    <span class="number">10</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">19</span>,
+    <span class="number">3</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">25</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">21</span>,
+    <span class="number">24</span>,
+    <span class="number">0xffff</span>,
+    <span class="number">7</span>,
+    <span class="number">11</span>,
     <span class="number">2</span>,
     <span class="number">0xffff</span>,
     <span class="number">0xffff</span>,
@@ -1540,7 +1580,7 @@
     <span class="number">0xffff</span>,
     <span class="number">0xffff</span>,
     <span class="number">0xffff</span>,
-    <span class="number">11</span>,
+    <span class="number">12</span>,
     <span class="number">0xffff</span>,
 ];
 <span class="kw">static </span>PRESETS: [(u8, u8); <span class="number">0</span>] = [
@@ -1550,7 +1590,7 @@
     descriptors: <span class="kw-2">&amp;</span>DESCRIPTORS,
     enumerators: <span class="kw-2">&amp;</span>ENUMERATORS,
     hash_table: <span class="kw-2">&amp;</span>HASH_TABLE,
-    defaults: <span class="kw-2">&amp;</span>[<span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x0c</span>, <span class="number">0x00</span>, <span class="number">0x4c</span>, <span class="number">0x24</span>, <span class="number">0x1c</span>],
+    defaults: <span class="kw-2">&amp;</span>[<span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x0c</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x4c</span>, <span class="number">0x24</span>, <span class="number">0x1c</span>],
     presets: <span class="kw-2">&amp;</span>PRESETS,
 };
 <span class="doccomment">/// Create a `settings::Builder` for the shared settings group.

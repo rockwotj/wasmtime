@@ -211,12 +211,6 @@
 <a href="#211" id="211">211</a>
 <a href="#212" id="212">212</a>
 <a href="#213" id="213">213</a>
-<a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
 </pre><pre class="rust"><code><span class="doccomment">//! risc-v 64-bit Instruction Set Architecture.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::dominator_tree::DominatorTree;
@@ -297,15 +291,10 @@
         <span class="kw">let </span>(vcode, regalloc_result) = <span class="self">self</span>.compile_vcode(func, domtree, ctrl_plane)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>want_disasm = want_disasm || <span class="macro">log::log_enabled!</span>(log::Level::Debug);
-        <span class="kw">let </span>emit_result = vcode.emit(
-            <span class="kw-2">&amp;</span>regalloc_result,
-            want_disasm,
-            <span class="self">self</span>.flags.machine_code_cfg_info(),
-            ctrl_plane,
-        );
+        <span class="kw">let </span>emit_result = vcode.emit(<span class="kw-2">&amp;</span>regalloc_result, want_disasm, <span class="kw-2">&amp;</span><span class="self">self</span>.flags, ctrl_plane);
         <span class="kw">let </span>frame_size = emit_result.frame_size;
         <span class="kw">let </span>value_labels_ranges = emit_result.value_labels_ranges;
-        <span class="kw">let </span>buffer = emit_result.buffer.finish(ctrl_plane);
+        <span class="kw">let </span>buffer = emit_result.buffer;
         <span class="kw">let </span>sized_stackslot_offsets = emit_result.sized_stackslot_offsets;
         <span class="kw">let </span>dynamic_stackslot_offsets = emit_result.dynamic_stackslot_offsets;
 
@@ -322,7 +311,6 @@
             dynamic_stackslot_offsets,
             bb_starts: emit_result.bb_offsets,
             bb_edges: emit_result.bb_edges,
-            alignment: emit_result.alignment,
         })
     }
 

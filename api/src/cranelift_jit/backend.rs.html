@@ -1667,7 +1667,7 @@
 
         <span class="comment">// work around borrow-checker to allow reuse of ctx below
         </span><span class="kw">let </span>res = ctx.compile(<span class="self">self</span>.isa(), ctrl_plane)<span class="question-mark">?</span>;
-        <span class="kw">let </span>alignment = res.alignment <span class="kw">as </span>u64;
+        <span class="kw">let </span>alignment = res.buffer.alignment <span class="kw">as </span>u64;
         <span class="kw">let </span>compiled_code = ctx.compiled_code().unwrap();
 
         <span class="kw">let </span>size = compiled_code.code_info().total_size <span class="kw">as </span>usize;

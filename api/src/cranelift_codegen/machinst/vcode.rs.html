@@ -1569,6 +1569,15 @@
 <a href="#1569" id="1569">1569</a>
 <a href="#1570" id="1570">1570</a>
 <a href="#1571" id="1571">1571</a>
+<a href="#1572" id="1572">1572</a>
+<a href="#1573" id="1573">1573</a>
+<a href="#1574" id="1574">1574</a>
+<a href="#1575" id="1575">1575</a>
+<a href="#1576" id="1576">1576</a>
+<a href="#1577" id="1577">1577</a>
+<a href="#1578" id="1578">1578</a>
+<a href="#1579" id="1579">1579</a>
+<a href="#1580" id="1580">1580</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This implements the VCode container: a CFG of Insts that have been lowered.
 //!
 //! VCode is virtual-register code. An instruction in VCode is almost a machine
@@ -1748,9 +1757,9 @@
 <span class="doccomment">/// The result of `VCode::emit`. Contains all information computed
 /// during emission: actual machine code, optionally a disassembly,
 /// and optionally metadata about the code layout.
-</span><span class="kw">pub struct </span>EmitResult&lt;I: VCodeInst&gt; {
+</span><span class="kw">pub struct </span>EmitResult {
     <span class="doccomment">/// The MachBuffer containing the machine code.
-    </span><span class="kw">pub </span>buffer: MachBuffer&lt;I&gt;,
+    </span><span class="kw">pub </span>buffer: MachBufferFinalized&lt;Stencil&gt;,
 
     <span class="doccomment">/// Offset of each basic block, recorded during emission. Computed
     /// only if `debug_value_labels` is non-empty.
@@ -1784,9 +1793,6 @@
 
     <span class="doccomment">/// Stack frame size.
     </span><span class="kw">pub </span>frame_size: u32,
-
-    <span class="doccomment">/// The alignment requirement for pc-relative loads.
-    </span><span class="kw">pub </span>alignment: u32,
 }
 
 <span class="doccomment">/// A builder for a VCode function body.
@@ -2321,9 +2327,9 @@
         <span class="kw-2">mut </span><span class="self">self</span>,
         regalloc: <span class="kw-2">&amp;</span>regalloc2::Output,
         want_disasm: bool,
-        want_metadata: bool,
+        flags: <span class="kw-2">&amp;</span>settings::Flags,
         ctrl_plane: <span class="kw-2">&amp;mut </span>ControlPlane,
-    ) -&gt; EmitResult&lt;I&gt;
+    ) -&gt; EmitResult
     <span class="kw">where
         </span>I: VCodeInst,
     {
@@ -2334,10 +2340,13 @@
         <span class="kw">let </span><span class="kw-2">mut </span>buffer = MachBuffer::new();
         <span class="kw">let </span><span class="kw-2">mut </span>bb_starts: Vec&lt;<span class="prelude-ty">Option</span>&lt;CodeOffset&gt;&gt; = <span class="macro">vec!</span>[];
 
-        <span class="comment">// The first M MachLabels are reserved for block indices, the next N MachLabels for
-        // constants.
+        <span class="comment">// The first M MachLabels are reserved for block indices.
         </span>buffer.reserve_labels_for_blocks(<span class="self">self</span>.num_blocks());
-        buffer.reserve_labels_for_constants(<span class="kw-2">&amp;</span><span class="self">self</span>.constants);
+
+        <span class="comment">// Register all allocated constants with the `MachBuffer` to ensure that
+        // any references to the constants during instructions can be handled
+        // correctly.
+        </span>buffer.register_constants(<span class="kw-2">&amp;</span><span class="self">self</span>.constants);
 
         <span class="comment">// Construct the final order we emit code in: cold blocks at the end.
         </span><span class="kw">let </span><span class="kw-2">mut </span>final_order: SmallVec&lt;[BlockIndex; <span class="number">16</span>]&gt; = <span class="macro">smallvec!</span>[];
@@ -2398,6 +2407,10 @@
         }
 
         <span class="kw">let </span>is_forward_edge_cfi_enabled = <span class="self">self</span>.abi.is_forward_edge_cfi_enabled();
+        <span class="kw">let </span>bb_padding = <span class="kw">match </span>flags.bb_padding_log2_minus_one() {
+            <span class="number">0 </span>=&gt; Vec::new(),
+            n =&gt; <span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">1 </span>&lt;&lt; (n - <span class="number">1</span>)],
+        };
 
         <span class="kw">for </span>(block_order_idx, <span class="kw-2">&amp;</span>block) <span class="kw">in </span>final_order.iter().enumerate() {
             <span class="macro">trace!</span>(<span class="string">&quot;emitting block {:?}&quot;</span>, block);
@@ -2445,7 +2458,7 @@
                 <span class="macro">writeln!</span>(<span class="kw-2">&amp;mut </span>disasm, <span class="string">&quot;block{}:&quot;</span>, block.index()).unwrap();
             }
 
-            <span class="kw">if </span>want_metadata {
+            <span class="kw">if </span>flags.machine_code_cfg_info() {
                 <span class="comment">// Track BB starts. If we have backed up due to MachBuffer
                 // branch opts, note that the removed blocks were removed.
                 </span><span class="kw">let </span>cur_offset = buffer.cur_offset();
@@ -2597,44 +2610,45 @@
                 cur_srcloc = <span class="prelude-val">None</span>;
             }
 
-            <span class="comment">// Do we need an island? Get the worst-case size of the
-            // next BB and see if, having emitted that many bytes, we
-            // will be beyond the deadline.
-            </span><span class="kw">if </span>block_order_idx &lt; final_order.len() - <span class="number">1 </span>{
+            <span class="comment">// Do we need an island? Get the worst-case size of the next BB, add
+            // it to the optional padding behind the block, and pass this to the
+            // `MachBuffer` to determine if an island is necessary.
+            </span><span class="kw">let </span>worst_case_next_bb = <span class="kw">if </span>block_order_idx &lt; final_order.len() - <span class="number">1 </span>{
                 <span class="kw">let </span>next_block = final_order[block_order_idx + <span class="number">1</span>];
                 <span class="kw">let </span>next_block_range = <span class="self">self</span>.block_ranges[next_block.index()];
                 <span class="kw">let </span>next_block_size =
                     (next_block_range.<span class="number">1</span>.index() - next_block_range.<span class="number">0</span>.index()) <span class="kw">as </span>u32;
                 <span class="kw">let </span>next_block_ra_insertions = ra_edits_per_block[next_block.index()];
-                <span class="kw">let </span>worst_case_next_bb =
-                    I::worst_case_size() * (next_block_size + next_block_ra_insertions);
-                <span class="kw">if </span>buffer.island_needed(worst_case_next_bb) {
-                    buffer.emit_island(worst_case_next_bb, ctrl_plane);
-                }
+                I::worst_case_size() * (next_block_size + next_block_ra_insertions)
+            } <span class="kw">else </span>{
+                <span class="number">0
+            </span>};
+            <span class="kw">let </span>padding = <span class="kw">if </span>bb_padding.is_empty() {
+                <span class="number">0
+            </span>} <span class="kw">else </span>{
+                bb_padding.len() <span class="kw">as </span>u32 + I::LabelUse::ALIGN - <span class="number">1
+            </span>};
+            <span class="kw">if </span>buffer.island_needed(padding + worst_case_next_bb) {
+                buffer.emit_island(padding + worst_case_next_bb, ctrl_plane);
+            }
+
+            <span class="comment">// Insert padding, if configured, to stress the `MachBuffer`&#39;s
+            // relocation and island calculations.
+            </span><span class="kw">if </span>!bb_padding.is_empty() {
+                buffer.put_data(<span class="kw-2">&amp;</span>bb_padding);
+                buffer.align_to(I::LabelUse::ALIGN);
             }
         }
 
         <span class="comment">// emission state is not needed anymore, move control plane back out
         </span><span class="kw-2">*</span>ctrl_plane = state.take_ctrl_plane();
 
-        <span class="comment">// Emit the constants used by the function, and additionally collect
-        // this function&#39;s alignment at the same time. The alignment start at
-        // the ISA-defined minimum, and can possibly get increased if necessary
-        // for constants.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>function_alignment = I::function_alignment().minimum;
-        <span class="kw">for </span>(constant, data) <span class="kw">in </span><span class="self">self</span>.constants.iter() {
-            function_alignment = data.alignment().max(function_alignment);
-
-            <span class="kw">let </span>label = buffer.get_label_for_constant(constant);
-            buffer.defer_constant(label, data.alignment(), data.as_slice(), u32::max_value());
-        }
-
         <span class="kw">let </span>func_body_len = buffer.cur_offset();
 
         <span class="comment">// Create `bb_edges` and final (filtered) `bb_starts`.
         </span><span class="kw">let </span><span class="kw-2">mut </span>bb_edges = <span class="macro">vec!</span>[];
         <span class="kw">let </span><span class="kw-2">mut </span>bb_offsets = <span class="macro">vec!</span>[];
-        <span class="kw">if </span>want_metadata {
+        <span class="kw">if </span>flags.machine_code_cfg_info() {
             <span class="kw">for </span>block <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.num_blocks() {
                 <span class="kw">if </span>bb_starts[block].is_none() {
                     <span class="comment">// Block was deleted by MachBuffer; skip.
@@ -2657,7 +2671,7 @@
         <span class="kw">let </span>frame_size = <span class="self">self</span>.abi.frame_size();
 
         EmitResult {
-            buffer,
+            buffer: buffer.finish(<span class="kw-2">&amp;</span><span class="self">self</span>.constants, ctrl_plane),
             bb_offsets,
             bb_edges,
             inst_offsets,
@@ -2667,7 +2681,6 @@
             dynamic_stackslot_offsets: <span class="self">self</span>.abi.dynamic_stackslot_offsets().clone(),
             value_labels_ranges,
             frame_size,
-            alignment: function_alignment,
         }
     }
 
@@ -3076,6 +3089,11 @@
     /// structure.
     </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = (VCodeConstant, <span class="kw-2">&amp;</span>VCodeConstantData)&gt; {
         <span class="self">self</span>.constants.iter()
+    }
+
+    <span class="doccomment">/// Returns the data associated with the specified constant.
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, c: VCodeConstant) -&gt; <span class="kw-2">&amp;</span>VCodeConstantData {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.constants[c]
     }
 }
 
