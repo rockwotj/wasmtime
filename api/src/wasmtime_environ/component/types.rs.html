@@ -1904,9 +1904,6 @@
 <a href="#1904" id="1904">1904</a>
 <a href="#1905" id="1905">1905</a>
 <a href="#1906" id="1906">1906</a>
-<a href="#1907" id="1907">1907</a>
-<a href="#1908" id="1908">1908</a>
-<a href="#1909" id="1909">1909</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::component::{MAX_FLAT_PARAMS, MAX_FLAT_RESULTS};
 <span class="kw">use crate</span>::{EntityType, Global, ModuleTypes, ModuleTypesBuilder, PrimaryMap, SignatureIndex};
 <span class="kw">use </span>anyhow::{bail, <span class="prelude-ty">Result</span>};
@@ -1920,6 +1917,8 @@
     ComponentAlias, ComponentOuterAliasKind, ComponentTypeDeclaration, InstanceTypeDeclaration,
 };
 <span class="kw">use </span>wasmtime_component_util::{DiscriminantSize, FlagsSize};
+
+<span class="kw">pub use </span>wasmtime_types::StaticModuleIndex;
 
 <span class="doccomment">/// Maximum nesting depth of a type allowed in Wasmtime.
 ///
@@ -2022,11 +2021,6 @@
 
     <span class="doccomment">/// Same as `ModuleUpvarIndex` but for components.
     </span><span class="kw">pub struct </span>ComponentUpvarIndex(u32);
-
-    <span class="doccomment">/// Index into the global list of modules found within an entire component.
-    /// Module translations are saved on the side to get fully compiled after
-    /// the original component has finished being translated.
-    </span><span class="kw">pub struct </span>StaticModuleIndex(u32);
 
     <span class="doccomment">/// Same as `StaticModuleIndex` but for components.
     </span><span class="kw">pub struct </span>StaticComponentIndex(u32);

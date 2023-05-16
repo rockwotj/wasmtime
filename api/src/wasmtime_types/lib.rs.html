@@ -406,6 +406,14 @@
 <a href="#406" id="406">406</a>
 <a href="#407" id="407">407</a>
 <a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Internal dependency of Wasmtime and Cranelift that defines types for
 //! WebAssembly.
 
@@ -649,6 +657,14 @@
 </span><span class="attr">#[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Debug, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>TagIndex(u32);
 <span class="macro">entity_impl!</span>(TagIndex);
+
+<span class="doccomment">/// Index into the global list of modules found within an entire component.
+///
+/// Module translations are saved on the side to get fully compiled after
+/// the original component has finished being translated.
+</span><span class="attr">#[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Debug, Serialize, Deserialize)]
+</span><span class="kw">pub struct </span>StaticModuleIndex(u32);
+<span class="macro">entity_impl!</span>(StaticModuleIndex);
 
 <span class="doccomment">/// An index of an entity.
 </span><span class="attr">#[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Debug, Serialize, Deserialize)]

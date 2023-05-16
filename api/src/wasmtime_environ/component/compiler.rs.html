@@ -94,7 +94,7 @@
 /// Generic so we can use this with either the `Box&lt;dyn Any + Send&gt;`s that
 /// implementations of the compiler trait return or with `FunctionLoc`s inside
 /// an object file, for example.
-</span><span class="attr">#[derive(Serialize, Deserialize)]
+</span><span class="attr">#[derive(Clone, Copy, Default, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>AllCallFunc&lt;T&gt; {
     <span class="doccomment">/// The function exposing the Wasm calling convention.
     </span><span class="kw">pub </span>wasm_call: T,
