@@ -230,6 +230,10 @@
 <a href="#230" id="230">230</a>
 <a href="#231" id="231">231</a>
 <a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
 </pre><pre class="rust"><code><span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>object::write::{Object, SymbolId};
 <span class="kw">use </span>std::any::Any;
@@ -238,7 +242,8 @@
 <span class="kw">use </span>wasmtime_cranelift_shared::{CompiledFunction, ModuleTextBuilder};
 <span class="kw">use </span>wasmtime_environ::{
     CompileError, DefinedFuncIndex, FilePos, FuncIndex, FunctionBodyData, FunctionLoc,
-    ModuleTranslation, ModuleTypes, PrimaryMap, Tunables, VMOffsets, WasmFunctionInfo,
+    ModuleTranslation, ModuleTypes, PrimaryMap, TrapEncodingBuilder, Tunables, VMOffsets,
+    WasmFunctionInfo,
 };
 <span class="kw">use </span>winch_codegen::{TargetIsa, TrampolineKind};
 <span class="kw">use </span>winch_environ::FuncEnv;
@@ -397,6 +402,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(SymbolId, FunctionLoc)&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
             ModuleTextBuilder::new(obj, <span class="self">self</span>, <span class="self">self</span>.isa.text_section_builder(funcs.len()));
+        <span class="kw">let </span><span class="kw-2">mut </span>traps = TrapEncodingBuilder::default();
 
         <span class="kw">let </span><span class="kw-2">mut </span>ret = Vec::with_capacity(funcs.len());
         <span class="kw">for </span>(i, (sym, func)) <span class="kw">in </span>funcs.iter().enumerate() {
@@ -405,6 +411,7 @@
                 .unwrap();
 
             <span class="kw">let </span>(sym, range) = builder.append_func(<span class="kw-2">&amp;</span>sym, func, |idx| resolve_reloc(i, idx));
+            traps.push(range.clone(), <span class="kw-2">&amp;</span>func.traps().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;());
 
             <span class="kw">let </span>info = FunctionLoc {
                 start: u32::try_from(range.start).unwrap(),
@@ -413,6 +420,7 @@
             ret.push((sym, info));
         }
         builder.finish();
+        traps.append_to(obj);
         <span class="prelude-val">Ok</span>(ret)
     }
 
