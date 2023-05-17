@@ -242,6 +242,12 @@
 <a href="#242" id="242">242</a>
 <a href="#243" id="243">243</a>
 <a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA definitions: immediate constants.
 
 </span><span class="comment">// Some variants are never constructed, but we still want them as options in the future.
@@ -385,6 +391,12 @@
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
+    }
+
+    <span class="kw">pub fn </span>from_bits(value: u8) -&gt; Imm5 {
+        <span class="macro">assert_eq!</span>(value &amp; <span class="number">0x1f</span>, value);
+        <span class="kw">let </span>signed = ((value &lt;&lt; <span class="number">3</span>) <span class="kw">as </span>i8) &gt;&gt; <span class="number">3</span>;
+        Imm5 { value: signed }
     }
 
     <span class="doccomment">/// Bits for encoding.

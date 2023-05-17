@@ -481,6 +481,19 @@
 <a href="#481" id="481">481</a>
 <a href="#482" id="482">482</a>
 <a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for riscv64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -489,7 +502,8 @@
 <span class="kw">use </span>generated_code::{Context, ExtendOp, MInst};
 
 <span class="comment">// Types that the generated ISLE code uses via `use super::*`.
-</span><span class="kw">use super</span>::{writable_zero_reg, zero_reg};
+</span><span class="kw">use </span><span class="self">self</span>::generated_code::VecAluOpRR;
+<span class="kw">use super</span>::{writable_zero_reg, zero_reg};
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::abi::Riscv64ABICaller;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::Riscv64Backend;
 <span class="kw">use </span><span class="kw">crate</span>::machinst::Reg;
@@ -686,6 +700,14 @@
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>imm5_from_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg0: u64) -&gt; <span class="prelude-ty">Option</span>&lt;Imm5&gt; {
         Imm5::maybe_from_i8(i8::try_from(arg0 <span class="kw">as </span>i64).ok()<span class="question-mark">?</span>)
+    }
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>uimm5_bitcast_to_imm5(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg0: UImm5) -&gt; Imm5 {
+        Imm5::from_bits(arg0.bits() <span class="kw">as </span>u8)
+    }
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>uimm5_from_u8(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg0: u8) -&gt; <span class="prelude-ty">Option</span>&lt;UImm5&gt; {
+        UImm5::maybe_from_u8(arg0)
     }
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>writable_zero_reg(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; WritableReg {
@@ -937,6 +959,10 @@
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
+    }
+
+    <span class="kw">fn </span>vec_alu_rr_dst_type(<span class="kw-2">&amp;mut </span><span class="self">self</span>, op: <span class="kw-2">&amp;</span>VecAluOpRR) -&gt; Type {
+        MInst::canonical_type_for_rc(op.dst_regclass())
     }
 }
 

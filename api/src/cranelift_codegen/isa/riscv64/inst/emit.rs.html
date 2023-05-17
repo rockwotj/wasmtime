@@ -2958,6 +2958,19 @@
 <a href="#2958" id="2958">2958</a>
 <a href="#2959" id="2959">2959</a>
 <a href="#2960" id="2960">2960</a>
+<a href="#2961" id="2961">2961</a>
+<a href="#2962" id="2962">2962</a>
+<a href="#2963" id="2963">2963</a>
+<a href="#2964" id="2964">2964</a>
+<a href="#2965" id="2965">2965</a>
+<a href="#2966" id="2966">2966</a>
+<a href="#2967" id="2967">2967</a>
+<a href="#2968" id="2968">2968</a>
+<a href="#2969" id="2969">2969</a>
+<a href="#2970" id="2970">2970</a>
+<a href="#2971" id="2971">2971</a>
+<a href="#2972" id="2972">2972</a>
+<a href="#2973" id="2973">2973</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::StackMap;
@@ -3427,7 +3440,9 @@
             <span class="comment">// VecSetState does not expect any vstate, rather it updates it.
             </span>Inst::VecSetState { .. } =&gt; <span class="prelude-val">None</span>,
 
+            Inst::VecAluRR { vstate, .. } |
             Inst::VecAluRRR { vstate, .. } |
+            Inst::VecAluRImm5 { vstate, .. } |
             Inst::VecAluRRImm5 { vstate, .. } |
             <span class="comment">// TODO: Unit-stride loads and stores only need the AVL to be correct, not
             // the full vtype. A future optimization could be to decouple these two when
@@ -5777,6 +5792,17 @@
                 <span class="kw">let </span>vd = allocs.next_writable(vd);
 
                 sink.put4(encode_valu_imm(op, vd, imm, vs2, VecOpMasking::Disabled));
+            }
+            <span class="kw-2">&amp;</span>Inst::VecAluRR { op, vd, vs, .. } =&gt; {
+                <span class="kw">let </span>vs = allocs.next(vs);
+                <span class="kw">let </span>vd = allocs.next_writable(vd);
+
+                sink.put4(encode_valu_rr(op, vd, vs, VecOpMasking::Disabled));
+            }
+            <span class="kw-2">&amp;</span>Inst::VecAluRImm5 { op, vd, imm, .. } =&gt; {
+                <span class="kw">let </span>vd = allocs.next_writable(vd);
+
+                sink.put4(encode_valu_r_imm(op, vd, imm, VecOpMasking::Disabled));
             }
             <span class="kw-2">&amp;</span>Inst::VecSetState { rd, <span class="kw-2">ref </span>vstate } =&gt; {
                 <span class="kw">let </span>rd = allocs.next_writable(rd);
