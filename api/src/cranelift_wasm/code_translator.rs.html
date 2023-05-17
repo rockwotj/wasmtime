@@ -3477,6 +3477,9 @@
 <a href="#3477" id="3477">3477</a>
 <a href="#3478" id="3478">3478</a>
 <a href="#3479" id="3479">3479</a>
+<a href="#3480" id="3480">3480</a>
+<a href="#3481" id="3481">3481</a>
+<a href="#3482" id="3482">3482</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module contains the bulk of the interesting code performing the translation between
 //! WebAssembly and Cranelift IR.
 //!
@@ -5825,6 +5828,9 @@
                 <span class="string">&quot;proposed function-references operator {:?}&quot;</span>,
                 op
             ));
+        }
+        Operator::I31New | Operator::I31GetS | Operator::I31GetU =&gt; {
+            <span class="macro">unimplemented!</span>(<span class="string">&quot;GC operators not yet implemented&quot;</span>)
         }
     };
     <span class="prelude-val">Ok</span>(())
