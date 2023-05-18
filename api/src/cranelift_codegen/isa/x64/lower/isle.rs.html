@@ -1328,42 +1328,42 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>avx512vl_enabled(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Type) -&gt; bool {
+    </span><span class="kw">fn </span>use_avx512vl_simd(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.backend.x64_flags.use_avx512vl_simd()
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>avx512dq_enabled(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Type) -&gt; bool {
+    </span><span class="kw">fn </span>use_avx512dq_simd(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.backend.x64_flags.use_avx512dq_simd()
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>avx512f_enabled(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Type) -&gt; bool {
+    </span><span class="kw">fn </span>use_avx512f_simd(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.backend.x64_flags.use_avx512f_simd()
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>avx512bitalg_enabled(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Type) -&gt; bool {
+    </span><span class="kw">fn </span>use_avx512bitalg_simd(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.backend.x64_flags.use_avx512bitalg_simd()
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>avx512vbmi_enabled(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Type) -&gt; bool {
+    </span><span class="kw">fn </span>use_avx512vbmi_simd(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.backend.x64_flags.use_avx512vbmi_simd()
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>use_lzcnt(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Type) -&gt; bool {
+    </span><span class="kw">fn </span>use_lzcnt(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.backend.x64_flags.use_lzcnt()
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>use_bmi1(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Type) -&gt; bool {
+    </span><span class="kw">fn </span>use_bmi1(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.backend.x64_flags.use_bmi1()
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>use_popcnt(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Type) -&gt; bool {
+    </span><span class="kw">fn </span>use_popcnt(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.backend.x64_flags.use_popcnt()
     }
 
