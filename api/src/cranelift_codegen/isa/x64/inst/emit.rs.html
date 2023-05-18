@@ -3938,6 +3938,21 @@
 <a href="#3938" id="3938">3938</a>
 <a href="#3939" id="3939">3939</a>
 <a href="#3940" id="3940">3940</a>
+<a href="#3941" id="3941">3941</a>
+<a href="#3942" id="3942">3942</a>
+<a href="#3943" id="3943">3943</a>
+<a href="#3944" id="3944">3944</a>
+<a href="#3945" id="3945">3945</a>
+<a href="#3946" id="3946">3946</a>
+<a href="#3947" id="3947">3947</a>
+<a href="#3948" id="3948">3948</a>
+<a href="#3949" id="3949">3949</a>
+<a href="#3950" id="3950">3950</a>
+<a href="#3951" id="3951">3951</a>
+<a href="#3952" id="3952">3952</a>
+<a href="#3953" id="3953">3953</a>
+<a href="#3954" id="3954">3954</a>
+<a href="#3955" id="3955">3955</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, Reloc};
 <span class="kw">use </span><span class="kw">crate</span>::ir::immediates::{Ieee32, Ieee64};
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
@@ -7465,7 +7480,12 @@
             sink.bind_label(done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
         }
 
-        Inst::LoadExtName { dst, name, offset } =&gt; {
+        Inst::LoadExtName {
+            dst,
+            name,
+            offset,
+            distance,
+        } =&gt; {
             <span class="kw">let </span>dst = allocs.next(dst.to_reg());
 
             <span class="kw">if </span>info.flags.is_pic() {
@@ -7491,6 +7511,16 @@
                     sink.put1(<span class="number">0xc0 </span>| (enc_dst &amp; <span class="number">7</span>));
                     sink.put4(<span class="kw-2">*</span>offset <span class="kw">as </span>u32);
                 }
+            } <span class="kw">else if </span>distance == <span class="kw-2">&amp;</span>RelocDistance::Near {
+                <span class="comment">// If we know the distance to the name is within 2GB (e.g., a module-local function),
+                // we can generate a RIP-relative address, with a relocation.
+                // Generates: lea $name(%rip), $dst
+                </span><span class="kw">let </span>enc_dst = int_reg_enc(dst);
+                sink.put1(<span class="number">0x48 </span>| ((enc_dst &gt;&gt; <span class="number">3</span>) &amp; <span class="number">1</span>) &lt;&lt; <span class="number">2</span>);
+                sink.put1(<span class="number">0x8D</span>);
+                sink.put1(<span class="number">0x05 </span>| ((enc_dst &amp; <span class="number">7</span>) &lt;&lt; <span class="number">3</span>));
+                emit_reloc(sink, Reloc::X86CallPCRel4, name, -<span class="number">4</span>);
+                sink.put4(<span class="number">0</span>);
             } <span class="kw">else </span>{
                 <span class="comment">// The full address can be encoded in the register, with a relocation.
                 // Generates: movabsq $name, %dst
