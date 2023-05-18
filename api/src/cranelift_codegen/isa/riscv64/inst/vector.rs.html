@@ -540,6 +540,38 @@
 <a href="#540" id="540">540</a>
 <a href="#541" id="541">541</a>
 <a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::AllocationConsumer;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::EmitState;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::lower::isle::generated_code::{
@@ -793,16 +825,26 @@
     <span class="kw">pub fn </span>funct6(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
         <span class="comment">// See: https://github.com/riscv/riscv-v-spec/blob/master/inst-table.adoc
         </span><span class="kw">match </span><span class="self">self </span>{
-            VecAluOpRRR::VaddVV | VecAluOpRRR::VaddVX =&gt; <span class="number">0b000000</span>,
-            VecAluOpRRR::VsubVV | VecAluOpRRR::VsubVX =&gt; <span class="number">0b000010</span>,
+            VecAluOpRRR::VaddVV
+            | VecAluOpRRR::VaddVX
+            | VecAluOpRRR::VfaddVV
+            | VecAluOpRRR::VfaddVF =&gt; <span class="number">0b000000</span>,
+            VecAluOpRRR::VsubVV
+            | VecAluOpRRR::VsubVX
+            | VecAluOpRRR::VfsubVV
+            | VecAluOpRRR::VfsubVF =&gt; <span class="number">0b000010</span>,
             VecAluOpRRR::VrsubVX =&gt; <span class="number">0b000011</span>,
             VecAluOpRRR::VmulVV =&gt; <span class="number">0b100101</span>,
             VecAluOpRRR::VmulhVV =&gt; <span class="number">0b100111</span>,
-            VecAluOpRRR::VmulhuVV =&gt; <span class="number">0b100100</span>,
+            VecAluOpRRR::VmulhuVV | VecAluOpRRR::VfmulVV | VecAluOpRRR::VfmulVF =&gt; <span class="number">0b100100</span>,
             VecAluOpRRR::VandVV =&gt; <span class="number">0b001001</span>,
             VecAluOpRRR::VorVV =&gt; <span class="number">0b001010</span>,
             VecAluOpRRR::VxorVV =&gt; <span class="number">0b001011</span>,
             VecAluOpRRR::VslidedownVX =&gt; <span class="number">0b001111</span>,
+            VecAluOpRRR::VfrsubVF =&gt; <span class="number">0b100111</span>,
+            VecAluOpRRR::VfdivVV | VecAluOpRRR::VfdivVF =&gt; <span class="number">0b100000</span>,
+            VecAluOpRRR::VfrdivVF =&gt; <span class="number">0b100001</span>,
+            VecAluOpRRR::VfsgnjnVV =&gt; <span class="number">0b001001</span>,
         }
     }
 
@@ -820,6 +862,17 @@
             | VecAluOpRRR::VsubVX
             | VecAluOpRRR::VrsubVX
             | VecAluOpRRR::VslidedownVX =&gt; VecOpCategory::OPIVX,
+            VecAluOpRRR::VfaddVV
+            | VecAluOpRRR::VfsubVV
+            | VecAluOpRRR::VfmulVV
+            | VecAluOpRRR::VfdivVV
+            | VecAluOpRRR::VfsgnjnVV =&gt; VecOpCategory::OPFVV,
+            VecAluOpRRR::VfaddVF
+            | VecAluOpRRR::VfsubVF
+            | VecAluOpRRR::VfrsubVF
+            | VecAluOpRRR::VfmulVF
+            | VecAluOpRRR::VfdivVF
+            | VecAluOpRRR::VfrdivVF =&gt; VecOpCategory::OPFVF,
         }
     }
 
@@ -902,6 +955,7 @@
             VecAluOpRR::VmvSX | VecAluOpRR::VmvXS | VecAluOpRR::VfmvSF | VecAluOpRR::VfmvFS =&gt; {
                 <span class="number">0b010000
             </span>}
+            VecAluOpRR::VfsqrtV =&gt; <span class="number">0b010011</span>,
             VecAluOpRR::VmvVV | VecAluOpRR::VmvVX | VecAluOpRR::VfmvVF =&gt; <span class="number">0b010111</span>,
         }
     }
@@ -911,7 +965,7 @@
             VecAluOpRR::VmvSX =&gt; VecOpCategory::OPMVX,
             VecAluOpRR::VmvXS =&gt; VecOpCategory::OPMVV,
             VecAluOpRR::VfmvSF | VecAluOpRR::VfmvVF =&gt; VecOpCategory::OPFVF,
-            VecAluOpRR::VfmvFS =&gt; VecOpCategory::OPFVV,
+            VecAluOpRR::VfmvFS | VecAluOpRR::VfsqrtV =&gt; VecOpCategory::OPFVV,
             VecAluOpRR::VmvVV =&gt; VecOpCategory::OPIVV,
             VecAluOpRR::VmvVX =&gt; VecOpCategory::OPIVX,
         }
@@ -928,6 +982,8 @@
             </span>VecAluOpRR::VfmvSF =&gt; <span class="number">0b00000</span>,
             <span class="comment">// VWFUNARY0
             </span>VecAluOpRR::VfmvFS =&gt; <span class="number">0b00000</span>,
+            <span class="comment">// VFUNARY1
+            </span>VecAluOpRR::VfsqrtV =&gt; <span class="number">0b00000</span>,
             <span class="comment">// These don&#39;t have a explicit encoding table, but Section 11.16 Vector Integer Move Instruction states:
             // &gt; The first operand specifier (vs2) must contain v0, and any other vector register number in vs2 is reserved.
             </span>VecAluOpRR::VmvVV | VecAluOpRR::VmvVX | VecAluOpRR::VfmvVF =&gt; <span class="number">0</span>,
@@ -939,7 +995,11 @@
     /// other way around. As far as I can tell only vmv.v.* are backwards.
     </span><span class="kw">pub fn </span>vs_is_vs2_encoded(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">match </span><span class="self">self </span>{
-            VecAluOpRR::VmvSX | VecAluOpRR::VmvXS | VecAluOpRR::VfmvSF | VecAluOpRR::VfmvFS =&gt; <span class="bool-val">true</span>,
+            VecAluOpRR::VmvSX
+            | VecAluOpRR::VmvXS
+            | VecAluOpRR::VfmvSF
+            | VecAluOpRR::VfmvFS
+            | VecAluOpRR::VfsqrtV =&gt; <span class="bool-val">true</span>,
             VecAluOpRR::VmvVV | VecAluOpRR::VmvVX | VecAluOpRR::VfmvVF =&gt; <span class="bool-val">false</span>,
         }
     }
@@ -950,7 +1010,8 @@
             | VecAluOpRR::VmvSX
             | VecAluOpRR::VmvVV
             | VecAluOpRR::VmvVX
-            | VecAluOpRR::VfmvVF =&gt; RegClass::Vector,
+            | VecAluOpRR::VfmvVF
+            | VecAluOpRR::VfsqrtV =&gt; RegClass::Vector,
             VecAluOpRR::VmvXS =&gt; RegClass::Int,
             VecAluOpRR::VfmvFS =&gt; RegClass::Float,
         }
@@ -958,7 +1019,9 @@
 
     <span class="kw">pub fn </span>src_regclass(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RegClass {
         <span class="kw">match </span><span class="self">self </span>{
-            VecAluOpRR::VmvXS | VecAluOpRR::VfmvFS | VecAluOpRR::VmvVV =&gt; RegClass::Vector,
+            VecAluOpRR::VmvXS | VecAluOpRR::VfmvFS | VecAluOpRR::VmvVV | VecAluOpRR::VfsqrtV =&gt; {
+                RegClass::Vector
+            }
             VecAluOpRR::VfmvSF | VecAluOpRR::VfmvVF =&gt; RegClass::Float,
             VecAluOpRR::VmvSX | VecAluOpRR::VmvVX =&gt; RegClass::Int,
         }
@@ -972,6 +1035,7 @@
             VecAluOpRR::VmvXS =&gt; <span class="string">&quot;vmv.x.s&quot;</span>,
             VecAluOpRR::VfmvSF =&gt; <span class="string">&quot;vfmv.s.f&quot;</span>,
             VecAluOpRR::VfmvFS =&gt; <span class="string">&quot;vfmv.f.s&quot;</span>,
+            VecAluOpRR::VfsqrtV =&gt; <span class="string">&quot;vfsqrt.v&quot;</span>,
             VecAluOpRR::VmvVV =&gt; <span class="string">&quot;vmv.v.v&quot;</span>,
             VecAluOpRR::VmvVX =&gt; <span class="string">&quot;vmv.v.x&quot;</span>,
             VecAluOpRR::VfmvVF =&gt; <span class="string">&quot;vfmv.v.f&quot;</span>,

@@ -1885,6 +1885,9 @@
 <a href="#1885" id="1885">1885</a>
 <a href="#1886" id="1886">1886</a>
 <a href="#1887" id="1887">1887</a>
+<a href="#1888" id="1888">1888</a>
+<a href="#1889" id="1889">1889</a>
+<a href="#1890" id="1890">1890</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines riscv64-specific machine instruction types.
 
 </span><span class="comment">// Some variants are not constructed, but we still want them as options in the future.
@@ -3467,9 +3470,12 @@
 
                 <span class="comment">// Note: vs2 and vs1 here are opposite to the standard scalar ordering.
                 // This is noted in Section 10.1 of the RISC-V Vector spec.
-                </span><span class="kw">match </span>(op, vs1) {
-                    (VecAluOpRRR::VrsubVX, vs1) <span class="kw">if </span>vs1 == zero_reg() =&gt; {
+                </span><span class="kw">match </span>(op, vs2, vs1) {
+                    (VecAluOpRRR::VrsubVX, <span class="kw">_</span>, vs1) <span class="kw">if </span>vs1 == zero_reg() =&gt; {
                         <span class="macro">format!</span>(<span class="string">&quot;vneg.v {},{} {}&quot;</span>, vd_s, vs2_s, vstate)
+                    }
+                    (VecAluOpRRR::VfsgnjnVV, vs2, vs1) <span class="kw">if </span>vs2 == vs1 =&gt; {
+                        <span class="macro">format!</span>(<span class="string">&quot;vfneg.v {},{} {}&quot;</span>, vd_s, vs2_s, vstate)
                     }
                     <span class="kw">_ </span>=&gt; <span class="macro">format!</span>(<span class="string">&quot;{} {},{},{} {}&quot;</span>, op, vd_s, vs2_s, vs1_s, vstate),
                 }
