@@ -190,6 +190,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a669a86afd0f80f93a2d405030d738e54"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="config_8h.html#a669a86afd0f80f93a2d405030d738e54">wasmtime_config_profiler_set</a> (<a class="el" href="structwasm__config__t.html">wasm_config_t</a> *, <a class="el" href="config_8h.html#a5f597057b06b082b23de5bba46366d65">wasmtime_profiling_strategy_t</a>)</td></tr>
 <tr class="memdesc:a669a86afd0f80f93a2d405030d738e54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures the profiling strategy used for JIT code.  <a href="config_8h.html#a669a86afd0f80f93a2d405030d738e54">More...</a><br /></td></tr>
 <tr class="separator:a669a86afd0f80f93a2d405030d738e54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9d8a8256499b14b167cf8069706bd31"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="config_8h.html#aa9d8a8256499b14b167cf8069706bd31">wasmtime_config_static_memory_forced_set</a> (<a class="el" href="structwasm__config__t.html">wasm_config_t</a> *, bool)</td></tr>
+<tr class="memdesc:aa9d8a8256499b14b167cf8069706bd31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures the “static” style of memory to always be used.  <a href="config_8h.html#aa9d8a8256499b14b167cf8069706bd31">More...</a><br /></td></tr>
+<tr class="separator:aa9d8a8256499b14b167cf8069706bd31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae25f4008dbf4b0fd0dce104d72834696"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="config_8h.html#ae25f4008dbf4b0fd0dce104d72834696">wasmtime_config_static_memory_maximum_size_set</a> (<a class="el" href="structwasm__config__t.html">wasm_config_t</a> *, uint64_t)</td></tr>
 <tr class="memdesc:ae25f4008dbf4b0fd0dce104d72834696"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures the maximum size for memory to be considered "static".  <a href="config_8h.html#ae25f4008dbf4b0fd0dce104d72834696">More...</a><br /></td></tr>
 <tr class="separator:ae25f4008dbf4b0fd0dce104d72834696"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -663,6 +666,38 @@ Functions</h2></td></tr>
 
 <p>Configures the profiling strategy used for JIT code. </p>
 <p >This setting in <a class="el" href="config_8h.html#a6d7f92ddb0b002ad140d3316d03d6abfa63474be5d261cf99032bde040889756b" title="No profiling is enabled at runtime.">WASMTIME_PROFILING_STRATEGY_NONE</a> by default. </p>
+
+</div>
+</div>
+<a id="aa9d8a8256499b14b167cf8069706bd31" name="aa9d8a8256499b14b167cf8069706bd31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9d8a8256499b14b167cf8069706bd31">&#9670;&nbsp;</a></span>wasmtime_config_static_memory_forced_set()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void wasmtime_config_static_memory_forced_set </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structwasm__config__t.html">wasm_config_t</a> *&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Configures the “static” style of memory to always be used. </p>
+<p >This setting is <code>false</code> by default.</p>
+<p >For more information see the Rust documentation at <a href="https://bytecodealliance.github.io/wasmtime/api/wasmtime/struct.Config.html#method.static_memory_forced">https://bytecodealliance.github.io/wasmtime/api/wasmtime/struct.Config.html#method.static_memory_forced</a>. </p>
 
 </div>
 </div>

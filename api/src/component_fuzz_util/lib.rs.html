@@ -997,19 +997,6 @@
 <a href="#997" id="997">997</a>
 <a href="#998" id="998">998</a>
 <a href="#999" id="999">999</a>
-<a href="#1000" id="1000">1000</a>
-<a href="#1001" id="1001">1001</a>
-<a href="#1002" id="1002">1002</a>
-<a href="#1003" id="1003">1003</a>
-<a href="#1004" id="1004">1004</a>
-<a href="#1005" id="1005">1005</a>
-<a href="#1006" id="1006">1006</a>
-<a href="#1007" id="1007">1007</a>
-<a href="#1008" id="1008">1008</a>
-<a href="#1009" id="1009">1009</a>
-<a href="#1010" id="1010">1010</a>
-<a href="#1011" id="1011">1011</a>
-<a href="#1012" id="1012">1012</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module generates test cases for the Wasmtime component model function APIs,
 //! e.g. `wasmtime::component::func::Func` and `TypedFunc`.
 //!
@@ -1222,14 +1209,7 @@
     }
 }
 
-<span class="comment">// impl&lt;&#39;a&gt; Arbitrary&lt;&#39;a&gt; for Type {
-//     fn arbitrary(u: &amp;mut Unstructured&lt;&#39;a&gt;) -&gt; arbitrary::Result&lt;Type&gt; {
-//         let mut fuel = 500;
-//         Type::generate(u, MAX_TYPE_DEPTH, &amp;mut fuel)
-//     }
-// }
-
-</span><span class="kw">fn </span>lower_record&lt;<span class="lifetime">&#39;a</span>&gt;(types: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Type&gt;, vec: <span class="kw-2">&amp;mut </span>Vec&lt;CoreType&gt;) {
+<span class="kw">fn </span>lower_record&lt;<span class="lifetime">&#39;a</span>&gt;(types: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Type&gt;, vec: <span class="kw-2">&amp;mut </span>Vec&lt;CoreType&gt;) {
     <span class="kw">for </span>ty <span class="kw">in </span>types {
         ty.lower(vec);
     }
@@ -1724,7 +1704,7 @@
     }
 
     <span class="kw">fn </span>write_decl(<span class="kw-2">&amp;mut </span><span class="self">self</span>, idx: u32, ty: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Type) -&gt; String {
-        <span class="kw">let </span><span class="kw-2">mut </span>decl = <span class="macro">format!</span>(<span class="string">&quot;(type $t{idx} &quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>decl = <span class="macro">format!</span>(<span class="string">&quot;(type $t{idx}&#39; &quot;</span>);
         <span class="kw">match </span>ty {
             Type::Bool
             | Type::S8
@@ -1815,7 +1795,8 @@
                 decl.push_str(<span class="string">&quot;)&quot;</span>);
             }
         }
-        decl.push_str(<span class="string">&quot;)&quot;</span>);
+        decl.push_str(<span class="string">&quot;)\n&quot;</span>);
+        <span class="macro">writeln!</span>(decl, <span class="string">&quot;(import \&quot;t{idx}\&quot; (type $t{idx} (eq $t{idx}&#39;)))&quot;</span>).unwrap();
         decl
     }
 }
@@ -1825,6 +1806,8 @@
 </span><span class="kw">pub struct </span>Declarations {
     <span class="doccomment">/// Type declarations (if any) referenced by `params` and/or `result`
     </span><span class="kw">pub </span>types: Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;,
+    <span class="doccomment">/// Types to thread through when instantiating sub-components.
+    </span><span class="kw">pub </span>type_instantiation_args: Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;,
     <span class="doccomment">/// Parameter declarations used for the imported and exported functions
     </span><span class="kw">pub </span>params: Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;,
     <span class="doccomment">/// Result declaration used for the imported and exported functions
@@ -1842,6 +1825,7 @@
     </span><span class="kw">pub fn </span>make_component(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Box&lt;str&gt; {
         <span class="kw">let </span><span class="self">Self </span>{
             types,
+            type_instantiation_args,
             params,
             results,
             import_and_export,
@@ -1852,6 +1836,8 @@
             <span class="macro">format!</span>(
                 <span class="string">r#&quot;
                 (component ${name}
+                    {types}
+                    (type $sig (func {params} {results}))
                     (import &quot;{IMPORT_FUNCTION}&quot; (func $f (type $sig)))
 
                     (core instance $libc (instantiate $libc))
@@ -1906,8 +1892,14 @@
 
                 {c1}
                 {c2}
-                (instance $c1 (instantiate $c1 (with &quot;{IMPORT_FUNCTION}&quot; (func $f))))
-                (instance $c2 (instantiate $c2 (with &quot;{IMPORT_FUNCTION}&quot; (func $c1 &quot;{EXPORT_FUNCTION}&quot;))))
+                (instance $c1 (instantiate $c1
+                    {type_instantiation_args}
+                    (with &quot;{IMPORT_FUNCTION}&quot; (func $f))
+                ))
+                (instance $c2 (instantiate $c2
+                    {type_instantiation_args}
+                    (with &quot;{IMPORT_FUNCTION}&quot; (func $c1 &quot;{EXPORT_FUNCTION}&quot;))
+                ))
                 (export &quot;{EXPORT_FUNCTION}&quot; (func $c2 &quot;{EXPORT_FUNCTION}&quot;))
             )&quot;#</span>,
         )
@@ -1928,28 +1920,7 @@
     </span><span class="kw">pub </span>encoding2: StringEncoding,
 }
 
-<span class="comment">// impl&lt;&#39;a&gt; Arbitrary&lt;&#39;a&gt; for TestCase {
-//     fn arbitrary(u: &amp;mut Unstructured&lt;&#39;a&gt;) -&gt; arbitrary::Result&lt;TestCase&gt; {
-//         let mut params = Vec::new();
-//         let mut results = Vec::new();
-//         let mut fuel = 300;
-//         for _ in 0..u.int_in_range(0..=MAX_ARITY)? {
-//             params.push(Type::generate(u, MAX_TYPE_DEPTH, &amp;mut fuel)?);
-//         }
-//         for _ in 0..u.int_in_range(0..=MAX_ARITY)? {
-//             results.push(Type::generate(u, MAX_TYPE_DEPTH, &amp;mut fuel)?);
-//         }
-
-//         Ok(TestCase {
-//             params,
-//             results,
-//             encoding1: u.arbitrary()?,
-//             encoding2: u.arbitrary()?,
-//         })
-//     }
-// }
-
-</span><span class="kw">impl </span>TestCase&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>TestCase&lt;<span class="lifetime">&#39;_</span>&gt; {
     <span class="doccomment">/// Generate a `Declarations` for this `TestCase` which may be used to build a component to execute the case.
     </span><span class="kw">pub fn </span>declarations(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Declarations {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = TypesBuilder::default();
@@ -1971,8 +1942,10 @@
         <span class="kw">let </span>import_and_export = make_import_and_export(<span class="kw-2">&amp;</span><span class="self">self</span>.params, <span class="kw-2">&amp;</span><span class="self">self</span>.results);
 
         <span class="kw">let </span><span class="kw-2">mut </span>type_decls = Vec::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>type_instantiation_args = String::new();
         <span class="kw">while let </span><span class="prelude-val">Some</span>((idx, ty)) = builder.worklist.pop() {
             type_decls.push(builder.write_decl(idx, ty));
+            <span class="macro">writeln!</span>(type_instantiation_args, <span class="string">&quot;(with \&quot;t{idx}\&quot; (type $t{idx}))&quot;</span>).unwrap();
         }
 
         <span class="comment">// Note that types are printed here in reverse order since they were
@@ -1986,6 +1959,7 @@
 
         Declarations {
             types: types.into(),
+            type_instantiation_args: type_instantiation_args.into(),
             params: params.into(),
             results: results.into(),
             import_and_export: import_and_export.into(),

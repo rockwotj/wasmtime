@@ -504,7 +504,7 @@
 <span class="comment">// Types that the generated ISLE code uses via `use super::*`.
 </span><span class="kw">use </span><span class="self">self</span>::generated_code::VecAluOpRR;
 <span class="kw">use super</span>::{writable_zero_reg, zero_reg};
-<span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::abi::Riscv64ABICaller;
+<span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::abi::Riscv64ABICallSite;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::Riscv64Backend;
 <span class="kw">use </span><span class="kw">crate</span>::machinst::Reg;
 <span class="kw">use </span><span class="kw">crate</span>::machinst::{isle::<span class="kw-2">*</span>, MachInst, SmallInstVec};
@@ -543,7 +543,7 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; RV64IsleContext&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, MInst, Riscv64Backend&gt; {
-    <span class="macro">isle_prelude_method_helpers!</span>(Riscv64ABICaller);
+    <span class="macro">isle_prelude_method_helpers!</span>(Riscv64ABICallSite);
 
     <span class="kw">fn </span>new(lower_ctx: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Lower&lt;<span class="lifetime">&#39;b</span>, MInst&gt;, backend: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Riscv64Backend) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
@@ -563,7 +563,7 @@
 
 <span class="kw">impl </span>generated_code::Context <span class="kw">for </span>RV64IsleContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, MInst, Riscv64Backend&gt; {
     <span class="macro">isle_lower_prelude_methods!</span>();
-    <span class="macro">isle_prelude_caller_methods!</span>(Riscv64MachineDeps, Riscv64ABICaller);
+    <span class="macro">isle_prelude_caller_methods!</span>(Riscv64MachineDeps, Riscv64ABICallSite);
 
     <span class="kw">fn </span>vec_writable_to_regs(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: <span class="kw-2">&amp;</span>VecWritableReg) -&gt; ValueRegs {
         <span class="kw">match </span>val.len() {

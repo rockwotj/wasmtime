@@ -163,20 +163,22 @@ $(document).ready(function(){initNavTree('config_8h_source.html',''); initResiza
 <div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span> </div>
 <div class="line"><a id="l00266" name="l00266"></a><span class="lineno"><a class="line" href="config_8h.html#a669a86afd0f80f93a2d405030d738e54">  266</a></span>WASMTIME_CONFIG_PROP(<span class="keywordtype">void</span>, profiler, <a class="code hl_typedef" href="config_8h.html#a5f597057b06b082b23de5bba46366d65">wasmtime_profiling_strategy_t</a>)</div>
 <div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span> </div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno"><a class="line" href="config_8h.html#ae25f4008dbf4b0fd0dce104d72834696">  274</a></span>WASMTIME_CONFIG_PROP(<span class="keywordtype">void</span>, static_memory_maximum_size, uint64_t)</div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span> </div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno"><a class="line" href="config_8h.html#a5c52837ac267f73c0360a2bd535345fe">  282</a></span>WASMTIME_CONFIG_PROP(<span class="keywordtype">void</span>, static_memory_guard_size, uint64_t)</div>
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span> </div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno"><a class="line" href="config_8h.html#a77524cd9b2987264c40d4cd52c47c455">  290</a></span>WASMTIME_CONFIG_PROP(<span class="keywordtype">void</span>, dynamic_memory_guard_size, uint64_t)</div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span> </div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno"><a class="line" href="config_8h.html#a11bf2d9745ab7780e2e9534343977422">  304</a></span>WASM_API_EXTERN <a class="code hl_struct" href="structwasmtime__error.html">wasmtime_error_t</a>* <a class="code hl_function" href="config_8h.html#a11bf2d9745ab7780e2e9534343977422">wasmtime_config_cache_config_load</a>(<a class="code hl_struct" href="structwasm__config__t.html">wasm_config_t</a>*, const <span class="keywordtype">char</span>*);</div>
-<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span> </div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span><span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>}  <span class="comment">// extern &quot;C&quot;</span></div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span> </div>
-<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span><span class="preprocessor">#endif </span><span class="comment">// WASMTIME_CONFIG_H</span></div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span> </div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno"><a class="line" href="config_8h.html#aa9d8a8256499b14b167cf8069706bd31">  276</a></span>WASMTIME_CONFIG_PROP(<span class="keywordtype">void</span>, static_memory_forced, <span class="keywordtype">bool</span>)</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span> </div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno"><a class="line" href="config_8h.html#ae25f4008dbf4b0fd0dce104d72834696">  284</a></span>WASMTIME_CONFIG_PROP(<span class="keywordtype">void</span>, static_memory_maximum_size, uint64_t)</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span> </div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno"><a class="line" href="config_8h.html#a5c52837ac267f73c0360a2bd535345fe">  292</a></span>WASMTIME_CONFIG_PROP(<span class="keywordtype">void</span>, static_memory_guard_size, uint64_t)</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span> </div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno"><a class="line" href="config_8h.html#a77524cd9b2987264c40d4cd52c47c455">  300</a></span>WASMTIME_CONFIG_PROP(<span class="keywordtype">void</span>, dynamic_memory_guard_size, uint64_t)</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno"><a class="line" href="config_8h.html#a11bf2d9745ab7780e2e9534343977422">  314</a></span>WASM_API_EXTERN <a class="code hl_struct" href="structwasmtime__error.html">wasmtime_error_t</a>* <a class="code hl_function" href="config_8h.html#a11bf2d9745ab7780e2e9534343977422">wasmtime_config_cache_config_load</a>(<a class="code hl_struct" href="structwasm__config__t.html">wasm_config_t</a>*, const <span class="keywordtype">char</span>*);</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span> </div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>}  <span class="comment">// extern &quot;C&quot;</span></div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span> </div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span><span class="preprocessor">#endif </span><span class="comment">// WASMTIME_CONFIG_H</span></div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span> </div>
 <div class="ttc" id="aconfig_8h_html_a11bf2d9745ab7780e2e9534343977422"><div class="ttname"><a href="config_8h.html#a11bf2d9745ab7780e2e9534343977422">wasmtime_config_cache_config_load</a></div><div class="ttdeci">wasmtime_error_t * wasmtime_config_cache_config_load(wasm_config_t *, const char *)</div><div class="ttdoc">Enables Wasmtime's cache and loads configuration from the specified path.</div></div>
 <div class="ttc" id="aconfig_8h_html_a2a4d4289ed2342ef85de62e772a8f55c"><div class="ttname"><a href="config_8h.html#a2a4d4289ed2342ef85de62e772a8f55c">wasmtime_strategy_t</a></div><div class="ttdeci">uint8_t wasmtime_strategy_t</div><div class="ttdoc">Specifier for how Wasmtime will compile code, values are in wasmtime_strategy_enum.</div><div class="ttdef"><b>Definition:</b> config.h:21</div></div>
 <div class="ttc" id="aconfig_8h_html_a5f597057b06b082b23de5bba46366d65"><div class="ttname"><a href="config_8h.html#a5f597057b06b082b23de5bba46366d65">wasmtime_profiling_strategy_t</a></div><div class="ttdeci">uint8_t wasmtime_profiling_strategy_t</div><div class="ttdoc">Different ways wasmtime can enable profiling JIT code.</div><div class="ttdef"><b>Definition:</b> config.h:65</div></div>

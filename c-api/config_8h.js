@@ -29,6 +29,7 @@ var config_8h =
     [ "wasmtime_config_max_wasm_stack_set", "config_8h.html#af91b5c0ceea04bdbbe09bcc76b50eed5", null ],
     [ "wasmtime_config_parallel_compilation_set", "config_8h.html#a83e363dded3f4d65f300ea74c223fd20", null ],
     [ "wasmtime_config_profiler_set", "config_8h.html#a669a86afd0f80f93a2d405030d738e54", null ],
+    [ "wasmtime_config_static_memory_forced_set", "config_8h.html#aa9d8a8256499b14b167cf8069706bd31", null ],
     [ "wasmtime_config_static_memory_guard_size_set", "config_8h.html#a5c52837ac267f73c0360a2bd535345fe", null ],
     [ "wasmtime_config_static_memory_maximum_size_set", "config_8h.html#ae25f4008dbf4b0fd0dce104d72834696", null ],
     [ "wasmtime_config_strategy_set", "config_8h.html#ada735dd95cbee6854fc6bb27dc9591c6", null ],

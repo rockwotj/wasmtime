@@ -1173,7 +1173,7 @@
     isa::{
         unwind::UnwindInst,
         x64::{
-            abi::X64Caller,
+            abi::X64CallSite,
             inst::{args::<span class="kw-2">*</span>, regs, CallInfo},
         },
     },
@@ -1225,7 +1225,7 @@
 
 <span class="kw">impl </span>Context <span class="kw">for </span>IsleContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, MInst, X64Backend&gt; {
     <span class="macro">isle_lower_prelude_methods!</span>();
-    <span class="macro">isle_prelude_caller_methods!</span>(X64ABIMachineSpec, X64Caller);
+    <span class="macro">isle_prelude_caller_methods!</span>(X64ABIMachineSpec, X64CallSite);
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>operand_size_of_type_32_64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type) -&gt; OperandSize {
@@ -2203,7 +2203,7 @@
 }
 
 <span class="kw">impl </span>IsleContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, MInst, X64Backend&gt; {
-    <span class="macro">isle_prelude_method_helpers!</span>(X64Caller);
+    <span class="macro">isle_prelude_method_helpers!</span>(X64CallSite);
 
     <span class="kw">fn </span>load_xmm_unaligned(<span class="kw-2">&amp;mut </span><span class="self">self</span>, addr: SyntheticAmode) -&gt; Xmm {
         <span class="kw">let </span>tmp = <span class="self">self</span>.lower_ctx.alloc_tmp(types::F32X4).only_reg().unwrap();

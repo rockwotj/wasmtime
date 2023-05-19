@@ -811,6 +811,9 @@
 <a href="#811" id="811">811</a>
 <a href="#812" id="812">812</a>
 <a href="#813" id="813">813</a>
+<a href="#814" id="814">814</a>
+<a href="#815" id="815">815</a>
+<a href="#816" id="816">816</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for aarch64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -839,7 +842,7 @@
         immediates::<span class="kw-2">*</span>, types::<span class="kw-2">*</span>, AtomicRmwOp, BlockCall, ExternalName, Inst, InstructionData,
         MemFlags, TrapCode, Value, ValueList,
     },
-    isa::aarch64::abi::AArch64Caller,
+    isa::aarch64::abi::AArch64CallSite,
     isa::aarch64::inst::args::{ShiftOp, ShiftOpShiftImm},
     isa::unwind::UnwindInst,
     machinst::{
@@ -889,12 +892,15 @@
 }
 
 <span class="kw">impl </span>IsleContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, MInst, AArch64Backend&gt; {
-    <span class="macro">isle_prelude_method_helpers!</span>(AArch64Caller);
+    <span class="macro">isle_prelude_method_helpers!</span>(AArch64CallSite);
 }
 
 <span class="kw">impl </span>Context <span class="kw">for </span>IsleContext&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, MInst, AArch64Backend&gt; {
     <span class="macro">isle_lower_prelude_methods!</span>();
-    <span class="macro">isle_prelude_caller_methods!</span>(<span class="kw">crate</span>::isa::aarch64::abi::AArch64MachineDeps, AArch64Caller);
+    <span class="macro">isle_prelude_caller_methods!</span>(
+        <span class="kw">crate</span>::isa::aarch64::abi::AArch64MachineDeps,
+        AArch64CallSite
+    );
 
     <span class="kw">fn </span>sign_return_address_disabled(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
         <span class="kw">if </span><span class="self">self</span>.backend.isa_flags.sign_return_address() {

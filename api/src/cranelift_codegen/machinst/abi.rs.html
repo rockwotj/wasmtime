@@ -4405,7 +4405,7 @@
 <span class="kw">pub type </span>CallRetList = SmallVec&lt;[CallRetPair; <span class="number">8</span>]&gt;;
 
 <span class="doccomment">/// ABI object for a callsite.
-</span><span class="kw">pub struct </span>Caller&lt;M: ABIMachineSpec&gt; {
+</span><span class="kw">pub struct </span>CallSite&lt;M: ABIMachineSpec&gt; {
     <span class="doccomment">/// The called function&#39;s signature.
     </span>sig: Sig,
     <span class="doccomment">/// All register uses for the callsite, i.e., function args, with
@@ -4436,7 +4436,7 @@
     </span>Reg(Reg),
 }
 
-<span class="kw">impl</span>&lt;M: ABIMachineSpec&gt; Caller&lt;M&gt; {
+<span class="kw">impl</span>&lt;M: ABIMachineSpec&gt; CallSite&lt;M&gt; {
     <span class="doccomment">/// Create a callsite ABI object for a call directly to the specified function.
     </span><span class="kw">pub fn </span>from_func(
         sigs: <span class="kw-2">&amp;</span>SigSet,
@@ -4445,10 +4445,10 @@
         dist: RelocDistance,
         caller_conv: isa::CallConv,
         flags: settings::Flags,
-    ) -&gt; CodegenResult&lt;Caller&lt;M&gt;&gt; {
+    ) -&gt; CodegenResult&lt;CallSite&lt;M&gt;&gt; {
         <span class="kw">let </span>sig = sigs.abi_sig_for_sig_ref(sig_ref);
         <span class="kw">let </span>clobbers = sigs.call_clobbers::&lt;M&gt;(sig);
-        <span class="prelude-val">Ok</span>(Caller {
+        <span class="prelude-val">Ok</span>(CallSite {
             sig,
             uses: <span class="macro">smallvec!</span>[],
             defs: <span class="macro">smallvec!</span>[],
@@ -4470,10 +4470,10 @@
         dist: RelocDistance,
         caller_conv: isa::CallConv,
         flags: settings::Flags,
-    ) -&gt; CodegenResult&lt;Caller&lt;M&gt;&gt; {
+    ) -&gt; CodegenResult&lt;CallSite&lt;M&gt;&gt; {
         <span class="kw">let </span>sig = sigs.abi_sig_for_signature(sig);
         <span class="kw">let </span>clobbers = sigs.call_clobbers::&lt;M&gt;(sig);
-        <span class="prelude-val">Ok</span>(Caller {
+        <span class="prelude-val">Ok</span>(CallSite {
             sig,
             uses: <span class="macro">smallvec!</span>[],
             defs: <span class="macro">smallvec!</span>[],
@@ -4495,10 +4495,10 @@
         opcode: ir::Opcode,
         caller_conv: isa::CallConv,
         flags: settings::Flags,
-    ) -&gt; CodegenResult&lt;Caller&lt;M&gt;&gt; {
+    ) -&gt; CodegenResult&lt;CallSite&lt;M&gt;&gt; {
         <span class="kw">let </span>sig = sigs.abi_sig_for_sig_ref(sig_ref);
         <span class="kw">let </span>clobbers = sigs.call_clobbers::&lt;M&gt;(sig);
-        <span class="prelude-val">Ok</span>(Caller {
+        <span class="prelude-val">Ok</span>(CallSite {
             sig,
             uses: <span class="macro">smallvec!</span>[],
             defs: <span class="macro">smallvec!</span>[],
@@ -4523,7 +4523,7 @@
     ctx.emit(M::gen_nominal_sp_adj(-amt));
 }
 
-<span class="kw">impl</span>&lt;M: ABIMachineSpec&gt; Caller&lt;M&gt; {
+<span class="kw">impl</span>&lt;M: ABIMachineSpec&gt; CallSite&lt;M&gt; {
     <span class="doccomment">/// Get the number of arguments expected.
     </span><span class="kw">pub fn </span>num_args(<span class="kw-2">&amp;</span><span class="self">self</span>, sigs: <span class="kw-2">&amp;</span>SigSet) -&gt; usize {
         sigs.num_args(<span class="self">self</span>.sig)
@@ -4776,7 +4776,7 @@
     /// sense.)
     ///
     /// This function should only be called once, as it is allowed to re-use
-    /// parts of the `Caller` object in emitting instructions.
+    /// parts of the `CallSite` object in emitting instructions.
     </span><span class="kw">pub fn </span>emit_call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>Lower&lt;M::I&gt;) {
         <span class="kw">let </span>word_type = M::word_type();
         <span class="kw">if let </span><span class="prelude-val">Some</span>(i) = ctx.sigs()[<span class="self">self</span>.sig].stack_ret_arg {
