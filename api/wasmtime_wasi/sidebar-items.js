@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["maybe_exit_on_error"],"mod":["sync"],"struct":["Error","I32Exit","WasiCtx"],"trait":["WasiDir","WasiFile"]};
+window.SIDEBAR_ITEMS = {"fn":["maybe_exit_on_error"],"mod":["preview2","sync"],"struct":["Error","I32Exit","WasiCtx"],"trait":["WasiDir","WasiFile"]};

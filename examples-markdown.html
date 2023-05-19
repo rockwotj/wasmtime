@@ -153,7 +153,7 @@ cd rust_wasi_markdown_parser
 </code></pre>
 <p>Then, we will open the <code>src/main.rs</code> and enter the following contents. Please see the comments to understand what our program will be doing.</p>
 <h2 id="srcmainrs"><a class="header" href="#srcmainrs"><code>src/main.rs</code></a></h2>
-<pre><pre class="playground"><code class="language-rust should_panic">// Import our CLI parsing libraries (And PathBuf for reading paths)
+<pre><code class="language-rust ignore">// Import our CLI parsing libraries (And PathBuf for reading paths)
 extern crate structopt;
 
 use structopt::StructOpt;
@@ -199,7 +199,7 @@ pub fn render_markdown(markdown: String) -&gt; String {
     html::push_html(&amp;mut html_buf, parser);
     html_buf
 }
-</code></pre></pre>
+</code></pre>
 <p>Next, we will want to add WASI as a target that we can compile to. We will ask the rustup tool to install support for WASI. Then, we will compile our program to WASI. To do this we will run:</p>
 <pre><code class="language-bash">rustup target add wasm32-wasi
 cargo build --target wasm32-wasi
