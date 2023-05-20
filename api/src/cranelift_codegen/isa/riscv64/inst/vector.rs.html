@@ -572,6 +572,31 @@
 <a href="#572" id="572">572</a>
 <a href="#573" id="573">573</a>
 <a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::AllocationConsumer;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::EmitState;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::lower::isle::generated_code::{
@@ -808,8 +833,17 @@
 <span class="kw">impl </span>VecOpMasking {
     <span class="kw">pub fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
         <span class="kw">match </span><span class="self">self </span>{
-            VecOpMasking::Enabled =&gt; <span class="number">0</span>,
+            VecOpMasking::Enabled { .. } =&gt; <span class="number">0</span>,
             VecOpMasking::Disabled =&gt; <span class="number">1</span>,
+        }
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>with_allocs(<span class="kw-2">&amp;</span><span class="self">self</span>, allocs: <span class="kw-2">&amp;mut </span>AllocationConsumer&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span><span class="self">self </span>{
+            VecOpMasking::Enabled { reg } =&gt; VecOpMasking::Enabled {
+                reg: allocs.next(<span class="kw-2">*</span>reg),
+            },
+            VecOpMasking::Disabled =&gt; VecOpMasking::Disabled,
         }
     }
 }
@@ -842,6 +876,7 @@
             VecAluOpRRR::VxorVV =&gt; <span class="number">0b001011</span>,
             VecAluOpRRR::VslidedownVX =&gt; <span class="number">0b001111</span>,
             VecAluOpRRR::VfrsubVF =&gt; <span class="number">0b100111</span>,
+            VecAluOpRRR::VmergeVVM | VecAluOpRRR::VmergeVXM | VecAluOpRRR::VfmergeVFM =&gt; <span class="number">0b010111</span>,
             VecAluOpRRR::VfdivVV | VecAluOpRRR::VfdivVF =&gt; <span class="number">0b100000</span>,
             VecAluOpRRR::VfrdivVF =&gt; <span class="number">0b100001</span>,
             VecAluOpRRR::VfsgnjnVV =&gt; <span class="number">0b001001</span>,
@@ -854,14 +889,16 @@
             | VecAluOpRRR::VsubVV
             | VecAluOpRRR::VandVV
             | VecAluOpRRR::VorVV
-            | VecAluOpRRR::VxorVV =&gt; VecOpCategory::OPIVV,
+            | VecAluOpRRR::VxorVV
+            | VecAluOpRRR::VmergeVVM =&gt; VecOpCategory::OPIVV,
             VecAluOpRRR::VmulVV | VecAluOpRRR::VmulhVV | VecAluOpRRR::VmulhuVV =&gt; {
                 VecOpCategory::OPMVV
             }
             VecAluOpRRR::VaddVX
             | VecAluOpRRR::VsubVX
             | VecAluOpRRR::VrsubVX
-            | VecAluOpRRR::VslidedownVX =&gt; VecOpCategory::OPIVX,
+            | VecAluOpRRR::VslidedownVX
+            | VecAluOpRRR::VmergeVXM =&gt; VecOpCategory::OPIVX,
             VecAluOpRRR::VfaddVV
             | VecAluOpRRR::VfsubVV
             | VecAluOpRRR::VfmulVV
@@ -872,7 +909,8 @@
             | VecAluOpRRR::VfrsubVF
             | VecAluOpRRR::VfmulVF
             | VecAluOpRRR::VfdivVF
-            | VecAluOpRRR::VfrdivVF =&gt; VecOpCategory::OPFVF,
+            | VecAluOpRRR::VfrdivVF
+            | VecAluOpRRR::VfmergeVFM =&gt; VecOpCategory::OPFVF,
         }
     }
 
@@ -889,10 +927,15 @@
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>VecAluOpRRR {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
+        <span class="kw">let </span>suffix_length = <span class="kw">match </span><span class="self">self </span>{
+            VecAluOpRRR::VmergeVVM | VecAluOpRRR::VmergeVXM | VecAluOpRRR::VfmergeVFM =&gt; <span class="number">3</span>,
+            <span class="kw">_ </span>=&gt; <span class="number">2</span>,
+        };
+
         <span class="kw">let </span><span class="kw-2">mut </span>s = <span class="macro">format!</span>(<span class="string">&quot;{self:?}&quot;</span>);
         s.make_ascii_lowercase();
-        <span class="kw">let </span>(opcode, category) = s.split_at(s.len() - <span class="number">2</span>);
-        f.write_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}.{}&quot;</span>, opcode, category))
+        <span class="kw">let </span>(opcode, category) = s.split_at(s.len() - suffix_length);
+        f.write_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{opcode}.{category}&quot;</span>))
     }
 }
 
@@ -911,31 +954,38 @@
             VecAluOpRRImm5::VaddVI =&gt; <span class="number">0b000000</span>,
             VecAluOpRRImm5::VrsubVI =&gt; <span class="number">0b000011</span>,
             VecAluOpRRImm5::VslidedownVI =&gt; <span class="number">0b001111</span>,
+            VecAluOpRRImm5::VmergeVIM =&gt; <span class="number">0b010111</span>,
         }
     }
 
     <span class="kw">pub fn </span>category(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; VecOpCategory {
         <span class="kw">match </span><span class="self">self </span>{
-            VecAluOpRRImm5::VaddVI | VecAluOpRRImm5::VrsubVI | VecAluOpRRImm5::VslidedownVI =&gt; {
-                VecOpCategory::OPIVI
-            }
+            VecAluOpRRImm5::VaddVI
+            | VecAluOpRRImm5::VrsubVI
+            | VecAluOpRRImm5::VslidedownVI
+            | VecAluOpRRImm5::VmergeVIM =&gt; VecOpCategory::OPIVI,
         }
     }
 
     <span class="kw">pub fn </span>imm_is_unsigned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">match </span><span class="self">self </span>{
             VecAluOpRRImm5::VslidedownVI =&gt; <span class="bool-val">true</span>,
-            VecAluOpRRImm5::VaddVI | VecAluOpRRImm5::VrsubVI =&gt; <span class="bool-val">false</span>,
+            VecAluOpRRImm5::VaddVI | VecAluOpRRImm5::VrsubVI | VecAluOpRRImm5::VmergeVIM =&gt; <span class="bool-val">false</span>,
         }
     }
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>VecAluOpRRImm5 {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
+        <span class="kw">let </span>suffix_length = <span class="kw">match </span><span class="self">self </span>{
+            VecAluOpRRImm5::VmergeVIM =&gt; <span class="number">3</span>,
+            <span class="kw">_ </span>=&gt; <span class="number">2</span>,
+        };
+
         <span class="kw">let </span><span class="kw-2">mut </span>s = <span class="macro">format!</span>(<span class="string">&quot;{self:?}&quot;</span>);
         s.make_ascii_lowercase();
-        <span class="kw">let </span>(opcode, category) = s.split_at(s.len() - <span class="number">2</span>);
-        f.write_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}.{}&quot;</span>, opcode, category))
+        <span class="kw">let </span>(opcode, category) = s.split_at(s.len() - suffix_length);
+        f.write_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{opcode}.{category}&quot;</span>))
     }
 }
 
@@ -995,12 +1045,12 @@
     /// other way around. As far as I can tell only vmv.v.* are backwards.
     </span><span class="kw">pub fn </span>vs_is_vs2_encoded(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">match </span><span class="self">self </span>{
+            VecAluOpRR::VmvXS | VecAluOpRR::VfmvFS | VecAluOpRR::VfsqrtV =&gt; <span class="bool-val">true</span>,
             VecAluOpRR::VmvSX
-            | VecAluOpRR::VmvXS
             | VecAluOpRR::VfmvSF
-            | VecAluOpRR::VfmvFS
-            | VecAluOpRR::VfsqrtV =&gt; <span class="bool-val">true</span>,
-            VecAluOpRR::VmvVV | VecAluOpRR::VmvVX | VecAluOpRR::VfmvVF =&gt; <span class="bool-val">false</span>,
+            | VecAluOpRR::VmvVV
+            | VecAluOpRR::VmvVX
+            | VecAluOpRR::VfmvVF =&gt; <span class="bool-val">false</span>,
         }
     }
 

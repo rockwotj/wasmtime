@@ -2971,6 +2971,33 @@
 <a href="#2971" id="2971">2971</a>
 <a href="#2972" id="2972">2972</a>
 <a href="#2973" id="2973">2973</a>
+<a href="#2974" id="2974">2974</a>
+<a href="#2975" id="2975">2975</a>
+<a href="#2976" id="2976">2976</a>
+<a href="#2977" id="2977">2977</a>
+<a href="#2978" id="2978">2978</a>
+<a href="#2979" id="2979">2979</a>
+<a href="#2980" id="2980">2980</a>
+<a href="#2981" id="2981">2981</a>
+<a href="#2982" id="2982">2982</a>
+<a href="#2983" id="2983">2983</a>
+<a href="#2984" id="2984">2984</a>
+<a href="#2985" id="2985">2985</a>
+<a href="#2986" id="2986">2986</a>
+<a href="#2987" id="2987">2987</a>
+<a href="#2988" id="2988">2988</a>
+<a href="#2989" id="2989">2989</a>
+<a href="#2990" id="2990">2990</a>
+<a href="#2991" id="2991">2991</a>
+<a href="#2992" id="2992">2992</a>
+<a href="#2993" id="2993">2993</a>
+<a href="#2994" id="2994">2994</a>
+<a href="#2995" id="2995">2995</a>
+<a href="#2996" id="2996">2996</a>
+<a href="#2997" id="2997">2997</a>
+<a href="#2998" id="2998">2998</a>
+<a href="#2999" id="2999">2999</a>
+<a href="#3000" id="3000">3000</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Riscv64 ISA: binary code emission.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::binemit::StackMap;
@@ -2978,7 +3005,6 @@
 <span class="kw">use </span><span class="kw">crate</span>::ir::TrapCode;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::{zero_reg, AluOPRRR};
-<span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::lower::isle::generated_code::VecOpMasking;
 <span class="kw">use </span><span class="kw">crate</span>::machinst::{AllocationConsumer, Reg, Writable};
 <span class="kw">use </span>cranelift_control::ControlPlane;
 <span class="kw">use </span>regalloc2::Allocation;
@@ -5777,32 +5803,58 @@
                 sink.bind_label(label_done, <span class="kw-2">&amp;mut </span>state.ctrl_plane);
             }
             <span class="kw-2">&amp;</span>Inst::VecAluRRR {
-                op, vd, vs1, vs2, ..
+                op,
+                vd,
+                vs1,
+                vs2,
+                <span class="kw-2">ref </span>mask,
+                ..
             } =&gt; {
                 <span class="kw">let </span>vs1 = allocs.next(vs1);
                 <span class="kw">let </span>vs2 = allocs.next(vs2);
                 <span class="kw">let </span>vd = allocs.next_writable(vd);
+                <span class="kw">let </span>mask = mask.with_allocs(<span class="kw-2">&amp;mut </span>allocs);
 
-                sink.put4(encode_valu(op, vd, vs1, vs2, VecOpMasking::Disabled));
+                sink.put4(encode_valu(op, vd, vs1, vs2, mask));
             }
             <span class="kw-2">&amp;</span>Inst::VecAluRRImm5 {
-                op, vd, imm, vs2, ..
+                op,
+                vd,
+                imm,
+                vs2,
+                <span class="kw-2">ref </span>mask,
+                ..
             } =&gt; {
                 <span class="kw">let </span>vs2 = allocs.next(vs2);
                 <span class="kw">let </span>vd = allocs.next_writable(vd);
+                <span class="kw">let </span>mask = mask.with_allocs(<span class="kw-2">&amp;mut </span>allocs);
 
-                sink.put4(encode_valu_imm(op, vd, imm, vs2, VecOpMasking::Disabled));
+                sink.put4(encode_valu_imm(op, vd, imm, vs2, mask));
             }
-            <span class="kw-2">&amp;</span>Inst::VecAluRR { op, vd, vs, .. } =&gt; {
+            <span class="kw-2">&amp;</span>Inst::VecAluRR {
+                op,
+                vd,
+                vs,
+                <span class="kw-2">ref </span>mask,
+                ..
+            } =&gt; {
                 <span class="kw">let </span>vs = allocs.next(vs);
                 <span class="kw">let </span>vd = allocs.next_writable(vd);
+                <span class="kw">let </span>mask = mask.with_allocs(<span class="kw-2">&amp;mut </span>allocs);
 
-                sink.put4(encode_valu_rr(op, vd, vs, VecOpMasking::Disabled));
+                sink.put4(encode_valu_rr(op, vd, vs, mask));
             }
-            <span class="kw-2">&amp;</span>Inst::VecAluRImm5 { op, vd, imm, .. } =&gt; {
+            <span class="kw-2">&amp;</span>Inst::VecAluRImm5 {
+                op,
+                vd,
+                imm,
+                <span class="kw-2">ref </span>mask,
+                ..
+            } =&gt; {
                 <span class="kw">let </span>vd = allocs.next_writable(vd);
+                <span class="kw">let </span>mask = mask.with_allocs(<span class="kw-2">&amp;mut </span>allocs);
 
-                sink.put4(encode_valu_r_imm(op, vd, imm, VecOpMasking::Disabled));
+                sink.put4(encode_valu_r_imm(op, vd, imm, mask));
             }
             <span class="kw-2">&amp;</span>Inst::VecSetState { rd, <span class="kw-2">ref </span>vstate } =&gt; {
                 <span class="kw">let </span>rd = allocs.next_writable(rd);
@@ -5822,11 +5874,13 @@
                 eew,
                 to,
                 <span class="kw-2">ref </span>from,
+                <span class="kw-2">ref </span>mask,
                 flags,
                 ..
             } =&gt; {
                 <span class="kw">let </span>from = from.clone().with_allocs(<span class="kw-2">&amp;mut </span>allocs);
                 <span class="kw">let </span>to = allocs.next_writable(to);
+                <span class="kw">let </span>mask = mask.with_allocs(<span class="kw-2">&amp;mut </span>allocs);
 
                 <span class="comment">// Vector Loads don&#39;t support immediate offsets, so we need to load it into a register.
                 </span><span class="kw">let </span>addr = <span class="kw">match </span>from {
@@ -5862,8 +5916,7 @@
                     eew,
                     addr,
                     from.lumop(),
-                    <span class="comment">// We don&#39;t implement masking yet.
-                    </span>VecOpMasking::Disabled,
+                    mask,
                     from.mop(),
                     from.nf(),
                 ));
@@ -5873,11 +5926,13 @@
                 eew,
                 <span class="kw-2">ref </span>to,
                 from,
+                <span class="kw-2">ref </span>mask,
                 flags,
                 ..
             } =&gt; {
                 <span class="kw">let </span>to = to.clone().with_allocs(<span class="kw-2">&amp;mut </span>allocs);
                 <span class="kw">let </span>from = allocs.next(from);
+                <span class="kw">let </span>mask = mask.with_allocs(<span class="kw-2">&amp;mut </span>allocs);
 
                 <span class="comment">// Vector Stores don&#39;t support immediate offsets, so we need to load it into a register.
                 </span><span class="kw">let </span>addr = <span class="kw">match </span>to {
@@ -5913,8 +5968,7 @@
                     eew,
                     addr,
                     to.sumop(),
-                    <span class="comment">// We don&#39;t implement masking yet.
-                    </span>VecOpMasking::Disabled,
+                    mask,
                     to.mop(),
                     to.nf(),
                 ));

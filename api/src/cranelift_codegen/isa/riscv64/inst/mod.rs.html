@@ -1888,13 +1888,78 @@
 <a href="#1888" id="1888">1888</a>
 <a href="#1889" id="1889">1889</a>
 <a href="#1890" id="1890">1890</a>
+<a href="#1891" id="1891">1891</a>
+<a href="#1892" id="1892">1892</a>
+<a href="#1893" id="1893">1893</a>
+<a href="#1894" id="1894">1894</a>
+<a href="#1895" id="1895">1895</a>
+<a href="#1896" id="1896">1896</a>
+<a href="#1897" id="1897">1897</a>
+<a href="#1898" id="1898">1898</a>
+<a href="#1899" id="1899">1899</a>
+<a href="#1900" id="1900">1900</a>
+<a href="#1901" id="1901">1901</a>
+<a href="#1902" id="1902">1902</a>
+<a href="#1903" id="1903">1903</a>
+<a href="#1904" id="1904">1904</a>
+<a href="#1905" id="1905">1905</a>
+<a href="#1906" id="1906">1906</a>
+<a href="#1907" id="1907">1907</a>
+<a href="#1908" id="1908">1908</a>
+<a href="#1909" id="1909">1909</a>
+<a href="#1910" id="1910">1910</a>
+<a href="#1911" id="1911">1911</a>
+<a href="#1912" id="1912">1912</a>
+<a href="#1913" id="1913">1913</a>
+<a href="#1914" id="1914">1914</a>
+<a href="#1915" id="1915">1915</a>
+<a href="#1916" id="1916">1916</a>
+<a href="#1917" id="1917">1917</a>
+<a href="#1918" id="1918">1918</a>
+<a href="#1919" id="1919">1919</a>
+<a href="#1920" id="1920">1920</a>
+<a href="#1921" id="1921">1921</a>
+<a href="#1922" id="1922">1922</a>
+<a href="#1923" id="1923">1923</a>
+<a href="#1924" id="1924">1924</a>
+<a href="#1925" id="1925">1925</a>
+<a href="#1926" id="1926">1926</a>
+<a href="#1927" id="1927">1927</a>
+<a href="#1928" id="1928">1928</a>
+<a href="#1929" id="1929">1929</a>
+<a href="#1930" id="1930">1930</a>
+<a href="#1931" id="1931">1931</a>
+<a href="#1932" id="1932">1932</a>
+<a href="#1933" id="1933">1933</a>
+<a href="#1934" id="1934">1934</a>
+<a href="#1935" id="1935">1935</a>
+<a href="#1936" id="1936">1936</a>
+<a href="#1937" id="1937">1937</a>
+<a href="#1938" id="1938">1938</a>
+<a href="#1939" id="1939">1939</a>
+<a href="#1940" id="1940">1940</a>
+<a href="#1941" id="1941">1941</a>
+<a href="#1942" id="1942">1942</a>
+<a href="#1943" id="1943">1943</a>
+<a href="#1944" id="1944">1944</a>
+<a href="#1945" id="1945">1945</a>
+<a href="#1946" id="1946">1946</a>
+<a href="#1947" id="1947">1947</a>
+<a href="#1948" id="1948">1948</a>
+<a href="#1949" id="1949">1949</a>
+<a href="#1950" id="1950">1950</a>
+<a href="#1951" id="1951">1951</a>
+<a href="#1952" id="1952">1952</a>
+<a href="#1953" id="1953">1953</a>
+<a href="#1954" id="1954">1954</a>
+<a href="#1955" id="1955">1955</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module defines riscv64-specific machine instruction types.
 
 </span><span class="comment">// Some variants are not constructed, but we still want them as options in the future.
 </span><span class="attr">#![allow(dead_code)]
 #![allow(non_camel_case_types)]
 
-</span><span class="kw">use </span><span class="kw">super</span>::lower::isle::generated_code::{VecAMode, VecElementWidth};
+</span><span class="kw">use </span><span class="kw">super</span>::lower::isle::generated_code::{VecAMode, VecElementWidth, VecOpMasking};
 <span class="kw">use </span><span class="kw">crate</span>::binemit::{Addend, CodeOffset, Reloc};
 <span class="kw">pub use </span><span class="kw">crate</span>::ir::condcodes::IntCC;
 <span class="kw">use </span><span class="kw">crate</span>::ir::types::{<span class="self">self</span>, F32, F64, I128, I16, I32, I64, I8, I8X16, R32, R64};
@@ -2191,6 +2256,7 @@
                 to: into_reg,
                 from: VecAMode::UnitStride { base: mem },
                 flags,
+                mask: VecOpMasking::Disabled,
                 vstate: VState::from_type(ty),
             }
         } <span class="kw">else </span>{
@@ -2211,6 +2277,7 @@
                 to: VecAMode::UnitStride { base: mem },
                 from: from_reg,
                 flags,
+                mask: VecOpMasking::Disabled,
                 vstate: VState::from_type(ty),
             }
         } <span class="kw">else </span>{
@@ -2225,7 +2292,20 @@
 }
 
 <span class="comment">//=============================================================================
-</span><span class="kw">fn </span>riscv64_get_operands&lt;F: Fn(VReg) -&gt; VReg&gt;(inst: <span class="kw-2">&amp;</span>Inst, collector: <span class="kw-2">&amp;mut </span>OperandCollector&lt;<span class="lifetime">&#39;_</span>, F&gt;) {
+
+</span><span class="kw">fn </span>vec_mask_operands&lt;F: Fn(VReg) -&gt; VReg&gt;(
+    mask: <span class="kw-2">&amp;</span>VecOpMasking,
+    collector: <span class="kw-2">&amp;mut </span>OperandCollector&lt;<span class="lifetime">&#39;_</span>, F&gt;,
+) {
+    <span class="kw">match </span>mask {
+        VecOpMasking::Enabled { reg } =&gt; {
+            collector.reg_fixed_use(<span class="kw-2">*</span>reg, pv_reg(<span class="number">0</span>).into());
+        }
+        VecOpMasking::Disabled =&gt; {}
+    }
+}
+
+<span class="kw">fn </span>riscv64_get_operands&lt;F: Fn(VReg) -&gt; VReg&gt;(inst: <span class="kw-2">&amp;</span>Inst, collector: <span class="kw-2">&amp;mut </span>OperandCollector&lt;<span class="lifetime">&#39;_</span>, F&gt;) {
     <span class="kw">match </span>inst {
         <span class="kw-2">&amp;</span>Inst::Nop0 =&gt; {}
         <span class="kw-2">&amp;</span>Inst::Nop4 =&gt; {}
@@ -2515,7 +2595,12 @@
             // no need let reg alloc know.
         </span>}
         <span class="kw-2">&amp;</span>Inst::VecAluRRR {
-            op, vd, vs1, vs2, ..
+            op,
+            vd,
+            vs1,
+            vs2,
+            <span class="kw-2">ref </span>mask,
+            ..
         } =&gt; {
             <span class="macro">debug_assert_eq!</span>(vd.to_reg().class(), RegClass::Vector);
             <span class="macro">debug_assert_eq!</span>(vs2.class(), RegClass::Vector);
@@ -2524,40 +2609,64 @@
             collector.reg_use(vs1);
             collector.reg_use(vs2);
             collector.reg_def(vd);
+            vec_mask_operands(mask, collector);
         }
-        <span class="kw-2">&amp;</span>Inst::VecAluRRImm5 { vd, vs2, .. } =&gt; {
+        <span class="kw-2">&amp;</span>Inst::VecAluRRImm5 {
+            vd, vs2, <span class="kw-2">ref </span>mask, ..
+        } =&gt; {
             <span class="macro">debug_assert_eq!</span>(vd.to_reg().class(), RegClass::Vector);
             <span class="macro">debug_assert_eq!</span>(vs2.class(), RegClass::Vector);
 
             collector.reg_use(vs2);
             collector.reg_def(vd);
+            vec_mask_operands(mask, collector);
         }
-        <span class="kw-2">&amp;</span>Inst::VecAluRR { op, vd, vs, .. } =&gt; {
+        <span class="kw-2">&amp;</span>Inst::VecAluRR {
+            op,
+            vd,
+            vs,
+            <span class="kw-2">ref </span>mask,
+            ..
+        } =&gt; {
             <span class="macro">debug_assert_eq!</span>(vd.to_reg().class(), op.dst_regclass());
             <span class="macro">debug_assert_eq!</span>(vs.class(), op.src_regclass());
 
             collector.reg_use(vs);
             collector.reg_def(vd);
+            vec_mask_operands(mask, collector);
         }
-        <span class="kw-2">&amp;</span>Inst::VecAluRImm5 { vd, .. } =&gt; {
+        <span class="kw-2">&amp;</span>Inst::VecAluRImm5 { vd, <span class="kw-2">ref </span>mask, .. } =&gt; {
             <span class="macro">debug_assert_eq!</span>(vd.to_reg().class(), RegClass::Vector);
 
             collector.reg_def(vd);
+            vec_mask_operands(mask, collector);
         }
         <span class="kw-2">&amp;</span>Inst::VecSetState { rd, .. } =&gt; {
             collector.reg_def(rd);
         }
-        <span class="kw-2">&amp;</span>Inst::VecLoad { to, <span class="kw-2">ref </span>from, .. } =&gt; {
+        <span class="kw-2">&amp;</span>Inst::VecLoad {
+            to,
+            <span class="kw-2">ref </span>from,
+            <span class="kw-2">ref </span>mask,
+            ..
+        } =&gt; {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(r) = from.get_allocatable_register() {
                 collector.reg_use(r);
             }
             collector.reg_def(to);
+            vec_mask_operands(mask, collector);
         }
-        <span class="kw-2">&amp;</span>Inst::VecStore { <span class="kw-2">ref </span>to, from, .. } =&gt; {
+        <span class="kw-2">&amp;</span>Inst::VecStore {
+            <span class="kw-2">ref </span>to,
+            from,
+            <span class="kw-2">ref </span>mask,
+            ..
+        } =&gt; {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(r) = to.get_allocatable_register() {
                 collector.reg_use(r);
             }
             collector.reg_use(from);
+            vec_mask_operands(mask, collector);
         }
     }
 }
@@ -2763,6 +2872,13 @@
         <span class="kw">let </span>format_vec_amode = |amode: <span class="kw-2">&amp;</span>VecAMode, allocs: <span class="kw-2">&amp;mut </span>AllocationConsumer&lt;<span class="lifetime">&#39;_</span>&gt;| -&gt; String {
             <span class="kw">match </span>amode {
                 VecAMode::UnitStride { base } =&gt; base.to_string_with_alloc(allocs),
+            }
+        };
+
+        <span class="kw">let </span>format_mask = |mask: <span class="kw-2">&amp;</span>VecOpMasking, allocs: <span class="kw-2">&amp;mut </span>AllocationConsumer&lt;<span class="lifetime">&#39;_</span>&gt;| -&gt; String {
+            <span class="kw">match </span>mask {
+                VecOpMasking::Enabled { reg } =&gt; <span class="macro">format!</span>(<span class="string">&quot;,{}.t&quot;</span>, format_reg(<span class="kw-2">*</span>reg, allocs)),
+                VecOpMasking::Disabled =&gt; <span class="macro">format!</span>(<span class="string">&quot;&quot;</span>),
             }
         };
 
@@ -3462,22 +3578,24 @@
                 vd,
                 vs1,
                 vs2,
+                <span class="kw-2">ref </span>mask,
                 <span class="kw-2">ref </span>vstate,
             } =&gt; {
                 <span class="kw">let </span>vs1_s = format_reg(vs1, allocs);
                 <span class="kw">let </span>vs2_s = format_reg(vs2, allocs);
                 <span class="kw">let </span>vd_s = format_reg(vd.to_reg(), allocs);
+                <span class="kw">let </span>mask = format_mask(mask, allocs);
 
                 <span class="comment">// Note: vs2 and vs1 here are opposite to the standard scalar ordering.
                 // This is noted in Section 10.1 of the RISC-V Vector spec.
                 </span><span class="kw">match </span>(op, vs2, vs1) {
                     (VecAluOpRRR::VrsubVX, <span class="kw">_</span>, vs1) <span class="kw">if </span>vs1 == zero_reg() =&gt; {
-                        <span class="macro">format!</span>(<span class="string">&quot;vneg.v {},{} {}&quot;</span>, vd_s, vs2_s, vstate)
+                        <span class="macro">format!</span>(<span class="string">&quot;vneg.v {vd_s},{vs2_s}{mask} {vstate}&quot;</span>)
                     }
                     (VecAluOpRRR::VfsgnjnVV, vs2, vs1) <span class="kw">if </span>vs2 == vs1 =&gt; {
-                        <span class="macro">format!</span>(<span class="string">&quot;vfneg.v {},{} {}&quot;</span>, vd_s, vs2_s, vstate)
+                        <span class="macro">format!</span>(<span class="string">&quot;vfneg.v {vd_s},{vs2_s}{mask} {vstate}&quot;</span>)
                     }
-                    <span class="kw">_ </span>=&gt; <span class="macro">format!</span>(<span class="string">&quot;{} {},{},{} {}&quot;</span>, op, vd_s, vs2_s, vs1_s, vstate),
+                    <span class="kw">_ </span>=&gt; <span class="macro">format!</span>(<span class="string">&quot;{op} {vd_s},{vs2_s},{vs1_s}{mask} {vstate}&quot;</span>),
                 }
             }
             <span class="kw-2">&amp;</span>Inst::VecAluRRImm5 {
@@ -3485,10 +3603,12 @@
                 vd,
                 imm,
                 vs2,
+                <span class="kw-2">ref </span>mask,
                 <span class="kw-2">ref </span>vstate,
             } =&gt; {
                 <span class="kw">let </span>vs2_s = format_reg(vs2, allocs);
                 <span class="kw">let </span>vd_s = format_reg(vd.to_reg(), allocs);
+                <span class="kw">let </span>mask = format_mask(mask, allocs);
 
                 <span class="comment">// Some opcodes interpret the immediate as unsigned, lets show the
                 // correct number here.
@@ -3498,28 +3618,32 @@
                     <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, imm)
                 };
 
-                <span class="macro">format!</span>(<span class="string">&quot;{} {},{},{} {}&quot;</span>, op, vd_s, vs2_s, imm_s, vstate)
+                <span class="macro">format!</span>(<span class="string">&quot;{op} {vd_s},{vs2_s},{imm_s}{mask} {vstate}&quot;</span>)
             }
             <span class="kw-2">&amp;</span>Inst::VecAluRR {
                 op,
                 vd,
                 vs,
+                <span class="kw-2">ref </span>mask,
                 <span class="kw-2">ref </span>vstate,
             } =&gt; {
                 <span class="kw">let </span>vs_s = format_reg(vs, allocs);
                 <span class="kw">let </span>vd_s = format_reg(vd.to_reg(), allocs);
+                <span class="kw">let </span>mask = format_mask(mask, allocs);
 
-                <span class="macro">format!</span>(<span class="string">&quot;{} {},{} {}&quot;</span>, op, vd_s, vs_s, vstate)
+                <span class="macro">format!</span>(<span class="string">&quot;{op} {vd_s},{vs_s}{mask} {vstate}&quot;</span>)
             }
             <span class="kw-2">&amp;</span>Inst::VecAluRImm5 {
                 op,
                 vd,
                 imm,
+                <span class="kw-2">ref </span>mask,
                 <span class="kw-2">ref </span>vstate,
             } =&gt; {
                 <span class="kw">let </span>vd_s = format_reg(vd.to_reg(), allocs);
+                <span class="kw">let </span>mask = format_mask(mask, allocs);
 
-                <span class="macro">format!</span>(<span class="string">&quot;{} {},{} {}&quot;</span>, op, vd_s, imm, vstate)
+                <span class="macro">format!</span>(<span class="string">&quot;{op} {vd_s},{imm}{mask} {vstate}&quot;</span>)
             }
             <span class="kw-2">&amp;</span>Inst::VecSetState { rd, <span class="kw-2">ref </span>vstate } =&gt; {
                 <span class="kw">let </span>rd_s = format_reg(rd.to_reg(), allocs);
@@ -3530,23 +3654,29 @@
                 eew,
                 to,
                 from,
+                <span class="kw-2">ref </span>mask,
                 <span class="kw-2">ref </span>vstate,
                 ..
             } =&gt; {
                 <span class="kw">let </span>base = format_vec_amode(from, allocs);
                 <span class="kw">let </span>vd = format_reg(to.to_reg(), allocs);
-                <span class="macro">format!</span>(<span class="string">&quot;vl{}.v {},{} {}&quot;</span>, eew, vd, base, vstate)
+                <span class="kw">let </span>mask = format_mask(mask, allocs);
+
+                <span class="macro">format!</span>(<span class="string">&quot;vl{eew}.v {vd},{base}{mask} {vstate}&quot;</span>)
             }
             Inst::VecStore {
                 eew,
                 to,
                 from,
+                <span class="kw-2">ref </span>mask,
                 <span class="kw-2">ref </span>vstate,
                 ..
             } =&gt; {
                 <span class="kw">let </span>dst = format_vec_amode(to, allocs);
                 <span class="kw">let </span>vs3 = format_reg(<span class="kw-2">*</span>from, allocs);
-                <span class="macro">format!</span>(<span class="string">&quot;vs{}.v {},{} {}&quot;</span>, eew, vs3, dst, vstate)
+                <span class="kw">let </span>mask = format_mask(mask, allocs);
+
+                <span class="macro">format!</span>(<span class="string">&quot;vs{eew}.v {vs3},{dst}{mask} {vstate}&quot;</span>)
             }
         }
     }
