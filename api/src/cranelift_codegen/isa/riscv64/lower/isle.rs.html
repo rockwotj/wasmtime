@@ -494,6 +494,10 @@
 <a href="#494" id="494">494</a>
 <a href="#495" id="495">495</a>
 <a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
+<a href="#500" id="500">500</a>
 </pre><pre class="rust"><code><span class="doccomment">//! ISLE integration glue code for riscv64 lowering.
 
 </span><span class="comment">// Pull in the ISLE generated code.
@@ -700,6 +704,10 @@
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>imm5_from_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg0: u64) -&gt; <span class="prelude-ty">Option</span>&lt;Imm5&gt; {
         Imm5::maybe_from_i8(i8::try_from(arg0 <span class="kw">as </span>i64).ok()<span class="question-mark">?</span>)
+    }
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>imm5_from_i8(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg0: i8) -&gt; <span class="prelude-ty">Option</span>&lt;Imm5&gt; {
+        Imm5::maybe_from_i8(arg0)
     }
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>uimm5_bitcast_to_imm5(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg0: UImm5) -&gt; Imm5 {

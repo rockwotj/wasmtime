@@ -841,6 +841,15 @@
 <a href="#841" id="841">841</a>
 <a href="#842" id="842">842</a>
 <a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Shared ISLE prelude implementation for optimization (mid-end) and
 //! lowering (backend) ISLE environments.
 
@@ -1214,6 +1223,15 @@
         <span class="attr">#[inline]
         </span><span class="kw">fn </span>ty_int(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type) -&gt; <span class="prelude-ty">Option</span>&lt;Type&gt; {
             ty.is_int().then(|| ty)
+        }
+
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>ty_scalar(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: Type) -&gt; <span class="prelude-ty">Option</span>&lt;Type&gt; {
+            <span class="kw">if </span>ty.lane_count() == <span class="number">1 </span>{
+                <span class="prelude-val">Some</span>(ty)
+            } <span class="kw">else </span>{
+                <span class="prelude-val">None
+            </span>}
         }
 
         <span class="attr">#[inline]

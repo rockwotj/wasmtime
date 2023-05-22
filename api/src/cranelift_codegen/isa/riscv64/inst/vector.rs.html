@@ -597,6 +597,23 @@
 <a href="#597" id="597">597</a>
 <a href="#598" id="598">598</a>
 <a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::AllocationConsumer;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::inst::EmitState;
 <span class="kw">use </span><span class="kw">crate</span>::isa::riscv64::lower::isle::generated_code::{
@@ -628,6 +645,9 @@
         }
     }
 }
+
+<span class="comment">// TODO: Can we tell ISLE to derive this?
+</span><span class="kw">impl </span>Copy <span class="kw">for </span>VecAvl {}
 
 <span class="comment">// TODO: Can we tell ISLE to derive this?
 </span><span class="kw">impl </span>PartialEq <span class="kw">for </span>VecAvl {
@@ -753,7 +773,7 @@
 <span class="doccomment">/// Vector Type (VType)
 ///
 /// vtype provides the default type used to interpret the contents of the vector register file.
-</span><span class="attr">#[derive(Clone, Debug, PartialEq)]
+</span><span class="attr">#[derive(Clone, Copy, Debug, PartialEq)]
 </span><span class="kw">pub struct </span>VType {
     <span class="kw">pub </span>sew: VecElementWidth,
     <span class="kw">pub </span>lmul: VecLmul,
@@ -788,7 +808,7 @@
 /// VState represents the state of the vector unit that each instruction expects before execution.
 /// Unlike VType or any of the other types here, VState is not a part of the RISC-V ISA. It is
 /// used by our instruction emission code to ensure that the vector unit is in the correct state.
-</span><span class="attr">#[derive(Clone, Debug, PartialEq)]
+</span><span class="attr">#[derive(Clone, Copy, Debug, PartialEq)]
 </span><span class="kw">pub struct </span>VState {
     <span class="kw">pub </span>avl: VecAvl,
     <span class="kw">pub </span>vtype: VType,
@@ -871,9 +891,9 @@
             VecAluOpRRR::VmulVV =&gt; <span class="number">0b100101</span>,
             VecAluOpRRR::VmulhVV =&gt; <span class="number">0b100111</span>,
             VecAluOpRRR::VmulhuVV | VecAluOpRRR::VfmulVV | VecAluOpRRR::VfmulVF =&gt; <span class="number">0b100100</span>,
-            VecAluOpRRR::VandVV =&gt; <span class="number">0b001001</span>,
-            VecAluOpRRR::VorVV =&gt; <span class="number">0b001010</span>,
-            VecAluOpRRR::VxorVV =&gt; <span class="number">0b001011</span>,
+            VecAluOpRRR::VandVV | VecAluOpRRR::VandVX =&gt; <span class="number">0b001001</span>,
+            VecAluOpRRR::VorVV | VecAluOpRRR::VorVX =&gt; <span class="number">0b001010</span>,
+            VecAluOpRRR::VxorVV | VecAluOpRRR::VxorVX =&gt; <span class="number">0b001011</span>,
             VecAluOpRRR::VslidedownVX =&gt; <span class="number">0b001111</span>,
             VecAluOpRRR::VfrsubVF =&gt; <span class="number">0b100111</span>,
             VecAluOpRRR::VmergeVVM | VecAluOpRRR::VmergeVXM | VecAluOpRRR::VfmergeVFM =&gt; <span class="number">0b010111</span>,
@@ -897,6 +917,9 @@
             VecAluOpRRR::VaddVX
             | VecAluOpRRR::VsubVX
             | VecAluOpRRR::VrsubVX
+            | VecAluOpRRR::VandVX
+            | VecAluOpRRR::VorVX
+            | VecAluOpRRR::VxorVX
             | VecAluOpRRR::VslidedownVX
             | VecAluOpRRR::VmergeVXM =&gt; VecOpCategory::OPIVX,
             VecAluOpRRR::VfaddVV
@@ -953,6 +976,9 @@
         </span><span class="kw">match </span><span class="self">self </span>{
             VecAluOpRRImm5::VaddVI =&gt; <span class="number">0b000000</span>,
             VecAluOpRRImm5::VrsubVI =&gt; <span class="number">0b000011</span>,
+            VecAluOpRRImm5::VandVI =&gt; <span class="number">0b001001</span>,
+            VecAluOpRRImm5::VorVI =&gt; <span class="number">0b001010</span>,
+            VecAluOpRRImm5::VxorVI =&gt; <span class="number">0b001011</span>,
             VecAluOpRRImm5::VslidedownVI =&gt; <span class="number">0b001111</span>,
             VecAluOpRRImm5::VmergeVIM =&gt; <span class="number">0b010111</span>,
         }
@@ -962,6 +988,9 @@
         <span class="kw">match </span><span class="self">self </span>{
             VecAluOpRRImm5::VaddVI
             | VecAluOpRRImm5::VrsubVI
+            | VecAluOpRRImm5::VandVI
+            | VecAluOpRRImm5::VorVI
+            | VecAluOpRRImm5::VxorVI
             | VecAluOpRRImm5::VslidedownVI
             | VecAluOpRRImm5::VmergeVIM =&gt; VecOpCategory::OPIVI,
         }
@@ -970,7 +999,12 @@
     <span class="kw">pub fn </span>imm_is_unsigned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">match </span><span class="self">self </span>{
             VecAluOpRRImm5::VslidedownVI =&gt; <span class="bool-val">true</span>,
-            VecAluOpRRImm5::VaddVI | VecAluOpRRImm5::VrsubVI | VecAluOpRRImm5::VmergeVIM =&gt; <span class="bool-val">false</span>,
+            VecAluOpRRImm5::VaddVI
+            | VecAluOpRRImm5::VrsubVI
+            | VecAluOpRRImm5::VandVI
+            | VecAluOpRRImm5::VorVI
+            | VecAluOpRRImm5::VxorVI
+            | VecAluOpRRImm5::VmergeVIM =&gt; <span class="bool-val">false</span>,
         }
     }
 }
