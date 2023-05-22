@@ -229,6 +229,12 @@
 <a href="#229" id="229">229</a>
 <a href="#230" id="230">230</a>
 <a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module provides all the necessary building blocks for
 //! implementing ISA specific ABIs.
 //!
@@ -295,6 +301,9 @@
     <span class="doccomment">/// The offset to the argument base, relative to the frame pointer.
     </span><span class="kw">fn </span>arg_base_offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8;
 
+    <span class="doccomment">/// The offset to the return address, relative to the frame pointer.
+    </span><span class="kw">fn </span>ret_addr_offset() -&gt; u8;
+
     <span class="doccomment">/// Construct the ABI-specific signature from a WebAssembly
     /// function type.
     </span><span class="kw">fn </span>sig(<span class="kw-2">&amp;</span><span class="self">self</span>, wasm_sig: <span class="kw-2">&amp;</span>FuncType, call_conv: <span class="kw-2">&amp;</span>CallingConvention) -&gt; ABISig;
@@ -312,6 +321,9 @@
 
     <span class="doccomment">/// Returns the frame pointer register.
     </span><span class="kw">fn </span>fp_reg() -&gt; Reg;
+
+    <span class="doccomment">/// Returns the stack pointer register.
+    </span><span class="kw">fn </span>sp_reg() -&gt; Reg;
 
     <span class="doccomment">/// Returns the pinned register used to hold
     /// the `VMContext`.

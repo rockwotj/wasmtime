@@ -227,6 +227,14 @@
 <a href="#227" id="227">227</a>
 <a href="#228" id="228">228</a>
 <a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::regs;
 <span class="kw">use </span><span class="kw">crate</span>::abi::{ABIArg, ABIResult, ABISig, ABI};
 <span class="kw">use </span><span class="kw">crate</span>::isa::{reg::Reg, CallingConvention};
@@ -284,6 +292,10 @@
         <span class="number">16
     </span>}
 
+    <span class="kw">fn </span>ret_addr_offset() -&gt; u8 {
+        <span class="number">8
+    </span>}
+
     <span class="kw">fn </span>word_bits() -&gt; u32 {
         <span class="number">64
     </span>}
@@ -313,6 +325,10 @@
     }
 
     <span class="kw">fn </span>scratch_reg() -&gt; Reg {
+        <span class="macro">todo!</span>()
+    }
+
+    <span class="kw">fn </span>sp_reg() -&gt; Reg {
         <span class="macro">todo!</span>()
     }
 
