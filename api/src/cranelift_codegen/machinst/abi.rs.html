@@ -2412,6 +2412,16 @@
 <a href="#2412" id="2412">2412</a>
 <a href="#2413" id="2413">2413</a>
 <a href="#2414" id="2414">2414</a>
+<a href="#2415" id="2415">2415</a>
+<a href="#2416" id="2416">2416</a>
+<a href="#2417" id="2417">2417</a>
+<a href="#2418" id="2418">2418</a>
+<a href="#2419" id="2419">2419</a>
+<a href="#2420" id="2420">2420</a>
+<a href="#2421" id="2421">2421</a>
+<a href="#2422" id="2422">2422</a>
+<a href="#2423" id="2423">2423</a>
+<a href="#2424" id="2424">2424</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Implementation of a vanilla ABI, shared between several machines. The
 //! implementation here assumes that arguments will be passed in registers
 //! first, then additional args on the stack; that the stack grows downward,
@@ -2523,9 +2533,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::isa::TargetIsa;
 <span class="kw">use </span><span class="kw">crate</span>::settings;
 <span class="kw">use </span><span class="kw">crate</span>::settings::ProbestackStrategy;
-<span class="kw">use </span><span class="kw">crate</span>::CodegenResult;
 <span class="kw">use crate</span>::{ir, isa};
 <span class="kw">use crate</span>::{machinst::<span class="kw-2">*</span>, trace};
+<span class="kw">use crate</span>::{CodegenError, CodegenResult};
 <span class="kw">use </span>alloc::vec::Vec;
 <span class="kw">use </span>regalloc2::{PReg, PRegSet};
 <span class="kw">use </span>smallvec::{smallvec, SmallVec};
@@ -3449,6 +3459,10 @@
     }
 }
 
+<span class="kw">fn </span>checked_round_up(val: u32, mask: u32) -&gt; <span class="prelude-ty">Option</span>&lt;u32&gt; {
+    <span class="prelude-val">Some</span>(val.checked_add(mask)<span class="question-mark">? </span>&amp; !mask)
+}
+
 <span class="kw">impl</span>&lt;M: ABIMachineSpec&gt; Callee&lt;M&gt; {
     <span class="doccomment">/// Create a new body ABI instance.
     </span><span class="kw">pub fn </span>new&lt;<span class="lifetime">&#39;a</span>&gt;(
@@ -3481,9 +3495,12 @@
         <span class="kw">let </span><span class="kw-2">mut </span>sized_stackslots = PrimaryMap::new();
         <span class="kw">for </span>(stackslot, data) <span class="kw">in </span>f.sized_stack_slots.iter() {
             <span class="kw">let </span>off = sized_stack_offset;
-            sized_stack_offset += data.size;
+            sized_stack_offset = sized_stack_offset
+                .checked_add(data.size)
+                .ok_or(CodegenError::ImplLimitExceeded)<span class="question-mark">?</span>;
             <span class="kw">let </span>mask = M::word_bytes() - <span class="number">1</span>;
-            sized_stack_offset = (sized_stack_offset + mask) &amp; !mask;
+            sized_stack_offset = checked_round_up(sized_stack_offset, mask)
+                .ok_or(CodegenError::ImplLimitExceeded)<span class="question-mark">?</span>;
             <span class="macro">debug_assert_eq!</span>(stackslot.as_u32() <span class="kw">as </span>usize, sized_stackslots.len());
             sized_stackslots.push(off);
         }
@@ -3494,12 +3511,15 @@
         <span class="kw">for </span>(stackslot, data) <span class="kw">in </span>f.dynamic_stack_slots.iter() {
             <span class="macro">debug_assert_eq!</span>(stackslot.as_u32() <span class="kw">as </span>usize, dynamic_stackslots.len());
             <span class="kw">let </span>off = dynamic_stack_offset;
-            <span class="kw">let </span>ty = f
-                .get_concrete_dynamic_ty(data.dyn_ty)
-                .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;invalid dynamic vector type: {}&quot;</span>, data.dyn_ty));
-            dynamic_stack_offset += isa.dynamic_vector_bytes(ty);
+            <span class="kw">let </span>ty = f.get_concrete_dynamic_ty(data.dyn_ty).ok_or_else(|| {
+                CodegenError::Unsupported(<span class="macro">format!</span>(<span class="string">&quot;invalid dynamic vector type: {}&quot;</span>, data.dyn_ty))
+            })<span class="question-mark">?</span>;
+            dynamic_stack_offset = dynamic_stack_offset
+                .checked_add(isa.dynamic_vector_bytes(ty))
+                .ok_or(CodegenError::ImplLimitExceeded)<span class="question-mark">?</span>;
             <span class="kw">let </span>mask = M::word_bytes() - <span class="number">1</span>;
-            dynamic_stack_offset = (dynamic_stack_offset + mask) &amp; !mask;
+            dynamic_stack_offset = checked_round_up(dynamic_stack_offset, mask)
+                .ok_or(CodegenError::ImplLimitExceeded)<span class="question-mark">?</span>;
             dynamic_stackslots.push(off);
         }
         <span class="kw">let </span>stackslots_size = dynamic_stack_offset;

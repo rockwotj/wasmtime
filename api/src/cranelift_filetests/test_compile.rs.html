@@ -79,6 +79,17 @@
 <a href="#79" id="79">79</a>
 <a href="#80" id="80">80</a>
 <a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Test command for testing the code generator pipeline
 //!
 //! The `compile` test command runs each function through the full code generator pipeline
@@ -96,16 +107,20 @@
     /// This test assertion is also automatically-update-able to allow tweaking
     /// the code generator and easily updating all affected tests.
     </span>precise_output: bool,
+    <span class="doccomment">/// Flag indicating that we expect compilation to fail, not succeed.
+    </span>expect_fail: bool,
 }
 
 <span class="kw">pub fn </span>subtest(parsed: <span class="kw-2">&amp;</span>TestCommand) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>SubTest&gt;&gt; {
     <span class="macro">assert_eq!</span>(parsed.command, <span class="string">&quot;compile&quot;</span>);
     <span class="kw">let </span><span class="kw-2">mut </span>test = TestCompile {
         precise_output: <span class="bool-val">false</span>,
+        expect_fail: <span class="bool-val">false</span>,
     };
     <span class="kw">for </span>option <span class="kw">in </span>parsed.options.iter() {
         <span class="kw">match </span>option {
             TestOption::Flag(<span class="string">&quot;precise-output&quot;</span>) =&gt; test.precise_output = <span class="bool-val">true</span>,
+            TestOption::Flag(<span class="string">&quot;expect-fail&quot;</span>) =&gt; test.expect_fail = <span class="bool-val">true</span>,
             <span class="kw">_ </span>=&gt; <span class="macro">anyhow::bail!</span>(<span class="string">&quot;unknown option on {}&quot;</span>, parsed),
         }
     }
@@ -133,9 +148,16 @@
         <span class="comment">// With `MachBackend`s, we need to explicitly request dissassembly results.
         </span>comp_ctx.set_disasm(<span class="bool-val">true</span>);
 
-        <span class="kw">let </span>compiled_code = comp_ctx
-            .compile(isa, <span class="kw-2">&amp;mut </span>Default::default())
-            .map_err(|e| <span class="kw">crate</span>::pretty_anyhow_error(<span class="kw-2">&amp;</span>e.func, e.inner))<span class="question-mark">?</span>;
+        <span class="kw">let </span>compiled_code = comp_ctx.compile(isa, <span class="kw-2">&amp;mut </span>Default::default());
+
+        <span class="kw">let </span>compiled_code = <span class="kw">if </span><span class="self">self</span>.expect_fail {
+            <span class="kw">if </span>compiled_code.is_ok() {
+                <span class="macro">anyhow::bail!</span>(<span class="string">&quot;Expected compilation failure but compilation succeeded&quot;</span>);
+            }
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+        } <span class="kw">else </span>{
+            compiled_code.map_err(|e| <span class="kw">crate</span>::pretty_anyhow_error(<span class="kw-2">&amp;</span>e.func, e.inner))<span class="question-mark">?
+        </span>};
         <span class="kw">let </span>total_size = compiled_code.code_info().total_size;
 
         <span class="kw">let </span>vcode = compiled_code.vcode.as_ref().unwrap();
