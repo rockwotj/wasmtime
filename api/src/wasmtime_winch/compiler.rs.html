@@ -230,10 +230,6 @@
 <a href="#230" id="230">230</a>
 <a href="#231" id="231">231</a>
 <a href="#232" id="232">232</a>
-<a href="#233" id="233">233</a>
-<a href="#234" id="234">234</a>
-<a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
 </pre><pre class="rust"><code><span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>object::write::{Object, SymbolId};
 <span class="kw">use </span>std::any::Any;
@@ -242,11 +238,9 @@
 <span class="kw">use </span>wasmtime_cranelift_shared::{CompiledFunction, ModuleTextBuilder};
 <span class="kw">use </span>wasmtime_environ::{
     CompileError, DefinedFuncIndex, FilePos, FuncIndex, FunctionBodyData, FunctionLoc,
-    ModuleTranslation, ModuleTypes, PrimaryMap, TrapEncodingBuilder, Tunables, VMOffsets,
-    WasmFunctionInfo,
+    ModuleTranslation, ModuleTypes, PrimaryMap, TrapEncodingBuilder, Tunables, WasmFunctionInfo,
 };
 <span class="kw">use </span>winch_codegen::{TargetIsa, TrampolineKind};
-<span class="kw">use </span>winch_environ::FuncEnv;
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Compiler {
     isa: Box&lt;<span class="kw">dyn </span>TargetIsa&gt;,
@@ -304,11 +298,9 @@
                 .unwrap(),
         );
         <span class="kw">let </span><span class="kw-2">mut </span>validator = validator.into_validator(<span class="self">self</span>.take_allocations());
-        <span class="kw">let </span>vmoffsets = VMOffsets::new(<span class="self">self</span>.isa.pointer_bytes(), <span class="kw-2">&amp;</span>translation.module);
-        <span class="kw">let </span>env = FuncEnv::new(<span class="kw-2">&amp;</span>translation.module, translation.get_types());
         <span class="kw">let </span>buffer = <span class="self">self
             </span>.isa
-            .compile_function(<span class="kw-2">&amp;</span>sig, <span class="kw-2">&amp;</span>body, <span class="kw-2">&amp;</span>vmoffsets, <span class="kw-2">&amp;</span>env, <span class="kw-2">&amp;mut </span>validator)
+            .compile_function(<span class="kw-2">&amp;</span>sig, <span class="kw-2">&amp;</span>body, <span class="kw-2">&amp;</span>translation, <span class="kw-2">&amp;mut </span>validator)
             .map_err(|e| CompileError::Codegen(<span class="macro">format!</span>(<span class="string">&quot;{e:?}&quot;</span>)));
         <span class="self">self</span>.save_allocations(validator.into_allocations());
         <span class="kw">let </span>buffer = buffer<span class="question-mark">?</span>;

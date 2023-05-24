@@ -214,6 +214,7 @@
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
 <a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This module is the central place for machine code emission.
 //! It defines an implementation of wasmparser&#39;s Visitor trait
 //! for `CodeGen`; which defines a visitor per op-code,
@@ -226,7 +227,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::stack::Val;
 <span class="kw">use </span>wasmparser::ValType;
 <span class="kw">use </span>wasmparser::VisitOperator;
-<span class="kw">use </span>wasmtime_environ::FuncIndex;
+<span class="kw">use </span>wasmtime_environ::{FuncIndex, PtrSize};
 
 <span class="doccomment">/// A macro to define unsupported WebAssembly operators.
 ///
@@ -273,10 +274,11 @@
     (emit <span class="macro-nonterminal">$unsupported</span>:tt $(<span class="macro-nonterminal">$rest</span>:tt)<span class="kw-2">*</span>) =&gt; {$(<span class="macro-nonterminal">$rest</span>)<span class="kw-2">*</span>};
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, A, M&gt; VisitOperator&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>CodeGen&lt;<span class="lifetime">&#39;a</span>, A, M&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, A, M, P&gt; VisitOperator&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>CodeGen&lt;<span class="lifetime">&#39;a</span>, A, M, P&gt;
 <span class="kw">where
     </span>M: MacroAssembler,
     A: ABI,
+    P: PtrSize,
 {
     <span class="kw">type </span>Output = ();
 

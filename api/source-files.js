@@ -134,7 +134,6 @@ var sourcesIndex = JSON.parse('{\
 "wiggle_macro":["",[],["lib.rs"]],\
 "wiggle_test":["",[],["lib.rs"]],\
 "winch_codegen":["",[["abi",[],["local.rs","mod.rs"]],["codegen",[],["call.rs","context.rs","env.rs","mod.rs"]],["frame",[],["mod.rs"]],["isa",[["aarch64",[],["abi.rs","address.rs","asm.rs","masm.rs","mod.rs","regs.rs"]],["x64",[],["abi.rs","address.rs","asm.rs","masm.rs","mod.rs","regs.rs"]]],["mod.rs","reg.rs"]]],["lib.rs","masm.rs","regalloc.rs","regset.rs","stack.rs","trampoline.rs","visitor.rs"]],\
-"winch_environ":["",[],["lib.rs"]],\
 "winch_filetests":["",[],["disasm.rs","lib.rs"]],\
 "winch_test_macros":["",[],["lib.rs"]],\
 "winch_tools":["",[],["compile.rs","filetests.rs","main.rs"]],\

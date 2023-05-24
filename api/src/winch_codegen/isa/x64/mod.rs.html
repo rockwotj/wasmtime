@@ -150,10 +150,9 @@
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     abi::ABI,
-    codegen::{CodeGen, CodeGenContext},
+    codegen::{CodeGen, CodeGenContext, FuncEnv},
 };
 
 <span class="kw">use </span><span class="kw">crate</span>::frame::{DefinedLocals, Frame};
@@ -161,7 +160,6 @@
 <span class="kw">use </span><span class="kw">crate</span>::masm::MacroAssembler;
 <span class="kw">use </span><span class="kw">crate</span>::regalloc::RegAlloc;
 <span class="kw">use </span><span class="kw">crate</span>::stack::Stack;
-<span class="kw">use </span><span class="kw">crate</span>::FuncEnv;
 <span class="kw">use crate</span>::{
     isa::{Builder, TargetIsa},
     regset::RegSet,
@@ -173,7 +171,7 @@
 <span class="kw">use </span>cranelift_codegen::{MachTextSectionBuilder, TextSectionBuilder};
 <span class="kw">use </span>target_lexicon::Triple;
 <span class="kw">use </span>wasmparser::{FuncType, FuncValidator, FunctionBody, ValidatorResources};
-<span class="kw">use </span>wasmtime_environ::VMOffsets;
+<span class="kw">use </span>wasmtime_environ::ModuleTranslation;
 
 <span class="kw">use </span><span class="self">self</span>::regs::ALL_GPR;
 
@@ -244,8 +242,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         sig: <span class="kw-2">&amp;</span>FuncType,
         body: <span class="kw-2">&amp;</span>FunctionBody,
-        vmoffsets: <span class="kw-2">&amp;</span>VMOffsets&lt;u8&gt;,
-        env: <span class="kw-2">&amp;</span><span class="kw">dyn </span>FuncEnv,
+        translation: <span class="kw-2">&amp;</span>ModuleTranslation,
         validator: <span class="kw-2">&amp;mut </span>FuncValidator&lt;ValidatorResources&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>body = body.get_binary_reader();
@@ -259,7 +256,8 @@
         <span class="comment">// TODO Add in floating point bitmask
         </span><span class="kw">let </span>regalloc = RegAlloc::new(RegSet::new(ALL_GPR, <span class="number">0</span>), regs::scratch());
         <span class="kw">let </span>codegen_context = CodeGenContext::new(regalloc, stack, <span class="kw-2">&amp;</span>frame);
-        <span class="kw">let </span><span class="kw-2">mut </span>codegen = CodeGen::new(<span class="kw-2">&amp;mut </span>masm, <span class="kw-2">&amp;</span>abi, codegen_context, env, abi_sig, vmoffsets);
+        <span class="kw">let </span>env = FuncEnv::new(<span class="self">self</span>.pointer_bytes(), translation);
+        <span class="kw">let </span><span class="kw-2">mut </span>codegen = CodeGen::new(<span class="kw-2">&amp;mut </span>masm, <span class="kw-2">&amp;</span>abi, codegen_context, env, abi_sig);
 
         codegen.emit(<span class="kw-2">&amp;mut </span>body, validator)<span class="question-mark">?</span>;
 

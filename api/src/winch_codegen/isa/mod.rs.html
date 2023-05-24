@@ -213,8 +213,7 @@
 <a href="#213" id="213">213</a>
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-</pre><pre class="rust"><code><span class="kw">use crate</span>::{FuncEnv, TrampolineKind};
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::TrampolineKind;
 <span class="kw">use </span>anyhow::{anyhow, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>core::fmt::Formatter;
 <span class="kw">use </span>cranelift_codegen::isa::{CallConv, IsaBuilder};
@@ -226,7 +225,7 @@
 };
 <span class="kw">use </span>target_lexicon::{Architecture, Triple};
 <span class="kw">use </span>wasmparser::{FuncType, FuncValidator, FunctionBody, ValidatorResources};
-<span class="kw">use </span>wasmtime_environ::VMOffsets;
+<span class="kw">use </span>wasmtime_environ::ModuleTranslation;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;x64&quot;</span>)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>x64;
@@ -365,8 +364,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         sig: <span class="kw-2">&amp;</span>FuncType,
         body: <span class="kw-2">&amp;</span>FunctionBody,
-        vmoffsets: <span class="kw-2">&amp;</span>VMOffsets&lt;u8&gt;,
-        env: <span class="kw-2">&amp;</span><span class="kw">dyn </span>FuncEnv,
+        translation: <span class="kw-2">&amp;</span>ModuleTranslation,
         validator: <span class="kw-2">&amp;mut </span>FuncValidator&lt;ValidatorResources&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MachBufferFinalized&lt;Final&gt;&gt;;
 
