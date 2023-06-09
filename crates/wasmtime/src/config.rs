@@ -101,7 +101,7 @@ pub struct Config {
     pub(crate) features: WasmFeatures,
     pub(crate) wasm_backtrace: bool,
     pub(crate) wasm_backtrace_details_env_used: bool,
-    pub(crate) native_unwind_info: bool,
+    pub(crate) native_unwind_info: Option<bool>,
     #[cfg(feature = "async")]
     pub(crate) async_stack_size: usize,
     pub(crate) async_support: bool,
@@ -189,7 +189,7 @@ impl Config {
             max_wasm_stack: 512 * 1024,
             wasm_backtrace: true,
             wasm_backtrace_details_env_used: false,
-            native_unwind_info: true,
+            native_unwind_info: None,
             features: WasmFeatures::default(),
             #[cfg(feature = "async")]
             async_stack_size: 2 << 20,
@@ -423,14 +423,14 @@ impl Config {
     /// [`WasmBacktrace`] is controlled by the [`Config::wasm_backtrace`]
     /// option.
     ///
-    /// Note that native unwind information is always generated when targeting
-    /// Windows, since the Windows ABI requires it.
-    ///
-    /// This option defaults to `true`.
+    /// Native unwind information is included:
+    /// - When [`ProfilingStrategy`] is specified.
+    /// - When targeting Windows, since the Windows ABI requires it.
+    /// - By default.
     ///
     /// [`WasmBacktrace`]: crate::WasmBacktrace
     pub fn native_unwind_info(&mut self, enable: bool) -> &mut Self {
-        self.native_unwind_info = enable;
+        self.native_unwind_info = Some(enable);
         self
     }
 
@@ -1597,32 +1597,23 @@ impl Config {
                 .insert("enable_probestack".into());
         }
 
-        if self.native_unwind_info ||
-             // Windows always needs unwind info, since it is part of the ABI.
-             target.operating_system == target_lexicon::OperatingSystem::Windows
+        if self.profiling_strategy != ProfilingStrategy::None
+            || target.operating_system == target_lexicon::OperatingSystem::Windows
         {
-            if !self
-                .compiler_config
-                .ensure_setting_unset_or_given("unwind_info", "true")
-            {
-                bail!("compiler option 'unwind_info' must be enabled for profiling");
+            unsafe {
+                self.cranelift_flag_set("unwind_info", "true");
             }
         }
 
-        if !self.native_unwind_info
-            && target.operating_system != target_lexicon::OperatingSystem::Windows
-        {
-            if self.profiling_strategy == ProfilingStrategy::None {
-                if let Strategy::Cranelift = self.compiler_config.strategy {
-                    unsafe {
-                        self.cranelift_flag_set("unwind_info", "false");
-                    }
-                }
-            } else {
-                bail!(
-                    "compiler option 'unwind_info' can not be disabled when profiling is enabled"
-                );
-            }
+        const DEFAULT_UNWIND_INFO: bool = true;
+        if !self.compiler_config.ensure_setting_unset_or_given(
+            "unwind_info",
+            &self
+                .native_unwind_info
+                .unwrap_or(DEFAULT_UNWIND_INFO)
+                .to_string(),
+        ) {
+            bail!("`native_unwind_info` cannot be disabled when profiling or on Windows");
         }
 
         // We require frame pointers for correct stack walking, which is safety
