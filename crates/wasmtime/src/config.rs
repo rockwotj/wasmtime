@@ -1579,7 +1579,12 @@ impl Config {
             .insert("probestack_strategy".into(), "inline".into());
 
         let host = target_lexicon::Triple::host();
-        let target = self.compiler_config.target.as_ref().unwrap_or(&host);
+        let target = self
+            .compiler_config
+            .target
+            .as_ref()
+            .unwrap_or(&host)
+            .clone();
 
         // On supported targets, we enable stack probing by default.
         // This is required on Windows because of the way Windows
@@ -1600,7 +1605,21 @@ impl Config {
                 .compiler_config
                 .ensure_setting_unset_or_given("unwind_info", "true")
             {
-                bail!("compiler option 'unwind_info' must be enabled profiling");
+                bail!("compiler option 'unwind_info' must be enabled for profiling");
+            }
+        }
+
+        if !self.native_unwind_info
+            && target.operating_system != target_lexicon::OperatingSystem::Windows
+        {
+            if self.profiling_strategy == ProfilingStrategy::None {
+                if let Strategy::Cranelift =  self.compiler_config.strategy {
+                    unsafe {
+                        self.cranelift_flag_set("unwind_info", "false");
+                    }
+                }
+            } else {
+                bail!("compiler option 'unwind_info' can not be disabled when profiling is enabled");
             }
         }
 
