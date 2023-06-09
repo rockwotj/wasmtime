@@ -1613,13 +1613,15 @@ impl Config {
             && target.operating_system != target_lexicon::OperatingSystem::Windows
         {
             if self.profiling_strategy == ProfilingStrategy::None {
-                if let Strategy::Cranelift =  self.compiler_config.strategy {
+                if let Strategy::Cranelift = self.compiler_config.strategy {
                     unsafe {
                         self.cranelift_flag_set("unwind_info", "false");
                     }
                 }
             } else {
-                bail!("compiler option 'unwind_info' can not be disabled when profiling is enabled");
+                bail!(
+                    "compiler option 'unwind_info' can not be disabled when profiling is enabled"
+                );
             }
         }
 
