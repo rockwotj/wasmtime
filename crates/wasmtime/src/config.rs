@@ -424,7 +424,6 @@ impl Config {
     /// option.
     ///
     /// Native unwind information is included:
-    /// - When [`ProfilingStrategy`] is specified.
     /// - When targeting Windows, since the Windows ABI requires it.
     /// - By default.
     ///
@@ -1597,23 +1596,22 @@ impl Config {
                 .insert("enable_probestack".into());
         }
 
-        if self.profiling_strategy != ProfilingStrategy::None
-            || target.operating_system == target_lexicon::OperatingSystem::Windows
-        {
-            unsafe {
-                self.cranelift_flag_set("unwind_info", "true");
+        if let Some(unwind_requested) = self.native_unwind_info {
+            if !self
+                .compiler_config
+                .ensure_setting_unset_or_given("unwind_info", &unwind_requested.to_string())
+            {
+                bail!("incompatible settings requested for Cranelift and Wasmtime `unwind-info` settings");
             }
         }
 
-        const DEFAULT_UNWIND_INFO: bool = true;
-        if !self.compiler_config.ensure_setting_unset_or_given(
-            "unwind_info",
-            &self
-                .native_unwind_info
-                .unwrap_or(DEFAULT_UNWIND_INFO)
-                .to_string(),
-        ) {
-            bail!("`native_unwind_info` cannot be disabled when profiling or on Windows");
+        if target.operating_system == target_lexicon::OperatingSystem::Windows {
+            if !self
+                .compiler_config
+                .ensure_setting_unset_or_given("unwind_info", "true")
+            {
+                bail!("`native_unwind_info` cannot be disabled on Windows");
+            }
         }
 
         // We require frame pointers for correct stack walking, which is safety
