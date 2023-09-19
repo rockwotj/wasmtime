@@ -86,8 +86,8 @@ enum wasmtime_profiling_strategy_enum { // ProfilingStrategy
   WASMTIME_PROFILING_STRATEGY_PERFMAP,
 };
 
-#define WASMTIME_CONFIG_PROP(ret, name, ty) \
-    WASM_API_EXTERN ret wasmtime_config_##name##_set(wasm_config_t*, ty);
+#define WASMTIME_CONFIG_PROP(ret, name, ty)                                    \
+  WASM_API_EXTERN ret wasmtime_config_##name##_set(wasm_config_t *, ty);
 
 /**
  * \brief Configures whether DWARF debug information is constructed at runtime
@@ -221,7 +221,8 @@ WASMTIME_CONFIG_PROP(void, wasm_memory64, bool)
 WASMTIME_CONFIG_PROP(void, strategy, wasmtime_strategy_t)
 
 /**
- * \brief Configure whether wasmtime should compile a module using multiple threads.
+ * \brief Configure whether wasmtime should compile a module using multiple
+ * threads.
  *
  * For more information see the Rust documentation at
  * https://docs.wasmtime.dev/api/wasmtime/struct.Config.html#method.parallel_compilation.
@@ -239,13 +240,15 @@ WASMTIME_CONFIG_PROP(void, parallel_compilation, bool)
 WASMTIME_CONFIG_PROP(void, cranelift_debug_verifier, bool)
 
 /**
- * \brief Configures whether Cranelift should perform a NaN-canonicalization pass.
+ * \brief Configures whether Cranelift should perform a NaN-canonicalization
+ * pass.
  *
  * When Cranelift is used as a code generation backend this will configure
  * it to replace NaNs with a single canonical value. This is useful for users
  * requiring entirely deterministic WebAssembly computation.
  *
- * This is not required by the WebAssembly spec, so it is not enabled by default.
+ * This is not required by the WebAssembly spec, so it is not enabled by
+ * default.
  *
  * The default value for this is `false`
  */
@@ -300,7 +303,8 @@ WASMTIME_CONFIG_PROP(void, static_memory_guard_size, uint64_t)
 WASMTIME_CONFIG_PROP(void, dynamic_memory_guard_size, uint64_t)
 
 /**
- * \brief Configures the size, in bytes, of the extra virtual memory space reserved after a “dynamic” memory for growing into.
+ * \brief Configures the size, in bytes, of the extra virtual memory space
+ * reserved after a “dynamic” memory for growing into.
  *
  * For more information see the Rust documentation at
  * https://docs.wasmtime.dev/api/wasmtime/struct.Config.html#method.dynamic_memory_reserved_for_growth
@@ -308,7 +312,8 @@ WASMTIME_CONFIG_PROP(void, dynamic_memory_guard_size, uint64_t)
 WASMTIME_CONFIG_PROP(void, dynamic_memory_reserved_for_growth, uint64_t)
 
 /**
- * \brief Configures whether to generate native unwind information (e.g. .eh_frame on Linux).
+ * \brief Configures whether to generate native unwind information (e.g.
+ * .eh_frame on Linux).
  *
  * This option defaults to true.
  *
@@ -329,7 +334,8 @@ WASMTIME_CONFIG_PROP(void, native_unwind_info, bool)
  * An error is returned if the cache configuration could not be loaded or if the
  * cache could not be enabled.
  */
-WASM_API_EXTERN wasmtime_error_t* wasmtime_config_cache_config_load(wasm_config_t*, const char*);
+WASM_API_EXTERN wasmtime_error_t *
+wasmtime_config_cache_config_load(wasm_config_t *, const char *);
 
 /**
  * \brief Configures the target triple that this configuration will produce
@@ -343,7 +349,7 @@ WASM_API_EXTERN wasmtime_error_t* wasmtime_config_cache_config_load(wasm_config_
  * For more information see the Rust documentation at
  * https://docs.wasmtime.dev/api/wasmtime/struct.Config.html#method.config
  */
-WASMTIME_CONFIG_PROP(wasmtime_error_t*, target, const char*)
+WASMTIME_CONFIG_PROP(wasmtime_error_t *, target, const char *)
 
 /**
  * \brief Enables a target-specific flag in Cranelift.
@@ -354,7 +360,8 @@ WASMTIME_CONFIG_PROP(wasmtime_error_t*, target, const char*)
  * For more information see the Rust documentation at
  * https://docs.wasmtime.dev/api/wasmtime/struct.Config.html#method.cranelift_flag_enable
  */
-WASM_API_EXTERN void wasmtime_config_cranelift_flag_enable(wasm_config_t*, const char*);
+WASM_API_EXTERN void wasmtime_config_cranelift_flag_enable(wasm_config_t *,
+                                                           const char *);
 
 /**
  * \brief Sets a target-specific flag in Cranelift to the specified value.
@@ -365,11 +372,18 @@ WASM_API_EXTERN void wasmtime_config_cranelift_flag_enable(wasm_config_t*, const
  * For more information see the Rust documentation at
  * https://docs.wasmtime.dev/api/wasmtime/struct.Config.html#method.cranelift_flag_set
  */
-WASM_API_EXTERN void wasmtime_config_cranelift_flag_set(wasm_config_t*, const char *key, const char *value);
+WASM_API_EXTERN void wasmtime_config_cranelift_flag_set(wasm_config_t *,
+                                                        const char *key,
+                                                        const char *value);
+
+/**
+ * TODO
+ */
+WASMTIME_CONFIG_PROP(void, async_support, bool)
+WASMTIME_CONFIG_PROP(void, async_stack_size, uint64_t)
 
 #ifdef __cplusplus
-}  // extern "C"
+} // extern "C"
 #endif
 
 #endif // WASMTIME_CONFIG_H
-

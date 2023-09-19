@@ -3,6 +3,7 @@ use crate::{
     wasmtime_extern_t, wasmtime_module_t, CStoreContext, CStoreContextMut,
 };
 use std::ffi::c_void;
+use std::future::Future;
 use std::mem::MaybeUninit;
 use std::str;
 use wasmtime::{Func, Instance, Linker};
@@ -75,6 +76,30 @@ pub unsafe extern "C" fn wasmtime_linker_define_func(
 }
 
 #[no_mangle]
+#[cfg(feature = "async")]
+pub unsafe extern "C" fn wasmtime_linker_define_func_async(
+    linker: &mut wasmtime_linker_t,
+    module: *const u8,
+    module_len: usize,
+    name: *const u8,
+    name_len: usize,
+    ty: &wasm_functype_t,
+    callback: crate::wasmtime_func_async_callback_t,
+    data: *mut c_void,
+    finalizer: Option<extern "C" fn(*mut std::ffi::c_void)>,
+) -> Option<Box<wasmtime_error_t>> {
+    let ty = ty.ty().ty.clone();
+    let module = to_str!(module, module_len);
+    let name = to_str!(name, name_len);
+    let cb = crate::func::c_async_callback_to_rust_fn(callback, data, finalizer);
+
+    handle_result(
+        linker.linker.func_new_async(module, name, ty, cb),
+        |_linker| (),
+    )
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn wasmtime_linker_define_func_unchecked(
     linker: &mut wasmtime_linker_t,
     module: *const u8,
@@ -134,6 +159,27 @@ pub extern "C" fn wasmtime_linker_instantiate(
 ) -> Option<Box<wasmtime_error_t>> {
     let result = linker.linker.instantiate(store, &module.module);
     super::instance::handle_instantiate(result, instance_ptr, trap_ptr)
+}
+
+#[no_mangle]
+pub extern "C" fn wasmtime_linker_instantiate_async(
+    linker: &wasmtime_linker_t,
+    store: CStoreContextMut<'_>,
+    module: &wasmtime_module_t,
+    instance_ptr: &mut Instance,
+    trap_ptr: &mut *mut wasm_trap_t,
+) -> Option<Box<wasmtime_error_t>> {
+    let mut result = Box::pin(linker.linker.instantiate_async(store, &module.module));
+    let w = crate::fut::noop_waker();
+    let mut ctx = core::task::Context::from_waker(&w);
+    loop {
+        match result.as_mut().poll(&mut ctx) {
+            std::task::Poll::Ready(result) => {
+                return super::instance::handle_instantiate(result, instance_ptr, trap_ptr);
+            }
+            std::task::Poll::Pending => continue,
+        }
+    }
 }
 
 #[no_mangle]

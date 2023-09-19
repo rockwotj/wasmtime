@@ -28,6 +28,8 @@ mod trap;
 mod types;
 mod val;
 mod vec;
+#[cfg(feature = "async")]
+mod fut;
 
 pub use crate::config::*;
 pub use crate::engine::*;
